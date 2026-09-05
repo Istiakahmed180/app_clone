@@ -20,8 +20,8 @@ class PhaseNotice extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool degraded = !virtualizationActive;
     final String text = virtualizationActive
-        ? 'Profiles run in real virtual containers. Each profile has its own isolated '
-            'application storage, separate from the normally installed app.'
+        ? 'Clones run in real virtual containers. Each clone keeps its own isolated '
+            'application data, separate from the normal install and from other clones.'
         : problem ??
             'The virtualization engine is not active on this device, so profiles '
             'cannot run in isolated containers.';

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import java.io.File
 import com.example.virtualspacedemo.native.EngineAvailability
 import com.example.virtualspacedemo.native.EngineErrorCodes
 import com.example.virtualspacedemo.native.EngineResult
@@ -188,6 +189,34 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         }
     }
 
+    override fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit> =
+        guarded(EngineErrorCodes.APP_INSTALL_FAILED) {
+            withServiceRetry {
+                warmUpPackageService()
+                doInstallApk(apkPath, virtualUserId)
+            }
+        }
+
+    private fun doInstallApk(apkPath: String, virtualUserId: Int): EngineResult<Unit> {
+        val file = File(apkPath)
+        if (!file.isFile) {
+            return EngineResult.Failure(
+                EngineErrorCodes.APK_UNREADABLE,
+                "The selected APK could not be read.",
+            )
+        }
+
+        val result = BlackBoxCore.get().installPackageAsUser(file, virtualUserId)
+        return if (result != null && result.success) {
+            Slog.i(Slog.INSTALL, "Installed APK ${result.packageName} into user $virtualUserId")
+            EngineResult.ok()
+        } else {
+            val reason = result?.msg ?: "unknown engine error"
+            Slog.e(Slog.INSTALL, "APK install failed: $reason")
+            EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
+        }
+    }
+
     override fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.PROFILE_DELETE_FAILED) {
             BlackBoxCore.get().uninstallPackageAsUser(packageName, virtualUserId)
@@ -204,18 +233,22 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             // Launch reads the same package service that install does, so it needs the
             // same recovery from Bcore's null-binder window.
             withServiceRetry {
-                warmUpPackageService()
+                // A launch is user-initiated and infrequent, so always rebuild the binder
+                // rather than trusting a possibly stale cached one.
+                warmUpPackageService(force = true)
                 doLaunch(packageName, virtualUserId)
             }
         }
 
+    /**
+     * Deliberately does NOT pre-check [isPackageInstalled].
+     *
+     * Bcore's `isInstalled` silently answers from the *host* package manager whenever its
+     * own service binder is unhealthy, which made it both false-negative (blocking a
+     * perfectly good launch) and false-positive. Attempting the launch and reacting to the
+     * real result is the only trustworthy signal; the caller repairs on failure.
+     */
     private fun doLaunch(packageName: String, virtualUserId: Int): EngineResult<Unit> {
-        if (!isPackageInstalled(packageName, virtualUserId)) {
-            return EngineResult.Failure(
-                EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
-                "The application is not installed in this virtual profile.",
-            )
-        }
         return if (BlackBoxCore.get().launchApk(packageName, virtualUserId)) {
             Slog.i(Slog.LAUNCH, "Launched $packageName in user $virtualUserId")
             EngineResult.ok()

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -5,6 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/engine_result.dart';
+import '../../../data/models/installed_app_model.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
@@ -29,6 +31,7 @@ class HomeController extends GetxController {
       Rxn<VirtualizationAvailability>();
   final RxMap<String, VirtualProfileState> profileStates =
       <String, VirtualProfileState>{}.obs;
+  final RxMap<String, Uint8List> appIcons = <String, Uint8List>{}.obs;
 
   bool get isTestAppInstalled => testApp.value?.installed ?? false;
 
@@ -48,6 +51,26 @@ class HomeController extends GetxController {
   VirtualProfileState stateFor(VirtualProfileModel profile) =>
       profileStates[profile.id] ?? VirtualProfileState.unknown;
 
+  /// Icon for a profile's package, or null for a clone whose APK is not installed
+  /// on the host (the card then falls back to a placeholder).
+  Uint8List? iconFor(VirtualProfileModel profile) => appIcons[profile.packageName];
+
+  /// How many profiles share this profile's package, used to label multi-instance clones.
+  int siblingCount(VirtualProfileModel profile) => _siblings(profile).length;
+
+  /// This clone's 1-based position among clones of the same app, ordered by creation.
+  int instanceIndex(VirtualProfileModel profile) {
+    final int index = _siblings(profile)
+        .indexWhere((VirtualProfileModel other) => other.id == profile.id);
+    return index < 0 ? 1 : index + 1;
+  }
+
+  List<VirtualProfileModel> _siblings(VirtualProfileModel profile) => profiles
+      .where((VirtualProfileModel other) => other.packageName == profile.packageName)
+      .toList(growable: false)
+    ..sort((VirtualProfileModel a, VirtualProfileModel b) =>
+        a.createdAt.compareTo(b.createdAt));
+
   String get testAppName => testApp.value?.displayName ?? AppConstants.testAppFallbackName;
 
   @override
@@ -60,7 +83,7 @@ class HomeController extends GetxController {
     isLoading.value = true;
     await _loadVirtualization();
     await Future.wait<void>(<Future<void>>[_loadProfiles(), _loadTestApp()]);
-    await _loadProfileStates();
+    await Future.wait<void>(<Future<void>>[_loadProfileStates(), _loadIcons()]);
     isLoading.value = false;
   }
 
@@ -85,6 +108,27 @@ class HomeController extends GetxController {
       }
     }
     profileStates.assignAll(states);
+  }
+
+  /// Icons come from the host package manager, so clones of apps that are not installed
+  /// normally simply have none.
+  Future<void> _loadIcons() async {
+    if (profiles.isEmpty) {
+      return;
+    }
+    try {
+      final List<InstalledAppModel> installed = await _nativeBridge.listInstalledApps();
+      final Map<String, Uint8List> icons = <String, Uint8List>{};
+      for (final InstalledAppModel app in installed) {
+        final Uint8List? icon = app.icon;
+        if (icon != null) {
+          icons[app.packageName] = icon;
+        }
+      }
+      appIcons.assignAll(icons);
+    } on AppException catch (error, stackTrace) {
+      _logger.error('Could not load app icons', error, stackTrace);
+    }
   }
 
   Future<void> _loadProfiles() async {

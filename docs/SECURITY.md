@@ -66,8 +66,16 @@ detected. This is a known gap, recorded rather than papered over.
 
 ## Package visibility
 
-The manifest declares visibility for exactly one package, `com.example.virtualtestapp`.
-`QUERY_ALL_PACKAGES` is not requested.
+**Changed in Phase 3.** Cloning arbitrary apps requires enumerating them, and on Android 11+
+`QUERY_ALL_PACKAGES` is the only way to do that. It is now requested.
+
+This is a Play-policy-sensitive permission. A dual-app/cloning product is one of Google's
+permitted use cases, but the declaration must be justified at review. Virtual Space uses it for
+exactly one purpose — listing launchable apps for the clone picker — and never to inspect
+another application's private data.
+
+`InstalledAppsProvider` reads only what a launcher already sees: label, package name, icon and
+version. Nothing else is collected.
 
 Note that merging the engine AAR adds ~322 `uses-permission` entries and ~152 stub activities
 to the host manifest — these come from the engine and are what allow guest apps to run. This
@@ -76,6 +84,15 @@ any store submission.
 
 ## Scope limit
 
-Phase 2 admits exactly one package. `AppSecurityChecker` rejects everything else with
-`APP_NOT_SUPPORTED`. Banking, payment, anti-cheat and Play-Integrity-dependent apps are out of
-scope and were not tested.
+**Changed in Phase 3.** The single-package allow-list is gone; arbitrary installed apps and
+imported APKs may be cloned. The policy is now a deny-list plus the secure-environment rule:
+
+- Virtual Space refuses to clone **itself** (it would recurse).
+- It refuses **system/framework packages** (`android`, `com.android.systemui`,
+  `com.android.settings`, `com.android.providers.*`) — cloning these yields a broken container.
+- `REQUIRE_SECURE_ENV` rejection is unchanged and applies to imported APKs too, checked before
+  the engine ever sees the file.
+
+Banking, payment, authenticator, anti-cheat and Play-Integrity-dependent apps were deliberately
+**not** tested and remain outside what this build can be said to support. Nothing prevents a
+user from attempting them; nothing claims they will work.

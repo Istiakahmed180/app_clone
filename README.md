@@ -1,22 +1,23 @@
-# Virtual Space — Phase 2
+# Virtual Space — Phase 3
 
-**Phase 2 introduces the first real virtualization-backed execution path.**
+**Phase 3 adds APK import, multi-app cloning and multi-instance support.**
 
-**The current supported target is the controlled Virtual Test App.**
+**Any installed app can now be cloned, and APKs can be imported without installing them.**
 
-**Arbitrary third-party application compatibility is not yet guaranteed.**
+**Arbitrary third-party application compatibility is still not guaranteed** — only the
+controlled test app and VLC have been verified, on one device.
 
-Profiles are now backed by real containers. Each profile runs the controlled test application
-in its own isolated storage, verified on a physical Android 15 device:
+Clones run in real containers with isolated storage, verified on a physical Android 15 device:
 
-| Instance | Counter | Stored name |
+| Container | App | State |
 | --- | --- | --- |
-| Normal installation | 5 | Normal |
-| Virtual Profile 1 | 10 | Alice |
-| Virtual Profile 2 | 20 | Bob |
+| virtual user 0 | Virtual Test App | Ann / 11 |
+| virtual user 1 | Virtual Test App (2nd clone) | Ben / 22 |
+| virtual user 2 | VLC | fresh install |
+| normal install | Virtual Test App | Normal / 5 |
 
-All three are independent. The guest writes through its own ordinary `SharedPreferences`; no
-per-profile state is faked in Flutter.
+All independent. Guests write through their own ordinary `SharedPreferences`; no per-clone
+state is faked in Flutter.
 
 ## Documentation
 
@@ -26,7 +27,8 @@ per-profile state is faked in Flutter.
 | `docs/VIRTUALIZATION_ENGINE.md` | Engine selection, toolchain reconciliation, backend defects and workarounds |
 | `docs/SECURITY.md` | Security posture, `REQUIRE_SECURE_ENV`, data boundaries |
 | `docs/DEPENDENCY_LICENSE_AUDIT.md` | Licences, and **open provenance risk** |
-| `docs/PHASE_2_TEST_PLAN.md` | Test plan, results, evidence, performance baseline |
+| `docs/PHASE_2_TEST_PLAN.md` | Phase 2 test plan, results, evidence, performance baseline |
+| `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
 
 > **Before distributing:** `docs/DEPENDENCY_LICENSE_AUDIT.md` records two unresolved issues —
 > stripped attribution in vendored native code, and unverified VirtualApp/VirtualAPK licence
@@ -48,16 +50,16 @@ A long-term platform for Android application virtualization / multiple accounts,
 category as Parallel Space or Dual Space. This repository holds the foundation for that platform,
 not the platform itself.
 
-## 2. Phase 2 scope
+## 2. Phase 3 scope
 
 | Delivered | Explicitly NOT delivered |
 | --- | --- |
-| Real container-backed profiles (NewBlackbox/Bcore) | Arbitrary third-party app support |
-| Isolated per-profile application storage | GMS / Play Store / Firebase virtualization |
-| Multiple simultaneous instances of one app | Camera / mic / location / notification virtualization |
-| Engine-reported install and launch state | Device-fingerprint or location spoofing |
-| `REQUIRE_SECURE_ENV` admission check | Any security bypass, VPN mode or anti-detection |
-| A backend-swappable adapter boundary | Remote APK download or code update |
+| Clone any installed app (picker with search + icons) | GMS / Play Store / Firebase virtualization |
+| Import and run an APK that is not installed | Camera / mic / location / notification virtualization |
+| Multiple independent instances of one app | Device-fingerprint or location spoofing |
+| Isolated per-clone application storage | Any security bypass, VPN mode or anti-detection |
+| `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK download or code update |
+| Self-healing containers (rebuild on failed launch) | Verified support for banking/anti-cheat/GMS apps |
 
 ## 3. Directory structure
 

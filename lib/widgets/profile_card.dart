@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'dart:typed_data';
+
 import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
+import 'app_icon.dart';
 
-enum ProfileCardAction { rename, delete }
+enum ProfileCardAction { rename, clone, delete }
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
@@ -13,11 +16,21 @@ class ProfileCard extends StatelessWidget {
     required this.canLaunch,
     required this.onLaunch,
     required this.onAction,
+    this.icon,
+    this.siblingCount = 1,
+    this.instanceIndex = 1,
     super.key,
   });
 
   final VirtualProfileModel profile;
   final VirtualProfileState state;
+  final Uint8List? icon;
+
+  /// How many clones share this package; >1 means the user has multiple instances.
+  final int siblingCount;
+
+  /// This clone's 1-based position among those siblings.
+  final int instanceIndex;
   final bool canLaunch;
   final VoidCallback onLaunch;
   final ValueChanged<ProfileCardAction> onAction;
@@ -31,7 +44,8 @@ class ProfileCard extends StatelessWidget {
     if (state.installed) {
       return (label: 'Ready', color: scheme.tertiary);
     }
-    return (label: 'Not installed', color: scheme.error);
+    // The container is missing, but launching rebuilds it, so this is not an error.
+    return (label: 'Rebuilds on launch', color: scheme.outline);
   }
 
   @override
@@ -48,16 +62,27 @@ class ProfileCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                AppIcon(bytes: icon, size: 44.r),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(profile.appName, style: theme.textTheme.titleMedium),
-                      SizedBox(height: 2.h),
                       Text(
                         profile.profileName,
-                        style: theme.textTheme.bodyMedium
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        siblingCount > 1
+                            ? '${profile.appName} · clone $instanceIndex of $siblingCount'
+                            : profile.appName,
+                        style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -69,6 +94,10 @@ class ProfileCard extends StatelessWidget {
                     PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.rename,
                       child: Text('Rename'),
+                    ),
+                    PopupMenuItem<ProfileCardAction>(
+                      value: ProfileCardAction.clone,
+                      child: Text('Add another clone'),
                     ),
                     PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.delete,

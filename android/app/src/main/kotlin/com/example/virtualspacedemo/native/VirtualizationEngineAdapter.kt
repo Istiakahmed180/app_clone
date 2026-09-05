@@ -33,6 +33,9 @@ interface VirtualizationEngineAdapter {
 
     fun installPackage(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
+    /** Installs a standalone APK file (not necessarily installed on the host). */
+    fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit>
+
     fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
     fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean
@@ -77,6 +80,9 @@ object EngineErrorCodes {
     const val APP_NOT_SUPPORTED = "APP_NOT_SUPPORTED"
     const val SECURE_ENV_REQUIRED = "SECURE_ENV_REQUIRED"
     const val APP_INSTALL_FAILED = "APP_INSTALL_FAILED"
+    const val APK_INVALID = "APK_INVALID"
+    const val APK_UNREADABLE = "APK_UNREADABLE"
+    const val APP_ALREADY_CLONED = "APP_ALREADY_CLONED"
     const val PROFILE_CREATE_FAILED = "PROFILE_CREATE_FAILED"
     const val PROFILE_DELETE_FAILED = "PROFILE_DELETE_FAILED"
     const val VIRTUAL_APP_NOT_INSTALLED = "VIRTUAL_APP_NOT_INSTALLED"

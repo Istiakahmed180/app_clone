@@ -1,0 +1,176 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../../../core/errors/app_exception.dart';
+import '../../../core/utils/app_logger.dart';
+import '../../../core/virtualization/virtualization_engine.dart';
+import '../../../data/models/installed_app_model.dart';
+import '../../../data/repositories/virtual_profile_repository.dart';
+import '../../../native/native_bridge.dart';
+
+/// Backs the "add a clone" flow: pick an installed app, or import an APK.
+class AppPickerController extends GetxController {
+  AppPickerController({
+    required this._bridge,
+    required this._engine,
+    required this._repository,
+  });
+
+  final NativeBridge _bridge;
+  final VirtualizationEngine _engine;
+  final VirtualProfileRepository _repository;
+  final AppLogger _logger = const AppLogger('AppPickerController');
+
+  final RxList<InstalledAppModel> apps = <InstalledAppModel>[].obs;
+  final RxBool isLoading = true.obs;
+  final RxBool isWorking = false.obs;
+  final RxString query = ''.obs;
+  final RxnString errorMessage = RxnString();
+
+  /// Apps matching the current search, by name or package.
+  List<InstalledAppModel> get visibleApps {
+    final String needle = query.value.trim().toLowerCase();
+    if (needle.isEmpty) {
+      return apps;
+    }
+    return apps
+        .where((InstalledAppModel app) =>
+            app.appName.toLowerCase().contains(needle) ||
+            app.packageName.toLowerCase().contains(needle))
+        .toList(growable: false);
+  }
+
+  /// When opened from a profile card, the picker arrives pre-filtered to that package
+  /// so "Add another clone" lands on the right app.
+  @override
+  void onInit() {
+    super.onInit();
+    final Object? argument = Get.arguments;
+    if (argument is String && argument.isNotEmpty) {
+      query.value = argument;
+    }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    loadApps();
+  }
+
+  Future<void> loadApps() async {
+    isLoading.value = true;
+    try {
+      apps.assignAll(await _bridge.listInstalledApps());
+      errorMessage.value = null;
+    } on AppException catch (error, stackTrace) {
+      _logger.error('Could not list installed apps', error, stackTrace);
+      errorMessage.value = error.message;
+    }
+    isLoading.value = false;
+  }
+
+  Future<int> instanceCount(String packageName) =>
+      _repository.instanceCountFor(packageName);
+
+  /// Clones an installed app. Returns `null` on success, or a user-facing message.
+  Future<String?> cloneInstalledApp(InstalledAppModel app) async {
+    if (isWorking.value) {
+      return null;
+    }
+    isWorking.value = true;
+    try {
+      final String profileName = await _repository.suggestProfileName(
+        appName: app.appName,
+        packageName: app.packageName,
+      );
+      await _engine.createProfile(
+        packageName: app.packageName,
+        appName: app.appName,
+        profileName: profileName,
+      );
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    } finally {
+      isWorking.value = false;
+    }
+  }
+
+  /// Lets the user pick an APK and returns its parsed identity, or `null` if cancelled.
+  Future<ApkCandidate?> pickApk() async {
+    final PlatformFile? picked = await FilePicker.pickFile();
+    if (picked == null) {
+      return null;
+    }
+
+    if (!picked.name.toLowerCase().endsWith('.apk')) {
+      errorMessage.value = 'Please choose an .apk file.';
+      return null;
+    }
+
+    isWorking.value = true;
+    try {
+      final String path = await _materialise(picked);
+      return await _bridge.inspectApk(path);
+    } on AppException catch (error) {
+      errorMessage.value = error.message;
+      return null;
+    } on IOException catch (error, stackTrace) {
+      _logger.error('Could not copy the selected APK', error, stackTrace);
+      errorMessage.value = 'The selected APK could not be read.';
+      return null;
+    } finally {
+      isWorking.value = false;
+    }
+  }
+
+  /// Copies the picked file into app cache and returns its real path.
+  ///
+  /// Android's document picker hands back a `content://` URI, which has no filesystem
+  /// path; both `getPackageArchiveInfo` and the engine's installer need a real file.
+  /// The copy is streamed so a large APK never has to sit in memory.
+  Future<String> _materialise(PlatformFile picked) async {
+    final Directory cache = await getTemporaryDirectory();
+    final Directory imports = Directory('${cache.path}/apk_imports');
+    if (!imports.existsSync()) {
+      imports.createSync(recursive: true);
+    }
+
+    final File target = File('${imports.path}/${DateTime.now().millisecondsSinceEpoch}.apk');
+    final IOSink sink = target.openWrite();
+    try {
+      await sink.addStream(picked.readAsByteStream());
+    } finally {
+      await sink.close();
+    }
+    return target.path;
+  }
+
+  /// Installs a previously inspected APK as a new clone.
+  Future<String?> cloneApk(ApkCandidate candidate) async {
+    if (isWorking.value) {
+      return null;
+    }
+    isWorking.value = true;
+    try {
+      final String profileName = await _repository.suggestProfileName(
+        appName: candidate.appName,
+        packageName: candidate.packageName,
+      );
+      await _engine.createProfileFromApk(
+        apkPath: candidate.apkPath,
+        packageName: candidate.packageName,
+        appName: candidate.appName,
+        profileName: profileName,
+      );
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    } finally {
+      isWorking.value = false;
+    }
+  }
+}

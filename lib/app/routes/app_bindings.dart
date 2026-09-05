@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import '../../core/virtualization/real_virtualization_engine.dart';
 import '../../core/virtualization/virtualization_engine.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
+import '../../features/apps/controllers/app_picker_controller.dart';
 import '../../features/home/controllers/home_controller.dart';
-import '../../features/profiles/controllers/profile_controller.dart';
 import '../../native/native_bridge.dart';
 
 /// Registers the long-lived dependency graph once, before the first route builds.
@@ -41,13 +41,17 @@ class HomeBinding extends Bindings {
   }
 }
 
-class AddProfileBinding extends Bindings {
-  AddProfileBinding();
+class AppPickerBinding extends Bindings {
+  AppPickerBinding();
 
   @override
   void dependencies() {
-    Get.lazyPut<ProfileController>(
-      () => ProfileController(engine: Get.find<VirtualizationEngine>()),
+    Get.lazyPut<AppPickerController>(
+      () => AppPickerController(
+        bridge: Get.find<NativeBridge>(),
+        engine: Get.find<VirtualizationEngine>(),
+        repository: Get.find<VirtualProfileRepository>(),
+      ),
     );
   }
 }

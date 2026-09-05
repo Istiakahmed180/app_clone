@@ -183,6 +183,126 @@ void main() {
     expect(state.virtualUserId, 0);
   });
 
+  group('multi-app and APK import', () {
+    test('creating a profile from an APK installs it and keeps the metadata', () async {
+      responses['installApkToProfile'] = ok('APP_INSTALLED');
+
+      final VirtualProfileModel profile = await engine.createProfileFromApk(
+        apkPath: '/tmp/example.apk',
+        packageName: 'org.example.imported',
+        appName: 'Imported App',
+        profileName: 'Imported App',
+      );
+
+      expect(calls, contains('installApkToProfile'));
+      expect((await repository.getProfile(profile.id))?.packageName, 'org.example.imported');
+    });
+
+    test('a failed APK install rolls the profile back', () async {
+      responses['installApkToProfile'] = fail('APK_INVALID', 'Not a valid APK.');
+
+      await expectLater(
+        engine.createProfileFromApk(
+          apkPath: '/tmp/bad.apk',
+          packageName: 'org.example.imported',
+          appName: 'Imported App',
+          profileName: 'Imported App',
+        ),
+        throwsA(isA<VirtualizationException>()
+            .having((VirtualizationException e) => e.code, 'code', 'APK_INVALID')),
+      );
+      expect(await repository.getProfiles(), isEmpty);
+    });
+
+    test('profiles for different packages coexist', () async {
+      await create('Test App');
+      responses['installApkToProfile'] = ok('APP_INSTALLED');
+      await engine.createProfileFromApk(
+        apkPath: '/tmp/example.apk',
+        packageName: 'org.example.imported',
+        appName: 'Imported App',
+        profileName: 'Imported App',
+      );
+
+      final List<VirtualProfileModel> profiles = await repository.getProfiles();
+      expect(profiles.map((VirtualProfileModel p) => p.packageName).toSet(), <String>{
+        AppConstants.testAppPackage,
+        'org.example.imported',
+      });
+    });
+  });
+
+  group('multi-instance naming', () {
+    test('suggests an unnumbered name for the first clone', () async {
+      expect(
+        await repository.suggestProfileName(
+          appName: 'Telegram',
+          packageName: 'org.telegram.messenger',
+        ),
+        'Telegram',
+      );
+    });
+
+    test('numbers subsequent clones of the same app', () async {
+      await repository.createProfile(
+        packageName: 'org.telegram.messenger',
+        appName: 'Telegram',
+        profileName: 'Telegram',
+      );
+
+      expect(
+        await repository.suggestProfileName(
+          appName: 'Telegram',
+          packageName: 'org.telegram.messenger',
+        ),
+        'Telegram 2',
+      );
+    });
+
+    test('skips names already taken by a different app', () async {
+      await repository.createProfile(
+        packageName: 'org.telegram.messenger',
+        appName: 'Telegram',
+        profileName: 'Telegram',
+      );
+      await repository.createProfile(
+        packageName: 'org.other.app',
+        appName: 'Other',
+        profileName: 'Telegram 2',
+      );
+
+      expect(
+        await repository.suggestProfileName(
+          appName: 'Telegram',
+          packageName: 'org.telegram.messenger',
+        ),
+        'Telegram 3',
+      );
+    });
+
+    test('counts instances per package', () async {
+      await create('Clone A');
+      await create('Clone B');
+      await repository.createProfile(
+        packageName: 'org.other.app',
+        appName: 'Other',
+        profileName: 'Other',
+      );
+
+      expect(await repository.instanceCountFor(AppConstants.testAppPackage), 2);
+      expect(await repository.instanceCountFor('org.other.app'), 1);
+      expect(await repository.instanceCountFor('org.nothing'), 0);
+    });
+
+    test('several clones of one package get distinct ids', () async {
+      final VirtualProfileModel first = await create('Clone A');
+      final VirtualProfileModel second = await create('Clone B');
+
+      expect(first.packageName, second.packageName);
+      expect(first.id, isNot(second.id));
+    });
+  });
+
   test('initialize surfaces an unavailable engine', () async {
     responses['initializeVirtualization'] =
         fail('VIRTUALIZATION_NOT_AVAILABLE', 'Engine unavailable.');

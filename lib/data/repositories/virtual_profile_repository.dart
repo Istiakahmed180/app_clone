@@ -53,6 +53,39 @@ class VirtualProfileRepository {
     return null;
   }
 
+  /// Suggests the next free clone name for an app, e.g. "Telegram", then "Telegram 2".
+  ///
+  /// Multi-instance means several profiles legitimately share a package, so the name is
+  /// what distinguishes them. Uniqueness is still enforced by [createProfile]; this just
+  /// avoids handing the user a name that would be rejected.
+  Future<String> suggestProfileName({
+    required String appName,
+    required String packageName,
+  }) async {
+    final List<VirtualProfileModel> profiles = await getProfiles();
+    final Set<String> taken =
+        profiles.map((VirtualProfileModel p) => p.profileName.toLowerCase()).toSet();
+
+    final String base = appName.trim().isEmpty ? packageName : appName.trim();
+    if (!taken.contains(base.toLowerCase())) {
+      return base;
+    }
+
+    for (int index = 2; index < 1000; index++) {
+      final String candidate = '$base $index';
+      if (!taken.contains(candidate.toLowerCase())) {
+        return candidate;
+      }
+    }
+    return '$base ${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// How many profiles already clone [packageName].
+  Future<int> instanceCountFor(String packageName) async {
+    final List<VirtualProfileModel> profiles = await getProfiles();
+    return profiles.where((VirtualProfileModel p) => p.packageName == packageName).length;
+  }
+
   Future<VirtualProfileModel> createProfile({
     required String packageName,
     required String appName,

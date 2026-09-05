@@ -22,7 +22,7 @@ class HomeView extends GetView<HomeController> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddProfile,
         icon: const Icon(Icons.add),
-        label: const Text('Add Profile'),
+        label: const Text('Add clone'),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -71,8 +71,8 @@ class HomeView extends GetView<HomeController> {
       return <Widget>[
         SizedBox(height: 48.h),
         const EmptyState(
-          title: 'No profiles yet',
-          message: 'Create a profile to see it listed here.',
+          title: 'No clones yet',
+          message: 'Add a clone of an installed app, or import an APK.',
         ),
       ];
     }
@@ -81,7 +81,10 @@ class HomeView extends GetView<HomeController> {
         .map((VirtualProfileModel profile) => ProfileCard(
               profile: profile,
               state: controller.stateFor(profile),
-              canLaunch: controller.stateFor(profile).installed,
+              icon: controller.iconFor(profile),
+              siblingCount: controller.siblingCount(profile),
+              instanceIndex: controller.instanceIndex(profile),
+              canLaunch: controller.providesRuntimeIsolation,
               onLaunch: () => _launch(context, profile),
               onAction: (ProfileCardAction action) =>
                   _handleAction(context, profile, action),
@@ -90,7 +93,7 @@ class HomeView extends GetView<HomeController> {
   }
 
   Future<void> _openAddProfile() async {
-    final Object? created = await Get.toNamed<Object?>(AppRoutes.addProfile);
+    final Object? created = await Get.toNamed<Object?>(AppRoutes.appPicker);
     if (created == true) {
       await controller.refreshAll();
     }
@@ -124,6 +127,15 @@ class HomeView extends GetView<HomeController> {
         final String? error = await controller.renameProfile(profile, name);
         if (error != null && context.mounted) {
           _showMessage(context, error);
+        }
+      case ProfileCardAction.clone:
+        // Reuse the picker pre-filtered to this app rather than duplicating the flow.
+        final Object? created = await Get.toNamed<Object?>(
+          AppRoutes.appPicker,
+          arguments: profile.packageName,
+        );
+        if (created == true) {
+          await controller.refreshAll();
         }
       case ProfileCardAction.delete:
         final bool confirmed = await showDeleteProfileDialog(

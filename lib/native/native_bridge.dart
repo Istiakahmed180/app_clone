@@ -4,6 +4,7 @@ import '../core/constants/app_constants.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
 import '../data/models/engine_result.dart';
+import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
 import '../data/models/test_app_model.dart';
 
@@ -88,6 +89,42 @@ class NativeBridge {
 
   Future<EngineResponse> installAppToProfile(String profileId, String packageName) =>
       _invokeEngine('installAppToProfile', _profileArgs(profileId, packageName));
+
+  /// Launchable apps on the device, for the clone picker.
+  Future<List<InstalledAppModel>> listInstalledApps({bool includeIcons = true}) async {
+    final EngineResponse response = await _invokeEngine(
+      'listInstalledApps',
+      <String, dynamic>{'includeIcons': includeIcons},
+    );
+    final List<dynamic> apps = response.data['apps'] as List<dynamic>? ?? <dynamic>[];
+    return apps
+        .map((dynamic app) => InstalledAppModel.fromMap(
+              (app as Map<Object?, Object?>)
+                  .map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
+            ))
+        .toList(growable: false);
+  }
+
+  /// Reads an imported APK's identity. Throws [VirtualizationException] if unreadable.
+  Future<ApkCandidate> inspectApk(String apkPath) async {
+    final EngineResponse response =
+        await _invokeEngine('inspectApk', <String, dynamic>{'apkPath': apkPath});
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return ApkCandidate.fromMap(apkPath, response.data);
+  }
+
+  Future<EngineResponse> installApkToProfile(
+    String profileId,
+    String apkPath,
+    String packageName,
+  ) =>
+      _invokeEngine('installApkToProfile', <String, dynamic>{
+        'profileId': profileId,
+        'packageName': packageName,
+        'apkPath': apkPath,
+      });
 
   Future<EngineResponse> uninstallAppFromProfile(String profileId, String packageName) =>
       _invokeEngine('uninstallAppFromProfile', _profileArgs(profileId, packageName));

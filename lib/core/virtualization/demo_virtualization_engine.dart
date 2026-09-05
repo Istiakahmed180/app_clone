@@ -24,6 +24,19 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
   bool get providesRuntimeIsolation => false;
 
   @override
+  Future<VirtualProfileModel> createProfileFromApk({
+    required String apkPath,
+    required String packageName,
+    required String appName,
+    required String profileName,
+  }) {
+    throw const VirtualizationException(
+      'This engine cannot install APKs.',
+      code: 'VIRTUALIZATION_NOT_AVAILABLE',
+    );
+  }
+
+  @override
   Future<void> initialize() async {
     // Nothing to prepare: this engine has no backend.
   }

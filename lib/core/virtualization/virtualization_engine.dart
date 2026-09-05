@@ -31,4 +31,12 @@ abstract class VirtualizationEngine {
 
   /// Prepares the backend. Safe to call more than once.
   Future<void> initialize();
+
+  /// Creates a profile from a standalone APK the user imported.
+  Future<VirtualProfileModel> createProfileFromApk({
+    required String apkPath,
+    required String packageName,
+    required String appName,
+    required String profileName,
+  });
 }

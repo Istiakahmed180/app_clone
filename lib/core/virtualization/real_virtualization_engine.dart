@@ -74,6 +74,33 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     return profile;
   }
 
+  /// Same two-sided contract as [createProfile], for an APK that may not be installed
+  /// on the host at all.
+  @override
+  Future<VirtualProfileModel> createProfileFromApk({
+    required String apkPath,
+    required String packageName,
+    required String appName,
+    required String profileName,
+  }) async {
+    final VirtualProfileModel profile = await _repository.createProfile(
+      packageName: packageName,
+      appName: appName,
+      profileName: profileName,
+    );
+
+    final EngineResponse response =
+        await _nativeBridge.installApkToProfile(profile.id, apkPath, packageName);
+
+    if (!response.success) {
+      _logger.error('APK install failed for ${profile.id}: ${response.code}');
+      await _repository.deleteProfile(profile.id);
+      throw VirtualizationException(response.message, code: response.code);
+    }
+
+    return profile;
+  }
+
   /// Removes the virtual environment first; metadata is only dropped once the engine
   /// has released the container, so a failure leaves a visible profile to retry.
   @override

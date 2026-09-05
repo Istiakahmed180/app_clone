@@ -87,6 +87,38 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             "isVirtualizationAvailable" -> result.success(engine.availability())
 
+            "listInstalledApps" -> {
+                val includeIcons = call.argument<Boolean>("includeIcons") ?: true
+                async(result) {
+                    success(
+                        "APPS_LISTED",
+                        "Installed applications listed.",
+                        mapOf("apps" to engine.listInstalledApps(includeIcons)),
+                    )
+                }
+            }
+
+            "inspectApk" -> {
+                val apkPath = call.requiredArg("apkPath", result) ?: return
+                async(result) {
+                    when (val info = engine.inspectApk(apkPath)) {
+                        is EngineResult.Success ->
+                            success("APK_INSPECTED", "APK read successfully.", info.value)
+                        is EngineResult.Failure -> failure(info.code, info.message)
+                    }
+                }
+            }
+
+            "installApkToProfile" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                val apkPath = call.requiredArg("apkPath", result) ?: return
+                async(result) {
+                    engine.installApkToProfile(profileId, apkPath, packageName)
+                        .toEnvelope("APP_INSTALLED", "Application installed successfully.")
+                }
+            }
+
             "initializeVirtualization" ->
                 async(result) { engine.initialize().toEnvelope("ENGINE_READY", "Engine ready.") }
 

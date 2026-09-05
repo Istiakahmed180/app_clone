@@ -23,13 +23,15 @@ class AppSecurityChecker(private val context: Context) {
         data class Rejected(val code: String, val message: String) : Verdict
     }
 
+    /**
+     * Admission check for an application already installed on this device.
+     *
+     * Phase 3 removed the single-package allow-list, so the policy is now a deny-list plus
+     * the secure-environment rule. Nothing here weakens the Phase 2 guarantees: a target
+     * that asks not to be virtualized is still rejected outright.
+     */
     fun check(packageName: String): Verdict {
-        if (packageName != AllowList.TEST_APP) {
-            return Verdict.Rejected(
-                EngineErrorCodes.APP_NOT_SUPPORTED,
-                "Phase 2 supports only the controlled Virtual Test App.",
-            )
-        }
+        blockedReason(packageName)?.let { return it }
 
         if (!isInstalled(packageName)) {
             return Verdict.Rejected(
@@ -47,6 +49,38 @@ class AppSecurityChecker(private val context: Context) {
         }
 
         return Verdict.Allowed
+    }
+
+    /**
+     * Admission check for a package identified from a standalone APK file. The
+     * host-installed check does not apply — the point of importing an APK is to run
+     * something that is not installed.
+     */
+    fun checkApk(packageName: String): Verdict {
+        blockedReason(packageName)?.let { return it }
+        return Verdict.Allowed
+    }
+
+    /**
+     * Packages Virtual Space refuses to clone.
+     *
+     * The host itself would recurse, and cloning core system/framework packages produces
+     * a broken container rather than a useful one.
+     */
+    private fun blockedReason(packageName: String): Verdict.Rejected? {
+        if (packageName == context.packageName) {
+            return Verdict.Rejected(
+                EngineErrorCodes.APP_NOT_SUPPORTED,
+                "Virtual Space cannot clone itself.",
+            )
+        }
+        if (BLOCKED_PREFIXES.any { packageName == it || packageName.startsWith("$it.") }) {
+            return Verdict.Rejected(
+                EngineErrorCodes.APP_NOT_SUPPORTED,
+                "System components cannot be cloned.",
+            )
+        }
+        return null
     }
 
     /** Fail-closed: any positive declaration found through either mechanism rejects. */
@@ -85,11 +119,14 @@ class AppSecurityChecker(private val context: Context) {
         false
     }
 
-    object AllowList {
-        const val TEST_APP = "com.example.virtualtestapp"
-    }
-
     private companion object {
+        val BLOCKED_PREFIXES = listOf(
+            "android",
+            "com.android.systemui",
+            "com.android.settings",
+            "com.android.providers",
+        )
+
         val SECURE_ENV_PROPERTIES = listOf(
             "REQUIRE_SECURE_ENV",
             "android.content.pm.REQUIRE_SECURE_ENV",
