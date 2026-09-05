@@ -112,7 +112,7 @@ class NativeBridge {
   Future<CompatibilityReport> analyzeApp(String packageName) async {
     final EngineResponse response =
         await _invokeEngine('analyzeApp', <String, dynamic>{'packageName': packageName});
-    return CompatibilityReport.fromMap(response.data);
+    return _reportOf(response, packageName);
   }
 
   /// What will and will not work if this APK is cloned, read from the archive itself.
@@ -124,6 +124,19 @@ class NativeBridge {
       'analyzeApk',
       <String, dynamic>{'apkPath': apkPath, 'packageName': packageName},
     );
+    return _reportOf(response, packageName);
+  }
+
+  /// A failed analysis means nothing is known — not that the app is unsupported.
+  ///
+  /// Parsing an empty payload would yield `UNSUPPORTED` with no findings, which reads to
+  /// the user as "blocked, for no stated reason". [CompatibilityReport.unknown] says
+  /// plainly that it was not analysed instead.
+  CompatibilityReport _reportOf(EngineResponse response, String packageName) {
+    if (!response.success || response.data.isEmpty) {
+      _logger.error('Compatibility analysis unavailable for $packageName: ${response.code}');
+      return CompatibilityReport.unknown;
+    }
     return CompatibilityReport.fromMap(response.data);
   }
 

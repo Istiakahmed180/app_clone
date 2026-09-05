@@ -214,6 +214,50 @@ class ApkManifestReaderTest {
         )
     }
 
+    /**
+     * Differential check between the two analysis paths.
+     *
+     * For an app that is installed, `analyze(package)` (via PackageManager) and
+     * `analyzeApk(sourceDir, package)` (via the archive) are looking at the same
+     * application and must reach the same blocking conclusion. A disagreement means one of
+     * them is wrong, and neither is obviously the authority — so it is worth failing on.
+     */
+    @Test
+    fun bothAnalysisPathsAgreeOnRealInstalledApps() {
+        val analyzer = AppCompatibilityAnalyzer(context)
+        val packages = InstalledAppsProvider(context)
+            .listLaunchableApps(includeIcons = false)
+            .map { it["packageName"] as String }
+            .take(20)
+
+        val disagreements = mutableListOf<String>()
+        var compared = 0
+
+        for (packageName in packages) {
+            val apk = runCatching {
+                context.packageManager.getApplicationInfo(packageName, 0).sourceDir
+            }.getOrNull() ?: continue
+            if (!File(apk).canRead()) continue
+
+            val installed = analyzer.analyze(packageName)
+            val archive = analyzer.analyzeApk(apk, packageName)
+            compared++
+
+            val installedBlocked = installed.findings.filter { it.blocking }.map { it.code }.toSet()
+            val archiveBlocked = archive.findings.filter { it.blocking }.map { it.code }.toSet()
+            if (installedBlocked != archiveBlocked) {
+                disagreements += "$packageName: installed=$installedBlocked archive=$archiveBlocked"
+            }
+
+            if (installed.requiresGms != archive.requiresGms) {
+                disagreements += "$packageName: GMS installed=${installed.requiresGms} archive=${archive.requiresGms}"
+            }
+        }
+
+        assertTrue("no apps were compared", compared > 0)
+        assertTrue("the two analysis paths disagree: $disagreements", disagreements.isEmpty())
+    }
+
     private companion object {
         const val SECURE_FIXTURE = "secure-env-fixture.apk"
         const val PLAIN_FIXTURE = "plain-fixture.apk"

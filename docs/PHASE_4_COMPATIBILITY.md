@@ -147,6 +147,31 @@ until then been a guess.
 
 Both were found by testing against real installed applications rather than fixtures alone.
 
+## Third review pass
+
+**A failed analysis was reported as "Unsupported".** `NativeBridge.analyzeApp` and
+`analyzeApk` parsed `response.data` without checking `response.success`. On a bridge failure
+the payload is empty, and `CompatibilityVerdict.parse(null)` returns `UNSUPPORTED` — so a
+transient error rendered as badge **"Unsupported"**, the line **"No known compatibility
+problems."**, and a disabled *Cannot clone* button. The user was blocked, told there were no
+problems, and given no reason, all at once.
+
+Both calls now return `CompatibilityReport.unknown` when the call did not succeed, so the
+sheet says **"Not analysed"**. Covered by two tests in `test/native_bridge_test.dart` that
+failed before the change.
+
+### Checks that found nothing
+
+Recorded so they are not repeated blindly:
+
+- **Differential analysis.** For 20 real installed apps, `analyze(package)` and
+  `analyzeApk(sourceDir, package)` were compared on blocking findings and GMS verdict. They
+  agree on every one. Kept as a permanent test.
+- **GMS heuristic against real manifests**, verified with `aapt2 dump xmltree`: Drive and
+  Telegram declare all three markers and are flagged; VLC and the controlled test app declare
+  none and are not. VLC does contain a few incidental `com.google.android.gms` references
+  without the markers, and not flagging it is the right call — it runs without Play Services.
+
 ## Known limitations
 
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.
