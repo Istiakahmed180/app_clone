@@ -52,13 +52,50 @@ class AppSecurityChecker(private val context: Context) {
     }
 
     /**
-     * Admission check for a package identified from a standalone APK file. The
-     * host-installed check does not apply — the point of importing an APK is to run
-     * something that is not installed.
+     * Admission check for a standalone APK file.
+     *
+     * The host-installed check does not apply — the point of importing an APK is to run
+     * something that is not installed — but the secure-environment rule still must. It is
+     * read from the archive itself via [apkPath]; if the same package also happens to be
+     * installed, the installed declaration is honoured too.
+     *
+     * Platform limit, stated plainly: `PackageManager.getProperty()` only answers for
+     * installed packages, so an archive can only be screened through its application
+     * meta-data. An APK that declares the requirement solely as a `<property>` and is not
+     * installed here cannot be detected. See docs/SECURITY.md.
      */
-    fun checkApk(packageName: String): Verdict {
+    fun checkApk(packageName: String, apkPath: String? = null): Verdict {
         blockedReason(packageName)?.let { return it }
+
+        val declared = (apkPath != null && archiveRequiresSecureEnvironment(apkPath)) ||
+            (isInstalled(packageName) && requiresSecureEnvironment(packageName))
+
+        if (declared) {
+            Slog.w(Slog.INSTALL, "$packageName declares a secure-environment requirement; rejecting")
+            return Verdict.Rejected(
+                EngineErrorCodes.SECURE_ENV_REQUIRED,
+                "This application requires a secure environment and cannot be virtualized.",
+            )
+        }
+
         return Verdict.Allowed
+    }
+
+    /** Reads the secure-environment declaration straight out of an uninstalled archive. */
+    fun archiveRequiresSecureEnvironment(apkPath: String): Boolean {
+        val meta = try {
+            context.packageManager
+                .getPackageArchiveInfo(apkPath, PackageManager.GET_META_DATA)
+                ?.applicationInfo
+                ?.metaData
+        } catch (error: Exception) {
+            // An unreadable archive is refused by ApkImporter; treat it as undeclared here
+            // rather than letting a parse failure look like a positive declaration.
+            Slog.w(Slog.INSTALL, "Could not read archive meta-data: ${error.message}")
+            null
+        } ?: return false
+
+        return SECURE_ENV_PROPERTIES.any { meta.getBoolean(it, false) }
     }
 
     /**

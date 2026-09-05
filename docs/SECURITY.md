@@ -90,8 +90,16 @@ imported APKs may be cloned. The policy is now a deny-list plus the secure-envir
 - Virtual Space refuses to clone **itself** (it would recurse).
 - It refuses **system/framework packages** (`android`, `com.android.systemui`,
   `com.android.settings`, `com.android.providers.*`) — cloning these yields a broken container.
-- `REQUIRE_SECURE_ENV` rejection is unchanged and applies to imported APKs too, checked before
-  the engine ever sees the file.
+- `REQUIRE_SECURE_ENV` rejection is unchanged. For an **installed** app it is read through
+  `PackageManager.getProperty()` and application meta-data. For an **imported APK** it is read
+  from the archive's application meta-data via `getPackageArchiveInfo(..., GET_META_DATA)`
+  before the engine sees the file, and the installed declaration is honoured as well when the
+  same package happens to be installed.
+
+  **Platform limit, stated plainly:** `PackageManager.getProperty()` answers only for installed
+  packages. An APK that declares the requirement *solely* as a `<property>` element and is not
+  installed on this device therefore cannot be screened. That gap is a platform constraint, not
+  a policy choice, and there is still no override path for a declaration that *is* detected.
 
 Banking, payment, authenticator, anti-cheat and Play-Integrity-dependent apps were deliberately
 **not** tested and remain outside what this build can be said to support. Nothing prevents a

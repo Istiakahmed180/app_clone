@@ -217,6 +217,24 @@ class ApkImportTest {
         assertFalse(importer.isInstalledOnHost("com.example.definitely.not.installed"))
     }
 
+    /** The archive-level secure-environment screen added after the audit. */
+    @Test
+    fun anOrdinaryApkDoesNotDeclareASecureEnvironmentRequirement() {
+        assertFalse(checker.archiveRequiresSecureEnvironment(testAppApkPath()))
+    }
+
+    @Test
+    fun anUnreadableArchiveIsTreatedAsUndeclaredRatherThanCrashing() {
+        assertFalse(checker.archiveRequiresSecureEnvironment("${context.filesDir}/nope.apk"))
+    }
+
+    @Test
+    fun checkApkStillAdmitsAnOrdinaryArchive() {
+        val verdict = checker.checkApk(TestAppManager.TEST_APP_PACKAGE, testAppApkPath())
+
+        assertTrue(verdict is AppSecurityChecker.Verdict.Allowed)
+    }
+
     @Test
     fun refusesToImportAnApkDeclaringTheHostPackage() {
         // Cloning Virtual Space into Virtual Space would recurse.

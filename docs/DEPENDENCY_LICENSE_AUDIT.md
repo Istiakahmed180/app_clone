@@ -34,7 +34,28 @@ These are compiled into `libblackbox.so`; they are not separate Gradle dependenc
    redistribute them without attribution. Before release, restore the upstream notices in a
    `NOTICE` file listing Dobby, xDL, FreeReflection, toml4j and VirtualApp/VirtualAPK.
 
-2. **VirtualApp / VirtualAPK ancestry is unverified.** NewBlackbox's README credits
+2. **VirtualApp / VirtualAPK ancestry — since traced, and the result is worse than "unverified".**
+
+   The chain was followed to its sources:
+
+   - `asLody/VirtualApp` carries **no LICENSE file**, and its README states that commercial
+     authorisation must be purchased ("请购买商业授权"), that the technology belongs to a named
+     company, and that unauthorised internal, commercial or app-store use will be met with
+     prosecution for copyright infringement. It is proprietary, not open source.
+   - `FBlackBox/BlackBox` (the origin of the `top.niunaijun.blackbox` namespace used here)
+     carries **no LICENSE file either** — the GitHub API reports `license: null` and no licence
+     file exists at the repository root. The original `niunaijun/BlackBox` repository now
+     returns 404; a surviving fork's README says the author deleted the project.
+   - Bcore's Java sources carry **no copyright headers at all**.
+
+   NewBlackbox nonetheless declares Apache-2.0 for the whole repository. On this evidence that
+   is a licence it was very likely not in a position to grant, which means the Apache-2.0 text
+   shipped in `android/app/libs/` may not confer the rights it appears to.
+
+   **This is not legal advice and should be confirmed by a lawyer.** But it is no longer an
+   open question of fact: the upstream projects are unlicensed or expressly commercial.
+
+   *(Superseded note, kept for history)* **VirtualApp / VirtualAPK ancestry was unverified.** NewBlackbox's README credits
    "Original Framework: VirtualApp, VirtualAPK". Some historical VirtualApp releases were
    published under GPL-3.0 before later commercial relicensing. NewBlackbox declares Apache-2.0
    for the whole repository, but **that declaration has not been traced back to the origin of

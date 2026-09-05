@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import com.example.virtualspacedemo.VirtualSpaceApplication
 import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -53,6 +54,17 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     /** Runs [work] off the platform thread and replies on the main looper. */
     private fun async(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
+        try {
+            submit(result, work)
+        } catch (_: RejectedExecutionException) {
+            // detach() has already shut the executor down. Answer instead of leaving the
+            // Dart future pending forever.
+            Slog.w(Slog.ENGINE, "Rejecting call: bridge is shutting down")
+            reply(result, failure("BRIDGE_SHUTTING_DOWN", "Virtual Space is closing."))
+        }
+    }
+
+    private fun submit(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
         engineExecutor.execute {
             val response = try {
                 work()

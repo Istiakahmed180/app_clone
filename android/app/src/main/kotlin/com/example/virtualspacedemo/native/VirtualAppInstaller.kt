@@ -43,7 +43,7 @@ class VirtualAppInstaller(
         packageName: String,
         virtualUserId: Int,
     ): EngineResult<Unit> {
-        when (val verdict = securityChecker.checkApk(packageName)) {
+        when (val verdict = securityChecker.checkApk(packageName, apkPath)) {
             is AppSecurityChecker.Verdict.Rejected ->
                 return EngineResult.Failure(verdict.code, verdict.message)
             AppSecurityChecker.Verdict.Allowed -> Unit

@@ -124,6 +124,43 @@ While adding that retry, `withServiceRetry` was corrected to retry **only when t
 throws**. A returned `Failure` is a definitive answer ("not installed", "refused") and must not
 be delayed by the 2 s backoff or repeated.
 
+## Automated isolation coverage (added after the Phase 1-4 audit)
+
+Until this was added, the central claim — two clones of one app do not share data — was
+supported **only by manual observation**. An engine or adapter regression could have removed
+isolation without any suite noticing. `ContainerIsolationTest`
+(`android/app/src/androidTest/.../native/ContainerIsolationTest.kt`) now asserts it:
+
+| Test | Asserts |
+| --- | --- |
+| `twoClonesOfOnePackageGetSeparateContainers` | Distinct `virtualUserId` and distinct container paths for the same package |
+| `dataWrittenInOneContainerIsNotVisibleInTheOther` | Each container keeps its own value |
+| `writingToOneContainerDoesNotCreateTheFileInAnUnwrittenOne` | No leakage into an untouched container |
+| `aLaunchedGuestWritesOnlyIntoItsOwnContainer` | The **guest process** writes only into its own container — the redirection proof |
+| `deletingOneCloneLeavesTheOthersDataIntact` | Deleting one clone does not disturb another |
+| `containersLiveInsideTheHostSandboxNotTheNormalInstallation` | A clone never resolves to `/data/data/<package>` |
+
+`@Before requireAWorkingEngine` fails the class outright when the backend did not start, so a
+device where nothing is virtualized cannot produce a green run that proved nothing.
+
+### Validated by mutation, not just by passing
+
+A passing test proves nothing unless it can fail. `VirtualProfileManager.getOrCreate` was
+temporarily mutated to map every profile to virtual user 0 — i.e. all clones sharing one
+container. **Five of the six tests failed**, as did the pre-existing
+`VirtualProfileManagerTest.allocatesDistinctIdsAndReusesFreedOnes`. The mutation was reverted
+and the suite returned to green (35 instrumentation tests).
+
+The one test that correctly did *not* fail is
+`containersLiveInsideTheHostSandboxNotTheNormalInstallation`, which does not depend on clones
+having distinct users.
+
+### Coupling note
+
+`ContainerIsolationTest.containerDir()` encodes the backend's on-disk layout
+(`blackbox/data/user/<id>/<package>`). If the virtualization backend is replaced, that helper
+is the single place the test needs updating.
+
 ## Known open issues
 
 - `isRunningApplication` always throws inside Bcore, so cards show **Ready** and never

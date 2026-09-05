@@ -31,6 +31,11 @@ class PermissionBridge {
         data object Cancelled : Outcome
     }
 
+    // Written from the platform thread (request) and from the main thread
+    // (onRequestPermissionsResult, cancelPending), so publication must be visible across
+    // both. Each mutation also swaps the field before invoking the callback, so a callback
+    // can never run twice for one request.
+    @Volatile
     private var pending: ((Outcome) -> Unit)? = null
 
     /**
@@ -43,10 +48,27 @@ class PermissionBridge {
         activity: Activity,
         permissions: List<String>,
         onResult: (Outcome) -> Unit,
+    ) = request(
+        permissions = permissions,
+        isGranted = { activity.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED },
+        ask = { outstanding, requestCode -> activity.requestPermissions(outstanding, requestCode) },
+        onResult = onResult,
+    )
+
+    /**
+     * The consent logic itself, with the two Activity calls injected.
+     *
+     * `Activity.requestPermissions` is final, so this seam is what lets the decision
+     * paths — already granted, busy, cancelled, per-permission mapping — be tested
+     * without raising real system dialogs. Behaviour is identical either way.
+     */
+    internal fun request(
+        permissions: List<String>,
+        isGranted: (String) -> Boolean,
+        ask: (Array<String>, Int) -> Unit,
+        onResult: (Outcome) -> Unit,
     ) {
-        val outstanding = permissions.filter {
-            activity.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
-        }
+        val outstanding = permissions.filterNot(isGranted)
 
         if (outstanding.isEmpty()) {
             onResult(Outcome.Answered(permissions.associateWith { true }))
@@ -61,7 +83,7 @@ class PermissionBridge {
 
         pending = onResult
         Slog.i(Slog.PROFILE, "Requesting ${outstanding.size} permission(s) for a guest app")
-        activity.requestPermissions(outstanding.toTypedArray(), REQUEST_CODE)
+        ask(outstanding.toTypedArray(), REQUEST_CODE)
     }
 
     /**
