@@ -93,10 +93,42 @@ another application's private data.
 `InstalledAppsProvider` reads only what a launcher already sees: label, package name, icon and
 version. Nothing else is collected.
 
-Note that merging the engine AAR adds ~322 `uses-permission` entries and ~152 stub activities
-to the host manifest — these come from the engine and are what allow guest apps to run. This
-is a real distribution consideration: the permission list is large and will need review before
-any store submission.
+### Permission surface
+
+Merging the engine AAR brought in **322 `uses-permission` entries (250 distinct)**. Bcore
+declares almost everything so that any guest can request anything; carried wholesale that is
+not reviewable. For comparison, a shipping product in this category
+(`com.multiapp.morespace.app`) declares **104 distinct**.
+
+The manifest now removes 139 of them with `tools:node="remove"`, bringing the app to
+**159 entries / 111 distinct**. What was removed, and why:
+
+| Removed | Count | Reason |
+| --- | --- | --- |
+| SIGNATURE-level | 33 | A normally-installed app can never be granted these, so declaring them achieves nothing |
+| Not defined on any current Android/GMS build | 106 | OEM- and launcher-specific (Samsung, Huawei, Oppo, HTC, Sony, badge providers) |
+
+Deliberately **kept**:
+
+| Kept | Count | Reason |
+| --- | --- | --- |
+| Dangerous | 38 | `PermissionBridge` can only request what the host declares. Removing one would silently and permanently deny that capability to every clone. |
+| Normal | 60 | Cheap, and the engine or guests may rely on them |
+| Still declared by the shipping competitor | 13 | Conservative: assume they are there for a reason |
+
+Protection levels were not guessed — they were read from the device through
+`PackageManager.getPermissionInfo().protection`, because `adb shell pm list permissions` is
+filtered on this OEM build and reported almost nothing.
+
+Verified after trimming: engine initialises, VLC clones and launches (`ProxyActivity$P0`), the
+compatibility sheet still reports exactly the same 9 outstanding permissions for VLC, and the
+container isolation suite passes.
+
+**Known trade-off:** launcher unread-count badges from guest apps may stop working on OEM
+launchers that gate them behind their own permission.
+
+~152 stub activities remain; those are what allow guest apps to run and cannot be trimmed the
+same way.
 
 ## Scope limit
 

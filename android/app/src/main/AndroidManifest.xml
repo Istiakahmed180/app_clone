@@ -47,6 +47,169 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <!-- ==========================================================================
+         Permissions removed from the virtualization engine's merged manifest.
+
+         Bcore declares ~250 distinct permissions so that guest apps can request
+         almost anything. Carried wholesale that is unreviewable: a shipping
+         competitor (com.multiapp.morespace.app) declares 104.
+
+         Removed here, and only here:
+           - SIGNATURE-level permissions, which a normally-installed app can never
+             be granted, so declaring them achieves nothing but noise.
+           - Permissions not defined on any current Android/GMS build, i.e. OEM- and
+             launcher-specific ones (Samsung, Huawei, Oppo, HTC, Sony, badge providers).
+
+         Deliberately NOT removed:
+           - Every dangerous permission. PermissionBridge can only request what the
+             host declares, so removing one would silently and permanently deny that
+             capability to every clone.
+           - Every normal permission.
+           - Anything the shipping competitor still declares.
+
+         Known trade-off: launcher unread-count badges from guest apps may stop
+         working on OEM launchers that gate them behind their own permission.
+         ========================================================================== -->
+    <uses-permission android:name="android.hardware.usb.host" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCOUNT_MANAGER" tools:node="remove" />
+    <uses-permission android:name="android.permission.BATTERY_STATS" tools:node="remove" />
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" tools:node="remove" />
+    <uses-permission android:name="android.permission.BIND_DIRECTORY_SEARCH" tools:node="remove" />
+    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" tools:node="remove" />
+    <uses-permission android:name="android.permission.BROADCAST_SMS" tools:node="remove" />
+    <uses-permission android:name="android.permission.BROADCAST_WAP_PUSH" tools:node="remove" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" tools:node="remove" />
+    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" tools:node="remove" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.DEVICE_POWER" tools:node="remove" />
+    <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" tools:node="remove" />
+    <uses-permission android:name="android.permission.HARDWARE_TEST" tools:node="remove" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" tools:node="remove" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" tools:node="remove" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_APP_BADGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_APP_SPECIFIC_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AURAL" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AURAL_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.SEND_RESPOND_VIA_MESSAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.SET_TIME" tools:node="remove" />
+    <uses-permission android:name="android.permission.SET_TIME_ZONE" tools:node="remove" />
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_APP_SPECIFIC_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="android.provider.Telephony.SMS_RECEIVED" tools:node="remove" />
+    <uses-permission android:name="cn.nubia.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.actionlauncher.playstore.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.anddoes.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT" tools:node="remove" />
+    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.android.launcher2.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.android.launcher3.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.android.voicemail.permission.READ_WRITE_ALL_VOICEMAIL" tools:node="remove" />
+    <uses-permission android:name="com.apusapps.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.bbk.launcher2.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.example.virtualspacedemo.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_BACKGROUND_LOCATION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_MEDIA_LOCATION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.ACCESS_WIFI_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.BLUETOOTH_ADVERTISE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.BLUETOOTH_CONNECT" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.BLUETOOTH_SCAN" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.BODY_SENSORS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.BODY_SENSORS_BACKGROUND" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.CAMERA" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.CHANGE_NETWORK_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.CHANGE_WIFI_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_DATA_SYNC" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_HEALTH" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_LOCATION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_MICROPHONE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_PHONE_CALL" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_SPECIAL_USE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.MANAGE_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.NEARBY_WIFI_DEVICES" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.POST_NOTIFICATIONS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_APP_SPECIFIC_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_CALENDAR" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_CALL_LOG" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_CONTACTS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_DEVICE_CONFIG" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_MEDIA_AUDIO" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_MEDIA_VIDEO" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_PHONE_NUMBERS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.READ_PRECISE_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.RECORD_AUDIO" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.VIBRATE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WAKE_LOCK" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WRITE_APP_SPECIFIC_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WRITE_CALENDAR" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WRITE_CALL_LOG" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WRITE_CONTACTS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.providers.talk.permission.READ_ONLY" tools:node="remove" />
+    <uses-permission android:name="com.google.android.providers.talk.permission.WRITE_ONLY" tools:node="remove" />
+    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT" tools:node="remove" />
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE" tools:node="remove" />
+    <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.huawei.authentication.HW_ACCESS_AUTH_SERVICE" tools:node="remove" />
+    <uses-permission android:name="com.lenovo.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE" tools:node="remove" />
+    <uses-permission android:name="com.mx.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.s.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.samsung.android.providers.context.permission.READ_RECORD_AUDIO" tools:node="remove" />
+    <uses-permission android:name="com.samsung.android.providers.context.permission.WRITE_RECORD_AUDIO" tools:node="remove" />
+    <uses-permission android:name="com.samsung.android.providers.context.permission.WRITE_USE_APP_FEATURE_SURVEY" tools:node="remove" />
+    <uses-permission android:name="com.samsung.android.scloud.backup.lib.read" tools:node="remove" />
+    <uses-permission android:name="com.samsung.android.scloud.backup.lib.write" tools:node="remove" />
+    <uses-permission android:name="com.samsung.svoice.sync.ACCESS_SERVICE" tools:node="remove" />
+    <uses-permission android:name="com.samsung.svoice.sync.READ_DATABASE" tools:node="remove" />
+    <uses-permission android:name="com.samsung.svoice.sync.WRITE_DATABASE" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.app.voicenote.Controller" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.permission.LAUNCH_PERSONAL_PAGE_SERVICE" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.permission.VOIP_INTERFACE" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.provider.badge.permission.READ" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE" tools:node="remove" />
+    <uses-permission android:name="com.sec.android.settings.permission.SOFT_RESET" tools:node="remove" />
+    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE" tools:node="remove" />
+    <uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE" tools:node="remove" />
+    <uses-permission android:name="com.teslacoilsw.launcher.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="com.tsf.shell.permission.READ_SETTINGS" tools:node="remove" />
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ" tools:node="remove" />
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE" tools:node="remove" />
+    <uses-permission android:name="sec.android.permission.READ_MSG_PREF" tools:node="remove" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
