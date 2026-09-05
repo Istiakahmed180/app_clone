@@ -314,6 +314,41 @@ class AppCompatibilityAnalyzerTest {
         }
     }
 
+    /**
+     * Guards against a false "unsupported" verdict. Real apps commonly ship
+     * `extractNativeLibs=false`, so the per-ABI directory can be empty even though the app
+     * runs fine. If ABI detection ever regresses, arm64 apps would be blocked outright.
+     */
+    @Test
+    fun arm64AppsAreNeverBlockedForTheirAbi() {
+        val installed = InstalledAppsProvider(context)
+            .listLaunchableApps(includeIcons = false)
+            .map { it["packageName"] as String }
+
+        var checked = 0
+        for (packageName in installed) {
+            val info = try {
+                context.packageManager.getApplicationInfo(packageName, 0)
+            } catch (_: Exception) {
+                continue
+            }
+            // Only meaningful for apps that actually carry native code.
+            val libDir = info.nativeLibraryDir ?: continue
+            if (!java.io.File(libDir).isDirectory) continue
+
+            val report = analyzer.analyze(packageName)
+            val abiBlocked = report.findings.any {
+                it.code == EngineErrorCodes.ABI_NOT_SUPPORTED && it.blocking
+            }
+            assertFalse(
+                "$packageName (libDir=$libDir) was wrongly blocked on ABI",
+                abiBlocked,
+            )
+            checked++
+            if (checked >= 20) break
+        }
+    }
+
     @Test
     fun aReportSurvivesConversionToTheChannelShape() {
         val map = analyzer.analyze(TestAppManager.TEST_APP_PACKAGE).toMap()

@@ -34,6 +34,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     fun unbindActivity() {
         activity = null
+        permissionBridge.cancelPending()
     }
 
     fun onRequestPermissionsResult(
@@ -59,19 +60,25 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 Slog.e(Slog.ENGINE, "Engine work failed", error)
                 failure("BRIDGE_ERROR", error.message ?: "Native call failed.")
             }
-            mainHandler.post {
-                // The activity can be destroyed while a long install is still running;
-                // replying on a torn-down channel throws.
-                if (channel == null) {
-                    Slog.w(Slog.ENGINE, "Dropping reply: bridge already detached")
-                    return@post
-                }
-                try {
-                    result.success(response)
-                } catch (error: Throwable) {
-                    Slog.w(Slog.ENGINE, "Reply failed: ${error.message}")
-                }
-            }
+            mainHandler.post { reply(result, response) }
+        }
+    }
+
+    /**
+     * Replies on the main looper, tolerating a bridge that has since been detached.
+     *
+     * The activity can go away while a long install or a permission dialog is still
+     * outstanding, and replying on a torn-down channel throws.
+     */
+    private fun reply(result: MethodChannel.Result, response: Map<String, Any?>) {
+        if (channel == null) {
+            Slog.w(Slog.ENGINE, "Dropping reply: bridge already detached")
+            return
+        }
+        try {
+            result.success(response)
+        } catch (error: Throwable) {
+            Slog.w(Slog.ENGINE, "Reply failed: ${error.message}")
         }
     }
 
@@ -80,6 +87,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     }
 
     fun detach() {
+        permissionBridge.cancelPending()
         channel?.setMethodCallHandler(null)
         channel = null
         engineExecutor.shutdown()
@@ -139,19 +147,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
                 val report = analyzer.analyze(packageName)
                 permissionBridge.request(host, report.missingPermissions) { outcome ->
-                    val stillMissing = report.bridgeablePermissions
-                        .filterNot(analyzer::isGrantedToHost)
-                    result.success(
-                        success(
-                            "PERMISSIONS_REQUESTED",
-                            "Permission request finished.",
-                            mapOf(
-                                "granted" to outcome.filterValues { it }.keys.toList(),
-                                "denied" to outcome.filterValues { !it }.keys.toList(),
-                                "stillMissing" to stillMissing,
-                            ),
-                        ),
-                    )
+                    reply(result, permissionEnvelope(report, outcome))
                 }
             }
 
@@ -279,6 +275,35 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             else -> result.notImplemented()
         }
+    }
+
+    /**
+     * "The user answered" and "we never asked" must not look the same to the UI, or it
+     * would report a decision the user never made.
+     */
+    private fun permissionEnvelope(
+        report: AppCompatibilityAnalyzer.Report,
+        outcome: PermissionBridge.Outcome,
+    ): Map<String, Any?> = when (outcome) {
+        is PermissionBridge.Outcome.Answered -> success(
+            "PERMISSIONS_REQUESTED",
+            "Permission request finished.",
+            mapOf(
+                "granted" to outcome.grants.filterValues { it }.keys.toList(),
+                "denied" to outcome.grants.filterValues { !it }.keys.toList(),
+                "stillMissing" to report.bridgeablePermissions.filterNot(analyzer::isGrantedToHost),
+            ),
+        )
+
+        PermissionBridge.Outcome.Busy -> failure(
+            "PERMISSION_REQUEST_IN_PROGRESS",
+            "Another permission request is already open.",
+        )
+
+        PermissionBridge.Outcome.Cancelled -> failure(
+            "PERMISSION_REQUEST_CANCELLED",
+            "The permission request was interrupted.",
+        )
     }
 
     private fun MethodCall.requiredProfile(result: MethodChannel.Result): String? =

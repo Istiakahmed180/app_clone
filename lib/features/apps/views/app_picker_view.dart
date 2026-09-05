@@ -99,10 +99,7 @@ class AppPickerView extends GetView<AppPickerController> {
       appName: app.appName,
       report: report,
       existingClones: existing,
-      onGrantPermissions: () async {
-        await controller.requestPermissions(app.packageName);
-        return controller.analyze(app.packageName);
-      },
+      onGrantPermissions: () => _grantPermissions(context, app.packageName),
     );
     if (!confirmed || !context.mounted) {
       return;
@@ -146,10 +143,7 @@ class AppPickerView extends GetView<AppPickerController> {
       appName: candidate.appName,
       report: report,
       existingClones: existing,
-      onGrantPermissions: () async {
-        await controller.requestPermissions(candidate.packageName);
-        return controller.analyze(candidate.packageName);
-      },
+      onGrantPermissions: () => _grantPermissions(context, candidate.packageName),
     );
 
     if (!proceed || !context.mounted) {
@@ -165,6 +159,27 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     Get.back<bool>(result: true);
+  }
+
+  /// Runs the permission request and reports why it did not happen, if it did not.
+  ///
+  /// A request can be refused before the dialog is ever shown (another one is open, or the
+  /// host went away); saying nothing would leave the sheet looking unchanged for no reason.
+  Future<CompatibilityReport> _grantPermissions(
+    BuildContext context,
+    String packageName,
+  ) async {
+    final PermissionRequestResult? result =
+        await controller.requestPermissions(packageName);
+
+    if (result == null && context.mounted) {
+      final String? reason = controller.errorMessage.value;
+      if (reason != null) {
+        _showMessage(context, reason);
+      }
+    }
+
+    return controller.analyze(packageName);
   }
 
   void _showMessage(BuildContext context, String message) {

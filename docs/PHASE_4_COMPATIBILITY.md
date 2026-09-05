@@ -77,13 +77,47 @@ list shows a per-row badge for anything not fully supported.
 | --- | --- |
 | `flutter analyze` | No issues |
 | `flutter test` | 61 passed |
-| `connectedDebugAndroidTest` | 28 passed on device |
+| `connectedDebugAndroidTest` | 29 passed on device |
 
 ## Defect found by the new tests
 
 `CompatibilityReport.fromMap` used a hard cast (`map['findings'] as List<dynamic>?`) which
 threw when the channel payload had an unexpected shape. Every field is now shape-checked
 rather than cast. Caught by a deliberately malformed-payload test, not on device.
+
+## Review pass — defects found and fixed
+
+A recheck of the Phase 4 code found three defects in the permission bridge, all in the paths
+where a request does *not* simply succeed:
+
+1. **A refused request reported success.** When a permission request was already on screen,
+   the bridge invoked the callback with an empty map, which the bridge turned into
+   `PERMISSIONS_REQUESTED — "Permission request finished."` The UI would have told the user
+   their answer had been recorded when they were never asked. The callback now carries a typed
+   outcome — `Answered` / `Busy` / `Cancelled` — and only `Answered` produces a success
+   envelope.
+
+2. **An interrupted request left the caller waiting forever.** If the host went away while the
+   system dialog was up, `onRequestPermissionsResult` never reached that bridge instance, the
+   `MethodChannel.Result` was never completed, and the Dart future never resolved — the sheet
+   would sit on "Waiting for your answer…" indefinitely. `cancelPending()` now completes such a
+   request as `Cancelled`, and is called from both `unbindActivity()` and `detach()`.
+   **Verified on device:** the dialog was started and then abandoned by leaving the app; the
+   sheet recovered to "Grant 9 permission(s)" rather than hanging.
+
+3. **The permission reply was not guarded against a detached channel** — the same defect
+   already fixed for engine calls, but reintroduced on this path. Both now go through a shared
+   `reply()` helper that drops the reply if the bridge has been detached.
+
+The UI also now surfaces *why* a request did not happen, instead of silently showing an
+unchanged sheet.
+
+### ABI detection verified, not assumed
+
+Modern apps commonly ship `extractNativeLibs=false`, which leaves the per-ABI directory empty.
+Had detection regressed, arm64 apps would have been blocked outright with a false
+`UNSUPPORTED`. A test now analyses up to 20 real installed apps that carry native code and
+asserts none is blocked on ABI. It passes on the test device.
 
 ## Known limitations
 
