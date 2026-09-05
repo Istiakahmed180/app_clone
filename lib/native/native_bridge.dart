@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 
 import '../core/constants/app_constants.dart';
@@ -103,6 +105,35 @@ class NativeBridge {
                   .map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
             ))
         .toList(growable: false);
+  }
+
+  /// Icons for specific packages only.
+  ///
+  /// Prefer this over [listInstalledApps] when the caller already knows which packages it
+  /// needs — decoding every launchable app's icon is expensive.
+  Future<Map<String, Uint8List>> getAppIcons(Iterable<String> packageNames) async {
+    final List<String> packages = packageNames.toSet().toList(growable: false);
+    if (packages.isEmpty) {
+      return <String, Uint8List>{};
+    }
+
+    final EngineResponse response = await _invokeEngine(
+      'getAppIcons',
+      <String, dynamic>{'packageNames': packages},
+    );
+
+    final Object? raw = response.data['icons'];
+    if (raw is! Map) {
+      return <String, Uint8List>{};
+    }
+
+    final Map<String, Uint8List> icons = <String, Uint8List>{};
+    raw.forEach((Object? key, Object? value) {
+      if (value is String && value.isNotEmpty) {
+        icons['$key'] = base64Decode(value);
+      }
+    });
+    return icons;
   }
 
   /// Reads an imported APK's identity. Throws [VirtualizationException] if unreadable.

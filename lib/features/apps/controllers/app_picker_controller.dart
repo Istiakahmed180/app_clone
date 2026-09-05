@@ -135,9 +135,14 @@ class AppPickerController extends GetxController {
   Future<String> _materialise(PlatformFile picked) async {
     final Directory cache = await getTemporaryDirectory();
     final Directory imports = Directory('${cache.path}/apk_imports');
-    if (!imports.existsSync()) {
-      imports.createSync(recursive: true);
+
+    // A previous import can be hundreds of megabytes; clear the staging area rather than
+    // letting copies accumulate. The engine keeps its own retained copy of anything that
+    // was actually installed, so nothing here is needed after this call.
+    if (imports.existsSync()) {
+      imports.deleteSync(recursive: true);
     }
+    imports.createSync(recursive: true);
 
     final File target = File('${imports.path}/${DateTime.now().millisecondsSinceEpoch}.apk');
     final IOSink sink = target.openWrite();

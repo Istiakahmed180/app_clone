@@ -78,6 +78,46 @@ u0_a823  28256  org.videolan.vlc               <- guest, different app, same tim
 3. **Misleading clone labels.** Every card read "1 of N". Cards now carry a real 1-based
    instance index ("clone 2 of 3").
 
+## Review pass — further defects found and fixed
+
+A recheck after the initial Phase 3 work found three more real defects:
+
+1. **The home screen decoded every installed app's icon on every refresh.** It called
+   `listInstalledApps()` (186 launchable apps on the test device) merely to map icons onto a
+   handful of cards. Measured: `Choreographer: Skipped 203 frames` on the affected path. A new
+   native `getAppIcons(packageNames)` now returns icons only for the packages actually cloned.
+   Measured after the fix: **0 skipped frames across three pull-to-refreshes.**
+
+2. **The install rollback guard used the untrustworthy `isInstalled` predicate.** Both
+   `installAppToProfile` and `installApkToProfile` skipped rollback when `isInstalled` returned
+   true — which it does for *any* host-installed package whenever Bcore's service is unhealthy.
+   A genuinely failed install of an app that is also installed normally would therefore have
+   left an orphan profile pointing at an empty container. The engine's own verdict is now
+   authoritative: a `Failure` always releases the mapping and any retained APK.
+
+3. **Imported APK copies leaked.** The Dart staging copy in the cache directory was never
+   deleted (an APK can be hundreds of megabytes), and a failed install left the retained copy
+   behind. The staging directory is now cleared before each import, and
+   `releaseProfileArtifacts` deletes the retained copy on both failure and profile deletion.
+
+### Corrected performance finding
+
+An earlier reading attributed startup jank to icon loading. That was wrong. Timing the startup
+sequence shows the stall sits between engine attach and first frame:
+
+```
+12:44:42.350  process start
+12:44:42.986  Engine attached          (+0.6s)
+12:44:44.226  Engine created           (+1.9s, waits for the :black provider process)
+12:44:46.805  Skipped 226 frames
+```
+
+Startup cost is dominated by **Bcore's synchronous initialisation** — `doAttachBaseContext`
+and `doCreate` must run on the main thread before anything else, and `doCreate` blocks until
+the `:black` service process is up — plus Flutter's own debug-mode startup. Neither is
+addressable without changing the engine's contract; a release build would cut the Flutter part.
+Warm starts still show ~215-230 skipped frames. This is a known limitation, not a regression.
+
 ## Known limitations
 
 - **The system file picker could not be automated.** ColorOS blocks synthetic input into

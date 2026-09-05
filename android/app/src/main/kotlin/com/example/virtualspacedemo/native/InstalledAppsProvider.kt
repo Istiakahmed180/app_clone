@@ -45,6 +45,26 @@ class InstalledAppsProvider(private val context: Context) {
             .toList()
     }
 
+    /**
+     * Icons for a specific set of packages.
+     *
+     * The home screen only needs icons for the handful of apps it has clones of. Decoding
+     * every launchable app's icon for that (186 on the test device) cost several hundred
+     * dropped frames per refresh.
+     */
+    fun iconsFor(packageNames: Collection<String>): Map<String, String> {
+        val icons = HashMap<String, String>(packageNames.size)
+        for (packageName in packageNames.toSet()) {
+            val info = try {
+                packageManager.getApplicationInfo(packageName, 0)
+            } catch (_: PackageManager.NameNotFoundException) {
+                continue // A clone of an imported APK has no host install; no icon to show.
+            }
+            encodeIcon(info)?.let { icons[packageName] = it }
+        }
+        return icons
+    }
+
     fun describeInstalled(packageName: String, includeIcons: Boolean = true): Map<String, Any?>? {
         val info = try {
             packageManager.getApplicationInfo(packageName, 0)

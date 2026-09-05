@@ -6,7 +6,6 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/engine_result.dart';
-import '../../../data/models/installed_app_model.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
@@ -117,15 +116,10 @@ class HomeController extends GetxController {
       return;
     }
     try {
-      final List<InstalledAppModel> installed = await _nativeBridge.listInstalledApps();
-      final Map<String, Uint8List> icons = <String, Uint8List>{};
-      for (final InstalledAppModel app in installed) {
-        final Uint8List? icon = app.icon;
-        if (icon != null) {
-          icons[app.packageName] = icon;
-        }
-      }
-      appIcons.assignAll(icons);
+      // Only the packages actually cloned, not every launchable app on the device.
+      final Set<String> packages =
+          profiles.map((VirtualProfileModel p) => p.packageName).toSet();
+      appIcons.assignAll(await _nativeBridge.getAppIcons(packages));
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not load app icons', error, stackTrace);
     }

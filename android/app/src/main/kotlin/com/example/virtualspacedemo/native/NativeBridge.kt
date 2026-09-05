@@ -98,6 +98,17 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "getAppIcons" -> {
+                val packages = call.argument<List<String>>("packageNames").orEmpty()
+                async(result) {
+                    success(
+                        "ICONS_LOADED",
+                        "Icons loaded.",
+                        mapOf("icons" to engine.appIconsFor(packages)),
+                    )
+                }
+            }
+
             "inspectApk" -> {
                 val apkPath = call.requiredArg("apkPath", result) ?: return
                 async(result) {

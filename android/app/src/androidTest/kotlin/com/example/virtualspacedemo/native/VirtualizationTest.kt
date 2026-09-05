@@ -109,6 +109,39 @@ class AppSecurityCheckerTest {
     }
 }
 
+/** Targeted icon lookup used by the home screen. */
+@RunWith(AndroidJUnit4::class)
+class InstalledAppsProviderTest {
+
+    private val provider = InstalledAppsProvider(ApplicationProvider.getApplicationContext())
+
+    @Test
+    fun listsLaunchableAppsWithoutTheHostItself() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val packages = provider.listLaunchableApps(includeIcons = false)
+            .map { it["packageName"] as String }
+
+        assertTrue(packages.contains(TestAppManager.TEST_APP_PACKAGE))
+        assertFalse("the host must not offer to clone itself", packages.contains(context.packageName))
+    }
+
+    @Test
+    fun returnsIconsOnlyForTheRequestedPackages() {
+        val icons = provider.iconsFor(
+            listOf(TestAppManager.TEST_APP_PACKAGE, "com.example.definitely.not.installed"),
+        )
+
+        assertEquals(1, icons.size)
+        assertTrue(icons.containsKey(TestAppManager.TEST_APP_PACKAGE))
+        assertTrue(icons.getValue(TestAppManager.TEST_APP_PACKAGE).isNotEmpty())
+    }
+
+    @Test
+    fun anEmptyRequestDoesNoWork() {
+        assertTrue(provider.iconsFor(emptyList()).isEmpty())
+    }
+}
+
 /** The engine adapter's own availability reporting. */
 @RunWith(AndroidJUnit4::class)
 class VirtualizationAvailabilityTest {

@@ -61,14 +61,18 @@ class RealVirtualizationEngine(
         val virtualUserId = profileManager.getOrCreate(profileId)
         val result = installer.install(packageName, virtualUserId)
 
-        if (result is EngineResult.Failure && !installer.isInstalled(packageName, virtualUserId)) {
-            profileManager.remove(profileId)
+        // Same reasoning as installApkToProfile: the engine's own verdict is authoritative.
+        if (result is EngineResult.Failure) {
+            releaseProfileArtifacts(profileId)
         }
         return result
     }
 
     fun listInstalledApps(includeIcons: Boolean): List<Map<String, Any?>> =
         installedApps.listLaunchableApps(includeIcons)
+
+    fun appIconsFor(packageNames: Collection<String>): Map<String, String> =
+        installedApps.iconsFor(packageNames)
 
     fun describeApp(packageName: String): Map<String, Any?>? =
         installedApps.describeInstalled(packageName)
@@ -108,11 +112,25 @@ class RealVirtualizationEngine(
         val retained = retainApk(profileId, apkPath) ?: apkPath
         val result = installer.installApk(retained, packageName, virtualUserId)
 
-        if (result is EngineResult.Failure && !installer.isInstalled(packageName, virtualUserId)) {
-            profileManager.remove(profileId)
-            profileManager.forgetApkPath(profileId)
+        // No isInstalled() guard here: it answers from the host package manager when the
+        // engine's service is unhealthy, so for an APK whose package is also installed
+        // normally it would report success and leave an orphan profile behind. If the
+        // engine said the install failed, treat it as failed.
+        if (result is EngineResult.Failure) {
+            releaseProfileArtifacts(profileId)
         }
         return result
+    }
+
+    /** Drops the user mapping and any retained APK for a profile that never came up. */
+    private fun releaseProfileArtifacts(profileId: String) {
+        profileManager.apkPathFor(profileId)?.let { path ->
+            if (!File(path).delete()) {
+                Slog.w(Slog.INSTALL, "Could not delete retained APK for $profileId")
+            }
+        }
+        profileManager.forgetApkPath(profileId)
+        profileManager.remove(profileId)
     }
 
     private fun retainApk(profileId: String, apkPath: String): String? = try {
@@ -207,9 +225,7 @@ class RealVirtualizationEngine(
         launcher.stop(packageName, virtualUserId)
         installer.uninstall(packageName, virtualUserId)
         val deletion = adapter.deleteVirtualUser(virtualUserId)
-        profileManager.apkPathFor(profileId)?.let { path -> File(path).delete() }
-        profileManager.forgetApkPath(profileId)
-        profileManager.remove(profileId)
+        releaseProfileArtifacts(profileId)
         return deletion
     }
 
