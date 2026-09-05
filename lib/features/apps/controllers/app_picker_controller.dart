@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
+import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
 import '../../../native/native_bridge.dart';
@@ -74,6 +75,37 @@ class AppPickerController extends GetxController {
 
   Future<int> instanceCount(String packageName) =>
       _repository.instanceCountFor(packageName);
+
+  /// Compatibility verdict for one app, computed on demand and cached for the session.
+  Future<CompatibilityReport> analyze(String packageName) async {
+    final CompatibilityReport? cached = _reports[packageName];
+    if (cached != null) {
+      return cached;
+    }
+    try {
+      final CompatibilityReport report = await _bridge.analyzeApp(packageName);
+      _reports[packageName] = report;
+      return report;
+    } on AppException catch (error, stackTrace) {
+      _logger.error('Compatibility analysis failed for $packageName', error, stackTrace);
+      return CompatibilityReport.unknown;
+    }
+  }
+
+  /// Asks for the permissions the guest needs. Returns null when it could not be asked.
+  Future<PermissionRequestResult?> requestPermissions(String packageName) async {
+    try {
+      final PermissionRequestResult result =
+          await _bridge.requestGuestPermissions(packageName);
+      _reports.remove(packageName); // grants changed; the cached verdict is stale
+      return result;
+    } on AppException catch (error) {
+      errorMessage.value = error.message;
+      return null;
+    }
+  }
+
+  final Map<String, CompatibilityReport> _reports = <String, CompatibilityReport>{};
 
   /// Clones an installed app. Returns `null` on success, or a user-facing message.
   Future<String?> cloneInstalledApp(InstalledAppModel app) async {

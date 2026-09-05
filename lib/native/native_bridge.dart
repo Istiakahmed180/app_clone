@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../core/constants/app_constants.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
+import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
@@ -105,6 +106,28 @@ class NativeBridge {
                   .map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
             ))
         .toList(growable: false);
+  }
+
+  /// What will and will not work if this app is cloned.
+  Future<CompatibilityReport> analyzeApp(String packageName) async {
+    final EngineResponse response =
+        await _invokeEngine('analyzeApp', <String, dynamic>{'packageName': packageName});
+    return CompatibilityReport.fromMap(response.data);
+  }
+
+  /// Asks the user for the runtime permissions a guest needs.
+  ///
+  /// Guests run under the host's identity, so Android checks the host's grants; this is
+  /// the ordinary system dialog and a denial is respected.
+  Future<PermissionRequestResult> requestGuestPermissions(String packageName) async {
+    final EngineResponse response = await _invokeEngine(
+      'requestGuestPermissions',
+      <String, dynamic>{'packageName': packageName},
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return PermissionRequestResult.fromMap(response.data);
   }
 
   /// Icons for specific packages only.

@@ -1,6 +1,6 @@
-# Virtual Space — Phase 3
+# Virtual Space — Phase 4
 
-**Phase 3 adds APK import, multi-app cloning and multi-instance support.**
+**Phase 4 adds an app compatibility layer: verdicts, permission bridging and honest warnings.**
 
 **Any installed app can now be cloned, and APKs can be imported without installing them.**
 
@@ -29,6 +29,7 @@ state is faked in Flutter.
 | `docs/DEPENDENCY_LICENSE_AUDIT.md` | Licences, and **open provenance risk** |
 | `docs/PHASE_2_TEST_PLAN.md` | Phase 2 test plan, results, evidence, performance baseline |
 | `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
+| `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
 
 > **Before distributing:** `docs/DEPENDENCY_LICENSE_AUDIT.md` records two unresolved issues —
 > stripped attribution in vendored native code, and unverified VirtualApp/VirtualAPK licence
@@ -50,7 +51,16 @@ A long-term platform for Android application virtualization / multiple accounts,
 category as Parallel Space or Dual Space. This repository holds the foundation for that platform,
 not the platform itself.
 
-## 2. Phase 3 scope
+## 2. Phase 4 scope
+
+| Delivered | Explicitly NOT delivered |
+| --- | --- |
+| Compatibility verdict per app before cloning | Making GMS-dependent apps actually work |
+| Permission bridging via the system dialog | Per-clone permission scoping |
+| ABI / secure-env / system-component blocking | Any permission or security bypass |
+| Honest warnings in the picker and clone sheet | Verified support for banking/anti-cheat apps |
+
+## 3. Phase 3 scope
 
 | Delivered | Explicitly NOT delivered |
 | --- | --- |

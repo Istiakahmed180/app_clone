@@ -12,10 +12,23 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         nativeBridge = NativeBridge(applicationContext).also {
             it.attach(flutterEngine.dartExecutor.binaryMessenger)
+            // Permission dialogs need an Activity, which the application context is not.
+            it.bindActivity(this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        if (nativeBridge?.onRequestPermissionsResult(requestCode, permissions, grantResults) != true) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        nativeBridge?.unbindActivity()
         nativeBridge?.detach()
         nativeBridge = null
         super.cleanUpFlutterEngine(flutterEngine)

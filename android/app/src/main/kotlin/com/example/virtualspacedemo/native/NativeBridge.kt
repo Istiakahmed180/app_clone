@@ -1,5 +1,6 @@
 package com.example.virtualspacedemo.native
 
+import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -22,7 +23,24 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val testAppManager = TestAppManager(appContext)
     private val appLauncher = AppLauncher(appContext)
     private val engine = RealVirtualizationEngine(appContext, VirtualSpaceApplication.engine)
+    private val analyzer = AppCompatibilityAnalyzer(appContext)
+    private val permissionBridge = PermissionBridge()
     private var channel: MethodChannel? = null
+    private var activity: Activity? = null
+
+    fun bindActivity(activity: Activity) {
+        this.activity = activity
+    }
+
+    fun unbindActivity() {
+        activity = null
+    }
+
+    fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ): Boolean = permissionBridge.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
     // Engine calls can install packages and wait out the backend's service backoff, so they
     // must never run on the platform thread. Results are posted back to the main looper,
@@ -94,6 +112,45 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         "APPS_LISTED",
                         "Installed applications listed.",
                         mapOf("apps" to engine.listInstalledApps(includeIcons)),
+                    )
+                }
+            }
+
+            "analyzeApp" -> {
+                val packageName = call.requiredPackage(result) ?: return
+                async(result) {
+                    success(
+                        "APP_ANALYZED",
+                        "Compatibility analysed.",
+                        analyzer.analyze(packageName).toMap(),
+                    )
+                }
+            }
+
+            "requestGuestPermissions" -> {
+                val packageName = call.requiredPackage(result) ?: return
+                val host = activity
+                if (host == null) {
+                    result.success(
+                        failure("NO_ACTIVITY", "Permissions can only be requested while the app is open."),
+                    )
+                    return
+                }
+
+                val report = analyzer.analyze(packageName)
+                permissionBridge.request(host, report.missingPermissions) { outcome ->
+                    val stillMissing = report.bridgeablePermissions
+                        .filterNot(analyzer::isGrantedToHost)
+                    result.success(
+                        success(
+                            "PERMISSIONS_REQUESTED",
+                            "Permission request finished.",
+                            mapOf(
+                                "granted" to outcome.filterValues { it }.keys.toList(),
+                                "denied" to outcome.filterValues { !it }.keys.toList(),
+                                "stillMissing" to stillMissing,
+                            ),
+                        ),
                     )
                 }
             }

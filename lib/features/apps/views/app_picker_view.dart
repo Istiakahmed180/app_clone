@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../../../widgets/app_icon.dart';
 import '../../../widgets/empty_state.dart';
 import '../controllers/app_picker_controller.dart';
+import '../widgets/compatibility_sheet.dart';
 
 /// Lets the user clone an installed app, or import an APK that is not installed.
 class AppPickerView extends GetView<AppPickerController> {
@@ -62,8 +64,13 @@ class AppPickerView extends GetView<AppPickerController> {
 
                 return ListView.builder(
                   itemCount: apps.length,
-                  itemBuilder: (BuildContext context, int index) =>
-                      _AppRow(app: apps[index], onTap: () => _clone(context, apps[index])),
+                  itemBuilder: (BuildContext context, int index) => _AppRow(
+                    app: apps[index],
+                    // Analysis is per-app and cached, so the badge resolves lazily as
+                    // rows scroll into view rather than stalling the whole list.
+                    analyze: () => controller.analyze(apps[index].packageName),
+                    onTap: () => _clone(context, apps[index]),
+                  ),
                 );
               }),
             ),
@@ -80,17 +87,25 @@ class AppPickerView extends GetView<AppPickerController> {
 
   Future<void> _clone(BuildContext context, InstalledAppModel app) async {
     final int existing = await controller.instanceCount(app.packageName);
+    final CompatibilityReport report = await controller.analyze(app.packageName);
     if (!context.mounted) {
       return;
     }
 
-    // Cloning an app that already has clones is normal, but say so explicitly so the
-    // user knows they are creating an additional, independent instance.
-    if (existing > 0) {
-      final bool confirmed = await _confirmExtraInstance(context, app, existing);
-      if (!confirmed || !context.mounted) {
-        return;
-      }
+    // Always surface the compatibility verdict first: an app may be unsupported, need
+    // permissions the host does not hold, or already have clones.
+    final bool confirmed = await CompatibilitySheet.show(
+      context,
+      appName: app.appName,
+      report: report,
+      existingClones: existing,
+      onGrantPermissions: () async {
+        await controller.requestPermissions(app.packageName);
+        return controller.analyze(app.packageName);
+      },
+    );
+    if (!confirmed || !context.mounted) {
+      return;
     }
 
     final String? error = await controller.cloneInstalledApp(app);
@@ -102,34 +117,6 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     Get.back<bool>(result: true);
-  }
-
-  Future<bool> _confirmExtraInstance(
-    BuildContext context,
-    InstalledAppModel app,
-    int existing,
-  ) async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('Add another ${app.appName}?'),
-        content: Text(
-          'You already have $existing clone${existing == 1 ? '' : 's'} of this app. '
-          'The new one starts empty and keeps its own separate data.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Add clone'),
-          ),
-        ],
-      ),
-    );
-    return confirmed ?? false;
   }
 
   Future<void> _importApk(BuildContext context) async {
@@ -144,29 +131,28 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
 
-    final bool? proceed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('Install ${candidate.appName}?'),
-        content: Text(
-          '${candidate.packageName}\n'
-          'Version ${candidate.versionName ?? '?'} (${candidate.versionCode ?? '?'})\n\n'
-          '${candidate.installedOnHost ? 'This app is also installed normally on this device. The clone stays separate from it.' : 'This app is not installed on this device. It will run only inside Virtual Space.'}',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Install'),
-          ),
-        ],
-      ),
+    // An imported APK can only be analysed when its package is also installed here;
+    // otherwise there is nothing on the device to inspect and the sheet says so.
+    final CompatibilityReport report = candidate.installedOnHost
+        ? await controller.analyze(candidate.packageName)
+        : CompatibilityReport.unknown;
+    final int existing = await controller.instanceCount(candidate.packageName);
+    if (!context.mounted) {
+      return;
+    }
+
+    final bool proceed = await CompatibilitySheet.show(
+      context,
+      appName: candidate.appName,
+      report: report,
+      existingClones: existing,
+      onGrantPermissions: () async {
+        await controller.requestPermissions(candidate.packageName);
+        return controller.analyze(candidate.packageName);
+      },
     );
 
-    if (proceed != true || !context.mounted) {
+    if (!proceed || !context.mounted) {
       return;
     }
 
@@ -189,9 +175,10 @@ class AppPickerView extends GetView<AppPickerController> {
 }
 
 class _AppRow extends StatelessWidget {
-  const _AppRow({required this.app, required this.onTap});
+  const _AppRow({required this.app, required this.analyze, required this.onTap});
 
   final InstalledAppModel app;
+  final Future<CompatibilityReport> Function() analyze;
   final VoidCallback onTap;
 
   @override
@@ -201,13 +188,22 @@ class _AppRow extends StatelessWidget {
       leading: AppIcon(bytes: app.icon, size: 40.r),
       title: Text(app.appName, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(app.packageName, maxLines: 1, overflow: TextOverflow.ellipsis),
-      trailing: app.isSystem
-          ? Chip(
-              label: const Text('System'),
-              visualDensity: VisualDensity.compact,
-              labelStyle: Theme.of(context).textTheme.labelSmall,
-            )
-          : null,
+      trailing: FutureBuilder<CompatibilityReport>(
+        future: analyze(),
+        builder: (BuildContext context, AsyncSnapshot<CompatibilityReport> snapshot) {
+          final CompatibilityReport? report = snapshot.data;
+          if (report == null || report.verdict == CompatibilityVerdict.supported) {
+            return const SizedBox.shrink();
+          }
+          final ColorScheme scheme = Theme.of(context).colorScheme;
+          final bool blocked = report.verdict == CompatibilityVerdict.unsupported;
+          return Icon(
+            blocked ? Icons.block : Icons.info_outline,
+            size: 20.r,
+            color: blocked ? scheme.error : scheme.tertiary,
+          );
+        },
+      ),
     );
   }
 }

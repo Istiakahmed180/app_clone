@@ -253,3 +253,74 @@ class ApkImportTest {
         }
     }
 }
+
+
+/** The Phase 4 compatibility layer. */
+@RunWith(AndroidJUnit4::class)
+class AppCompatibilityAnalyzerTest {
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val analyzer = AppCompatibilityAnalyzer(context)
+
+    @Test
+    fun theControlledTestAppIsFullySupported() {
+        val report = analyzer.analyze(TestAppManager.TEST_APP_PACKAGE)
+
+        // It declares no dangerous permissions and no GMS dependency.
+        assertEquals(AppCompatibilityAnalyzer.Verdict.SUPPORTED, report.verdict)
+        assertTrue(report.findings.isEmpty())
+        assertFalse(report.requiresGms)
+    }
+
+    @Test
+    fun systemComponentsAreUnsupportedAndBlocking() {
+        val report = analyzer.analyze("com.android.settings")
+
+        assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
+        assertTrue(report.findings.any { it.blocking })
+    }
+
+    @Test
+    fun theHostRefusesToAnalyseItselfAsCloneable() {
+        val report = analyzer.analyze(context.packageName)
+
+        assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
+    }
+
+    @Test
+    fun aMissingPackageIsUnsupportedRatherThanCrashing() {
+        val report = analyzer.analyze("com.example.definitely.not.installed")
+
+        assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
+        assertEquals(EngineErrorCodes.APP_NOT_FOUND, report.findings.single().code)
+    }
+
+    @Test
+    fun missingPermissionsAreASubsetOfBridgeableOnes() {
+        val installed = InstalledAppsProvider(context)
+            .listLaunchableApps(includeIcons = false)
+            .map { it["packageName"] as String }
+
+        for (packageName in installed.take(12)) {
+            val report = analyzer.analyze(packageName)
+            assertTrue(
+                "$packageName: missing must be a subset of bridgeable",
+                report.bridgeablePermissions.containsAll(report.missingPermissions),
+            )
+            // Anything reported as missing must genuinely not be held.
+            for (permission in report.missingPermissions) {
+                assertFalse(analyzer.isGrantedToHost(permission))
+            }
+        }
+    }
+
+    @Test
+    fun aReportSurvivesConversionToTheChannelShape() {
+        val map = analyzer.analyze(TestAppManager.TEST_APP_PACKAGE).toMap()
+
+        assertEquals(TestAppManager.TEST_APP_PACKAGE, map["packageName"])
+        assertEquals("SUPPORTED", map["verdict"])
+        assertTrue(map["findings"] is List<*>)
+        assertTrue(map["bridgeablePermissions"] is List<*>)
+    }
+}
