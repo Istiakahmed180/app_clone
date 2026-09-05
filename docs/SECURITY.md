@@ -36,23 +36,39 @@ requirement, installation is rejected with `SECURE_ENV_REQUIRED` and no virtual 
 There is deliberately **no override, no manifest rewriting, no APK downgrade and no
 environment spoofing** to defeat this flag.
 
-### An honest limitation
+### The property name — now confirmed by a real app
 
-`REQUIRE_SECURE_ENV` is a Play-policy manifest declaration, not a platform SDK constant — it
-is absent from `android.jar` on API 35, 36 and 37, which were checked directly. The checker
-therefore probes a defensive list of candidate property names via
-`PackageManager.getProperty()` (API 31+) and falls back to application `metaData`:
+`REQUIRE_SECURE_ENV` is a Play-policy manifest declaration, not a platform SDK constant (it is
+absent from `android.jar` on API 35, 36 and 37, checked directly). The name was previously a
+guess. It no longer is.
+
+**Google Authenticator ships it**, verified independently with `aapt2 dump xmltree`:
 
 ```
-REQUIRE_SECURE_ENV
-android.content.pm.REQUIRE_SECURE_ENV
-android.app.REQUIRE_SECURE_ENV
+E: property (line=48)
+  A: android:name="REQUIRE_SECURE_ENV"
+  A: android:value=1
 ```
 
-The check is fail-closed: any positive declaration found through either mechanism rejects the
-install. **The canonical property name must be confirmed against Google's published
-requirement before release**, because a declaration under a name not on this list would not be
-detected. This is a known gap, recorded rather than papered over.
+So the bare `REQUIRE_SECURE_ENV` is the real name. The two fully-qualified variants are kept in
+the candidate list as cheap insurance.
+
+### Two bugs this real-world case exposed
+
+Both were found by testing against Authenticator rather than against fixtures alone:
+
+1. **`<property>` was unreadable for an uninstalled APK.** `getProperty()` answers only for
+   installed packages, so an imported APK declaring the requirement was admitted. Closed by
+   `ApkManifestReader`, which decodes the archive's own compiled manifest.
+
+2. **The installed path missed it too — the more serious of the two,** because it is the path
+   the picker uses. The check required `Property.isBoolean`, but `android:value="true"` is
+   compiled to the **integer 1**. Authenticator was therefore offered for cloning, verdict
+   "Limited". The check now accepts boolean, integer and string encodings, and Authenticator
+   is refused with `SECURE_ENV_REQUIRED` and a disabled "Cannot clone" button.
+
+The check remains fail-closed, is applied to both installed apps and imported APKs, and has no
+override path.
 
 ## Data boundaries
 

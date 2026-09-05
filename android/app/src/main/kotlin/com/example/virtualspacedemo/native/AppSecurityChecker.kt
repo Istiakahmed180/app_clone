@@ -141,14 +141,29 @@ class AppSecurityChecker(private val context: Context) {
 
         return SECURE_ENV_PROPERTIES.any { name ->
             try {
-                val property = context.packageManager.getProperty(name, packageName)
-                property.isBoolean && property.boolean
+                context.packageManager.getProperty(name, packageName).isTruthy()
             } catch (_: PackageManager.NameNotFoundException) {
                 false
             } catch (_: Exception) {
                 false
             }
         }
+    }
+
+    /**
+     * Accepts every encoding a manifest can use for "yes".
+     *
+     * Requiring `isBoolean` was wrong and had real consequences: Google Authenticator ships
+     * `<property android:name="REQUIRE_SECURE_ENV" android:value="true"/>`, which aapt2
+     * compiles to the **integer** 1, not a boolean. The stricter check therefore found no
+     * declaration, and an app that explicitly refuses to be virtualized was offered for
+     * cloning. Verified with `aapt2 dump xmltree`.
+     */
+    private fun PackageManager.Property.isTruthy(): Boolean = when {
+        isBoolean -> boolean
+        isInteger -> integer != 0
+        isString -> string.equals("true", ignoreCase = true) || string == "1"
+        else -> false
     }
 
     private fun declaredViaMetaData(packageName: String): Boolean = try {

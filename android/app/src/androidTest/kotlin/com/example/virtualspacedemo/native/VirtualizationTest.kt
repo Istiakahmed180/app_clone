@@ -61,19 +61,40 @@ class AppSecurityCheckerTest {
         assertTrue(checker.check(TestAppManager.TEST_APP_PACKAGE) is AppSecurityChecker.Verdict.Allowed)
     }
 
-    /** Phase 3 removed the single-package allow-list; arbitrary installed apps are allowed. */
+    /**
+     * Phase 3 removed the single-package allow-list; ordinary installed apps are allowed.
+     *
+     * Deliberately does not assume the *first* app in the list is admissible — some are
+     * legitimately refused, e.g. an app declaring a secure-environment requirement. What
+     * matters is that ordinary apps get through and that every refusal has a stated reason.
+     */
     @Test
-    fun allowsAnArbitraryInstalledApp() {
-        val other = InstalledAppsProvider(ApplicationProvider.getApplicationContext())
+    fun allowsOrdinaryInstalledAppsAndExplainsAnyRefusal() {
+        val installed = InstalledAppsProvider(ApplicationProvider.getApplicationContext())
             .listLaunchableApps(includeIcons = false)
             .map { it["packageName"] as String }
-            .firstOrNull { it != TestAppManager.TEST_APP_PACKAGE }
+            .filter { it != TestAppManager.TEST_APP_PACKAGE }
+            .take(20)
 
-        // Nothing to assert on a device with no other launchable app.
-        if (other != null) {
+        val verdicts = installed.associateWith(checker::check)
+
+        for ((packageName, verdict) in verdicts) {
+            if (verdict is AppSecurityChecker.Verdict.Rejected) {
+                assertTrue(
+                    "$packageName was refused without a recognised reason: ${verdict.code}",
+                    verdict.code in setOf(
+                        EngineErrorCodes.SECURE_ENV_REQUIRED,
+                        EngineErrorCodes.APP_NOT_SUPPORTED,
+                        EngineErrorCodes.APP_NOT_FOUND,
+                    ),
+                )
+            }
+        }
+
+        if (installed.isNotEmpty()) {
             assertTrue(
-                "expected $other to be admissible",
-                checker.check(other) is AppSecurityChecker.Verdict.Allowed,
+                "no ordinary installed app was admissible",
+                verdicts.values.any { it is AppSecurityChecker.Verdict.Allowed },
             )
         }
     }
@@ -101,6 +122,33 @@ class AppSecurityCheckerTest {
                 (verdict as AppSecurityChecker.Verdict.Rejected).code,
             )
         }
+    }
+
+    /**
+     * The installed-app path, which is what the picker uses.
+     *
+     * This is the case that actually failed: the archive check rejected Authenticator while
+     * `check()` still admitted it, because the declaration is compiled as an integer rather
+     * than a boolean. Skipped when the app is absent so the suite stays portable.
+     */
+    @Test
+    fun anInstalledAppDeclaringASecureEnvironmentIsRejected() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val authenticator = "com.google.android.apps.authenticator2"
+        runCatching { context.packageManager.getApplicationInfo(authenticator, 0) }
+            .getOrNull() ?: return
+
+        assertTrue(
+            "the installed declaration was not detected",
+            checker.requiresSecureEnvironment(authenticator),
+        )
+
+        val verdict = checker.check(authenticator)
+        assertTrue(verdict is AppSecurityChecker.Verdict.Rejected)
+        assertEquals(
+            EngineErrorCodes.SECURE_ENV_REQUIRED,
+            (verdict as AppSecurityChecker.Verdict.Rejected).code,
+        )
     }
 
     @Test

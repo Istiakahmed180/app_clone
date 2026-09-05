@@ -101,8 +101,77 @@ class ApkManifestReaderTest {
         )
     }
 
+    /**
+     * Sweeps real APKs on the device.
+     *
+     * Guards the failure mode that no fixture can catch: a parser that quietly degraded to
+     * returning nothing would reopen the very hole this reader exists to close while every
+     * other test stayed green.
+     *
+     * Note this does **not** assert that no app declares the requirement — at least one on
+     * a normal device does. See [googleAuthenticatorIsRefused].
+     */
+    @Test
+    fun realApksAreParsedRatherThanSilentlyReturningNothing() {
+        val packages = InstalledAppsProvider(context)
+            .listLaunchableApps(includeIcons = false)
+            .map { it["packageName"] as String }
+            .take(25)
+
+        var parsed = 0
+        var examined = 0
+
+        for (packageName in packages) {
+            val apk = runCatching {
+                context.packageManager.getApplicationInfo(packageName, 0).sourceDir
+            }.getOrNull() ?: continue
+            if (!File(apk).canRead()) continue
+
+            examined++
+            // Must not throw on any real archive.
+            if (ApkManifestReader.readDeclarations(apk).isNotEmpty()) parsed++
+        }
+
+        assertTrue("no readable APKs were examined", examined > 0)
+        // Essentially every real app declares at least one <meta-data> or <property>.
+        assertTrue(
+            "the reader extracted declarations from only $parsed of $examined real APKs",
+            parsed * 2 >= examined,
+        )
+    }
+
+    /**
+     * A real-world end-to-end case for the whole point of this reader.
+     *
+     * Google Authenticator ships
+     * `<property android:name="REQUIRE_SECURE_ENV" android:value="true"/>` — verified
+     * independently with `aapt2 dump xmltree`. It is exactly the kind of app that must not be
+     * cloned, and before this reader existed it would have been admitted without complaint.
+     *
+     * Skipped rather than failed when the app is absent, so the suite stays portable.
+     */
+    @Test
+    fun googleAuthenticatorIsRefused() {
+        val apk = runCatching {
+            context.packageManager.getApplicationInfo(AUTHENTICATOR, 0).sourceDir
+        }.getOrNull() ?: return
+
+        assertTrue(
+            "the declaration in $AUTHENTICATOR was not detected",
+            ApkManifestReader.declaresTrue(apk, secureEnvNames),
+        )
+
+        val verdict = AppSecurityChecker(context).checkApk(AUTHENTICATOR, apk)
+        assertTrue(verdict is AppSecurityChecker.Verdict.Rejected)
+        assertEquals(
+            EngineErrorCodes.SECURE_ENV_REQUIRED,
+            (verdict as AppSecurityChecker.Verdict.Rejected).code,
+        )
+    }
+
     private companion object {
         const val SECURE_FIXTURE = "secure-env-fixture.apk"
         const val PLAIN_FIXTURE = "plain-fixture.apk"
+        const val AUTHENTICATOR = "com.google.android.apps.authenticator2"
     }
 }
