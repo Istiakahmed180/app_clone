@@ -81,8 +81,20 @@ class AppSecurityChecker(private val context: Context) {
         return Verdict.Allowed
     }
 
-    /** Reads the secure-environment declaration straight out of an uninstalled archive. */
+    /**
+     * Reads the secure-environment declaration straight out of an uninstalled archive.
+     *
+     * Two independent sources, because neither is sufficient alone:
+     *  - `PackageManager` surfaces an archive's `<meta-data>` but not its `<property>`
+     *    elements, which are only exposed through `getProperty()` for installed packages.
+     *  - [ApkManifestReader] decodes the archive's own binary manifest and therefore sees
+     *    `<property>` as well.
+     */
     fun archiveRequiresSecureEnvironment(apkPath: String): Boolean {
+        if (ApkManifestReader.declaresTrue(apkPath, SECURE_ENV_PROPERTIES)) {
+            return true
+        }
+
         val meta = try {
             context.packageManager
                 .getPackageArchiveInfo(apkPath, PackageManager.GET_META_DATA)

@@ -96,10 +96,20 @@ imported APKs may be cloned. The policy is now a deny-list plus the secure-envir
   before the engine sees the file, and the installed declaration is honoured as well when the
   same package happens to be installed.
 
-  **Platform limit, stated plainly:** `PackageManager.getProperty()` answers only for installed
-  packages. An APK that declares the requirement *solely* as a `<property>` element and is not
-  installed on this device therefore cannot be screened. That gap is a platform constraint, not
-  a policy choice, and there is still no override path for a declaration that *is* detected.
+  **The `<property>` gap is now closed.** `PackageManager.getProperty()` answers only for
+  installed packages, so an APK declaring the requirement solely as a `<property>` element used
+  to be unscreenable. `ApkManifestReader` now decodes the archive's own compiled
+  `AndroidManifest.xml` and reads both `<meta-data>` and `<property>` declarations directly, so
+  an imported APK is screened whether or not it is installed. Both sources are consulted; a
+  parse failure is treated as *no declaration found*, never as a pass.
+
+  Proven, not assumed: `ApkManifestReaderTest` uses a purpose-built ~750-byte APK that really
+  declares `<property android:name="REQUIRE_SECURE_ENV" android:value="true"/>`, and asserts
+  both that the reader finds it and that `checkApk` rejects it with `SECURE_ENV_REQUIRED`.
+  Without such a fixture a reader that always answered "not declared" would have passed every
+  other test.
+
+  There is still no override path for a declaration that is detected.
 
 Banking, payment, authenticator, anti-cheat and Play-Integrity-dependent apps were deliberately
 **not** tested and remain outside what this build can be said to support. Nothing prevents a
