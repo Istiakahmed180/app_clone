@@ -94,11 +94,16 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
      * Callers run on a background thread, so this never blocks the UI.
      */
     private fun withServiceRetry(block: () -> EngineResult<Unit>): EngineResult<Unit> {
-        // Only a *thrown* call is retried. The null binder surfaces as an NPE from Bcore,
-        // whereas a returned Failure is a definitive engine answer ("not installed",
-        // "refused") that must not be delayed by the backoff or repeated.
+        // Retried only when the engine failed to answer: either it threw (the null binder
+        // surfaces as an NPE) or it returned ENGINE_NO_RESPONSE. Any other returned Failure
+        // is a definitive answer ("not installed", "refused") and must not be delayed by the
+        // backoff or repeated.
         try {
-            return block()
+            val first = block()
+            if (first !is EngineResult.Failure || first.code != EngineErrorCodes.ENGINE_NO_RESPONSE) {
+                return first
+            }
+            Slog.w(Slog.ENGINE, "Engine gave no response; retrying after service backoff")
         } catch (error: Throwable) {
             Slog.w(Slog.ENGINE, "Engine service unavailable (${error.javaClass.simpleName}); retrying")
         }
@@ -179,14 +184,30 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     private fun doInstall(packageName: String, virtualUserId: Int): EngineResult<Unit> {
         val result = BlackBoxCore.get().installPackageAsUser(packageName, virtualUserId)
-        return if (result != null && result.success) {
+            ?: return noResponse("install of $packageName")
+
+        return if (result.success) {
             Slog.i(Slog.INSTALL, "Installed $packageName into user $virtualUserId")
             EngineResult.ok()
         } else {
-            val reason = result?.msg ?: "unknown engine error"
+            val reason = result.msg ?: "the engine refused the install"
             Slog.e(Slog.INSTALL, "Install of $packageName failed: $reason")
             EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
         }
+    }
+
+    /**
+     * A null result is Bcore saying nothing, not saying no — it happens when its package
+     * service is momentarily unhealthy. Reporting it as a plain install failure made an
+     * otherwise fine install fail intermittently, because a returned failure is never
+     * retried. Giving it its own code lets [withServiceRetry] treat it as transient.
+     */
+    private fun noResponse(what: String): EngineResult.Failure {
+        Slog.w(Slog.ENGINE, "No response from the engine for $what")
+        return EngineResult.Failure(
+            EngineErrorCodes.ENGINE_NO_RESPONSE,
+            "The virtualization engine did not respond.",
+        )
     }
 
     override fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit> =
@@ -207,11 +228,13 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         }
 
         val result = BlackBoxCore.get().installPackageAsUser(file, virtualUserId)
-        return if (result != null && result.success) {
+            ?: return noResponse("APK install into user $virtualUserId")
+
+        return if (result.success) {
             Slog.i(Slog.INSTALL, "Installed APK ${result.packageName} into user $virtualUserId")
             EngineResult.ok()
         } else {
-            val reason = result?.msg ?: "unknown engine error"
+            val reason = result.msg ?: "the engine refused the install"
             Slog.e(Slog.INSTALL, "APK install failed: $reason")
             EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
         }

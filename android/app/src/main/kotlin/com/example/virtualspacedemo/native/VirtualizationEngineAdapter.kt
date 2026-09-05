@@ -80,6 +80,13 @@ object EngineErrorCodes {
     const val APP_NOT_SUPPORTED = "APP_NOT_SUPPORTED"
     const val SECURE_ENV_REQUIRED = "SECURE_ENV_REQUIRED"
     const val APP_INSTALL_FAILED = "APP_INSTALL_FAILED"
+
+    /**
+     * The backend returned no answer at all (a null result), rather than refusing.
+     * Distinct from [APP_INSTALL_FAILED] because "no answer" is transient and worth
+     * retrying, while a refusal with a reason is definitive.
+     */
+    const val ENGINE_NO_RESPONSE = "ENGINE_NO_RESPONSE"
     const val APK_INVALID = "APK_INVALID"
     const val APK_UNREADABLE = "APK_UNREADABLE"
     const val APP_ALREADY_CLONED = "APP_ALREADY_CLONED"

@@ -155,6 +155,30 @@ The one test that correctly did *not* fail is
 `containersLiveInsideTheHostSandboxNotTheNormalInstallation`, which does not depend on clones
 having distinct users.
 
+### An intermittent install failure this test exposed — and its fix
+
+The first mutation run surfaced a genuine product bug rather than a test problem: one
+`installAppToProfile` returned `APP_INSTALL_FAILED / "unknown engine error"` and the isolation
+test failed spuriously (once in roughly five runs).
+
+Cause: `BlackBoxCore.installPackageAsUser` returns **null** when its package service is
+momentarily unhealthy. `BlackBoxEngineAdapter.doInstall` collapsed that into
+`APP_INSTALL_FAILED`, indistinguishable from a genuine refusal — and `withServiceRetry`
+deliberately does not retry returned failures, so the install never recovered.
+
+A null result is the engine saying *nothing*, not saying *no*. It now returns its own
+`ENGINE_NO_RESPONSE` code, which `withServiceRetry` treats as transient and retries, while a
+refusal carrying a reason stays definitive and is not retried.
+
+Verified by injection, both directions:
+
+| Injected behaviour | Expected | Observed |
+| --- | --- | --- |
+| First install returns no-response | Retry recovers, suite green | 47/47 passed |
+| Every install returns no-response | Failure propagates with the new code | Isolation tests failed with `ENGINE_NO_RESPONSE` |
+
+The test was **not** given a retry of its own; the fix is in the product.
+
 ### Coupling note
 
 `ContainerIsolationTest.containerDir()` encodes the backend's on-disk layout

@@ -9,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -43,10 +44,18 @@ class ContainerIsolationTest {
 
     @After
     fun removeProfilesCreatedByThisTest() {
+        // A container left behind would leak a virtual user into later runs, so a failed
+        // cleanup is surfaced rather than swallowed.
+        val failures = mutableListOf<String>()
         for (profileId in createdProfiles) {
-            runCatching { engine.deleteProfile(profileId, PACKAGE) }
+            val outcome = runCatching { engine.deleteProfile(profileId, PACKAGE) }
+                .getOrElse { EngineResult.Failure("EXCEPTION", it.message.orEmpty()) }
+            if (outcome is EngineResult.Failure) {
+                failures += "$profileId -> ${outcome.code}"
+            }
         }
         createdProfiles.clear()
+        assertTrue("profiles were left behind: $failures", failures.isEmpty())
     }
 
     // ---------------------------------------------------------------------------------
@@ -137,6 +146,7 @@ class ContainerIsolationTest {
         val (launchedProfile, launched) = newProfile()
         val (_, idle) = newProfile()
 
+        // Recorded before launching so growth can only come from the launch itself.
         val filesBefore = fileCount(launched)
         val idleBefore = fileCount(idle)
 
@@ -199,9 +209,6 @@ class ContainerIsolationTest {
         }
         return condition()
     }
-
-    private fun assertNull(message: String, value: Any?) =
-        org.junit.Assert.assertNull(message, value)
 
     private companion object {
         const val PACKAGE = TestAppManager.TEST_APP_PACKAGE
