@@ -299,8 +299,6 @@ Not started. In rough priority order:
    Everything here is verified on one OnePlus device running Android 15.
 3. **Decide on the backend**: patch Bcore's broken `isRunningApplication` upstream, or move to
    another backend behind the existing adapter.
-4. **Show compatibility on existing clones.** The analyzer only runs in the picker, so a clone
-   whose app later becomes unsupported still shows a plain "Ready" card.
 5. **Guest notifications and per-clone launcher shortcuts**, which are what make a
    dual-app product usable day to day.
 6. **Decide what to do about Google Play Services**, which most popular apps depend on and

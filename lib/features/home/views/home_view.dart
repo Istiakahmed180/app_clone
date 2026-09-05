@@ -84,6 +84,7 @@ class HomeView extends GetView<HomeController> {
               icon: controller.iconFor(profile),
               siblingCount: controller.siblingCount(profile),
               instanceIndex: controller.instanceIndex(profile),
+              warnings: controller.warningsFor(profile),
               canLaunch: controller.providesRuntimeIsolation,
               onLaunch: () => _launch(context, profile),
               onAction: (ProfileCardAction action) =>

@@ -19,5 +19,6 @@ class AppConstants {
   /// Stable native error codes surfaced by the virtualization engine.
   static const String errorSecureEnvRequired = 'SECURE_ENV_REQUIRED';
   static const String errorAppNotSupported = 'APP_NOT_SUPPORTED';
+  static const String errorAppNotFound = 'APP_NOT_FOUND';
   static const String errorVirtualAppNotInstalled = 'VIRTUAL_APP_NOT_INSTALLED';
 }

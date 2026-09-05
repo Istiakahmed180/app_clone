@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'dart:typed_data';
 
+import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
 import 'app_icon.dart';
@@ -19,6 +20,7 @@ class ProfileCard extends StatelessWidget {
     this.icon,
     this.siblingCount = 1,
     this.instanceIndex = 1,
+    this.warnings = const <CompatibilityFinding>[],
     super.key,
   });
 
@@ -31,6 +33,9 @@ class ProfileCard extends StatelessWidget {
 
   /// This clone's 1-based position among those siblings.
   final int instanceIndex;
+
+  /// Compatibility problems affecting this clone's app, if any.
+  final List<CompatibilityFinding> warnings;
   final bool canLaunch;
   final VoidCallback onLaunch;
   final ValueChanged<ProfileCardAction> onAction;
@@ -129,6 +134,13 @@ class ProfileCard extends StatelessWidget {
                 );
               },
             ),
+            if (warnings.isNotEmpty) ...<Widget>[
+              SizedBox(height: 8.h),
+              _Warning(finding: warnings.firstWhere(
+                (CompatibilityFinding f) => f.blocking,
+                orElse: () => warnings.first,
+              )),
+            ],
             SizedBox(height: 8.h),
             Align(
               alignment: Alignment.centerRight,
@@ -144,6 +156,40 @@ class ProfileCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// A single compatibility problem shown on a clone's card.
+class _Warning extends StatelessWidget {
+  const _Warning({required this.finding});
+
+  final CompatibilityFinding finding;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final Color colour = finding.blocking ? scheme.error : scheme.tertiary;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Icon(
+          finding.blocking ? Icons.block : Icons.warning_amber_outlined,
+          size: 16.r,
+          color: colour,
+        ),
+        SizedBox(width: 6.w),
+        Expanded(
+          child: Text(
+            finding.message,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colour),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
