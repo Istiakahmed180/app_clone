@@ -53,6 +53,7 @@ class CompatibilityReport {
     required this.missingPermissions,
     required this.requiresGms,
     this.abi,
+    this.analysed = true,
   });
 
   factory CompatibilityReport.fromMap(Map<String, dynamic> map) {
@@ -77,13 +78,18 @@ class CompatibilityReport {
     );
   }
 
+  /// Used when analysis could not run at all.
+  ///
+  /// Deliberately not [CompatibilityVerdict.supported]: an app nobody examined must never
+  /// be presented as problem-free.
   static const CompatibilityReport unknown = CompatibilityReport(
     packageName: '',
-    verdict: CompatibilityVerdict.supported,
+    verdict: CompatibilityVerdict.limited,
     findings: <CompatibilityFinding>[],
     bridgeablePermissions: <String>[],
     missingPermissions: <String>[],
     requiresGms: false,
+    analysed: false,
   );
 
   static List<String> _strings(Object? raw) => raw is List
@@ -102,6 +108,9 @@ class CompatibilityReport {
 
   final bool requiresGms;
   final String? abi;
+
+  /// False when the compatibility layer could not inspect this app at all.
+  final bool analysed;
 
   bool get canClone => verdict != CompatibilityVerdict.unsupported;
 

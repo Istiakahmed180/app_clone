@@ -128,11 +128,9 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
 
-    // An imported APK can only be analysed when its package is also installed here;
-    // otherwise there is nothing on the device to inspect and the sheet says so.
-    final CompatibilityReport report = candidate.installedOnHost
-        ? await controller.analyze(candidate.packageName)
-        : CompatibilityReport.unknown;
+    // Read from the archive itself, so an APK that is not installed here is still judged
+    // properly instead of being presented as problem-free.
+    final CompatibilityReport report = await controller.analyzeApk(candidate);
     final int existing = await controller.instanceCount(candidate.packageName);
     if (!context.mounted) {
       return;

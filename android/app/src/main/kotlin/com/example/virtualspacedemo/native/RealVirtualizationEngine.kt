@@ -74,6 +74,9 @@ class RealVirtualizationEngine(
     fun appIconsFor(packageNames: Collection<String>): Map<String, String> =
         installedApps.iconsFor(packageNames)
 
+    fun analyzeApk(apkPath: String, packageName: String): Map<String, Any?> =
+        AppCompatibilityAnalyzer(context).analyzeApk(apkPath, packageName).toMap()
+
     fun describeApp(packageName: String): Map<String, Any?>? =
         installedApps.describeInstalled(packageName)
 

@@ -125,6 +125,97 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     }
 
     /**
+     * Analyses a standalone APK, without needing it to be installed.
+     *
+     * The import flow previously had nothing to inspect for an APK that is not installed
+     * here, and presented it as "Supported / no known problems" — an overclaim about
+     * something never examined. Everything below is read out of the archive itself.
+     */
+    fun analyzeApk(apkPath: String, packageName: String): Report {
+        val findings = mutableListOf<Finding>()
+
+        (securityChecker.checkApk(packageName, apkPath) as? AppSecurityChecker.Verdict.Rejected)
+            ?.let { findings += Finding(it.code, it.message, blocking = true) }
+
+        val abi = archiveAbi(apkPath)
+        if (abi == UNSUPPORTED_ABI) {
+            findings += Finding(
+                EngineErrorCodes.ABI_NOT_SUPPORTED,
+                "This APK's native libraries are not built for an architecture the engine supports.",
+                blocking = true,
+            )
+        }
+
+        val archive = try {
+            context.packageManager.getPackageArchiveInfo(apkPath, PackageManager.GET_PERMISSIONS)
+        } catch (_: Exception) {
+            null
+        }
+
+        val requested = archive?.requestedPermissions?.toSet().orEmpty()
+        val requiresGms = GMS_PERMISSION_MARKERS.any { it in requested } ||
+            ApkManifestReader.readDeclarations(apkPath)
+                .any { it.element == "meta-data" && it.name == GMS_VERSION_META }
+
+        if (requiresGms) {
+            findings += Finding(
+                CODE_REQUIRES_GMS,
+                "This app relies on Google Play Services, which is not virtualized in this build. " +
+                    "Sign-in, push notifications and maps are likely to fail.",
+                blocking = false,
+            )
+        }
+
+        val hostDeclared = hostDeclaredPermissions()
+        val bridgeable = requested.filter { it in hostDeclared }.filter(::isDangerous).sorted()
+        val missing = bridgeable.filterNot(::isGrantedToHost)
+        if (missing.isNotEmpty()) {
+            findings += Finding(
+                CODE_PERMISSIONS_REQUIRED,
+                "The clone needs ${missing.size} permission(s) that Virtual Space does not hold yet. " +
+                    "Guests run under the host's identity, so the host must be granted them.",
+                blocking = false,
+            )
+        }
+
+        return Report(
+            packageName = packageName,
+            verdict = when {
+                findings.any { it.blocking } -> Verdict.UNSUPPORTED
+                findings.isNotEmpty() -> Verdict.LIMITED
+                else -> Verdict.SUPPORTED
+            },
+            findings = findings,
+            bridgeablePermissions = bridgeable,
+            missingPermissions = missing,
+            requiresGms = requiresGms,
+            abi = abi.takeIf { it != UNSUPPORTED_ABI },
+        )
+    }
+
+    /**
+     * The engine-loadable ABI an archive ships, [UNSUPPORTED_ABI] when it carries native
+     * code for none, or null when it carries no native code at all.
+     */
+    private fun archiveAbi(apkPath: String): String? = try {
+        java.util.zip.ZipFile(java.io.File(apkPath)).use { zip ->
+            val abis = zip.entries().asSequence()
+                .map { it.name }
+                .filter { it.startsWith("lib/") }
+                .mapNotNull { it.split('/').getOrNull(1) }
+                .toSet()
+
+            when {
+                abis.isEmpty() -> null
+                else -> abis.firstOrNull { it in ENGINE_ABIS } ?: UNSUPPORTED_ABI
+            }
+        }
+    } catch (error: Exception) {
+        Slog.w(Slog.INSTALL, "Could not read ABIs from $apkPath: ${error.message}")
+        null
+    }
+
+    /**
      * Permissions worth bridging: dangerous ones the guest asks for that the host is also
      * able to hold. The host cannot be granted a permission it does not declare, and the
      * engine's merged manifest is what makes most of them declarable.
@@ -208,6 +299,9 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         const val CODE_PERMISSIONS_REQUIRED = "PERMISSIONS_REQUIRED"
 
         private val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
+
+        private const val GMS_VERSION_META = "com.google.android.gms.version"
+        private const val UNSUPPORTED_ABI = "unsupported"
 
         private val GMS_PERMISSION_MARKERS = setOf(
             "com.google.android.c2dm.permission.RECEIVE",

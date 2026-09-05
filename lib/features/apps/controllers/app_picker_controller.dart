@@ -92,6 +92,16 @@ class AppPickerController extends GetxController {
     }
   }
 
+  /// Compatibility verdict for a picked APK, read from the archive rather than assumed.
+  Future<CompatibilityReport> analyzeApk(ApkCandidate candidate) async {
+    try {
+      return await _bridge.analyzeApk(candidate.apkPath, candidate.packageName);
+    } on AppException catch (error, stackTrace) {
+      _logger.error('APK analysis failed for ${candidate.packageName}', error, stackTrace);
+      return CompatibilityReport.unknown;
+    }
+  }
+
   /// Asks for the permissions the guest needs. Returns null when it could not be asked.
   Future<PermissionRequestResult?> requestPermissions(String packageName) async {
     try {

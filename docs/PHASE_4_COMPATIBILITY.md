@@ -119,6 +119,34 @@ Had detection regressed, arm64 apps would have been blocked outright with a fals
 `UNSUPPORTED`. A test now analyses up to 20 real installed apps that carry native code and
 asserts none is blocked on ABI. It passes on the test device.
 
+## Second review pass — an overclaim, and a real-world security miss
+
+**The sheet presented unanalysed APKs as problem-free.** For an imported APK whose package was
+not installed on the device there was nothing to inspect, so the import flow passed
+`CompatibilityReport.unknown` — which carried `verdict: supported` and no findings, and
+therefore rendered as **"Supported / No known compatibility problems."** A widget test
+(`test/compatibility_sheet_test.dart`) was written to demonstrate this before it was changed.
+
+Two things were done rather than one:
+
+1. `AppCompatibilityAnalyzer.analyzeApk(apkPath, packageName)` now analyses the archive
+   directly — secure-environment declaration, GMS markers, bridgeable permissions from the
+   archive's requested permissions, and the ABIs actually shipped in its `lib/` entries. An
+   imported APK is judged on evidence before anything is installed.
+2. `CompatibilityReport.unknown` is no longer `supported`, and carries `analysed = false`. When
+   analysis truly cannot run, the sheet shows **"Not analysed"** and says plainly that nothing
+   is known and the clone may still be refused.
+
+**A non-boolean property made the installed path miss a real app.** `REQUIRE_SECURE_ENV` is
+compiled by aapt2 as the **integer 1**, not a boolean. The check required
+`Property.isBoolean`, so Google Authenticator — which genuinely ships
+`<property android:name="REQUIRE_SECURE_ENV" android:value="true"/>`, verified with
+`aapt2 dump xmltree` — was offered for cloning with verdict "Limited". It is now refused, with
+a disabled "Cannot clone" button. This also confirms the canonical property name, which had
+until then been a guess.
+
+Both were found by testing against real installed applications rather than fixtures alone.
+
 ## Known limitations
 
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.
@@ -127,8 +155,8 @@ asserts none is blocked on ABI. It passes on the test device.
 - **Permission bridging is host-wide, not per-clone.** Granting the camera for one clone
   grants it to Virtual Space, and therefore to every clone. Per-clone permission scoping
   would require the engine to virtualize permission checks, which it does not.
-- The analyzer cannot inspect an imported APK whose package is not installed on the device;
-  the sheet falls back to "no known problems" for that case, which is an absence of evidence
-  rather than a clean bill of health.
+- Imported APKs are now analysed from the archive itself (`analyzeApk`), so they no longer
+  fall back to a clean bill of health. If analysis genuinely fails the sheet says
+  **"Not analysed"** rather than "Supported".
 - Banking, payment, authenticator and anti-cheat apps remain untested and out of scope.
 - Verified on one device and one OEM build.

@@ -116,7 +116,14 @@ class _SheetBodyState extends State<_SheetBody> {
             ),
             SizedBox(height: 16.h),
 
-            if (_report.findings.isEmpty)
+            if (!_report.analysed)
+              _Line(
+                icon: Icons.help_outline,
+                color: theme.colorScheme.onSurfaceVariant,
+                text: 'This app could not be examined, so nothing is known about how well '
+                    'it will run. It may still be refused when the clone is created.',
+              )
+            else if (_report.findings.isEmpty)
               _Line(
                 icon: Icons.check_circle_outline,
                 color: theme.colorScheme.primary,
@@ -187,7 +194,14 @@ class _SheetBodyState extends State<_SheetBody> {
     );
   }
 
-  ({String label, Color color, IconData icon}) _badge(ColorScheme scheme) =>
+  ({String label, Color color, IconData icon}) _badge(ColorScheme scheme) {
+    if (!_report.analysed) {
+      return (label: 'Not analysed', color: scheme.onSurfaceVariant, icon: Icons.help_outline);
+    }
+    return _verdictBadge(scheme);
+  }
+
+  ({String label, Color color, IconData icon}) _verdictBadge(ColorScheme scheme) =>
       switch (_report.verdict) {
         CompatibilityVerdict.supported =>
           (label: 'Supported', color: scheme.primary, icon: Icons.verified_outlined),

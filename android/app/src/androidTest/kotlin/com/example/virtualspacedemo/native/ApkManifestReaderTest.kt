@@ -169,6 +169,51 @@ class ApkManifestReaderTest {
         )
     }
 
+    /**
+     * The import flow's verdict now comes from the archive, not from an assumption.
+     * An APK declaring the requirement must be UNSUPPORTED before anything is installed.
+     */
+    @Test
+    fun analysingADeclaringArchiveYieldsAnUnsupportedVerdict() {
+        val report = AppCompatibilityAnalyzer(context)
+            .analyzeApk(fixture(SECURE_FIXTURE), "com.example.secureenvfixture")
+
+        assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
+        assertTrue(report.findings.any { it.blocking })
+    }
+
+    @Test
+    fun analysingAnOrdinaryArchiveDoesNotBlockIt() {
+        val realApk = context.packageManager
+            .getApplicationInfo(TestAppManager.TEST_APP_PACKAGE, 0)
+            .sourceDir
+
+        val report = AppCompatibilityAnalyzer(context)
+            .analyzeApk(realApk, TestAppManager.TEST_APP_PACKAGE)
+
+        assertFalse(
+            "an ordinary APK was blocked: ${report.findings.map { it.code }}",
+            report.findings.any { it.blocking },
+        )
+    }
+
+    /** Real-world end-to-end: the archive path must refuse Authenticator too. */
+    @Test
+    fun analysingAuthenticatorsArchiveIsUnsupported() {
+        val apk = runCatching {
+            context.packageManager.getApplicationInfo(AUTHENTICATOR, 0).sourceDir
+        }.getOrNull() ?: return
+
+        val report = AppCompatibilityAnalyzer(context).analyzeApk(apk, AUTHENTICATOR)
+
+        assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
+        assertTrue(
+            report.findings.any {
+                it.blocking && it.code == EngineErrorCodes.SECURE_ENV_REQUIRED
+            },
+        )
+    }
+
     private companion object {
         const val SECURE_FIXTURE = "secure-env-fixture.apk"
         const val PLAIN_FIXTURE = "plain-fixture.apk"

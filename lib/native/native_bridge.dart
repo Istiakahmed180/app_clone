@@ -115,6 +115,18 @@ class NativeBridge {
     return CompatibilityReport.fromMap(response.data);
   }
 
+  /// What will and will not work if this APK is cloned, read from the archive itself.
+  ///
+  /// Unlike [analyzeApp] this needs no installed package, so an imported APK can be judged
+  /// before anything is installed.
+  Future<CompatibilityReport> analyzeApk(String apkPath, String packageName) async {
+    final EngineResponse response = await _invokeEngine(
+      'analyzeApk',
+      <String, dynamic>{'apkPath': apkPath, 'packageName': packageName},
+    );
+    return CompatibilityReport.fromMap(response.data);
+  }
+
   /// Asks the user for the runtime permissions a guest needs.
   ///
   /// Guests run under the host's identity, so Android checks the host's grants; this is
