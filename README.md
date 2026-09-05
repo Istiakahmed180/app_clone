@@ -71,7 +71,7 @@ not the platform itself.
 | `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK download or code update |
 | Self-healing containers (rebuild on failed launch) | Verified support for banking/anti-cheat/GMS apps |
 
-## 3. Directory structure
+## 4. Directory structure
 
 ```
 Others/
@@ -94,19 +94,21 @@ virtual_space_demo/lib/
 │   ├── utils/app_logger.dart          dart:developer wrapper (no print())
 │   └── virtualization/
 │       ├── virtualization_engine.dart      the integration boundary
-│       ├── real_virtualization_engine.dart Phase 2 container-backed implementation
-│       └── demo_virtualization_engine.dart Phase 1 metadata-only reference
+│       ├── real_virtualization_engine.dart container-backed implementation (production)
+│       └── demo_virtualization_engine.dart no-op reference; not bound in production
 ├── data/
-│   ├── models/{virtual_profile_model, test_app_model, platform_info, engine_result}.dart
+│   ├── models/{virtual_profile_model, test_app_model, platform_info,
+│   │           engine_result, compatibility_report, installed_app_model}.dart
 │   └── repositories/virtual_profile_repository.dart
 ├── native/native_bridge.dart          the ONLY MethodChannel caller
 ├── features/
-│   ├── home/{controllers,views,widgets}
-│   └── profiles/{controllers,views,widgets}
-└── widgets/{profile_card, empty_state}.dart
+│   ├── apps/          clone picker, APK import, compatibility sheet
+│   ├── home/          clone list, engine status notice
+│   └── profiles/      rename and delete dialogs
+└── widgets/{profile_card, app_icon, empty_state}.dart
 ```
 
-## 4. Flutter architecture
+## 5. Flutter architecture
 
 - Dart null safety, strong typing, `const` constructors where they apply.
 - GetX for state management and routing; dependencies are registered in `AppBinding`.
@@ -117,7 +119,7 @@ virtual_space_demo/lib/
 
 Layering: `View → Controller → VirtualizationEngine → Repository / NativeBridge`.
 
-## 5. Kotlin architecture
+## 6. Kotlin architecture
 
 ```
 android/app/src/main/kotlin/com/example/virtualspacedemo/
@@ -130,9 +132,15 @@ android/app/src/main/kotlin/com/example/virtualspacedemo/
     ├── VirtualProfileManager.kt    profile UUID <-> engine user id mapping
     ├── VirtualAppInstaller.kt      installs into a container (after admission check)
     ├── VirtualAppLauncher.kt       starts/stops the guest in a container
-    ├── AppSecurityChecker.kt       allow-list + REQUIRE_SECURE_ENV admission
+    ├── AppSecurityChecker.kt       deny-list + REQUIRE_SECURE_ENV admission
+    ├── AppCompatibilityAnalyzer.kt compatibility verdict for an app or an APK
+    ├── PermissionBridge.kt         asks the user for permissions a guest needs
+    ├── InstalledAppsProvider.kt    launchable apps and their icons, for the picker
+    ├── ApkImporter.kt              identity of a picked APK file
+    ├── ApkManifestReader.kt        decodes an APK's compiled AndroidManifest.xml
     ├── TestAppManager.kt           PackageManager reads
-    ├── AppLauncher.kt              Phase 1 normal launcher intent (kept for comparison)
+    ├── AppLauncher.kt              Phase 1 normal launcher intent (kept for comparison;
+    │                               not reachable in production — see section 11)
     ├── Slog.kt                     controlled logging tags
     └── blackbox/
         └── BlackBoxEngineAdapter.kt  the ONLY file importing top.niunaijun.*
@@ -141,7 +149,7 @@ android/app/src/main/kotlin/com/example/virtualspacedemo/
 Android types (`Context`, `Intent`, `PackageManager`) never cross the channel; Flutter receives
 plain maps of primitives which are converted into typed Dart models.
 
-## 6. Flutter ↔ Kotlin bridge
+## 7. Flutter ↔ Kotlin bridge
 
 Channel: `virtual_space/native_bridge`
 
@@ -171,7 +179,7 @@ Package visibility is declared as narrowly as Android 11+ allows — a single
 `<package android:name="com.example.virtualtestapp" />` entry. `QUERY_ALL_PACKAGES` is not
 requested.
 
-## 7. Test APK
+## 8. Test APK
 
 `../virtual_test_app` — a native Kotlin app, package `com.example.virtualtestapp`, label
 "Virtual Test App". It exists solely as a controlled application whose behaviour we fully know,
@@ -180,12 +188,12 @@ so later phases can measure whether state is genuinely isolated.
 It shows a counter and a stored name, persisted in `SharedPreferences`
 (`virtual_test_app_state.xml`): counter defaults to `0`, stored name to `Test User`.
 
-## 8. Profile model
+## 9. Profile model
 
 `VirtualProfileModel { id, packageName, appName, profileName, createdAt, enabled }` — immutable,
 UUID v4 id, JSON serialisable.
 
-## 9. Repository
+## 10. Repository
 
 `VirtualProfileRepository` owns *all* profile persistence: `createProfile`, `getProfiles`,
 `getProfile`, `updateProfile`, `deleteProfile`. Profiles are stored as a JSON array under the
@@ -199,7 +207,7 @@ is never overwritten. Renaming a profile to its own current name is allowed.
 Storage sits behind the `ProfileStorage` interface so repository behaviour is unit-testable
 without a device.
 
-## 10. Virtualization engines
+## 11. Virtualization engines
 
 `VirtualizationEngine` is an abstract interface: `createProfile`, `deleteProfile`,
 `renameProfile`, `launchProfile`, `getProfiles`, `profileState`, `initialize` and
@@ -214,7 +222,7 @@ isolation when the native backend also confirms it is available on the device.
 Deleting a profile removes the container and its isolated data. The normally installed test APK
 is never uninstalled and its own data is never touched — verified on device.
 
-## 11. Installation and testing instructions
+## 12. Installation and testing instructions
 
 Build and install the controlled test app first:
 
@@ -250,7 +258,7 @@ Manual acceptance walkthrough:
 6. Delete Profile 2 (a confirmation dialog appears), restart → it stays deleted.
 7. Launch any profile → the normal Virtual Test App opens; the test APK is still installed.
 
-## 12. Current limitations
+## 13. Current limitations
 
 Phase 2 **does** provide isolated per-profile application storage, separate guest processes and
 multiple simultaneous instances of one app.
@@ -266,7 +274,7 @@ It does **not** provide:
 
 x86_64 is unsupported: Bcore ships no x86_64 native library.
 
-## 13. Security constraints
+## 14. Security constraints
 
 - The host application never reads another application's private data — no passwords, tokens,
   databases, cookies, private files, other apps' `SharedPreferences`, or internal storage.
@@ -280,16 +288,23 @@ x86_64 is unsupported: Bcore ships no x86_64 native library.
   backend options Virtual Space pins off (`FLAG_SECURE` defeat, root hiding, VPN mode).
 - Applications declaring `REQUIRE_SECURE_ENV` are rejected, with no override path.
 
-## 14. Recommended Phase 3 direction
+## 15. Recommended next direction
 
 Not started. In rough priority order:
 
-1. **Close the licence provenance question** in `docs/DEPENDENCY_LICENSE_AUDIT.md` and restore
-   third-party attribution notices. This gates any distribution and may gate the backend choice.
-2. **Confirm the canonical `REQUIRE_SECURE_ENV` property name** against Google's published
-   container requirement.
-3. **Broaden device coverage** — other vendors, Android 13/14/16 — before claiming support.
-4. **Decide on the backend**: patch Bcore's `isRunningApplication` and cold-start fallback
-   upstream, or move to another backend behind the existing adapter.
-5. Only then consider a second controlled application, and the permission/UID model needed for
-   real third-party apps.
+1. **Close the licence provenance question** in `docs/DEPENDENCY_LICENSE_AUDIT.md` and add the
+   missing third-party attribution notices. This gates any distribution and may gate the
+   backend choice itself — the upstream projects are unlicensed or expressly commercial.
+2. **Broaden device coverage** — other vendors, Android 13/14/16 — before claiming support.
+   Everything here is verified on one OnePlus device running Android 15.
+3. **Decide on the backend**: patch Bcore's broken `isRunningApplication` upstream, or move to
+   another backend behind the existing adapter.
+4. **Show compatibility on existing clones.** The analyzer only runs in the picker, so a clone
+   whose app later becomes unsupported still shows a plain "Ready" card.
+5. **Guest notifications and per-clone launcher shortcuts**, which are what make a
+   dual-app product usable day to day.
+6. **Decide what to do about Google Play Services**, which most popular apps depend on and
+   which this build does not virtualize.
+
+Resolved since this list was first written: the canonical `REQUIRE_SECURE_ENV` property name is
+now confirmed against real apps (see `docs/SECURITY.md`), and multi-app support has shipped.

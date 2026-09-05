@@ -4,7 +4,11 @@ class AppConstants {
 
   static const String appTitle = 'Virtual Space';
 
-  /// The single controlled application Phase 1 knows about.
+  /// The controlled test application.
+  ///
+  /// Any installed app can be cloned; this one is singled out only because the home
+  /// screen reports whether it is present, and the test suite uses it as a known
+  /// quantity.
   static const String testAppPackage = 'com.example.virtualtestapp';
   static const String testAppFallbackName = 'Virtual Test App';
 

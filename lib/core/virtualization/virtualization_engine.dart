@@ -1,10 +1,14 @@
 import '../../data/models/engine_result.dart';
 import '../../data/models/virtual_profile_model.dart';
 
-/// Integration boundary for a future, real Android virtualization engine.
+/// Integration boundary for the Android virtualization backend.
 ///
-/// Phase 1 ships only [DemoVirtualizationEngine]. The interface exists so a later
-/// native implementation can replace it without touching the UI or controllers.
+/// [RealVirtualizationEngine] is what ships: it backs each profile with a real container
+/// through the native adapter. [DemoVirtualizationEngine] remains as the reference no-op
+/// implementation of this same interface, and is not bound in production.
+///
+/// The interface exists so the backend can be replaced without touching the UI or
+/// controllers.
 abstract class VirtualizationEngine {
   Future<VirtualProfileModel> createProfile({
     required String packageName,

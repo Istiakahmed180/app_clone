@@ -2,8 +2,12 @@ import 'package:flutter/foundation.dart';
 
 /// Metadata describing one virtual profile.
 ///
-/// A profile is *only* metadata in Phase 1: it does not own an Android process,
-/// UID, package installation or data directory.
+/// This model is the host's own record of a clone. The container it maps to — with its
+/// own isolated application data — is owned by the native engine and keyed by [id]; see
+/// `VirtualProfileManager` for the profile-to-virtual-user mapping.
+///
+/// A clone does *not* get its own Android UID: guests run under the host's identity and
+/// inherit its permission grants.
 @immutable
 class VirtualProfileModel {
   const VirtualProfileModel({
