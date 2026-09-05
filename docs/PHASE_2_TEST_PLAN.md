@@ -101,6 +101,29 @@ Indicative, from device runs — wall-clock, not instrumented:
    dialog now owns its `TextEditingController` in a `StatefulWidget` instead of disposing it
    from the dialog future. Verified 3/3 plus a clean-install run.
 
+## Additional checks from the Phase 2 review pass
+
+| Check | Expected | Result |
+| --- | --- | --- |
+| Delete a profile, create a new one that reclaims the same `virtualUserId` | New profile starts clean, does **not** inherit the deleted profile's data | PASS — reclaimed `user 0` opened at Counter=0 / Test User, not the deleted 10/Alice |
+| Other profiles after a delete | Untouched | PASS — `user 1` still Bob/20 |
+| Normal install after a delete | Untouched | PASS — Normal/5 |
+| Host force-stop and restart | Profiles and the profile→user mapping survive | PASS |
+| APK upgrade over an existing install | Profiles, mapping and container data survive | PASS |
+
+Two defects were found by code review in the same pass and fixed:
+
+1. **Unguarded channel reply.** `NativeBridge` replied on the main looper without checking the
+   channel was still attached. An activity destroyed during a long install would have thrown.
+   Now the reply is dropped with a log if the bridge has detached.
+2. **Launch lacked the install path's service retry.** Launch reads the same package service
+   that install does, so it was exposed to the same null-binder window. It now shares
+   `withServiceRetry`.
+
+While adding that retry, `withServiceRetry` was corrected to retry **only when the engine call
+throws**. A returned `Failure` is a definitive answer ("not installed", "refused") and must not
+be delayed by the 2 s backoff or repeated.
+
 ## Known open issues
 
 - `isRunningApplication` always throws inside Bcore, so cards show **Ready** and never

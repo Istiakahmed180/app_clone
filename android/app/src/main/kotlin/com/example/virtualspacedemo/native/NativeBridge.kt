@@ -41,7 +41,19 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 Slog.e(Slog.ENGINE, "Engine work failed", error)
                 failure("BRIDGE_ERROR", error.message ?: "Native call failed.")
             }
-            mainHandler.post { result.success(response) }
+            mainHandler.post {
+                // The activity can be destroyed while a long install is still running;
+                // replying on a torn-down channel throws.
+                if (channel == null) {
+                    Slog.w(Slog.ENGINE, "Dropping reply: bridge already detached")
+                    return@post
+                }
+                try {
+                    result.success(response)
+                } catch (error: Throwable) {
+                    Slog.w(Slog.ENGINE, "Reply failed: ${error.message}")
+                }
+            }
         }
     }
 

@@ -93,20 +93,24 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
      * Callers run on a background thread, so this never blocks the UI.
      */
     private fun withServiceRetry(block: () -> EngineResult<Unit>): EngineResult<Unit> {
-        val first = runCatching(block).getOrElse { error ->
-            EngineResult.Failure(EngineErrorCodes.ENGINE_INITIALIZATION_FAILED, error.message.orEmpty())
-        }
-        if (first is EngineResult.Success) {
-            return first
+        // Only a *thrown* call is retried. The null binder surfaces as an NPE from Bcore,
+        // whereas a returned Failure is a definitive engine answer ("not installed",
+        // "refused") that must not be delayed by the backoff or repeated.
+        try {
+            return block()
+        } catch (error: Throwable) {
+            Slog.w(Slog.ENGINE, "Engine service unavailable (${error.javaClass.simpleName}); retrying")
         }
 
-        Slog.w(Slog.ENGINE, "Engine call failed; retrying after service backoff")
         SystemClock.sleep(RETRY_TIMEOUT_MS + 200L)
         warmUpPackageService(force = true)
-        return runCatching(block).getOrElse { error ->
+        return try {
+            block()
+        } catch (error: Throwable) {
+            Slog.e(Slog.ENGINE, "Engine service still unavailable after retry", error)
             EngineResult.Failure(
                 EngineErrorCodes.ENGINE_INITIALIZATION_FAILED,
-                error.message ?: "Engine service unavailable.",
+                "The virtualization engine service is not responding.",
             )
         }
     }
@@ -197,23 +201,31 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     override fun launch(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED) {
-            warmUpPackageService()
-            if (!isPackageInstalled(packageName, virtualUserId)) {
-                return@guarded EngineResult.Failure(
-                    EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
-                    "The application is not installed in this virtual profile.",
-                )
-            }
-            if (BlackBoxCore.get().launchApk(packageName, virtualUserId)) {
-                Slog.i(Slog.LAUNCH, "Launched $packageName in user $virtualUserId")
-                EngineResult.ok()
-            } else {
-                EngineResult.Failure(
-                    EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED,
-                    "The engine refused to launch the virtual application.",
-                )
+            // Launch reads the same package service that install does, so it needs the
+            // same recovery from Bcore's null-binder window.
+            withServiceRetry {
+                warmUpPackageService()
+                doLaunch(packageName, virtualUserId)
             }
         }
+
+    private fun doLaunch(packageName: String, virtualUserId: Int): EngineResult<Unit> {
+        if (!isPackageInstalled(packageName, virtualUserId)) {
+            return EngineResult.Failure(
+                EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
+                "The application is not installed in this virtual profile.",
+            )
+        }
+        return if (BlackBoxCore.get().launchApk(packageName, virtualUserId)) {
+            Slog.i(Slog.LAUNCH, "Launched $packageName in user $virtualUserId")
+            EngineResult.ok()
+        } else {
+            EngineResult.Failure(
+                EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED,
+                "The engine refused to launch the virtual application.",
+            )
+        }
+    }
 
     override fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED) {
