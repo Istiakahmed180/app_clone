@@ -169,6 +169,31 @@ class NativeBridge {
     return PermissionRequestResult.fromMap(response.data);
   }
 
+  /// Whether the current launcher can pin shortcuts at all.
+  Future<bool> areShortcutsSupported() async {
+    final EngineResponse response = await _invokeEngine('areShortcutsSupported');
+    return response.data['supported'] as bool? ?? false;
+  }
+
+  /// Asks the launcher to put a clone on the home screen.
+  ///
+  /// Success means the launcher accepted the request; it still shows its own confirmation,
+  /// so this does not mean the shortcut exists yet.
+  Future<void> pinCloneShortcut({
+    required String profileId,
+    required String packageName,
+    required String label,
+  }) async {
+    final EngineResponse response = await _invokeEngine('pinCloneShortcut', <String, dynamic>{
+      'profileId': profileId,
+      'packageName': packageName,
+      'label': label,
+    });
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+  }
+
   /// Icons for specific packages only.
   ///
   /// Prefer this over [listInstalledApps] when the caller already knows which packages it

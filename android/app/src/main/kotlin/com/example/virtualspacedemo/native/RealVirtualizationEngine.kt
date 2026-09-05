@@ -225,6 +225,13 @@ class RealVirtualizationEngine(
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.ok()
 
+        // A pinned shortcut outlives the clone; an app cannot delete one, so disable it
+        // with a reason rather than leaving a tile that silently does nothing.
+        CloneShortcutManager(context).disable(
+            profileId,
+            "This clone was deleted in Virtual Space.",
+        )
+
         launcher.stop(packageName, virtualUserId)
         installer.uninstall(packageName, virtualUserId)
         val deletion = adapter.deleteVirtualUser(virtualUserId)

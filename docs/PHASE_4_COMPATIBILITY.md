@@ -221,6 +221,35 @@ suite returns to green.
 `pending` is `@Volatile`: it is written from the platform thread by `request` and from the main
 thread by `onRequestPermissionsResult` and `cancelPending`.
 
+## Home-screen shortcuts
+
+A clone can be pinned to the launcher and opened directly, without passing through Virtual
+Space — the thing that makes a dual-app product usable day to day.
+
+| Piece | Role |
+| --- | --- |
+| `CloneLauncherActivity` | No-UI trampoline. Reads `profileId` + `packageName` from the shortcut intent, launches that container, finishes. |
+| `CloneShortcutManager` | Builds the `ShortcutInfoCompat` (guest's own icon, clone's name) and asks the launcher to pin it. |
+| Card menu → "Add to home screen" | Entry point. |
+
+Points worth knowing:
+
+- The shortcut carries the **profile id**, not just the package, so "WhatsApp 2" opens the
+  second clone rather than the first.
+- `requestPinShortcut` succeeding means the **launcher accepted the request**, not that the
+  user confirmed it — the launcher shows its own dialog. The message says so rather than
+  claiming the shortcut exists.
+- Launchers that cannot pin are reported as `SHORTCUTS_UNSUPPORTED` instead of failing quietly.
+- The icon falls back to Virtual Space's own when the guest package is not installed on the
+  host, which is the normal case for a clone made from an imported APK.
+- **Deleting a clone disables its shortcut** with a reason. An app cannot delete a shortcut the
+  user pinned, so a stale tile that silently does nothing is the alternative.
+
+Verified on device: the launcher's pin dialog appeared with VLC's icon and name; after
+confirming, `dumpsys shortcut` shows it pinned with the intent
+`cmp=…/.CloneLauncherActivity` carrying the profile id. Firing that intent from a **cold
+start** (app force-stopped) brought up `ProxyActivity$P0` with `org.videolan.vlc` running.
+
 ## Known limitations
 
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.

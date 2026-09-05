@@ -8,7 +8,7 @@ import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
 import 'app_icon.dart';
 
-enum ProfileCardAction { rename, clone, delete }
+enum ProfileCardAction { rename, clone, addShortcut, delete }
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
@@ -103,6 +103,10 @@ class ProfileCard extends StatelessWidget {
                     PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.clone,
                       child: Text('Add another clone'),
+                    ),
+                    PopupMenuItem<ProfileCardAction>(
+                      value: ProfileCardAction.addShortcut,
+                      child: Text('Add to home screen'),
                     ),
                     PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.delete,

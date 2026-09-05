@@ -138,6 +138,15 @@ class HomeView extends GetView<HomeController> {
         if (created == true) {
           await controller.refreshAll();
         }
+      case ProfileCardAction.addShortcut:
+        final String? error = await controller.addShortcut(profile);
+        if (!context.mounted) {
+          return;
+        }
+        _showMessage(
+          context,
+          error ?? 'Confirm the shortcut on your home screen to finish adding it.',
+        );
       case ProfileCardAction.delete:
         final bool confirmed = await showDeleteProfileDialog(
           context,

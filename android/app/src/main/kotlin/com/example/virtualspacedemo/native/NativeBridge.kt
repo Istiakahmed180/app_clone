@@ -25,6 +25,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val appLauncher = AppLauncher(appContext)
     private val engine = RealVirtualizationEngine(appContext, VirtualSpaceApplication.engine)
     private val analyzer = AppCompatibilityAnalyzer(appContext)
+    private val shortcuts = CloneShortcutManager(appContext)
     private val permissionBridge = PermissionBridge()
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
@@ -173,6 +174,24 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         engine.analyzeApk(apkPath, packageName),
                     )
                 }
+            }
+
+            "areShortcutsSupported" -> result.success(
+                success(
+                    "SHORTCUT_SUPPORT",
+                    "Shortcut support checked.",
+                    mapOf("supported" to shortcuts.isSupported()),
+                ),
+            )
+
+            "pinCloneShortcut" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                val label = call.argument<String>("label").orEmpty().ifBlank { packageName }
+                result.success(
+                    shortcuts.requestPin(profileId, packageName, label)
+                        .toEnvelope("SHORTCUT_REQUESTED", "Shortcut request sent to the launcher."),
+                )
             }
 
             "getAppIcons" -> {

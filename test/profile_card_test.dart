@@ -90,6 +90,40 @@ void main() {
     expect(find.byIcon(Icons.block), findsOneWidget);
   });
 
+  testWidgets('the menu offers adding the clone to the home screen',
+      (WidgetTester tester) async {
+    ProfileCardAction? chosen;
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(390, 844),
+        builder: (BuildContext context, Widget? child) => MaterialApp(
+          home: Scaffold(
+            body: ProfileCard(
+              profile: _profile(),
+              state: const VirtualProfileState(
+                installed: true,
+                running: false,
+                virtualUserId: 0,
+              ),
+              canLaunch: true,
+              onLaunch: () {},
+              onAction: (ProfileCardAction a) => chosen = a,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(PopupMenuButton<ProfileCardAction>));
+    await tester.pumpAndSettle();
+    expect(find.text('Add to home screen'), findsOneWidget);
+
+    await tester.tap(find.text('Add to home screen'));
+    await tester.pumpAndSettle();
+    expect(chosen, ProfileCardAction.addShortcut);
+  });
+
   testWidgets('multi-instance clones are labelled by position', (WidgetTester tester) async {
     await _pump(tester, siblingCount: 3, instanceIndex: 2);
 

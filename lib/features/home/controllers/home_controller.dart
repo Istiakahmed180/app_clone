@@ -198,6 +198,22 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Asks the launcher to add this clone to the home screen.
+  ///
+  /// Returns null when the request was accepted, or a user-facing message otherwise.
+  Future<String?> addShortcut(VirtualProfileModel profile) async {
+    try {
+      await _nativeBridge.pinCloneShortcut(
+        profileId: profile.id,
+        packageName: profile.packageName,
+        label: profile.profileName,
+      );
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
   Future<String?> renameProfile(VirtualProfileModel profile, String name) async {
     try {
       await _engine.renameProfile(profile.id, name);

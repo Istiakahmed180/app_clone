@@ -87,6 +87,8 @@ object EngineErrorCodes {
      * retrying, while a refusal with a reason is definitive.
      */
     const val ENGINE_NO_RESPONSE = "ENGINE_NO_RESPONSE"
+    const val SHORTCUTS_UNSUPPORTED = "SHORTCUTS_UNSUPPORTED"
+    const val SHORTCUT_REQUEST_FAILED = "SHORTCUT_REQUEST_FAILED"
     const val APK_INVALID = "APK_INVALID"
     const val APK_UNREADABLE = "APK_UNREADABLE"
     const val APP_ALREADY_CLONED = "APP_ALREADY_CLONED"

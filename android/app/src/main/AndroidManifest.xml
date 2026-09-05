@@ -26,6 +26,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Target of per-clone home-screen shortcuts. Exported because the system
+             launches it on the launcher's behalf; it carries no UI and only acts on a
+             profile id that already exists. -->
+        <activity
+            android:name=".CloneLauncherActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
