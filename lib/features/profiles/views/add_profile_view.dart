@@ -44,7 +44,7 @@ class AddProfileView extends GetView<ProfileController> {
                   border: OutlineInputBorder(),
                   hintText: 'Profile 1',
                 ),
-                onSubmitted: (_) => _submit(context, appName),
+                onSubmitted: (_) => _submit(appName),
               ),
               Obx(() {
                 final String? error = controller.errorMessage.value;
@@ -60,7 +60,7 @@ class AddProfileView extends GetView<ProfileController> {
               Obx(
                 () => FilledButton(
                   onPressed:
-                      controller.isSaving.value ? null : () => _submit(context, appName),
+                      controller.isSaving.value ? null : () => _submit(appName),
                   child: const Text('Create Profile'),
                 ),
               ),
@@ -71,7 +71,7 @@ class AddProfileView extends GetView<ProfileController> {
     );
   }
 
-  Future<void> _submit(BuildContext context, String appName) async {
+  Future<void> _submit(String appName) async {
     final bool created = await controller.submit(appName: appName);
     if (created) {
       Get.back<bool>(result: true);

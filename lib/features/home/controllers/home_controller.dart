@@ -11,10 +11,9 @@ import '../../../native/native_bridge.dart';
 
 class HomeController extends GetxController {
   HomeController({
-    required VirtualizationEngine engine,
-    required NativeBridge nativeBridge,
-  })  : _engine = engine,
-        _nativeBridge = nativeBridge;
+    required this._engine,
+    required this._nativeBridge,
+  });
 
   final VirtualizationEngine _engine;
   final NativeBridge _nativeBridge;

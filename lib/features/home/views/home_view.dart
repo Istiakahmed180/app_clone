@@ -20,7 +20,7 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       appBar: AppBar(title: const Text(AppConstants.appTitle)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openAddProfile(context),
+        onPressed: _openAddProfile,
         icon: const Icon(Icons.add),
         label: const Text('Add Profile'),
       ),
@@ -86,7 +86,7 @@ class HomeView extends GetView<HomeController> {
         .toList(growable: false);
   }
 
-  Future<void> _openAddProfile(BuildContext context) async {
+  Future<void> _openAddProfile() async {
     final Object? created = await Get.toNamed<Object?>(AppRoutes.addProfile);
     if (created == true) {
       await controller.refreshAll();

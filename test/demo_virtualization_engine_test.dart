@@ -64,6 +64,21 @@ void main() {
     expect(nativeCalls, isEmpty);
   });
 
+  test('refuses to launch a profile pointing at an unsupported package', () async {
+    final VirtualProfileModel profile = await engine.createProfile(
+      packageName: 'com.example.some.other.app',
+      appName: 'Other App',
+      profileName: 'Profile 1',
+    );
+
+    expect(
+      engine.launchProfile(profile.id),
+      throwsA(isA<LaunchException>()
+          .having((LaunchException e) => e.code, 'code', 'UNSUPPORTED_PACKAGE')),
+    );
+    expect(nativeCalls, isEmpty);
+  });
+
   test('deleting a profile removes metadata only, never the package', () async {
     final VirtualProfileModel profile = await create('Profile 1');
 

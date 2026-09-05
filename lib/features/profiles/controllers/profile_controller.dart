@@ -6,7 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 
 class ProfileController extends GetxController {
-  ProfileController({required VirtualizationEngine engine}) : _engine = engine;
+  ProfileController({required this._engine});
 
   final VirtualizationEngine _engine;
 

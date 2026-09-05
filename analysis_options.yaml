@@ -21,9 +21,8 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # Named constructor parameters cannot be private in Dart, so a private final
-    # field fed by a named parameter has no initializing-formal equivalent.
-    prefer_initializing_formals: false
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

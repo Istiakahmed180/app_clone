@@ -1,6 +1,7 @@
 import '../../data/models/virtual_profile_model.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../native/native_bridge.dart';
+import '../constants/app_constants.dart';
 import '../errors/app_exception.dart';
 import 'virtualization_engine.dart';
 
@@ -11,10 +12,9 @@ import 'virtualization_engine.dart';
 /// that package's single real runtime state.
 class DemoVirtualizationEngine implements VirtualizationEngine {
   const DemoVirtualizationEngine({
-    required VirtualProfileRepository repository,
-    required NativeBridge nativeBridge,
-  })  : _repository = repository,
-        _nativeBridge = nativeBridge;
+    required this._repository,
+    required this._nativeBridge,
+  });
 
   final VirtualProfileRepository _repository;
   final NativeBridge _nativeBridge;
@@ -52,6 +52,15 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
     final VirtualProfileModel? profile = await _repository.getProfile(profileId);
     if (profile == null) {
       throw ProfileNotFoundException(profileId);
+    }
+
+    // Phase 1 can only launch the one controlled package. Fail loudly rather than
+    // silently starting the test app for a profile that points somewhere else.
+    if (profile.packageName != AppConstants.testAppPackage) {
+      throw const LaunchException(
+        'Only the controlled test application can be launched in Phase 1.',
+        code: 'UNSUPPORTED_PACKAGE',
+      );
     }
 
     // Selecting the profile has no runtime effect yet; the real package is started.
