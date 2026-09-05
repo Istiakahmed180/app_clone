@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:virtual_space_demo/core/errors/app_exception.dart';
 import 'package:virtual_space_demo/data/models/compatibility_report.dart';
+import 'package:virtual_space_demo/data/models/installed_app_model.dart';
 import 'package:virtual_space_demo/data/models/test_app_model.dart';
 import 'package:virtual_space_demo/native/native_bridge.dart';
 
@@ -121,6 +122,57 @@ void main() {
           await bridge.analyzeApk('/tmp/x.apk', 'org.example');
 
       expect(report.analysed, isFalse);
+    });
+  });
+
+  group('installed app list', () {
+    test('a successful listing is parsed', () async {
+      responses['listInstalledApps'] = <Object?, Object?>{
+        'success': true,
+        'code': 'APPS_LISTED',
+        'message': 'ok',
+        'data': <Object?, Object?>{
+          'apps': <Object?>[
+            <Object?, Object?>{'packageName': 'org.example', 'appName': 'Example'},
+          ],
+        },
+      };
+
+      final List<InstalledAppModel> apps = await bridge.listInstalledApps();
+
+      expect(apps, hasLength(1));
+      expect(apps.single.packageName, 'org.example');
+    });
+
+    test('a failed listing raises rather than looking like an empty device', () async {
+      // Returning [] would render as "No matching apps", telling the user they have no
+      // apps when the truth is that the call failed.
+      responses['listInstalledApps'] = <Object?, Object?>{
+        'success': false,
+        'code': 'BRIDGE_ERROR',
+        'message': 'Native call failed.',
+        'data': <Object?, Object?>{},
+      };
+
+      expect(bridge.listInstalledApps(), throwsA(isA<VirtualizationException>()));
+    });
+
+    test('a malformed entry is skipped rather than crashing the listing', () async {
+      responses['listInstalledApps'] = <Object?, Object?>{
+        'success': true,
+        'code': 'APPS_LISTED',
+        'message': 'ok',
+        'data': <Object?, Object?>{
+          'apps': <Object?>[
+            'not-a-map',
+            <Object?, Object?>{'packageName': 'org.example', 'appName': 'Example'},
+          ],
+        },
+      };
+
+      final List<InstalledAppModel> apps = await bridge.listInstalledApps();
+
+      expect(apps, hasLength(1));
     });
   });
 

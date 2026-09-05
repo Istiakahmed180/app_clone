@@ -94,16 +94,30 @@ class NativeBridge {
       _invokeEngine('installAppToProfile', _profileArgs(profileId, packageName));
 
   /// Launchable apps on the device, for the clone picker.
+  ///
+  /// Raises on failure rather than returning an empty list: the picker renders an empty
+  /// result as "No matching apps", which would tell the user they have no apps when in
+  /// fact the call failed. The caller already has an error path for this.
   Future<List<InstalledAppModel>> listInstalledApps({bool includeIcons = true}) async {
     final EngineResponse response = await _invokeEngine(
       'listInstalledApps',
       <String, dynamic>{'includeIcons': includeIcons},
     );
-    final List<dynamic> apps = response.data['apps'] as List<dynamic>? ?? <dynamic>[];
+
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+
+    final Object? apps = response.data['apps'];
+    if (apps is! List) {
+      return const <InstalledAppModel>[];
+    }
+
+    // A single malformed entry must not lose the whole list.
     return apps
-        .map((dynamic app) => InstalledAppModel.fromMap(
-              (app as Map<Object?, Object?>)
-                  .map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
+        .whereType<Map<Object?, Object?>>()
+        .map((Map<Object?, Object?> app) => InstalledAppModel.fromMap(
+              app.map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
             ))
         .toList(growable: false);
   }

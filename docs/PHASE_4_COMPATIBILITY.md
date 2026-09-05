@@ -160,6 +160,22 @@ Both calls now return `CompatibilityReport.unknown` when the call did not succee
 sheet says **"Not analysed"**. Covered by two tests in `test/native_bridge_test.dart` that
 failed before the change.
 
+### Fourth pass: a designed error path that could never run
+
+`NativeBridge.listInstalledApps` also ignored `response.success` and returned an **empty
+list** on failure. The picker renders an empty result as *"No matching apps — try a different
+search, or import an APK instead"*, so a bridge failure told the user they had no apps.
+
+`AppPickerController.loadApps` already catches `AppException` and the view already renders a
+*"Could not list apps"* state — that path was simply unreachable, because a failure envelope
+is data, not an exception. The call now raises `VirtualizationException` on failure, so the
+error UI that was written for this finally runs.
+
+A hard cast in the same method (`app as Map<Object?, Object?>`) would have thrown on a single
+malformed entry and lost the whole listing; entries are now filtered by type instead.
+
+Both covered by tests that failed before the change.
+
 ### Checks that found nothing
 
 Recorded so they are not repeated blindly:
