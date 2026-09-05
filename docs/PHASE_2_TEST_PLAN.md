@@ -92,7 +92,12 @@ Indicative, from device runs — wall-clock, not instrumented:
 1. **Cold-start engine fallback** silently defeated virtualization — reported success while
    launching the app unvirtualized. Fixed via a public-API warm-up. See
    `VIRTUALIZATION_ENGINE.md`.
-2. **Rename dialog crash** — `_dependents.isEmpty` assertion in `InheritedElement`. The rename
+2. **Second profile creation failed with a null service binder** — caused by calling the
+   backend's `forceReinitialize()` twice inside its 50 ms rate-limit window. Fixed with an
+   interval guard plus a bounded retry past the backend's 2 s backoff; engine calls now run on
+   a background executor so the retry cannot block the UI. Re-verified: two profiles created
+   back-to-back, both `Ready` with `user 0` / `user 1`.
+3. **Rename dialog crash** — `_dependents.isEmpty` assertion in `InheritedElement`. The rename
    dialog now owns its `TextEditingController` in a `StatefulWidget` instead of disposing it
    from the dialog future. Verified 3/3 plus a clean-install run.
 

@@ -98,6 +98,32 @@ produces `ProxyActivity$P0`.
 
 This is why the adapter never treats an engine "success" as proof on its own.
 
+### 1b. Service-creation rate limiting (worked around)
+
+`forceReinitialize()` must not be called back-to-back. It clears the binder cache and then
+re-fetches, but Bcore rate-limits service creation to one attempt per 50 ms and returns the
+just-cleared (null) reference inside that window. Two rapid warm-ups therefore leave the
+service null, and the next call throws:
+
+```
+Attempt to invoke interface method '...IBPackageManagerService.installPackageAsUser(...)'
+on a null object reference
+```
+
+This was self-inflicted: the first version of the warm-up called `forceReinitialize()` from
+both `isPackageInstalled` and `installPackage`, which are invoked microseconds apart when a
+profile is created. It surfaced as the *second* profile creation failing while the first
+succeeded.
+
+**Workaround:** the adapter guards warm-ups behind a 1 s interval, no longer warms up in
+`isPackageInstalled`, and retries once past Bcore's own 2 s failure backoff
+(`RETRY_TIMEOUT_MS`) before giving up. Because that retry sleeps, all engine calls were moved
+off the platform thread onto a single background executor in `NativeBridge`, with results
+posted back to the main looper.
+
+Note the failure was reported honestly throughout: the error reached the UI and the profile was
+rolled back rather than left half-created.
+
 ### 2. `isRunningApplication` always fails (accepted limitation)
 
 ```

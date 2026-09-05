@@ -3,6 +3,7 @@ package com.example.virtualspacedemo.native.blackbox
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import com.example.virtualspacedemo.native.EngineAvailability
 import com.example.virtualspacedemo.native.EngineErrorCodes
 import com.example.virtualspacedemo.native.EngineResult
@@ -23,6 +24,8 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     @Volatile
     private var initialized = false
+
+    private var lastWarmUpAt = 0L
 
     override fun attachBaseContext(application: Application, base: Context) {
         try {
@@ -60,13 +63,51 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
      * every virtual user and launching it unvirtualized.
      *
      * `forceReinitialize()` is Bcore's own public API and populates that cache, so the
-     * engine is not patched or reflected into. Called before any package-manager work.
+     * engine is not patched or reflected into.
+     *
+     * It must NOT be called back-to-back. It clears the cache and then re-fetches, but
+     * Bcore rate-limits service creation to one attempt per 50 ms and returns the
+     * (just-cleared, null) reference inside that window — so two rapid warm-ups leave the
+     * service null and the next call throws an NPE. Hence the interval guard.
      */
-    private fun warmUpPackageService() {
+    @Synchronized
+    private fun warmUpPackageService(force: Boolean = false) {
+        val now = SystemClock.elapsedRealtime()
+        if (!force && now - lastWarmUpAt < WARM_UP_MIN_INTERVAL_MS) {
+            return
+        }
+        lastWarmUpAt = now
         try {
             BlackBoxCore.getBPackageManager().forceReinitialize()
         } catch (error: Throwable) {
             Slog.w(Slog.ENGINE, "Package service warm-up failed: ${error.message}")
+        }
+    }
+
+    /**
+     * Retries once past Bcore's failure backoff.
+     *
+     * After a service creation failure Bcore refuses to rebuild the binder for
+     * [RETRY_TIMEOUT_MS], returning null and throwing an NPE on every call in between.
+     * Waiting out that window and forcing a rebuild recovers without touching the engine.
+     * Callers run on a background thread, so this never blocks the UI.
+     */
+    private fun withServiceRetry(block: () -> EngineResult<Unit>): EngineResult<Unit> {
+        val first = runCatching(block).getOrElse { error ->
+            EngineResult.Failure(EngineErrorCodes.ENGINE_INITIALIZATION_FAILED, error.message.orEmpty())
+        }
+        if (first is EngineResult.Success) {
+            return first
+        }
+
+        Slog.w(Slog.ENGINE, "Engine call failed; retrying after service backoff")
+        SystemClock.sleep(RETRY_TIMEOUT_MS + 200L)
+        warmUpPackageService(force = true)
+        return runCatching(block).getOrElse { error ->
+            EngineResult.Failure(
+                EngineErrorCodes.ENGINE_INITIALIZATION_FAILED,
+                error.message ?: "Engine service unavailable.",
+            )
         }
     }
 
@@ -125,17 +166,23 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     override fun installPackage(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.APP_INSTALL_FAILED) {
-            warmUpPackageService()
-            val result = BlackBoxCore.get().installPackageAsUser(packageName, virtualUserId)
-            if (result != null && result.success) {
-                Slog.i(Slog.INSTALL, "Installed $packageName into user $virtualUserId")
-                EngineResult.ok()
-            } else {
-                val reason = result?.msg ?: "unknown engine error"
-                Slog.e(Slog.INSTALL, "Install of $packageName failed: $reason")
-                EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
+            withServiceRetry {
+                warmUpPackageService()
+                doInstall(packageName, virtualUserId)
             }
         }
+
+    private fun doInstall(packageName: String, virtualUserId: Int): EngineResult<Unit> {
+        val result = BlackBoxCore.get().installPackageAsUser(packageName, virtualUserId)
+        return if (result != null && result.success) {
+            Slog.i(Slog.INSTALL, "Installed $packageName into user $virtualUserId")
+            EngineResult.ok()
+        } else {
+            val reason = result?.msg ?: "unknown engine error"
+            Slog.e(Slog.INSTALL, "Install of $packageName failed: $reason")
+            EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
+        }
+    }
 
     override fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.PROFILE_DELETE_FAILED) {
@@ -145,7 +192,6 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     override fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean =
         runCatching {
-            warmUpPackageService()
             BlackBoxCore.get().isInstalled(packageName, virtualUserId)
         }.getOrDefault(false)
 
@@ -204,5 +250,11 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
     private companion object {
         const val MIN_SDK = Build.VERSION_CODES.LOLLIPOP
         val SUPPORTED_ABIS = setOf("arm64-v8a", "armeabi-v7a")
+
+        /** Comfortably above Bcore's 50 ms service-creation rate limit. */
+        const val WARM_UP_MIN_INTERVAL_MS = 1_000L
+
+        /** Matches Bcore's own RETRY_TIMEOUT_MS failure backoff. */
+        const val RETRY_TIMEOUT_MS = 2_000L
     }
 }

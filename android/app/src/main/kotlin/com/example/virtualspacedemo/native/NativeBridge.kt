@@ -1,7 +1,10 @@
 package com.example.virtualspacedemo.native
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import com.example.virtualspacedemo.VirtualSpaceApplication
+import java.util.concurrent.Executors
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -21,6 +24,27 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val engine = RealVirtualizationEngine(appContext, VirtualSpaceApplication.engine)
     private var channel: MethodChannel? = null
 
+    // Engine calls can install packages and wait out the backend's service backoff, so they
+    // must never run on the platform thread. Results are posted back to the main looper,
+    // which MethodChannel.Result requires.
+    private val engineExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "virtual-space-engine")
+    }
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** Runs [work] off the platform thread and replies on the main looper. */
+    private fun async(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
+        engineExecutor.execute {
+            val response = try {
+                work()
+            } catch (error: Throwable) {
+                Slog.e(Slog.ENGINE, "Engine work failed", error)
+                failure("BRIDGE_ERROR", error.message ?: "Native call failed.")
+            }
+            mainHandler.post { result.success(response) }
+        }
+    }
+
     fun attach(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, CHANNEL_NAME).also { it.setMethodCallHandler(this) }
     }
@@ -28,6 +52,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     fun detach() {
         channel?.setMethodCallHandler(null)
         channel = null
+        engineExecutor.shutdown()
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -51,7 +76,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "isVirtualizationAvailable" -> result.success(engine.availability())
 
             "initializeVirtualization" ->
-                result.success(engine.initialize().toEnvelope("ENGINE_READY", "Engine ready."))
+                async(result) { engine.initialize().toEnvelope("ENGINE_READY", "Engine ready.") }
 
             "isAppSupported" -> {
                 val packageName = call.requiredPackage(result) ?: return
@@ -83,58 +108,58 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "installAppToProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     engine.installAppToProfile(profileId, packageName)
-                        .toEnvelope("APP_INSTALLED", "Application installed successfully."),
-                )
+                        .toEnvelope("APP_INSTALLED", "Application installed successfully.")
+                }
             }
 
             "uninstallAppFromProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     engine.uninstallAppFromProfile(profileId, packageName)
-                        .toEnvelope("APP_UNINSTALLED", "Application removed from profile."),
-                )
+                        .toEnvelope("APP_UNINSTALLED", "Application removed from profile.")
+                }
             }
 
             "isAppInstalledInProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     success(
                         "PROFILE_STATE",
                         "Profile state read.",
                         engine.profileState(profileId, packageName),
-                    ),
-                )
+                    )
+                }
             }
 
             "launchProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     engine.launchProfile(profileId, packageName)
-                        .toEnvelope("PROFILE_LAUNCHED", "Virtual application launched."),
-                )
+                        .toEnvelope("PROFILE_LAUNCHED", "Virtual application launched.")
+                }
             }
 
             "stopProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     engine.stopProfile(profileId, packageName)
-                        .toEnvelope("PROFILE_STOPPED", "Virtual application stopped."),
-                )
+                        .toEnvelope("PROFILE_STOPPED", "Virtual application stopped.")
+                }
             }
 
             "deleteProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                result.success(
+                async(result) {
                     engine.deleteProfile(profileId, packageName)
-                        .toEnvelope("PROFILE_DELETED", "Virtual environment removed."),
-                )
+                        .toEnvelope("PROFILE_DELETED", "Virtual environment removed.")
+                }
             }
 
             // Phase 1 path, kept so the normal (unvirtualized) launch stays testable.
