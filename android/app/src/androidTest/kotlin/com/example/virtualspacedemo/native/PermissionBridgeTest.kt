@@ -1,7 +1,9 @@
 package com.example.virtualspacedemo.native
 
+import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -159,6 +161,34 @@ class PermissionBridgeTest {
         )
     }
 
+    /**
+     * The production entry point, not the test seam.
+     *
+     * The other cases go through the injectable overload, so the two lines that wire an
+     * Activity into it were themselves uncovered. `requestPermissions` is final and cannot
+     * be stubbed, but `checkSelfPermission` can — and for an already-granted request the
+     * bridge never asks, so this path exercises the real wiring end to end.
+     */
+    @Test
+    fun theActivityOverloadUsesTheActivitysOwnPermissionState() {
+        var outcome: PermissionBridge.Outcome? = null
+
+        // Activity's constructor builds a Handler, so it needs a Looper.
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val activity = object : Activity() {
+                override fun checkSelfPermission(permission: String): Int =
+                    PackageManager.PERMISSION_GRANTED
+            }
+            PermissionBridge().request(activity, listOf(camera, audio)) { outcome = it }
+        }
+
+        assertTrue(outcome is PermissionBridge.Outcome.Answered)
+        assertEquals(
+            mapOf(camera to true, audio to true),
+            (outcome as PermissionBridge.Outcome.Answered).grants,
+        )
+    }
+
     @Test
     fun anotherComponentsRequestCodeIsLeftAlone() {
         val bridge = PermissionBridge()
@@ -173,5 +203,58 @@ class PermissionBridgeTest {
 
         assertEquals(false, consumed)
         assertNull("an unrelated result must not answer our request", outcome)
+    }
+}
+
+/**
+ * What the user is finally told.
+ *
+ * `permissionEnvelope` is where the original defect lived: a refused request was turned
+ * into a success envelope, so the UI reported a decision the user never made. The three
+ * outcomes must stay distinguishable at the channel boundary.
+ */
+@RunWith(AndroidJUnit4::class)
+class PermissionEnvelopeTest {
+
+    private val context: android.content.Context =
+        androidx.test.core.app.ApplicationProvider.getApplicationContext()
+    private val bridge = NativeBridge(context)
+    private val report = AppCompatibilityAnalyzer(context).analyze(TestAppManager.TEST_APP_PACKAGE)
+
+    @Test
+    fun anAnsweredRequestSucceedsAndSplitsGrantedFromDenied() {
+        val envelope = bridge.permissionEnvelope(
+            report,
+            PermissionBridge.Outcome.Answered(
+                mapOf(
+                    "android.permission.CAMERA" to true,
+                    "android.permission.RECORD_AUDIO" to false,
+                ),
+            ),
+        )
+
+        assertEquals(true, envelope["success"])
+        assertEquals("PERMISSIONS_REQUESTED", envelope["code"])
+
+        @Suppress("UNCHECKED_CAST")
+        val data = envelope["data"] as Map<String, Any?>
+        assertEquals(listOf("android.permission.CAMERA"), data["granted"])
+        assertEquals(listOf("android.permission.RECORD_AUDIO"), data["denied"])
+    }
+
+    @Test
+    fun aBusyRequestIsAFailureNotASuccess() {
+        val envelope = bridge.permissionEnvelope(report, PermissionBridge.Outcome.Busy)
+
+        assertEquals(false, envelope["success"])
+        assertEquals("PERMISSION_REQUEST_IN_PROGRESS", envelope["code"])
+    }
+
+    @Test
+    fun aCancelledRequestIsAFailureNotASuccess() {
+        val envelope = bridge.permissionEnvelope(report, PermissionBridge.Outcome.Cancelled)
+
+        assertEquals(false, envelope["success"])
+        assertEquals("PERMISSION_REQUEST_CANCELLED", envelope["code"])
     }
 }

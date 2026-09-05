@@ -305,7 +305,8 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
      * "The user answered" and "we never asked" must not look the same to the UI, or it
      * would report a decision the user never made.
      */
-    private fun permissionEnvelope(
+    @androidx.annotation.VisibleForTesting
+    internal fun permissionEnvelope(
         report: AppCompatibilityAnalyzer.Report,
         outcome: PermissionBridge.Outcome,
     ): Map<String, Any?> = when (outcome) {

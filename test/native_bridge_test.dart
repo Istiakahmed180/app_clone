@@ -176,6 +176,80 @@ void main() {
     });
   });
 
+  group('guest permission requests', () {
+    test('an answered request reports what was granted and what is still missing', () async {
+      responses['requestGuestPermissions'] = <Object?, Object?>{
+        'success': true,
+        'code': 'PERMISSIONS_REQUESTED',
+        'message': 'ok',
+        'data': <Object?, Object?>{
+          'granted': <Object?>['android.permission.CAMERA'],
+          'denied': <Object?>['android.permission.RECORD_AUDIO'],
+          'stillMissing': <Object?>['android.permission.RECORD_AUDIO'],
+        },
+      };
+
+      final PermissionRequestResult result =
+          await bridge.requestGuestPermissions('org.example');
+
+      expect(result.granted, <String>['android.permission.CAMERA']);
+      expect(result.stillMissing, <String>['android.permission.RECORD_AUDIO']);
+      expect(result.allGranted, isFalse);
+    });
+
+    test('a fully granted request reports nothing still missing', () async {
+      responses['requestGuestPermissions'] = <Object?, Object?>{
+        'success': true,
+        'code': 'PERMISSIONS_REQUESTED',
+        'message': 'ok',
+        'data': <Object?, Object?>{
+          'granted': <Object?>['android.permission.CAMERA'],
+          'denied': <Object?>[],
+          'stillMissing': <Object?>[],
+        },
+      };
+
+      expect((await bridge.requestGuestPermissions('org.example')).allGranted, isTrue);
+    });
+
+    test('a request that was never shown raises rather than looking answered', () async {
+      // The user decided nothing here; reporting success would claim otherwise.
+      responses['requestGuestPermissions'] = <Object?, Object?>{
+        'success': false,
+        'code': 'PERMISSION_REQUEST_IN_PROGRESS',
+        'message': 'Another permission request is already open.',
+        'data': <Object?, Object?>{},
+      };
+
+      expect(
+        bridge.requestGuestPermissions('org.example'),
+        throwsA(isA<VirtualizationException>().having(
+          (VirtualizationException e) => e.code,
+          'code',
+          'PERMISSION_REQUEST_IN_PROGRESS',
+        )),
+      );
+    });
+
+    test('an interrupted request raises with its own code', () async {
+      responses['requestGuestPermissions'] = <Object?, Object?>{
+        'success': false,
+        'code': 'PERMISSION_REQUEST_CANCELLED',
+        'message': 'The permission request was interrupted.',
+        'data': <Object?, Object?>{},
+      };
+
+      expect(
+        bridge.requestGuestPermissions('org.example'),
+        throwsA(isA<VirtualizationException>().having(
+          (VirtualizationException e) => e.code,
+          'code',
+          'PERMISSION_REQUEST_CANCELLED',
+        )),
+      );
+    });
+  });
+
   test('a platform failure becomes a NativeBridgeException', () {
     expect(bridge.getPlatformInfo(), throwsA(isA<NativeBridgeException>()));
   });

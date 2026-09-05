@@ -188,6 +188,39 @@ Recorded so they are not repeated blindly:
   none and are not. VLC does contain a few incidental `com.google.android.gms` references
   without the markers, and not flagging it is the right call — it runs without Play Services.
 
+## Consent-path coverage
+
+The permission bridge began with no tests at all, on code that decides what the user is told
+about their own consent. Coverage was added in stages, each closing a gap the previous one
+left:
+
+| Covered | Where |
+| --- | --- |
+| Already-granted / empty requests answer without a dialog | `PermissionBridgeTest` |
+| Only missing permissions are asked for | `PermissionBridgeTest` |
+| `Busy` and `Cancelled` are distinct from `Answered` | `PermissionBridgeTest` |
+| A late system result cannot answer a cancelled request twice | `PermissionBridgeTest` |
+| Per-permission grant/deny mapping | `PermissionBridgeTest` |
+| Another component's request code is left alone | `PermissionBridgeTest` |
+| **The production `request(Activity, …)` entry point** | `PermissionBridgeTest` |
+| **Outcome → channel envelope mapping** | `PermissionEnvelopeTest` |
+| **Dart side: granted/denied parsing, and raising on Busy/Cancelled** | `test/native_bridge_test.dart` |
+
+The last three were added after noticing that the earlier tests all went through the
+injectable seam, so the two lines wiring a real `Activity` into it were themselves untested —
+as was `permissionEnvelope`, which is precisely where the original defect lived.
+
+`Activity`'s constructor builds a `Handler`, so the entry-point test constructs it inside
+`runOnMainSync`. `requestPermissions` is final and cannot be stubbed, so that test covers the
+already-granted path, where the bridge correctly never asks.
+
+**Validated by mutation:** re-introducing the original bug — `Busy` mapped to a success
+envelope — fails `PermissionEnvelopeTest.aBusyRequestIsAFailureNotASuccess`. Reverted, and the
+suite returns to green.
+
+`pending` is `@Volatile`: it is written from the platform thread by `request` and from the main
+thread by `onRequestPermissionsResult` and `cancelPending`.
+
 ## Known limitations
 
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.
