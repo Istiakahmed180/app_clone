@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../core/constants/app_constants.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
+import '../data/models/engine_result.dart';
 import '../data/models/platform_info.dart';
 import '../data/models/test_app_model.dart';
 
@@ -59,10 +60,73 @@ class NativeBridge {
     throw LaunchException(_launchMessageFor(code), code: code);
   }
 
-  Future<Map<String, dynamic>> _invokeMap(String method) async {
+  // ---------------------------------------------------------------------------
+  // Phase 2: virtualization engine
+  // ---------------------------------------------------------------------------
+
+  Future<VirtualizationAvailability> isVirtualizationAvailable() async {
+    final Map<String, dynamic> result = await _invokeMap('isVirtualizationAvailable');
+    return VirtualizationAvailability.fromMap(result);
+  }
+
+  Future<EngineResponse> initializeVirtualization() =>
+      _invokeEngine('initializeVirtualization');
+
+  Future<bool> isAppSupported(String packageName) async {
+    final EngineResponse response =
+        await _invokeEngine('isAppSupported', <String, dynamic>{'packageName': packageName});
+    return response.data['supported'] as bool? ?? false;
+  }
+
+  Future<bool> checkSecureEnvironmentRequirement(String packageName) async {
+    final EngineResponse response = await _invokeEngine(
+      'checkSecureEnvironmentRequirement',
+      <String, dynamic>{'packageName': packageName},
+    );
+    return response.data['requiresSecureEnv'] as bool? ?? false;
+  }
+
+  Future<EngineResponse> installAppToProfile(String profileId, String packageName) =>
+      _invokeEngine('installAppToProfile', _profileArgs(profileId, packageName));
+
+  Future<EngineResponse> uninstallAppFromProfile(String profileId, String packageName) =>
+      _invokeEngine('uninstallAppFromProfile', _profileArgs(profileId, packageName));
+
+  Future<VirtualProfileState> profileState(String profileId, String packageName) async {
+    final EngineResponse response = await _invokeEngine(
+      'isAppInstalledInProfile',
+      _profileArgs(profileId, packageName),
+    );
+    return VirtualProfileState.fromMap(response.data);
+  }
+
+  Future<EngineResponse> launchProfile(String profileId, String packageName) =>
+      _invokeEngine('launchProfile', _profileArgs(profileId, packageName));
+
+  Future<EngineResponse> stopProfile(String profileId, String packageName) =>
+      _invokeEngine('stopProfile', _profileArgs(profileId, packageName));
+
+  Future<EngineResponse> deleteVirtualProfile(String profileId, String packageName) =>
+      _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
+
+  Map<String, dynamic> _profileArgs(String profileId, String packageName) =>
+      <String, dynamic>{'profileId': profileId, 'packageName': packageName};
+
+  Future<EngineResponse> _invokeEngine(
+    String method, [
+    Map<String, dynamic>? arguments,
+  ]) async {
+    final Map<String, dynamic> result = await _invokeMap(method, arguments);
+    return EngineResponse.fromMap(result);
+  }
+
+  Future<Map<String, dynamic>> _invokeMap(
+    String method, [
+    Map<String, dynamic>? arguments,
+  ]) async {
     try {
       final Map<Object?, Object?>? raw =
-          await _channel.invokeMethod<Map<Object?, Object?>>(method);
+          await _channel.invokeMethod<Map<Object?, Object?>>(method, arguments);
       if (raw == null) {
         throw NativeBridgeException('The native bridge returned no data for $method.');
       }

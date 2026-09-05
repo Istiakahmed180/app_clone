@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
 
 enum ProfileCardAction { rename, delete }
@@ -8,7 +9,7 @@ enum ProfileCardAction { rename, delete }
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
     required this.profile,
-    required this.statusLabel,
+    required this.state,
     required this.canLaunch,
     required this.onLaunch,
     required this.onAction,
@@ -16,10 +17,22 @@ class ProfileCard extends StatelessWidget {
   });
 
   final VirtualProfileModel profile;
-  final String statusLabel;
+  final VirtualProfileState state;
   final bool canLaunch;
   final VoidCallback onLaunch;
   final ValueChanged<ProfileCardAction> onAction;
+
+  /// Status is derived from what the engine reports, never assumed from the fact that
+  /// a profile row exists.
+  ({String label, Color color}) _status(ColorScheme scheme) {
+    if (state.running) {
+      return (label: 'Running', color: scheme.primary);
+    }
+    if (state.installed) {
+      return (label: 'Ready', color: scheme.tertiary);
+    }
+    return (label: 'Not installed', color: scheme.error);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +79,26 @@ class ProfileCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 8.h),
-            Chip(
-              label: Text(statusLabel),
-              visualDensity: VisualDensity.compact,
-              side: BorderSide(color: theme.colorScheme.outlineVariant),
+            Builder(
+              builder: (BuildContext context) {
+                final ({String label, Color color}) status = _status(theme.colorScheme);
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(Icons.circle, size: 10.r, color: status.color),
+                    SizedBox(width: 6.w),
+                    Text(status.label, style: theme.textTheme.labelLarge),
+                    if (state.virtualUserId != null) ...<Widget>[
+                      SizedBox(width: 8.w),
+                      Text(
+                        'user ${state.virtualUserId}',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
             SizedBox(height: 8.h),
             Align(

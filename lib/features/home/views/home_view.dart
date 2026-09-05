@@ -35,7 +35,10 @@ class HomeView extends GetView<HomeController> {
             child: ListView(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 96.h),
               children: <Widget>[
-                const PhaseNotice(),
+                PhaseNotice(
+                  virtualizationActive: controller.providesRuntimeIsolation,
+                  problem: controller.virtualizationProblem,
+                ),
                 TestAppStatusCard(
                   testApp: controller.testApp.value,
                   platformInfo: controller.platformInfo.value,
@@ -77,8 +80,8 @@ class HomeView extends GetView<HomeController> {
     return controller.profiles
         .map((VirtualProfileModel profile) => ProfileCard(
               profile: profile,
-              statusLabel: 'Demo Virtual Profile',
-              canLaunch: controller.isTestAppInstalled,
+              state: controller.stateFor(profile),
+              canLaunch: controller.stateFor(profile).installed,
               onLaunch: () => _launch(context, profile),
               onAction: (ProfileCardAction action) =>
                   _handleAction(context, profile, action),
@@ -100,7 +103,7 @@ class HomeView extends GetView<HomeController> {
     }
     _showMessage(
       context,
-      error ?? 'Opened the real ${profile.appName}. State is shared across profiles.',
+      error ?? 'Launched ${profile.appName} in ${profile.profileName}.',
     );
   }
 

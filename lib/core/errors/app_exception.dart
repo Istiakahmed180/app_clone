@@ -38,3 +38,11 @@ class LaunchException extends AppException {
 
   final String code;
 }
+
+/// A virtualization engine operation failed. [code] is the stable native error code
+/// (see EngineErrorCodes.kt) so callers can branch without parsing messages.
+class VirtualizationException extends AppException {
+  const VirtualizationException(super.message, {required this.code});
+
+  final String code;
+}

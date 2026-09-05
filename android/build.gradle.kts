@@ -2,6 +2,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // FreeReflection (a Bcore runtime dependency) is published only on JitPack.
+        // Build-time resolution only; the app never downloads code at runtime.
+        maven { url = uri("https://www.jitpack.io") }
     }
 }
 

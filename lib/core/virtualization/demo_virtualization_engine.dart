@@ -1,3 +1,4 @@
+import '../../data/models/engine_result.dart';
 import '../../data/models/virtual_profile_model.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../native/native_bridge.dart';
@@ -21,6 +22,15 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
 
   @override
   bool get providesRuntimeIsolation => false;
+
+  @override
+  Future<void> initialize() async {
+    // Nothing to prepare: this engine has no backend.
+  }
+
+  @override
+  Future<VirtualProfileState> profileState(String profileId) async =>
+      VirtualProfileState.unknown;
 
   @override
   Future<List<VirtualProfileModel>> getProfiles() => _repository.getProfiles();

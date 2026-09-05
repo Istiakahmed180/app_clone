@@ -46,6 +46,18 @@ flutter {
 }
 
 dependencies {
+    // Vendored virtualization engine (NewBlackbox / Bcore, Apache-2.0).
+    // Prebuilt AAR rather than a source subproject: Bcore's Gradle DSL predates
+    // AGP 9, and its AIDL/ndkBuild steps are already compiled into the archive.
+    implementation(files("libs/bcore.aar"))
+    implementation(files("libs/black-reflection.jar"))
+
+    // Runtime dependencies Bcore expects but an AAR cannot declare for itself.
+    implementation("com.moandjiezana.toml:toml4j:0.7.2")
+    implementation("com.github.tiann:FreeReflection:3.2.2")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+
     androidTestImplementation("androidx.test:core-ktx:1.6.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")

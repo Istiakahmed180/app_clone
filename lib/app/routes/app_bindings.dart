@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../../core/virtualization/demo_virtualization_engine.dart';
+import '../../core/virtualization/real_virtualization_engine.dart';
 import '../../core/virtualization/virtualization_engine.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../features/home/controllers/home_controller.dart';
@@ -15,8 +15,10 @@ class AppBinding extends Bindings {
   void dependencies() {
     Get.put<NativeBridge>(NativeBridge(), permanent: true);
     Get.put<VirtualProfileRepository>(VirtualProfileRepository(), permanent: true);
+    // Phase 2 backs profiles with the native container engine. DemoVirtualizationEngine
+    // is kept in the tree as the reference no-op implementation of the same interface.
     Get.put<VirtualizationEngine>(
-      DemoVirtualizationEngine(
+      RealVirtualizationEngine(
         repository: Get.find<VirtualProfileRepository>(),
         nativeBridge: Get.find<NativeBridge>(),
       ),

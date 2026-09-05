@@ -1,3 +1,4 @@
+import '../../data/models/engine_result.dart';
 import '../../data/models/virtual_profile_model.dart';
 
 /// Integration boundary for a future, real Android virtualization engine.
@@ -23,4 +24,11 @@ abstract class VirtualizationEngine {
   ///
   /// The UI uses this to describe honestly what a launch actually does.
   bool get providesRuntimeIsolation;
+
+  /// Engine-observed state for one profile. Implementations that keep no runtime
+  /// state return [VirtualProfileState.unknown].
+  Future<VirtualProfileState> profileState(String profileId);
+
+  /// Prepares the backend. Safe to call more than once.
+  Future<void> initialize();
 }

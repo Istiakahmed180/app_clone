@@ -1,9 +1,44 @@
-# Virtual Space Demo — Phase 1
+# Virtual Space — Phase 2
 
-**Phase 1 is a controlled prototype. It does not yet provide true Android application virtualization.**
+**Phase 2 introduces the first real virtualization-backed execution path.**
 
-The current profiles are metadata-level virtual profiles. The controlled test APK is launched
-normally through Android's official launcher APIs.
+**The current supported target is the controlled Virtual Test App.**
+
+**Arbitrary third-party application compatibility is not yet guaranteed.**
+
+Profiles are now backed by real containers. Each profile runs the controlled test application
+in its own isolated storage, verified on a physical Android 15 device:
+
+| Instance | Counter | Stored name |
+| --- | --- | --- |
+| Normal installation | 5 | Normal |
+| Virtual Profile 1 | 10 | Alice |
+| Virtual Profile 2 | 20 | Bob |
+
+All three are independent. The guest writes through its own ordinary `SharedPreferences`; no
+per-profile state is faked in Flutter.
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| `docs/ARCHITECTURE.md` | Layering, the backend swap point, profile identity, consistency rules |
+| `docs/VIRTUALIZATION_ENGINE.md` | Engine selection, toolchain reconciliation, backend defects and workarounds |
+| `docs/SECURITY.md` | Security posture, `REQUIRE_SECURE_ENV`, data boundaries |
+| `docs/DEPENDENCY_LICENSE_AUDIT.md` | Licences, and **open provenance risk** |
+| `docs/PHASE_2_TEST_PLAN.md` | Test plan, results, evidence, performance baseline |
+
+> **Before distributing:** `docs/DEPENDENCY_LICENSE_AUDIT.md` records two unresolved issues —
+> stripped attribution in vendored native code, and unverified VirtualApp/VirtualAPK licence
+> ancestry. Both should be closed before any public release.
+
+---
+
+## Phase 1 history
+
+Phase 1 was a controlled prototype with metadata-only profiles that launched the test APK
+normally. Its `DemoVirtualizationEngine` remains in the tree as the reference no-op
+implementation of the same interface.
 
 ---
 
@@ -13,19 +48,16 @@ A long-term platform for Android application virtualization / multiple accounts,
 category as Parallel Space or Dual Space. This repository holds the foundation for that platform,
 not the platform itself.
 
-## 2. Phase 1 scope
-
-Phase 1 establishes the skeleton that a real engine can later be dropped into:
+## 2. Phase 2 scope
 
 | Delivered | Explicitly NOT delivered |
 | --- | --- |
-| Clean Flutter + Kotlin architecture | Any real virtualization |
-| A single `MethodChannel` bridge | UID / process / package / storage isolation |
-| A controlled native test APK with persistent state | Android framework or Binder hooks |
-| Virtual profile CRUD + local persistence | APK cloning or injection |
-| Package detection via `PackageManager` | Sandboxing, permission virtualization |
-| Normal launch of the test APK | Third-party engines (BlackBox, VirtualApp, …) |
-| A replaceable `VirtualizationEngine` abstraction | Multiple simultaneous runtime instances |
+| Real container-backed profiles (NewBlackbox/Bcore) | Arbitrary third-party app support |
+| Isolated per-profile application storage | GMS / Play Store / Firebase virtualization |
+| Multiple simultaneous instances of one app | Camera / mic / location / notification virtualization |
+| Engine-reported install and launch state | Device-fingerprint or location spoofing |
+| `REQUIRE_SECURE_ENV` admission check | Any security bypass, VPN mode or anti-detection |
+| A backend-swappable adapter boundary | Remote APK download or code update |
 
 ## 3. Directory structure
 
@@ -49,10 +81,11 @@ virtual_space_demo/lib/
 │   ├── services/profile_storage.dart  storage interface + SharedPreferences impl
 │   ├── utils/app_logger.dart          dart:developer wrapper (no print())
 │   └── virtualization/
-│       ├── virtualization_engine.dart      the Phase 2 integration boundary
-│       └── demo_virtualization_engine.dart Phase 1 metadata-only implementation
+│       ├── virtualization_engine.dart      the integration boundary
+│       ├── real_virtualization_engine.dart Phase 2 container-backed implementation
+│       └── demo_virtualization_engine.dart Phase 1 metadata-only reference
 ├── data/
-│   ├── models/{virtual_profile_model, test_app_model, platform_info}.dart
+│   ├── models/{virtual_profile_model, test_app_model, platform_info, engine_result}.dart
 │   └── repositories/virtual_profile_repository.dart
 ├── native/native_bridge.dart          the ONLY MethodChannel caller
 ├── features/
@@ -76,11 +109,21 @@ Layering: `View → Controller → VirtualizationEngine → Repository / NativeB
 
 ```
 android/app/src/main/kotlin/com/example/virtualspacedemo/
-├── MainActivity.kt          entry point; attaches and detaches the bridge
+├── MainActivity.kt                 entry point; attaches and detaches the bridge
+├── VirtualSpaceApplication.kt      host Application; attaches the engine in every process
 └── native/
-    ├── NativeBridge.kt      MethodChannel handling and dispatch
-    ├── TestAppManager.kt    PackageManager reads (detection, metadata, device info)
-    └── AppLauncher.kt       launcher-intent creation and startActivity
+    ├── NativeBridge.kt             MethodChannel handling and dispatch
+    ├── RealVirtualizationEngine.kt application-facing virtualization API
+    ├── VirtualizationEngineAdapter.kt  backend abstraction + error codes
+    ├── VirtualProfileManager.kt    profile UUID <-> engine user id mapping
+    ├── VirtualAppInstaller.kt      installs into a container (after admission check)
+    ├── VirtualAppLauncher.kt       starts/stops the guest in a container
+    ├── AppSecurityChecker.kt       allow-list + REQUIRE_SECURE_ENV admission
+    ├── TestAppManager.kt           PackageManager reads
+    ├── AppLauncher.kt              Phase 1 normal launcher intent (kept for comparison)
+    ├── Slog.kt                     controlled logging tags
+    └── blackbox/
+        └── BlackBoxEngineAdapter.kt  the ONLY file importing top.niunaijun.*
 ```
 
 Android types (`Context`, `Intent`, `PackageManager`) never cross the channel; Flutter receives
@@ -95,7 +138,19 @@ Channel: `virtual_space/native_bridge`
 | `getPlatformInfo` | `{androidVersion, sdkInt, manufacturer, model}` |
 | `isTestAppInstalled` | `bool` |
 | `getTestAppInfo` | `{installed, packageName, appName?, versionName?, versionCode?}` |
-| `launchTestApp` | `{success: true, packageName}` or `{success: false, error: "TEST_APP_NOT_INSTALLED"}` |
+| `launchTestApp` | Phase 1 normal launch: `{success, packageName}` or `{success:false, error}` |
+| `isVirtualizationAvailable` | `{available, backend, code?, message?}` |
+| `initializeVirtualization` | envelope |
+| `isAppSupported` / `checkSecureEnvironmentRequirement` | envelope with `data` |
+| `installAppToProfile` / `uninstallAppFromProfile` | envelope |
+| `isAppInstalledInProfile` | envelope with `{installed, running, virtualUserId}` |
+| `launchProfile` / `stopProfile` / `deleteProfile` | envelope |
+
+Phase 2 calls return a structured envelope so a native failure can never read as success:
+
+```json
+{ "success": true, "code": "APP_INSTALLED", "message": "...", "data": {} }
+```
 
 Failures are returned as structured results or surfaced as typed Dart exceptions
 (`NativeBridgeException`, `LaunchException`). Nothing is hardcoded to succeed.
@@ -132,17 +187,20 @@ is never overwritten. Renaming a profile to its own current name is allowed.
 Storage sits behind the `ProfileStorage` interface so repository behaviour is unit-testable
 without a device.
 
-## 10. DemoVirtualizationEngine
+## 10. Virtualization engines
 
 `VirtualizationEngine` is an abstract interface: `createProfile`, `deleteProfile`,
-`renameProfile`, `launchProfile`, `getProfiles`, and `providesRuntimeIsolation`.
+`renameProfile`, `launchProfile`, `getProfiles`, `profileState`, `initialize` and
+`providesRuntimeIsolation`.
 
-`DemoVirtualizationEngine` is the only Phase 1 implementation. It delegates persistence to the
-repository and, on launch, starts the real installed package through `AppLauncher`. It reports
-`providesRuntimeIsolation == false`, and the home screen states that fact permanently in the UI.
+`RealVirtualizationEngine` (Phase 2, active) backs each profile with a real container through
+the native adapter. It reports `providesRuntimeIsolation == true`, but the UI only *claims*
+isolation when the native backend also confirms it is available on the device.
 
-Deleting a profile removes metadata only. The test APK is never uninstalled and its data is never
-touched.
+`DemoVirtualizationEngine` (Phase 1) remains as the reference no-op implementation.
+
+Deleting a profile removes the container and its isolated data. The normally installed test APK
+is never uninstalled and its own data is never touched — verified on device.
 
 ## 11. Installation and testing instructions
 
@@ -182,21 +240,19 @@ Manual acceptance walkthrough:
 
 ## 12. Current limitations
 
-Phase 1 does **not** provide:
+Phase 2 **does** provide isolated per-profile application storage, separate guest processes and
+multiple simultaneous instances of one app.
 
-- independent APK runtime state
-- an independent Android UID or Linux process
-- an independent package installation
-- virtual storage or virtual permissions
-- framework or Binder virtualization, process hooks, APK cloning, real sandboxing
-- multiple simultaneous runtime instances
+It does **not** provide:
 
-The following is expected and correct behaviour today:
+- support for any package other than `com.example.virtualtestapp`
+- an independent Android UID — guests run under the **host's** UID and inherit its permission
+  grants; isolation is at the container/storage level, not the kernel UID level
+- GMS, Play Store, Firebase, push, camera, mic or location virtualization
+- a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
+- any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 
-> Profile 1 → normal Test App. Profile 2 → normal Test App. Both use the same real Android
-> application state.
-
-Profile separation exists **only** inside this application's own metadata store.
+x86_64 is unsupported: Bcore ships no x86_64 native library.
 
 ## 13. Security constraints
 
@@ -206,17 +262,22 @@ Profile separation exists **only** inside this application's own metadata store.
   workaround, fingerprint spoofing, or stealth behaviour.
 - Only public, documented Android APIs are used.
 - Package visibility is scoped to one package; `QUERY_ALL_PACKAGES` is not requested.
-- No third-party virtualization or hooking framework is present, and no code from such a project
-  has been copied.
+- The virtualization backend is third-party (NewBlackbox/Bcore, Apache-2.0), vendored as a
+  prebuilt AAR and confined behind `VirtualizationEngineAdapter`. See
+  `docs/DEPENDENCY_LICENSE_AUDIT.md` for open provenance risk and `docs/SECURITY.md` for the
+  backend options Virtual Space pins off (`FLAG_SECURE` defeat, root hiding, VPN mode).
+- Applications declaring `REQUIRE_SECURE_ENV` are rejected, with no override path.
 
-## 14. Future Phase 2 direction
+## 14. Recommended Phase 3 direction
 
-Research and prototype a real Android application virtualization engine using a legally
-compatible open-source foundation, with the current `VirtualizationEngine` abstraction acting as
-the integration boundary.
+Not started. In rough priority order:
 
-Phase 2 is investigation, not implementation. It should establish, before any code is written:
-licence compatibility of any candidate foundation; what a real engine must do about UID, process,
-storage and permission isolation; which Android versions and OEM builds it can support; how
-Google Play policy and Play Integrity affect distribution; and what the maintenance cost is when
-a new Android release changes the private framework surface such an engine depends on.
+1. **Close the licence provenance question** in `docs/DEPENDENCY_LICENSE_AUDIT.md` and restore
+   third-party attribution notices. This gates any distribution and may gate the backend choice.
+2. **Confirm the canonical `REQUIRE_SECURE_ENV` property name** against Google's published
+   container requirement.
+3. **Broaden device coverage** — other vendors, Android 13/14/16 — before claiming support.
+4. **Decide on the backend**: patch Bcore's `isRunningApplication` and cold-start fallback
+   upstream, or move to another backend behind the existing adapter.
+5. Only then consider a second controlled application, and the permission/UID model needed for
+   real third-party apps.
