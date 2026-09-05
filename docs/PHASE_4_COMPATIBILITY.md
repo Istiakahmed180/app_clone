@@ -250,6 +250,45 @@ confirming, `dumpsys shortcut` shows it pinned with the intent
 `cmp=…/.CloneLauncherActivity` carrying the profile id. Firing that intent from a **cold
 start** (app force-stopped) brought up `ProxyActivity$P0` with `org.videolan.vlc` running.
 
+## Guest notifications — measured, and they work
+
+This was listed for several rounds as a missing feature. That was an **assumption, never
+tested**. Measured on device, it turns out to work already, so nothing had to be built.
+
+Method: a "Post notification" button was added to the controlled test app, posting text that
+carries that instance's own `storedName` and `counter` — so a notification can be traced back
+to the instance that sent it.
+
+Result, with the normal installation and one clone both holding distinct state:
+
+```
+android.text=String (name=CloneA counter=3)    <- the clone
+android.text=String (name=Normal counter=7)    <- the normal installation
+```
+
+Both coexist in the shade, each carrying its own isolated state. Tapping the clone's
+notification opened `ProxyActivity$P1` showing `Counter: 3 / CloneA` — the clone, not the
+normal app.
+
+### How it actually works, and what that costs
+
+| Observation | Evidence |
+| --- | --- |
+| A guest notification is posted under the **host's** package | `NotificationRecord(... pkg=com.example.virtualspacedemo ... uid 10910)` versus the normal app's `pkg=com.example.virtualtestapp ... uid 10806` |
+| The engine **remaps notification ids** so clones cannot collide | guest posted id `1001`, system recorded `640142011` |
+| Title and icon still come from the guest | `android.title=(Virtual Test App)`, `icon=Icon(... pkg=com.example.virtualtestapp)` |
+| The permission is the **host's**, and the user is told so | the system dialog reads *"Allow **Virtual Space** to send you notifications?"* |
+| Force-stopping the host clears guest notifications | they are the host's notifications as far as the system is concerned |
+
+Two consequences worth stating plainly rather than discovering later:
+
+- In notification settings the user manages these under **Virtual Space**, not under the
+  cloned app, and cannot silence one clone without silencing all of them.
+- `POST_NOTIFICATIONS` is a single host-wide grant. Denying it silences every clone at once.
+  This is the same host-identity limit that applies to camera, microphone and storage, and
+  the compatibility sheet already reports it: cloning the test app showed
+  *"The clone needs 1 permission(s)"* before the grant, and the warning disappeared after.
+
 ## Known limitations
 
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.

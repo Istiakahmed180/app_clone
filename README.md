@@ -299,9 +299,9 @@ Not started. In rough priority order:
    Everything here is verified on one OnePlus device running Android 15.
 3. **Decide on the backend**: patch Bcore's broken `isRunningApplication` upstream, or move to
    another backend behind the existing adapter.
-5. **Guest notifications.** Whether they already work is untested, not known to be broken —
-   Bcore ships notification handling and the merged manifest carries `POST_NOTIFICATIONS`.
-   Measure before building anything.
+5. **Per-clone notification control.** Guest notifications already work (see
+   `docs/PHASE_4_COMPATIBILITY.md`), but they are posted under Virtual Space's identity, so a
+   user cannot silence one clone without silencing all of them.
 6. **Decide what to do about Google Play Services**, which most popular apps depend on and
    which this build does not virtualize.
 
