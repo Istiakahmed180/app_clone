@@ -56,19 +56,32 @@ index 4ffcc08..216b89a 100644
          dest.writeTypedList(this.configPreferences);
          dest.writeTypedList(this.reqFeatures);
 diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java
-index ab9983b..8a8cbd2 100644
+index ab9983b..a78f0ac 100644
 --- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java
 +++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java
-@@ -304,6 +304,13 @@ public class PackageManagerCompat {
+@@ -304,6 +304,26 @@ public class PackageManagerCompat {
          ai.processName = BPackageManagerService.fixProcessName(p.packageName, ai.packageName);
          ai.publicSourceDir = sourceDir;
          ai.sourceDir = sourceDir;
 +        // Hand the guest its split APKs as well. Leaving these null means the guest's
-+        // ClassLoader only ever opens base.apk, so classes and native libraries that live in
-+        // a split are invisible -- the app runs but anything depending on them hangs.
-+        if (p.splitCodePaths != null && p.splitCodePaths.length > 0) {
-+            ai.splitSourceDirs = p.splitCodePaths;
-+            ai.splitPublicSourceDirs = p.splitCodePaths;
++        // ClassLoader only ever opens base.apk, and a modern split install keeps its native
++        // libraries *inside* split_config.<abi>.apk (extractNativeLibs=false, so nothing is
++        // unpacked to lib/). The guest then starts but anything native never initialises --
++        // VLC, for one, sits on "Loading..." forever.
++        String[] splitPaths = p.splitCodePaths;
++        if (splitPaths == null || splitPaths.length == 0) {
++            // Apps installed on the host go through the FLAG_SYSTEM path, which never fills
++            // splitCodePaths in, so read them from the host package manager instead.
++            try {
++                splitPaths = BlackBoxCore.getPackageManager()
++                        .getApplicationInfo(p.packageName, 0).splitSourceDirs;
++            } catch (Throwable ignored) {
++                // Imported APK with no host install: it genuinely has no splits.
++            }
++        }
++        if (splitPaths != null && splitPaths.length > 0) {
++            ai.splitSourceDirs = splitPaths;
++            ai.splitPublicSourceDirs = splitPaths;
 +        }
          ai.uid = p.mExtras.appId;
  
