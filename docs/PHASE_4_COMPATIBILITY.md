@@ -568,3 +568,20 @@ Both live below the Flutter/adapter layer this project controls:
   cannot rewrite Facebook's PendingIntent call.
 
 Neither was papered over. Recorded here so the engine-upgrade decision is made on evidence.
+
+## WhatsApp AppOps crash — fix written, and why it must live in the engine
+
+The WhatsApp worker crash (`ClassCastException: Integer -> SyncNotedAppOp`, above) was traced
+to the engine's `IAppOpsManagerProxy.invoke()`, which answers `note*`/`start*` with the
+pre-Android-11 `int` MODE_ALLOWED where API 30+ expects a `SyncNotedAppOp`.
+
+The corrected engine source is written and compiles cleanly against the vendored `classes.jar`;
+it is saved as `engine-patches/0001-appops-syncnotedappop-return-type.patch`.
+
+An in-app runtime fix was attempted and does **not** work: wrapping `IAppOpsService` at both the
+`AppOpsManager` instance and the `ServiceManager` cache level, from the guest process's
+`Application.onCreate`, is overwritten because the engine re-installs its own AppOps hook every
+time it binds a guest Application (measured — the wrap logs `cache=true instance=true` yet the
+guest still receives the engine's Integer-returning proxy). The fix therefore has to be in the
+engine. Applying it needs an engine AAR rebuild (NDK), which is the same wall as the GMS
+signature issue: both are resolved only by rebuilding or replacing the engine.

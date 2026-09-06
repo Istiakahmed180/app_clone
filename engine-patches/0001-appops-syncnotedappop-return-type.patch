@@ -1,0 +1,78 @@
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IAppOpsManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IAppOpsManagerProxy.java
+index 5f56c4f..394480e 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IAppOpsManagerProxy.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IAppOpsManagerProxy.java
+@@ -50,6 +50,24 @@ public class IAppOpsManagerProxy extends BinderInvocationStub {
+         if (methodName.startsWith("check") || 
+             methodName.startsWith("note") || 
+             methodName.startsWith("start")) {
++            // On API 30+ several of these (noteOperation, startOperation,
++            // noteProxyOperation, startProxyOperation, and the API 34+ *ForDevice
++            // variants) are declared to return android.app.SyncNotedAppOp, not int.
++            // Returning the int MODE_ALLOWED here boxes to Integer and crashes the guest
++            // with ClassCastException (Integer -> SyncNotedAppOp) the instant it calls,
++            // e.g., Environment.isExternalStorageLegacy() -> AppOpsManager.noteOpNoThrow.
++            // Keep the existing "allow" semantics but with the correct return type.
++            Class<?> rt = method.getReturnType();
++            if (rt != null && "android.app.SyncNotedAppOp".equals(rt.getName())) {
++                Object synced = makeAllowedSyncNotedAppOp(args);
++                if (synced != null) {
++                    return synced;
++                }
++                // Could not build one; defer to the real service so the type is at least right.
++                MethodParameterUtils.replaceFirstAppPkg(args);
++                MethodParameterUtils.replaceLastUid(args);
++                return super.invoke(proxy, method, args);
++            }
+             Slog.d(TAG, "AppOps invoke: Bypassing system for " + methodName + ", allowing operation");
+             return AppOpsManager.MODE_ALLOWED;
+         }
+@@ -249,4 +267,48 @@ public class IAppOpsManagerProxy extends BinderInvocationStub {
+             return null;
+         }
+     }
++
++    /**
++     * Builds an android.app.SyncNotedAppOp representing MODE_ALLOWED, matching the return
++     * type the framework expects from noteOperation/startOperation on API 30+. Uses the
++     * hidden (opMode, code, attributionTag, packageName) constructor the platform itself
++     * uses; falls back to the public (code, attributionTag) constructor. Returns null if
++     * neither can be built, so the caller can defer to the real service.
++     */
++    private static Object makeAllowedSyncNotedAppOp(Object[] args) {
++        try {
++            Class<?> cls = Class.forName("android.app.SyncNotedAppOp");
++            int code = (args != null && args.length > 0 && (args[0] instanceof Integer))
++                    ? (Integer) args[0] : 0;
++            String pkg = null;
++            String attributionTag = null;
++            if (args != null) {
++                // noteOperation(int code, int uid, String packageName, String attributionTag, ...)
++                if (args.length > 2 && (args[2] instanceof String)) pkg = (String) args[2];
++                if (args.length > 3 && (args[3] instanceof String)) attributionTag = (String) args[3];
++            }
++            // Preferred: hidden (int opMode, int code, String attributionTag, String packageName)
++            for (java.lang.reflect.Constructor<?> c : cls.getDeclaredConstructors()) {
++                Class<?>[] pt = c.getParameterTypes();
++                if (pt.length == 4 && pt[0] == int.class && pt[1] == int.class
++                        && pt[2] == String.class && pt[3] == String.class) {
++                    try {
++                        c.setAccessible(true);
++                        return c.newInstance(AppOpsManager.MODE_ALLOWED, code, attributionTag, pkg);
++                    } catch (Throwable ignore) {
++                    }
++                }
++            }
++            // Fallback: public (int code, String attributionTag)
++            try {
++                java.lang.reflect.Constructor<?> c = cls.getConstructor(int.class, String.class);
++                c.setAccessible(true);
++                return c.newInstance(code, attributionTag);
++            } catch (Throwable ignore) {
++            }
++        } catch (Throwable t) {
++            Slog.e(TAG, "makeAllowedSyncNotedAppOp failed", t);
++        }
++        return null;
++    }
+ }
