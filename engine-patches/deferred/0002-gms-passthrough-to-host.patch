@@ -1,0 +1,21 @@
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/env/AppSystemEnv.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/env/AppSystemEnv.java
+index 68c2694..d9bde8b 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/env/AppSystemEnv.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/env/AppSystemEnv.java
+@@ -18,6 +18,16 @@ public class AppSystemEnv {
+ 
+     static {
+         sSystemPackages.add("android");
++        // Pass Google Play services through to the host's real, Google-signed GMS instead of
++        // virtualizing (or hiding) it. Installing a copy into the container reports
++        // SERVICE_INVALID -- the container copy is not Google-signed -- which breaks Firebase
++        // apps; passing through means the guest talks to the genuine host GMS, so its
++        // availability and signature checks pass. Uses the real service, so it is not a
++        // signature bypass. isOpenPackage() routes both package visibility (IPackageManagerProxy)
++        // and service binds (IActivityManagerProxy) to the host for these.
++        sSystemPackages.add("com.google.android.gms");
++        sSystemPackages.add("com.google.android.gsf");
++        sSystemPackages.add("com.android.vending");
+         sSystemPackages.add("com.google.android.webview");
+         sSystemPackages.add("com.google.android.webview.dev");
+         sSystemPackages.add("com.google.android.webview.beta");
