@@ -1,2 +1,9 @@
 89b59836c66f173756a4ae258cf379a957649820
 https://github.com/ALEX5402/NewBlackbox
+
+PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the source at
+the commit above with engine-patches/0001-appops-syncnotedappop-return-type.patch applied,
+which fixes a guest crash on API 30+ (ClassCastException: Integer -> SyncNotedAppOp in the
+AppOps hook). To reproduce: clone the repo at that commit, apply the patch, lower Bcore's
+compileOptions from JavaVersion.VERSION_21 to VERSION_17 (local JDK is 17), and run
+`./gradlew :Bcore:assembleRelease` (NDK 29.0.13846066). See engine-patches/README.md.

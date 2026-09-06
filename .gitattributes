@@ -1,0 +1,7 @@
+# Vendored prebuilt engine and its helper jar are binary: never text-diff, merge, or
+# normalize line endings. They are regenerable — see engine-patches/build-engine.sh.
+*.aar   binary
+*.jar   binary
+*.so    binary
+*.apk   binary
+*.keystore binary

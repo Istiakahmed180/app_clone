@@ -34,16 +34,36 @@ It does not hold: the engine re-installs its own AppOps hook every time it binds
 Application, overwriting any wrapper set earlier from the host's `Application.onCreate`. The
 correct place is the engine itself.
 
-### Applying
+### Applying / reproducing
+
+`build-engine.sh` does the whole thing — clone at the pinned commit, apply every patch here,
+reconcile the toolchain, build, sanity-check, and install `android/app/libs/bcore.aar`:
 
 ```bash
-git clone https://github.com/ALEX5402/NewBlackbox.git
-cd NewBlackbox && git checkout 89b59836c66f173756a4ae258cf379a957649820
-git apply /path/to/engine-patches/0001-appops-syncnotedappop-return-type.patch
-# then rebuild the :Bcore AAR (needs the NDK version pinned in Bcore/build.gradle:
-# ndkVersion 29.0.13846066) and replace android/app/libs/bcore.aar
+engine-patches/build-engine.sh
+# needs: git, a JDK, the Android SDK, and NDK 29.0.13846066
 ```
 
-The patch is verified to compile against the vendored `classes.jar` + Android API 36.
-It has NOT been run on device, because building the engine AAR needs the NDK toolchain that
-is the reason the engine is vendored prebuilt in the first place.
+The build is deterministic: re-running it reproduces the committed `bcore.aar` byte-for-byte
+(sha256 verified). So the vendored binary is not an opaque blob — it is exactly what this
+script generates from the upstream commit plus the patches here.
+
+### Build note
+
+Bcore's `compileOptions` pin `JavaVersion.VERSION_21`; the local JDK is 17, so they were
+lowered to `VERSION_17` for the rebuild (the engine uses no Java 21 language features, so it
+compiles unchanged). Built with `./gradlew :Bcore:assembleRelease` on NDK 29.0.13846066,
+Gradle 8.14.5, AGP 8.13.2.
+
+### Status: APPLIED and verified on device
+
+`android/app/libs/bcore.aar` is the rebuilt, patched artefact (see
+`android/app/libs/BCORE_SOURCE_COMMIT.txt`). On the OnePlus CPH2605 (Android 15) in a minified
+release build:
+
+- a cloned WhatsApp launches to "Welcome to WhatsApp" with **0 crashes** (previously one
+  `ClassCastException: Integer -> SyncNotedAppOp` per launch); no AppOps error appears in logs.
+- Telegram still launches cleanly (no regression).
+
+The `.so` files (arm64-v8a, armeabi-v7a) are the freshly built ones; the engine's own consumer
+proguard keeps `top.niunaijun.**`, so the fix survives its R8.

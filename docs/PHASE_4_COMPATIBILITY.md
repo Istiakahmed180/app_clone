@@ -585,3 +585,13 @@ time it binds a guest Application (measured — the wrap logs `cache=true instan
 guest still receives the engine's Integer-returning proxy). The fix therefore has to be in the
 engine. Applying it needs an engine AAR rebuild (NDK), which is the same wall as the GMS
 signature issue: both are resolved only by rebuilding or replacing the engine.
+
+### Update: AppOps fix applied by rebuilding the engine (2026-09-06)
+
+The engine was rebuilt from source with the patch above and `android/app/libs/bcore.aar`
+replaced. Verified on the OnePlus CPH2605 in a minified release build: a cloned WhatsApp now
+launches to onboarding with **0 crashes** (the `Integer -> SyncNotedAppOp` ClassCastException is
+gone), Telegram still launches cleanly, and no AppOps error appears in logcat. The only build
+change needed was lowering Bcore's `compileOptions` from Java 21 to 17 to match the local JDK.
+This leaves the GMS signature wall (SERVICE_INVALID) and the Facebook Firebase-IID crash as the
+remaining engine/GMS-deep limitations; the AppOps one is closed.
