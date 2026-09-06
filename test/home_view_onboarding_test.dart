@@ -9,6 +9,7 @@ import 'package:duplika/core/virtualization/virtualization_engine.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
 import 'package:duplika/features/home/views/home_view.dart';
+import 'package:duplika/features/home/widgets/virtualization_warning.dart';
 import 'package:duplika/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:duplika/features/onboarding/widgets/background_permission_banner.dart';
 import 'package:duplika/native/native_bridge.dart';
@@ -24,6 +25,7 @@ void main() {
   const MethodChannel channel = MethodChannel(NativeBridge.channelName);
   late OnboardingController onboarding;
   late bool ignoringBattery;
+  late bool virtualizationAvailable;
 
   Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
         'success': true,
@@ -34,11 +36,16 @@ void main() {
 
   setUp(() async {
     ignoringBattery = false;
+    virtualizationAvailable = true;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
       switch (call.method) {
         case 'isVirtualizationAvailable':
-          return <Object?, Object?>{'available': true, 'backend': 'test'};
+          return <Object?, Object?>{
+            'available': virtualizationAvailable,
+            'backend': 'test',
+            'message': 'This device cannot host containers.',
+          };
         case 'getTestAppInfo':
           return <Object?, Object?>{'installed': false, 'packageName': 'x'};
         case 'getPlatformInfo':
@@ -94,6 +101,34 @@ void main() {
 
     expect(find.byType(HomeView), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a working device is given no banner above the clone list',
+      (WidgetTester tester) async {
+    await pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    // The warning is in the tree but takes no space: the healthy path is the list, not
+    // a standing notice about the app working.
+    // In the tree, painting nothing: the healthy path is the clone list, not a standing
+    // notice that the app works.
+    final Finder warning = find.byType(VirtualizationWarning, skipOffstage: false);
+    expect(warning, findsOneWidget);
+    // Width is whatever the list gives it; the height is the assertion.
+    expect(tester.getSize(warning).height, 0);
+    expect(find.text('Your Virtual Apps'), findsOneWidget);
+  });
+
+  testWidgets('a device the engine cannot run on says so, in the backend\'s words',
+      (WidgetTester tester) async {
+    virtualizationAvailable = false;
+    // The controller loaded once already, on Get.put in setUp.
+    await Get.find<HomeController>().refreshAll();
+
+    await pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('This device cannot host containers.'), findsOneWidget);
   });
 
   testWidgets('a device that is not exempt is offered the Doze banner',

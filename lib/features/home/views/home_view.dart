@@ -12,8 +12,7 @@ import '../../onboarding/widgets/background_permission_banner.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
 import '../controllers/home_controller.dart';
-import '../widgets/phase_notice.dart';
-import '../widgets/test_app_status_card.dart';
+import '../widgets/virtualization_warning.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -47,15 +46,10 @@ class HomeView extends GetView<HomeController> {
             child: ListView(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 96.h),
               children: <Widget>[
-                PhaseNotice(
+                VirtualizationWarning(
                   virtualizationActive: controller.providesRuntimeIsolation,
                   problem: controller.virtualizationProblem,
                 ),
-                TestAppStatusCard(
-                  testApp: controller.testApp.value,
-                  platformInfo: controller.platformInfo.value,
-                ),
-                SizedBox(height: 24.h),
                 Text(
                   'Your Virtual Apps',
                   style: Theme.of(context).textTheme.titleMedium,
