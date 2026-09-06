@@ -595,3 +595,46 @@ gone), Telegram still launches cleanly, and no AppOps error appears in logcat. T
 change needed was lowering Bcore's `compileOptions` from Java 21 to 17 to match the local JDK.
 This leaves the GMS signature wall (SERVICE_INVALID) and the Facebook Firebase-IID crash as the
 remaining engine/GMS-deep limitations; the AppOps one is closed.
+
+## Clean-slate full retest on the patched engine (2026-09-06)
+
+Virtual Space uninstalled and reinstalled, then all five apps cloned (default config, GMS off)
+and launched on the OnePlus CPH2605.
+
+| App | Launched to first screen | App-process crash | Verdict |
+| --- | --- | --- | --- |
+| Telegram | yes | 0 | ✅ |
+| WhatsApp | yes | 0 | ✅ (AppOps engine patch) |
+| Discord | yes | 0 | ✅ |
+| VLC | yes | 0 | ✅ |
+| Facebook | no (fell back to host) | 1 | ❌ GMS-blocked |
+
+Four of five run cleanly. WhatsApp — previously one crash per launch — is fixed by the rebuilt
+engine.
+
+### Facebook is not a separate bug to fix; it is the GMS signature wall
+
+Facebook dies on a `firebase-iid-executor` thread:
+
+```
+java.lang.IllegalArgumentException: com.facebook.katana: Targeting S+ requires FLAG_IMMUTABLE
+    or FLAG_MUTABLE ... at PendingIntent.checkPendingIntent
+    at PendingIntent.getBroadcastAsUser
+```
+
+This is Facebook's bundled Firebase InstanceID **legacy** path, taken only because Google Play
+services is not reachable (the SERVICE_INVALID signature wall). It is not fixable at the engine
+level within our constraints:
+
+- `checkPendingIntent` throws **client-side**, before the `getIntentSender` binder call, so the
+  engine's existing `getIntentSender` hook cannot intercept it.
+- The check reads `context.getApplicationInfo().targetSdkVersion`. Suppressing it would mean
+  making the guest report targetSdk < 31 process-wide — a hammer that changes runtime
+  permission, storage and notification behaviour for every guest, risking the four apps that
+  currently work.
+- The clean fix is working GMS, which requires presenting Google's signing certificate — the
+  security bypass ruled out in `docs/SECURITY.md`.
+
+So Facebook is blocked by the same wall as GMS sign-in: it is a policy limit, not an
+undiscovered defect. Fixing it means either shipping a real GMS (a lawyer-and-licence question)
+or accepting that heavily Google-dependent apps do not run.
