@@ -16,7 +16,11 @@ class VirtualAppInstaller(
     private val analyzer: AppCompatibilityAnalyzer,
 ) {
 
-    fun install(packageName: String, virtualUserId: Int): EngineResult<Unit> {
+    fun install(
+        packageName: String,
+        virtualUserId: Int,
+        provisionGms: Boolean,
+    ): EngineResult<Unit> {
         when (val verdict = securityChecker.check(packageName)) {
             is AppSecurityChecker.Verdict.Rejected ->
                 return EngineResult.Failure(verdict.code, verdict.message)
@@ -29,7 +33,10 @@ class VirtualAppInstaller(
         // real install. Re-installing is idempotent and does not clear container data
         // (only the explicit clearPackage does), so always going through is both safe and
         // the only way to guarantee the per-user record exists.
-        provisionGmsIfNeeded(virtualUserId, analyzer.analyze(packageName).requiresGms)
+        provisionGmsIfRequested(
+            virtualUserId,
+            provisionGms && analyzer.analyze(packageName).requiresGms,
+        )
         return adapter.installPackage(packageName, virtualUserId)
     }
 
@@ -42,19 +49,27 @@ class VirtualAppInstaller(
      * and maps fail at their first call. Provisioning puts those packages inside the
      * container so there is something for the guest to find.
      *
-     * Only containers that need GMS get it: this installs a set of packages rather than one,
-     * so doing it unconditionally would slow down every clone to no purpose.
+     * Opt-in per clone, and off by default. Provisioning is not free: it installs a set of
+     * Google packages (a few seconds), makes the container heavier, and -- because the guest
+     * runs under the host UID and cannot present Google's signing certificate -- still leaves
+     * Google Play services reporting SERVICE_INVALID, so sign-in and push do not actually
+     * work yet (see docs/PHASE_4_COMPATIBILITY.md). Real apps that need no GMS (Telegram,
+     * WhatsApp) run fine without it, so the default cost/benefit is negative. The user asks
+     * for it per clone when they want to try a Google-login app and accept the trade.
+     *
+     * [wanted] is already the AND of the user's opt-in and the app actually declaring a GMS
+     * dependency, so this method only decides device support and carries out the install.
      *
      * Failure is deliberately not fatal. A clone whose GMS provisioning failed is exactly the
      * clone the compatibility warning already describes, so the app is still installed and the
      * user still gets it -- degraded rather than absent. The reason is logged.
      */
-    private fun provisionGmsIfNeeded(virtualUserId: Int, requiresGms: Boolean) {
+    private fun provisionGmsIfRequested(virtualUserId: Int, wanted: Boolean) {
         // Logged unconditionally: whether a container gets GMS decides whether Google sign-in
         // and push work inside it, and silently skipping was previously indistinguishable from
         // provisioning that ran and did nothing.
-        Slog.i(Slog.INSTALL, "GMS check for user $virtualUserId: requiresGms=$requiresGms")
-        if (!requiresGms) {
+        Slog.i(Slog.INSTALL, "GMS provisioning for user $virtualUserId: requested=$wanted")
+        if (!wanted) {
             return
         }
         if (!adapter.isGmsSupported()) {
@@ -84,6 +99,7 @@ class VirtualAppInstaller(
         apkPath: String,
         packageName: String,
         virtualUserId: Int,
+        provisionGms: Boolean,
     ): EngineResult<Unit> {
         when (val verdict = securityChecker.checkApk(packageName, apkPath)) {
             is AppSecurityChecker.Verdict.Rejected ->
@@ -91,7 +107,10 @@ class VirtualAppInstaller(
             AppSecurityChecker.Verdict.Allowed -> Unit
         }
 
-        provisionGmsIfNeeded(virtualUserId, analyzer.analyzeApk(apkPath, packageName).requiresGms)
+        provisionGmsIfRequested(
+            virtualUserId,
+            provisionGms && analyzer.analyzeApk(apkPath, packageName).requiresGms,
+        )
         return adapter.installApkFile(apkPath, virtualUserId)
     }
 

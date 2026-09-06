@@ -94,18 +94,19 @@ class AppPickerView extends GetView<AppPickerController> {
 
     // Always surface the compatibility verdict first: an app may be unsupported, need
     // permissions the host does not hold, or already have clones.
-    final bool confirmed = await CompatibilitySheet.show(
+    final CloneDecision decision = await CompatibilitySheet.show(
       context,
       appName: app.appName,
       report: report,
       existingClones: existing,
       onGrantPermissions: () => _grantPermissions(context, app.packageName),
     );
-    if (!confirmed || !context.mounted) {
+    if (!decision.proceed || !context.mounted) {
       return;
     }
 
-    final String? error = await controller.cloneInstalledApp(app);
+    final String? error =
+        await controller.cloneInstalledApp(app, installGms: decision.installGms);
     if (!context.mounted) {
       return;
     }
@@ -136,7 +137,7 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
 
-    final bool proceed = await CompatibilitySheet.show(
+    final CloneDecision decision = await CompatibilitySheet.show(
       context,
       appName: candidate.appName,
       report: report,
@@ -144,11 +145,12 @@ class AppPickerView extends GetView<AppPickerController> {
       onGrantPermissions: () => _grantPermissions(context, candidate.packageName),
     );
 
-    if (!proceed || !context.mounted) {
+    if (!decision.proceed || !context.mounted) {
       return;
     }
 
-    final String? error = await controller.cloneApk(candidate);
+    final String? error =
+        await controller.cloneApk(candidate, installGms: decision.installGms);
     if (!context.mounted) {
       return;
     }

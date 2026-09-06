@@ -118,7 +118,10 @@ class AppPickerController extends GetxController {
   final Map<String, CompatibilityReport> _reports = <String, CompatibilityReport>{};
 
   /// Clones an installed app. Returns `null` on success, or a user-facing message.
-  Future<String?> cloneInstalledApp(InstalledAppModel app) async {
+  Future<String?> cloneInstalledApp(
+    InstalledAppModel app, {
+    bool installGms = false,
+  }) async {
     if (isWorking.value) {
       return null;
     }
@@ -132,6 +135,7 @@ class AppPickerController extends GetxController {
         packageName: app.packageName,
         appName: app.appName,
         profileName: profileName,
+        installGms: installGms,
       );
       return null;
     } on AppException catch (error) {
@@ -197,7 +201,10 @@ class AppPickerController extends GetxController {
   }
 
   /// Installs a previously inspected APK as a new clone.
-  Future<String?> cloneApk(ApkCandidate candidate) async {
+  Future<String?> cloneApk(
+    ApkCandidate candidate, {
+    bool installGms = false,
+  }) async {
     if (isWorking.value) {
       return null;
     }
@@ -212,6 +219,7 @@ class AppPickerController extends GetxController {
         packageName: candidate.packageName,
         appName: candidate.appName,
         profileName: profileName,
+        installGms: installGms,
       );
       return null;
     } on AppException catch (error) {

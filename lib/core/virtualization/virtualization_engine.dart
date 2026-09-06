@@ -14,6 +14,7 @@ abstract class VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   });
 
   Future<void> deleteProfile(String profileId);
@@ -42,5 +43,6 @@ abstract class VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   });
 }

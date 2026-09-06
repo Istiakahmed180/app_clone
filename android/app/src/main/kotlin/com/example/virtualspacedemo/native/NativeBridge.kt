@@ -220,8 +220,9 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
                 val apkPath = call.requiredArg("apkPath", result) ?: return
+                val provisionGms = call.argument<Boolean>("installGms") ?: false
                 async(result) {
-                    engine.installApkToProfile(profileId, apkPath, packageName)
+                    engine.installApkToProfile(profileId, apkPath, packageName, provisionGms)
                         .toEnvelope("APP_INSTALLED", "Application installed successfully.")
                 }
             }
@@ -259,8 +260,9 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "installAppToProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
+                val provisionGms = call.argument<Boolean>("installGms") ?: false
                 async(result) {
-                    engine.installAppToProfile(profileId, packageName)
+                    engine.installAppToProfile(profileId, packageName, provisionGms)
                         .toEnvelope("APP_INSTALLED", "Application installed successfully.")
                 }
             }

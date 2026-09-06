@@ -82,4 +82,126 @@ void main() {
       expect(find.text('Supported'), findsNothing);
     },
   );
+
+  testWidgets(
+    'the GMS opt-in appears when the app needs Google Play services',
+    (WidgetTester tester) async {
+      await _pump(tester, _gmsReport);
+      expect(find.text('Install Google Play services in this clone'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'the GMS opt-in is hidden for an app that does not need it',
+    (WidgetTester tester) async {
+      await _pump(
+        tester,
+        const CompatibilityReport(
+          packageName: 'org.example',
+          verdict: CompatibilityVerdict.supported,
+          findings: <CompatibilityFinding>[],
+          bridgeablePermissions: <String>[],
+          missingPermissions: <String>[],
+          requiresGms: false,
+        ),
+      );
+      expect(find.text('Install Google Play services in this clone'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'GMS provisioning is off unless the user ticks the box',
+    (WidgetTester tester) async {
+      late CloneDecision decision;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => ElevatedButton(
+                  onPressed: () async {
+                    decision = await CompatibilitySheet.show(
+                      context,
+                      appName: 'Example',
+                      report: _gmsReport,
+                      existingClones: 0,
+                      onGrantPermissions: () async => _gmsReport,
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      // Add clone without touching the checkbox.
+      await tester.tap(find.widgetWithText(FilledButton, 'Add clone'));
+      await tester.pumpAndSettle();
+
+      expect(decision.proceed, isTrue);
+      expect(decision.installGms, isFalse,
+          reason: 'provisioning must default off even for a GMS app');
+    },
+  );
+
+  testWidgets(
+    'ticking the box opts this clone into GMS provisioning',
+    (WidgetTester tester) async {
+      late CloneDecision decision;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => ElevatedButton(
+                  onPressed: () async {
+                    decision = await CompatibilitySheet.show(
+                      context,
+                      appName: 'Example',
+                      report: _gmsReport,
+                      existingClones: 0,
+                      onGrantPermissions: () async => _gmsReport,
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Install Google Play services in this clone'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Add clone'));
+      await tester.pumpAndSettle();
+
+      expect(decision.proceed, isTrue);
+      expect(decision.installGms, isTrue);
+    },
+  );
 }
+
+  const CompatibilityReport _gmsReport = CompatibilityReport(
+    packageName: 'org.example.gms',
+    verdict: CompatibilityVerdict.limited,
+    findings: <CompatibilityFinding>[
+      CompatibilityFinding(
+        code: 'REQUIRES_GMS',
+        message: 'This app relies on Google Play Services.',
+        blocking: false,
+      ),
+    ],
+    bridgeablePermissions: <String>[],
+    missingPermissions: <String>[],
+    requiresGms: true,
+  );
+

@@ -55,6 +55,7 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   }) async {
     final VirtualProfileModel profile = await _repository.createProfile(
       packageName: packageName,
@@ -62,8 +63,11 @@ class RealVirtualizationEngine implements VirtualizationEngine {
       profileName: profileName,
     );
 
-    final EngineResponse response =
-        await _nativeBridge.installAppToProfile(profile.id, packageName);
+    final EngineResponse response = await _nativeBridge.installAppToProfile(
+      profile.id,
+      packageName,
+      installGms: installGms,
+    );
 
     if (!response.success) {
       _logger.error('Install failed for ${profile.id}: ${response.code}');
@@ -82,6 +86,7 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   }) async {
     final VirtualProfileModel profile = await _repository.createProfile(
       packageName: packageName,
@@ -89,8 +94,12 @@ class RealVirtualizationEngine implements VirtualizationEngine {
       profileName: profileName,
     );
 
-    final EngineResponse response =
-        await _nativeBridge.installApkToProfile(profile.id, apkPath, packageName);
+    final EngineResponse response = await _nativeBridge.installApkToProfile(
+      profile.id,
+      apkPath,
+      packageName,
+      installGms: installGms,
+    );
 
     if (!response.success) {
       _logger.error('APK install failed for ${profile.id}: ${response.code}');

@@ -18,6 +18,7 @@ void main() {
   late VirtualProfileRepository repository;
   late RealVirtualizationEngine engine;
   late List<String> calls;
+  late Map<String, Object?> lastArgs;
   late Map<String, Map<Object?, Object?>> responses;
 
   Map<Object?, Object?> ok(String code, [Map<String, Object?> data = const <String, Object?>{}]) =>
@@ -30,6 +31,7 @@ void main() {
     storage = InMemoryProfileStorage();
     repository = VirtualProfileRepository(storage: storage);
     calls = <String>[];
+    lastArgs = <String, Object?>{};
     responses = <String, Map<Object?, Object?>>{
       'installAppToProfile': ok('APP_INSTALLED'),
       'launchProfile': ok('PROFILE_LAUNCHED'),
@@ -46,6 +48,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
       calls.add(call.method);
+      lastArgs[call.method] = call.arguments;
       return responses[call.method];
     });
 
@@ -75,6 +78,27 @@ void main() {
 
     expect(calls, contains('installAppToProfile'));
     expect(await repository.getProfile(profile.id), isNotNull);
+  });
+
+  test('GMS provisioning is off by default in the install call', () async {
+    await create('Profile 1');
+
+    final Map<Object?, Object?> args =
+        lastArgs['installAppToProfile']! as Map<Object?, Object?>;
+    expect(args['installGms'], isFalse);
+  });
+
+  test('opting in forwards installGms to the engine', () async {
+    await engine.createProfile(
+      packageName: AppConstants.testAppPackage,
+      appName: AppConstants.testAppFallbackName,
+      profileName: 'Profile 1',
+      installGms: true,
+    );
+
+    final Map<Object?, Object?> args =
+        lastArgs['installAppToProfile']! as Map<Object?, Object?>;
+    expect(args['installGms'], isTrue);
   });
 
   test('a failed install rolls the profile metadata back', () async {
@@ -196,6 +220,28 @@ void main() {
 
       expect(calls, contains('installApkToProfile'));
       expect((await repository.getProfile(profile.id))?.packageName, 'org.example.imported');
+      expect(
+        (lastArgs['installApkToProfile']! as Map<Object?, Object?>)['installGms'],
+        isFalse,
+        reason: 'APK import must also default GMS provisioning off',
+      );
+    });
+
+    test('opting in forwards installGms on the APK path too', () async {
+      responses['installApkToProfile'] = ok('APP_INSTALLED');
+
+      await engine.createProfileFromApk(
+        apkPath: '/tmp/example.apk',
+        packageName: 'org.example.imported',
+        appName: 'Imported App',
+        profileName: 'Imported App',
+        installGms: true,
+      );
+
+      expect(
+        (lastArgs['installApkToProfile']! as Map<Object?, Object?>)['installGms'],
+        isTrue,
+      );
     });
 
     test('a failed APK install rolls the profile back', () async {

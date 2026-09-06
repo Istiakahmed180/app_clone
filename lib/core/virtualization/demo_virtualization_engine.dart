@@ -29,6 +29,7 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   }) {
     throw const VirtualizationException(
       'This engine cannot install APKs.',
@@ -53,7 +54,10 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
     required String packageName,
     required String appName,
     required String profileName,
+    bool installGms = false,
   }) {
+    // This engine performs no virtualization, so there is nothing to provision GMS into;
+    // the flag is accepted to satisfy the interface and ignored.
     return _repository.createProfile(
       packageName: packageName,
       appName: appName,

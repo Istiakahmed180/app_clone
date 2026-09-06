@@ -56,11 +56,15 @@ class RealVirtualizationEngine(
      * On failure the mapping is released again, so a profile is never left marked as
      * installed when the engine disagrees.
      */
-    fun installAppToProfile(profileId: String, packageName: String): EngineResult<Unit> {
+    fun installAppToProfile(
+        profileId: String,
+        packageName: String,
+        provisionGms: Boolean,
+    ): EngineResult<Unit> {
         requireAvailable()?.let { return it }
 
         val virtualUserId = profileManager.getOrCreate(profileId)
-        val result = installer.install(packageName, virtualUserId)
+        val result = installer.install(packageName, virtualUserId, provisionGms)
 
         // Same reasoning as installApkToProfile: the engine's own verdict is authoritative.
         if (result is EngineResult.Failure) {
@@ -106,6 +110,7 @@ class RealVirtualizationEngine(
         profileId: String,
         apkPath: String,
         packageName: String,
+        provisionGms: Boolean,
     ): EngineResult<Unit> {
         requireAvailable()?.let { return it }
 
@@ -114,7 +119,7 @@ class RealVirtualizationEngine(
         // The picker hands back a cache copy, which the system may reclaim. Keep our own
         // copy so a lost container can be rebuilt later without re-picking the file.
         val retained = retainApk(profileId, apkPath) ?: apkPath
-        val result = installer.installApk(retained, packageName, virtualUserId)
+        val result = installer.installApk(retained, packageName, virtualUserId, provisionGms)
 
         // No isInstalled() guard here: it answers from the host package manager when the
         // engine's service is unhealthy, so for an APK whose package is also installed
@@ -199,11 +204,16 @@ class RealVirtualizationEngine(
     ): EngineResult.Failure? {
         Slog.w(Slog.INSTALL, "Launch failed for user $virtualUserId; rebuilding container")
 
+        // Rebuild without re-provisioning GMS. The per-clone opt-in is not persisted, so
+        // this recovery path cannot know whether the clone had it; re-provisioning
+        // unconditionally would add the (currently non-functional, SERVICE_INVALID) Google
+        // packages and their background crashes to a clone that may never have asked for
+        // them. If GMS is persisted per profile later, thread that flag through here.
         val retainedApk = profileManager.apkPathFor(profileId)
         val result = if (retainedApk != null && File(retainedApk).isFile) {
-            installer.installApk(retainedApk, packageName, virtualUserId)
+            installer.installApk(retainedApk, packageName, virtualUserId, provisionGms = false)
         } else {
-            installer.install(packageName, virtualUserId)
+            installer.install(packageName, virtualUserId, provisionGms = false)
         }
 
         return when (result) {

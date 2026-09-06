@@ -90,8 +90,15 @@ class NativeBridge {
     return response.data['requiresSecureEnv'] as bool? ?? false;
   }
 
-  Future<EngineResponse> installAppToProfile(String profileId, String packageName) =>
-      _invokeEngine('installAppToProfile', _profileArgs(profileId, packageName));
+  Future<EngineResponse> installAppToProfile(
+    String profileId,
+    String packageName, {
+    bool installGms = false,
+  }) =>
+      _invokeEngine('installAppToProfile', <String, dynamic>{
+        ..._profileArgs(profileId, packageName),
+        'installGms': installGms,
+      });
 
   /// Launchable apps on the device, for the clone picker.
   ///
@@ -236,12 +243,14 @@ class NativeBridge {
   Future<EngineResponse> installApkToProfile(
     String profileId,
     String apkPath,
-    String packageName,
-  ) =>
+    String packageName, {
+    bool installGms = false,
+  }) =>
       _invokeEngine('installApkToProfile', <String, dynamic>{
         'profileId': profileId,
         'packageName': packageName,
         'apkPath': apkPath,
+        'installGms': installGms,
       });
 
   Future<EngineResponse> uninstallAppFromProfile(String profileId, String packageName) =>

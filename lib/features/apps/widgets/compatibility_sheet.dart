@@ -3,6 +3,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../data/models/compatibility_report.dart';
 
+/// The user's answer from [CompatibilitySheet]: whether to create the clone, and whether
+/// to opt this clone into Google Play services provisioning.
+class CloneDecision {
+  const CloneDecision({required this.proceed, this.installGms = false});
+
+  const CloneDecision.cancelled()
+      : proceed = false,
+        installGms = false;
+
+  final bool proceed;
+  final bool installGms;
+}
+
 /// Shows what will and will not work before a clone is created.
 ///
 /// The point of this sheet is that the user finds out *before* committing, rather than
@@ -23,14 +36,14 @@ class CompatibilitySheet extends StatelessWidget {
   /// Returns the refreshed report after the user has answered the permission dialog.
   final Future<CompatibilityReport> Function() onGrantPermissions;
 
-  static Future<bool> show(
+  static Future<CloneDecision> show(
     BuildContext context, {
     required String appName,
     required CompatibilityReport report,
     required int existingClones,
     required Future<CompatibilityReport> Function() onGrantPermissions,
   }) async {
-    final bool? proceed = await showModalBottomSheet<bool>(
+    final CloneDecision? decision = await showModalBottomSheet<CloneDecision>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -41,7 +54,7 @@ class CompatibilitySheet extends StatelessWidget {
         onGrantPermissions: onGrantPermissions,
       ),
     );
-    return proceed ?? false;
+    return decision ?? const CloneDecision.cancelled();
   }
 
   @override
@@ -73,6 +86,7 @@ class _SheetBody extends StatefulWidget {
 class _SheetBodyState extends State<_SheetBody> {
   late CompatibilityReport _report = widget.initialReport;
   bool _requesting = false;
+  bool _installGms = false;
 
   Future<void> _grant() async {
     setState(() => _requesting = true);
@@ -168,12 +182,35 @@ class _SheetBodyState extends State<_SheetBody> {
               ),
             ],
 
+            if (_report.requiresGms) ...<Widget>[
+              SizedBox(height: 8.h),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _installGms,
+                onChanged: (bool? value) =>
+                    setState(() => _installGms = value ?? false),
+                title: Text(
+                  'Install Google Play services in this clone',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                subtitle: Text(
+                  'Experimental. Off by default: it makes the clone slower and heavier, '
+                  'and Google sign-in may still fail. Only turn it on for an app that '
+                  'needs Google login.',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+
             SizedBox(height: 20.h),
             Row(
               children: <Widget>[
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: () =>
+                        Navigator.of(context).pop(const CloneDecision.cancelled()),
                     child: const Text('Cancel'),
                   ),
                 ),
@@ -181,7 +218,9 @@ class _SheetBodyState extends State<_SheetBody> {
                 Expanded(
                   child: FilledButton(
                     onPressed: _report.canClone
-                        ? () => Navigator.of(context).pop(true)
+                        ? () => Navigator.of(context).pop(
+                              CloneDecision(proceed: true, installGms: _installGms),
+                            )
                         : null,
                     child: Text(_report.canClone ? 'Add clone' : 'Cannot clone'),
                   ),
