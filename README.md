@@ -7,6 +7,23 @@
 **Arbitrary third-party application compatibility is still not guaranteed** — only the
 controlled test app and VLC have been verified, on one device.
 
+> ## ⛔ This build must not be distributed
+>
+> The virtualization engine descends from projects that are **unlicensed or expressly
+> commercial**. `asLody/VirtualApp` — credited upstream as the original framework — ships no
+> LICENSE, requires purchased commercial authorisation, and threatens prosecution for
+> app-store use. `FBlackBox/BlackBox`, source of the `top.niunaijun.blackbox` namespace used
+> here, reports `license: null`. NewBlackbox nevertheless declares Apache-2.0 for the whole
+> repository, which on this evidence it was very likely not in a position to grant.
+>
+> Separately, `android/app/libs/bcore.aar` is **already committed to a public repository**, so
+> it also lives in Git history and in any fork taken.
+>
+> Nothing in this repository resolves that. It needs a lawyer, and then one of: purchased
+> authorisation, a different engine behind the `VirtualizationEngine` adapter, or not shipping.
+> Internal development and testing are unaffected. Details and evidence:
+> `docs/DEPENDENCY_LICENSE_AUDIT.md` (findings 2 and 5) and the root `NOTICE`.
+
 Clones run in real containers with isolated storage, verified on a physical Android 15 device:
 
 | Container | App | State |
@@ -32,9 +49,9 @@ state is faked in Flutter.
 | `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
 | `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
 
-> **Before distributing:** `docs/DEPENDENCY_LICENSE_AUDIT.md` records two unresolved issues —
-> stripped attribution in vendored native code, and unverified VirtualApp/VirtualAPK licence
-> ancestry. Both should be closed before any public release.
+> **Attribution:** the root `NOTICE` and `licenses/` now carry the required notices for xDL,
+> Dobby, FreeReflection and toml4j, whose copies inside the vendored engine had none. That
+> obligation is met; the blocker above is a separate question and is not affected by it.
 
 ---
 

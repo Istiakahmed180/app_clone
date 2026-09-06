@@ -1,0 +1,99 @@
+Virtual Space
+Copyright 2026 the Virtual Space authors
+
+================================================================================
+DISTRIBUTION STATUS: NOT CLEARED
+================================================================================
+
+This NOTICE satisfies the attribution obligations of the third-party components
+listed below. It does NOT resolve the question of whether those components may
+be redistributed at all.
+
+The virtualization engine descends from projects that are unlicensed or
+expressly commercial (see "Engine provenance" below and
+docs/DEPENDENCY_LICENSE_AUDIT.md, finding 2). Until that is resolved by a
+lawyer, this build must not be published to an app store, distributed to users,
+or shipped as part of any product.
+
+================================================================================
+Third-party components
+================================================================================
+
+The components below are compiled into the vendored engine artefacts
+(android/app/libs/bcore.aar, android/app/libs/black-reflection.jar) or resolved
+as Gradle dependencies. Full licence texts are in licenses/.
+
+--------------------------------------------------------------------------------
+xDL
+    Copyright (c) 2020-2024 HexHacking Team
+    MIT License -- licenses/xDL-MIT.txt
+    https://github.com/hexhacking/xDL
+    Compiled into libblackbox.so from Bcore/src/main/cpp/xdl.
+
+Dobby
+    Apache License 2.0 -- licenses/Dobby-Apache-2.0.txt
+    https://github.com/jmpews/Dobby
+    Compiled into libblackbox.so from Bcore/src/main/cpp/Dobby.
+
+FreeReflection
+    Copyright (c) 2018 weishu
+    MIT License -- licenses/FreeReflection-MIT.txt
+    https://github.com/tiann/FreeReflection
+    Gradle dependency com.github.tiann:FreeReflection:3.2.2.
+
+toml4j
+    Copyright (c) 2013-2015 Moandji Ezana
+    MIT License -- licenses/toml4j-MIT.txt
+    https://github.com/mwanji/toml4j
+    Gradle dependency com.moandjiezana.toml:toml4j:0.7.2.
+
+NewBlackbox (Bcore, black-reflection)
+    Apache License 2.0 as declared by that repository
+    -- licenses/NewBlackbox-Apache-2.0.txt
+    https://github.com/ALEX5402/NewBlackbox
+    commit 89b59836c66f173756a4ae258cf379a957649820
+    See "Engine provenance" below: this declaration is disputed.
+
+androidx.appcompat, com.google.android.material
+    Apache License 2.0. Standard Android dependencies, resolved from Google's
+    Maven repository and not vendored.
+--------------------------------------------------------------------------------
+
+Provenance of these notices
+    The copies of xDL and Dobby inside the vendored engine carry no licence
+    headers -- xdl.c begins with roughly 22 blank lines where the upstream MIT
+    notice normally sits. Virtual Space did not remove them; they were already
+    absent in the artefact obtained upstream.
+
+    The texts in licenses/ were therefore retrieved from the upstream projects
+    on 2026-09-06, not copied out of the vendored code. If the engine artefact
+    is rebuilt or updated, re-confirm that these components, versions and
+    licences still match what is actually compiled in.
+
+================================================================================
+Engine provenance -- unresolved
+================================================================================
+
+NewBlackbox declares Apache-2.0 for its whole repository. Tracing that
+declaration upstream does not support it:
+
+  * asLody/VirtualApp, credited by NewBlackbox as the original framework, has
+    no LICENSE file. Its README requires commercial authorisation to be
+    purchased, states the technology belongs to a named company, and threatens
+    prosecution for unauthorised commercial or app-store use. It is
+    proprietary, not open source.
+
+  * FBlackBox/BlackBox, the origin of the top.niunaijun.blackbox namespace used
+    here, also has no LICENSE file; the GitHub API reports license: null. The
+    original niunaijun/BlackBox repository now returns 404.
+
+  * Bcore's Java sources carry no copyright headers at all.
+
+On this evidence NewBlackbox was very likely not in a position to grant
+Apache-2.0, so licenses/NewBlackbox-Apache-2.0.txt may not confer the rights it
+appears to.
+
+This is a statement of what was found in the source, not legal advice. It must
+be reviewed by a lawyer before any distribution. The VirtualizationEngine
+adapter boundary exists precisely so the backend can be replaced if this cannot
+be cleared.

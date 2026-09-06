@@ -27,12 +27,26 @@ These are compiled into `libblackbox.so`; they are not separate Gradle dependenc
 
 ## Findings and open risks
 
-1. **Stripped attribution in vendored native code (must resolve before any distribution).**
+1. **Stripped attribution in vendored native code — ADDRESSED 2026-09-06.**
    The MIT licence for xDL and the Apache-2.0 licence for Dobby both require their notices to
    travel with the code. The copies inside Bcore do not carry them. Virtual Space did not remove
    these notices — they were already absent upstream — but shipping this build would still
-   redistribute them without attribution. Before release, restore the upstream notices in a
-   `NOTICE` file listing Dobby, xDL, FreeReflection, toml4j and VirtualApp/VirtualAPK.
+   redistribute them without attribution.
+
+   A root `NOTICE` now carries the attributions, and `licenses/` holds the full texts. Because
+   the vendored copies had no headers to copy, the texts were retrieved from the upstream
+   projects on 2026-09-06 and the copyright holders confirmed from those files:
+
+   | Component | Licence | Copyright line as published upstream |
+   | --- | --- | --- |
+   | xDL | MIT | Copyright (c) 2020-2024 HexHacking Team |
+   | Dobby | Apache-2.0 | no per-file copyright line in the upstream LICENSE |
+   | FreeReflection | MIT | Copyright (c) 2018 weishu |
+   | toml4j | MIT | Copyright (c) 2013-2015 Moandji Ezana |
+
+   This closes the *attribution* obligation only. It does not make the engine distributable —
+   see finding 2. If `bcore.aar` is ever rebuilt, re-confirm that these components and versions
+   are still what is compiled in; the NOTICE describes one specific artefact.
 
 2. **VirtualApp / VirtualAPK ancestry — since traced, and the result is worse than "unverified".**
 
@@ -70,9 +84,17 @@ These are compiled into `libblackbox.so`; they are not separate Gradle dependenc
 4. **No runtime code download.** The engine, its native libraries and all dependencies are
    part of the APK. Nothing executable is fetched at runtime, in line with the Phase 2 rules.
 
+5. **The engine artefact is already published on a public repository.**
+   `android/app/libs/bcore.aar` — 2.2 MB of compiled engine, including the native code whose
+   attribution finding 1 covers — is committed to a public GitHub repository. If finding 2
+   resolves against this engine, deleting the file from the working tree is not enough: it stays
+   in the Git history and in every clone and fork already taken. Removing it means rewriting
+   history and force-pushing, and that is a decision for the repository owner, not a routine
+   cleanup. Until then, redistribution is already happening whatever this build does.
+
 ## Recommendation
 
-Do not distribute this build publicly until findings 1 and 2 are closed. For internal
+Do not distribute this build publicly until findings 2 and 5 are closed. Finding 1 is closed. For internal
 development and testing the current state is workable, and the
 `VirtualizationEngineAdapter` boundary means the backend can be replaced if the provenance
 question cannot be resolved.
