@@ -7,6 +7,9 @@ import '../../../core/constants/app_constants.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/profile_card.dart';
+import '../../onboarding/controllers/onboarding_controller.dart';
+import '../../onboarding/widgets/background_permission_banner.dart';
+import '../../onboarding/widgets/onboarding_host.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/phase_notice.dart';
@@ -24,8 +27,17 @@ class HomeView extends GetView<HomeController> {
         icon: const Icon(Icons.add),
         label: const Text('Add clone'),
       ),
-      body: SafeArea(
-        child: Obx(() {
+      bottomNavigationBar: Obx(
+        () => _onboarding.showBackgroundPrompt.value
+            ? BackgroundPermissionBanner(
+                onConfirm: () => _confirmBackgroundPermission(context),
+                onDismiss: _onboarding.dismissBackgroundPrompt,
+              )
+            : const SizedBox.shrink(),
+      ),
+      body: OnboardingHost(
+        child: SafeArea(
+          child: Obx(() {
           if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -59,11 +71,24 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ..._buildProfileSection(context),
               ],
-            ),
-          );
-        }),
+              ),
+            );
+          }),
+        ),
       ),
     );
+  }
+
+  OnboardingController get _onboarding => Get.find<OnboardingController>();
+
+  /// Opens the Doze exemption screen and re-checks the answer when the user returns.
+  Future<void> _confirmBackgroundPermission(BuildContext context) async {
+    final String? message = await _onboarding.requestBackgroundPermission();
+    if (message != null && context.mounted) {
+      _showMessage(context, message);
+    }
+    // Android owns the answer, so ask it rather than assuming the prompt succeeded.
+    await _onboarding.refreshBackgroundPrompt();
   }
 
   List<Widget> _buildProfileSection(BuildContext context) {

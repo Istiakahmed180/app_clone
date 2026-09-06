@@ -6,6 +6,7 @@ import '../core/constants/app_constants.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
 import '../data/models/compatibility_report.dart';
+import '../data/models/consent_state.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
@@ -19,7 +20,7 @@ class NativeBridge {
   NativeBridge({MethodChannel? channel})
       : _channel = channel ?? const MethodChannel(channelName);
 
-  static const String channelName = 'virtual_space/native_bridge';
+  static const String channelName = 'duplika/native_bridge';
 
   final MethodChannel _channel;
   final AppLogger _logger = const AppLogger('NativeBridge');
@@ -272,6 +273,76 @@ class NativeBridge {
 
   Future<EngineResponse> deleteVirtualProfile(String profileId, String packageName) =>
       _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
+
+  // ---------------------------------------------------------------------------
+  // Onboarding: consent and Doze exemption
+  // ---------------------------------------------------------------------------
+
+  /// The stored consent state, without contacting the network.
+  Future<ConsentState> getConsentStatus() async {
+    final EngineResponse response = await _invokeEngine('getConsentStatus');
+    return ConsentState.fromMap(response.data);
+  }
+
+  /// Runs the UMP consent flow, showing the form when one is required.
+  ///
+  /// Never throws for a consent failure. A form that cannot load is reported through
+  /// [ConsentState.failed] so the caller can log it and let the user proceed; consent
+  /// gates nothing in this app.
+  ///
+  /// [debugGeography] and [testDeviceHashedId] force the form to appear outside the EEA
+  /// during development. UMP ignores both in a release build.
+  Future<ConsentState> requestConsent({
+    String? debugGeography,
+    String? testDeviceHashedId,
+  }) async {
+    try {
+      final EngineResponse response = await _invokeEngine('requestConsent', <String, dynamic>{
+        'debugGeography': debugGeography,
+        'testDeviceHashedId': testDeviceHashedId,
+      });
+      return ConsentState.fromMap(response.data);
+    } on NativeBridgeException catch (error, stackTrace) {
+      _logger.error('Consent request unavailable', error, stackTrace);
+      return ConsentState.unknown;
+    }
+  }
+
+  /// Re-opens the consent form so a user can change or withdraw their answer.
+  Future<ConsentState> showPrivacyOptions() async {
+    final EngineResponse response = await _invokeEngine('showPrivacyOptions');
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return ConsentState.fromMap(response.data);
+  }
+
+  /// Whether Android currently exempts Duplika from Doze.
+  ///
+  /// Returns `false` rather than throwing when the platform cannot answer: the caller
+  /// uses this to decide whether to offer the prompt, and offering it needlessly is a
+  /// smaller harm than a crash on a device that has no power manager.
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    try {
+      final EngineResponse response = await _invokeEngine('isIgnoringBatteryOptimizations');
+      return response.data['ignoring'] as bool? ?? false;
+    } on NativeBridgeException catch (error, stackTrace) {
+      _logger.error('Battery optimisation state unavailable', error, stackTrace);
+      return false;
+    }
+  }
+
+  /// Opens the Doze exemption prompt and reports which screen the system showed.
+  ///
+  /// Success means a screen opened, not that the exemption was granted -- Android owns
+  /// the answer. Re-read [isIgnoringBatteryOptimizations] after the user returns.
+  Future<BatteryPromptScreen> requestIgnoreBatteryOptimizations() async {
+    final EngineResponse response = await _invokeEngine('requestIgnoreBatteryOptimizations');
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return BatteryPromptScreen.parse(response.data['screen'] as String?);
+  }
 
   Map<String, dynamic> _profileArgs(String profileId, String packageName) =>
       <String, dynamic>{'profileId': profileId, 'packageName': packageName};

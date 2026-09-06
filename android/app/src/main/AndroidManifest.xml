@@ -37,6 +37,14 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
+        <!-- The UMP consent SDK reads the publisher identity from here; there is no
+             separate UMP id. The value comes from the `admobApplicationId` manifest
+             placeholder in app/build.gradle.kts, which currently holds Google's public
+             sample id. See docs/ONBOARDING.md. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobApplicationId}" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -57,6 +65,19 @@
          inspects another app's private data. See docs/SECURITY.md. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- Guests run inside the host process group, so when Android dozes Duplika it dozes
+         every clone with it: background sync and notifications stop for apps the user
+         believes are running. This permission enables the one-tap system dialog that asks
+         the user to exempt Duplika.
+
+         Play-policy-sensitive, like QUERY_ALL_PACKAGES above, and treated the same way:
+         declared, never requested silently, and refusable. Android shows its own dialog,
+         a denial is respected and never re-asked automatically, and the app is fully
+         usable without it. BatteryOptimization falls back to the ordinary battery
+         settings screen when the dialog is unavailable. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        tools:ignore="BatteryLife" />
 
     <!-- ==========================================================================
          Permissions removed from the virtualization engine's merged manifest.

@@ -27,6 +27,8 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val analyzer = AppCompatibilityAnalyzer(appContext)
     private val shortcuts = CloneShortcutManager(appContext)
     private val permissionBridge = PermissionBridge()
+    private val consent = ConsentManager(appContext)
+    private val battery = BatteryOptimization(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
 
@@ -49,7 +51,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     // must never run on the platform thread. Results are posted back to the main looper,
     // which MethodChannel.Result requires.
     private val engineExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "virtual-space-engine")
+        Thread(runnable, "duplika-engine")
     }
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -174,6 +176,58 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         engine.analyzeApk(apkPath, packageName),
                     )
                 }
+            }
+
+            // Consent and Doze prompts are main-thread, Activity-bound and short. They must
+            // not go through async(): UMP requires the main thread, and the engine executor
+            // is a single queue that a long install would sit in front of.
+            "getConsentStatus" -> result.success(
+                success("CONSENT_STATUS", "Consent state read.", consent.status()),
+            )
+
+            "requestConsent" -> {
+                val host = activity ?: return result.success(noActivity("Consent"))
+                consent.request(
+                    host,
+                    call.argument<String>("debugGeography"),
+                    call.argument<String>("testDeviceHashedId"),
+                ) { state ->
+                    reply(result, success("CONSENT_RESOLVED", "Consent flow finished.", state))
+                }
+            }
+
+            "showPrivacyOptions" -> {
+                val host = activity ?: return result.success(noActivity("The privacy options form"))
+                consent.showPrivacyOptions(host) { state ->
+                    reply(result, success("CONSENT_RESOLVED", "Privacy options closed.", state))
+                }
+            }
+
+            "resetConsent" -> {
+                consent.reset()
+                result.success(success("CONSENT_RESET", "Consent state cleared.", consent.status()))
+            }
+
+            "isIgnoringBatteryOptimizations" -> result.success(
+                success(
+                    "BATTERY_STATE",
+                    "Battery optimisation state read.",
+                    mapOf("ignoring" to battery.isIgnoring()),
+                ),
+            )
+
+            "requestIgnoreBatteryOptimizations" -> {
+                val host = activity ?: return result.success(noActivity("The battery prompt"))
+                result.success(
+                    when (val outcome = battery.request(host)) {
+                        is EngineResult.Success -> success(
+                            "BATTERY_PROMPT_OPENED",
+                            "Battery optimisation prompt opened.",
+                            outcome.value,
+                        )
+                        is EngineResult.Failure -> failure(outcome.code, outcome.message)
+                    },
+                )
             }
 
             "areShortcutsSupported" -> result.success(
@@ -358,6 +412,11 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private fun MethodCall.requiredPackage(result: MethodChannel.Result): String? =
         requiredArg("packageName", result)
 
+    private fun noActivity(subject: String): Map<String, Any?> = failure(
+        EngineErrorCodes.NO_ACTIVITY,
+        "$subject can only be shown while the app is open.",
+    )
+
     private fun MethodCall.requiredArg(name: String, result: MethodChannel.Result): String? {
         val value = argument<String>(name)
         if (value.isNullOrBlank()) {
@@ -394,6 +453,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     )
 
     companion object {
-        const val CHANNEL_NAME = "virtual_space/native_bridge"
+        const val CHANNEL_NAME = "duplika/native_bridge"
     }
 }

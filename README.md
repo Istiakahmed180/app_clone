@@ -50,6 +50,7 @@ state is faked in Flutter.
 | `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
 | `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
 | `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
+| `docs/ONBOARDING.md` | First-launch consent, terms and the Doze exemption; what must change before release |
 
 > **Attribution:** the root `NOTICE` and `licenses/` now carry the required notices for xDL,
 > Dobby, FreeReflection and toml4j, whose copies inside the vendored engine had none. That
@@ -109,21 +110,24 @@ virtual_space_demo/lib/
 │   └── theme/app_theme.dart           Material 3 theme
 ├── core/
 │   ├── constants/app_constants.dart
+│   ├── constants/legal_constants.dart policy URLs + terms version (placeholders)
 │   ├── errors/app_exception.dart      sealed application error hierarchy
 │   ├── services/profile_storage.dart  storage interface + SharedPreferences impl
+│   ├── services/onboarding_store.dart what the user has already been asked
 │   ├── utils/app_logger.dart          dart:developer wrapper (no print())
 │   └── virtualization/
 │       ├── virtualization_engine.dart      the integration boundary
 │       ├── real_virtualization_engine.dart container-backed implementation (production)
 │       └── demo_virtualization_engine.dart no-op reference; not bound in production
 ├── data/
-│   ├── models/{virtual_profile_model, test_app_model, platform_info,
+│   ├── models/{virtual_profile_model, test_app_model, platform_info, consent_state,
 │   │           engine_result, compatibility_report, installed_app_model}.dart
 │   └── repositories/virtual_profile_repository.dart
 ├── native/native_bridge.dart          the ONLY MethodChannel caller
 ├── features/
 │   ├── apps/          clone picker, APK import, compatibility sheet
 │   ├── home/          clone list, engine status notice
+│   ├── onboarding/    consent, terms, Doze exemption (docs/ONBOARDING.md)
 │   └── profiles/      rename and delete dialogs
 └── widgets/{profile_card, app_icon, empty_state}.dart
 ```
@@ -147,6 +151,8 @@ android/app/src/main/kotlin/co/tdevs/duplika/
 ├── DuplikaApplication.kt           host Application; attaches the engine in every process
 └── native/
     ├── NativeBridge.kt             MethodChannel handling and dispatch
+    ├── ConsentManager.kt           GDPR/TCF consent form (Google UMP)
+    ├── BatteryOptimization.kt      Doze exemption prompt, with a settings fallback
     ├── RealVirtualizationEngine.kt application-facing virtualization API
     ├── VirtualizationEngineAdapter.kt  backend abstraction + error codes
     ├── VirtualProfileManager.kt    profile UUID <-> engine user id mapping
@@ -171,7 +177,7 @@ plain maps of primitives which are converted into typed Dart models.
 
 ## 7. Flutter ↔ Kotlin bridge
 
-Channel: `virtual_space/native_bridge`
+Channel: `duplika/native_bridge`
 
 | Method | Returns |
 | --- | --- |
@@ -217,7 +223,7 @@ UUID v4 id, JSON serialisable.
 
 `VirtualProfileRepository` owns *all* profile persistence: `createProfile`, `getProfiles`,
 `getProfile`, `updateProfile`, `deleteProfile`. Profiles are stored as a JSON array under the
-`shared_preferences` key `virtual_space.profiles.v1`.
+`shared_preferences` key `duplika.profiles.v1`.
 
 **Duplicate policy (chosen and enforced):** several profiles may reference the same package —
 that is the point of the product. Profile *names*, however, must be unique after trimming and

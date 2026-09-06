@@ -108,7 +108,7 @@ class VirtualProfileManager(context: Context) {
     }
 
     private companion object {
-        const val PREFS_NAME = "virtual_space_profile_mapping"
+        const val PREFS_NAME = "duplika_profile_mapping"
         const val KEY_MAPPING = "profile_to_virtual_user"
         const val KEY_APK_PATHS = "profile_to_apk_path"
     }

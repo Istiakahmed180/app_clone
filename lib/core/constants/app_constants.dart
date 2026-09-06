@@ -12,7 +12,7 @@ class AppConstants {
   static const String testAppPackage = 'com.example.virtualtestapp';
   static const String testAppFallbackName = 'Virtual Test App';
 
-  static const String profilesStorageKey = 'virtual_space.profiles.v1';
+  static const String profilesStorageKey = 'duplika.profiles.v1';
 
   static const int maxProfileNameLength = 40;
 

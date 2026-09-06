@@ -13,7 +13,7 @@ Flutter UI (Material 3)
    │                      │
 RealVirtualizationEngine  DemoVirtualizationEngine (reference no-op)
    │
-NativeBridge (Dart)  ──── MethodChannel "virtual_space/native_bridge" ────┐
+NativeBridge (Dart)  ──── MethodChannel "duplika/native_bridge" ────┐
                                                                           │
                                                      NativeBridge (Kotlin)│
                                                                           │

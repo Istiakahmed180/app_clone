@@ -15,6 +15,8 @@ object Slog {
     const val PROFILE = "$ROOT.Profile"
     const val INSTALL = "$ROOT.Install"
     const val LAUNCH = "$ROOT.Launch"
+    const val CONSENT = "$ROOT.Consent"
+    const val POWER = "$ROOT.Power"
 
     fun i(tag: String, message: String) = Log.i(tag, message)
 

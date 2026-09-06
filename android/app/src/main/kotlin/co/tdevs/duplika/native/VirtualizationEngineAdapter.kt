@@ -114,4 +114,10 @@ object EngineErrorCodes {
     const val PROFILE_DELETE_FAILED = "PROFILE_DELETE_FAILED"
     const val VIRTUAL_APP_NOT_INSTALLED = "VIRTUAL_APP_NOT_INSTALLED"
     const val VIRTUAL_APP_LAUNCH_FAILED = "VIRTUAL_APP_LAUNCH_FAILED"
+
+    /** No activity on this device can handle either battery optimisation screen. */
+    const val BATTERY_PROMPT_UNAVAILABLE = "BATTERY_PROMPT_UNAVAILABLE"
+
+    /** A consent or Doze prompt was asked for while no Activity was in the foreground. */
+    const val NO_ACTIVITY = "NO_ACTIVITY"
 }

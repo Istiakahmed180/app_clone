@@ -5,6 +5,7 @@ import '../../core/virtualization/virtualization_engine.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../features/apps/controllers/app_picker_controller.dart';
 import '../../features/home/controllers/home_controller.dart';
+import '../../features/onboarding/controllers/onboarding_controller.dart';
 import '../../native/native_bridge.dart';
 
 /// Registers the long-lived dependency graph once, before the first route builds.
@@ -37,6 +38,9 @@ class HomeBinding extends Bindings {
         engine: Get.find<VirtualizationEngine>(),
         nativeBridge: Get.find<NativeBridge>(),
       ),
+    );
+    Get.lazyPut<OnboardingController>(
+      () => OnboardingController(nativeBridge: Get.find<NativeBridge>()),
     );
   }
 }

@@ -23,6 +23,13 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // The UMP SDK identifies the publisher through the AdMob application id in the
+        // merged manifest -- it has no id of its own. This is Google's public sample id,
+        // so the consent flow can be built and exercised without an AdMob account. It
+        // will not serve a real consent message: swap it for the real application id
+        // here, in this one place, before release.
+        manifestPlaceholders["admobApplicationId"] = "ca-app-pub-3940256099942544~3347511713"
     }
 
     buildTypes {
@@ -66,6 +73,11 @@ dependencies {
     implementation("com.github.tiann:FreeReflection:3.2.2")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
+
+    // Google User Messaging Platform: the GDPR/TCF consent form. Standalone artifact --
+    // deliberately NOT google_mobile_ads, because this app shows no ads and the full
+    // Mobile Ads SDK would be dead weight.
+    implementation("com.google.android.ump:user-messaging-platform:3.2.0")
 
     androidTestImplementation("androidx.test:core-ktx:1.6.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
