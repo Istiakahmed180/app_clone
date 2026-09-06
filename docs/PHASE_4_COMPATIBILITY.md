@@ -472,3 +472,34 @@ clone, a heavier container) for no functional gain on these apps. A reasonable n
 make GMS provisioning opt-in per clone rather than automatic, so only an app that genuinely
 needs Google sign-in — and a user who accepts the trade — pays for it. That is a product
 decision, recorded here rather than taken silently.
+
+
+## GMS provisioning is now opt-in per clone (2026-09-06)
+
+The measured cost/benefit above — provisioning delivers no working Google sign-in (the
+SERVICE_INVALID signature wall) while adding weight and one-time background crashes, and the
+flagship apps run without it — made automatic provisioning the wrong default. It is now off by
+default and chosen per clone.
+
+- The compatibility sheet shows a checkbox, **"Install Google Play services in this clone"**,
+  only when the app declares a GMS dependency. It is unchecked by default and labelled as
+  experimental (slower, heavier, sign-in may still fail).
+- The choice threads through `createProfile`/`createProfileFromApk` → the bridge's
+  `installGms` argument → `VirtualAppInstaller`, which provisions only when the user opted in
+  *and* the app actually needs GMS. The decision is logged (`GMS provisioning for user N:
+  requested=...`).
+- The failed-launch repair path rebuilds without GMS: the opt-in is not persisted per profile,
+  so repair cannot know it, and re-provisioning would re-add the non-functional Google packages
+  and their crashes. If the opt-in is ever persisted on the profile, thread it through `repair`.
+
+Verified on the OnePlus CPH2605 in a minified release build, cloning Discord (a GMS-marker
+app) twice:
+
+| Clone | Checkbox | Log | GMS packages installed |
+| --- | --- | --- | --- |
+| user 4 | unchecked | `requested=false` | no |
+| user 5 | checked | `requested=true` → `Provisioned Google Play services` | yes |
+
+Tests: `test/compatibility_sheet_test.dart` covers the checkbox's visibility and that the
+returned decision defaults off and flips when ticked; `test/real_virtualization_engine_test.dart`
+covers `installGms` defaulting false and being forwarded on both the installed-app and APK paths.
