@@ -9,6 +9,10 @@ void main() {
     required void Function(bool accepted) onAnswer,
     bool policiesArePlaceholders = false,
   }) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       ScreenUtilInit(
         designSize: const Size(390, 844),
@@ -39,7 +43,7 @@ void main() {
     await pumpDialog(tester, onAnswer: (_) {});
 
     expect(find.widgetWithText(TextButton, 'Decline'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Accept'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'Accept'), findsOneWidget);
   });
 
   testWidgets('accepting reports acceptance', (WidgetTester tester) async {
@@ -77,6 +81,32 @@ void main() {
     expect(find.textContaining('not published'), findsOneWidget);
     // The whole point: no link text claiming to be the policy.
     expect(find.textContaining('Read our'), findsNothing);
+  });
+
+  testWidgets('the disclosure scrolls, and says so while text is below the fold',
+      (WidgetTester tester) async {
+    await pumpDialog(tester, onAnswer: (_) {});
+
+    final Finder view = find.byType(Scrollable).last;
+    final ScrollController controller =
+        tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView)).controller!;
+
+    // The point of the tall panel: there is more to read than fits.
+    expect(controller.position.extentAfter, greaterThan(0));
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      1,
+    );
+
+    await tester.drag(view, const Offset(0, -4000));
+    await tester.pumpAndSettle();
+
+    // Reaching the end retires the affordance rather than leaving a stray rule.
+    expect(controller.position.extentAfter, lessThanOrEqualTo(1));
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      0,
+    );
   });
 
   testWidgets('the dialog cannot be dismissed with the back gesture',

@@ -30,10 +30,10 @@ class BackgroundPermissionBanner extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Allow Duplika to run in the background so your clones keep receiving '
-                  'messages and notifications.',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.onInverseSurface),
+                  'Allow the app to run in the background for better stability.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onInverseSurface,
+                  ),
                 ),
               ),
               TextButton(
