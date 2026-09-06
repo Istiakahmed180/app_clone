@@ -30,6 +30,7 @@ state is faked in Flutter.
 | `docs/PHASE_2_TEST_PLAN.md` | Phase 2 test plan, results, evidence, performance baseline |
 | `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
 | `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
+| `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
 
 > **Before distributing:** `docs/DEPENDENCY_LICENSE_AUDIT.md` records two unresolved issues —
 > stripped attribution in vendored native code, and unverified VirtualApp/VirtualAPK licence
@@ -240,6 +241,22 @@ flutter analyze
 flutter test
 flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+Release builds minify, and the engine needs keep rules to survive that
+(`android/app/proguard-rules.pro`). Without them the engine dies in
+`attachBaseContext` and every clone is unusable — see `docs/RELEASE_BUILD.md`:
+
+```bash
+flutter build apk --release
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+A release build is not debuggable, so `run-as` cannot inspect containers. Verify
+it by launching a clone and confirming the foreground activity is a proxy:
+
+```bash
+adb shell dumpsys activity activities | grep topResumedActivity
 ```
 
 Native instrumentation tests (require a device with the test APK installed):

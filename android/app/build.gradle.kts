@@ -31,6 +31,16 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // Pinned rather than inherited. AGP 9 turns release minification on by
+            // default, which silently broke the virtualization engine: R8 deleted the
+            // annotation-only hidden-API stubs it reflects on. Stating the value here
+            // keeps that decision visible next to the rules that make it survivable.
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
