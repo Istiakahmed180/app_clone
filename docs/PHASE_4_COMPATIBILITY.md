@@ -436,3 +436,39 @@ R8's *optimisation* rewrote the reflection-heavy bind path around them. `-dontop
 `android/app/proguard-rules.pro` fixes it, verified on device in a minified release build. That
 is a blunt instrument; a narrower rule would be better if anyone finds which optimisation is at
 fault.
+
+## Real-app test on a physical device (2026-09-06)
+
+Two flagship dual-account apps, already installed on the host, cloned and launched on a
+OnePlus CPH2605 (Android 15, arm64) from the minified release build.
+
+| App | Verdict shown | Clone launched | First screen reached | App-process crash |
+| --- | --- | --- | --- | --- |
+| Telegram (`org.telegram.messenger` 12.10.1) | Limited | yes, `ProxyActivity$P0` | onboarding "Start Messaging" | none |
+| WhatsApp (`com.whatsapp` 2.26.34.81) | Limited | yes, `ProxyActivity$P0` | onboarding "Welcome to WhatsApp" | none |
+
+**Isolation, confirmed on real apps.** Both clones opened their own first-run onboarding while
+the host's own Telegram and WhatsApp remain set up. A clone that shared the host's data would
+show the user's chats, not a welcome screen; it shows the welcome screen, so the container is
+genuinely separate. No account was signed into and no Terms were accepted during the test.
+
+### GMS provisioning: what it costs on real apps
+
+Both apps declare the GMS marker, so provisioning ran (~3 s each) and GMS became visible in the
+container. At each clone's first launch, the provisioned Google processes threw one-time
+background crashes:
+
+- `com.android.vending:background` — `ClassCastException` between obfuscated Play classes
+- `com.google.android.gms.persistent` — `SecurityException: Permission Denial ...
+  INTERACT_ACROSS_USERS` (the guest runs under the host UID and cannot broadcast as another user)
+
+These are the provisioned Google processes failing, not the guest app: Telegram and WhatsApp
+both launched and ran to their onboarding regardless, and while idle nothing crash-loops.
+
+This sharpens the earlier finding. Because the signature wall (SERVICE_INVALID) means
+provisioning still delivers no working Google sign-in or push, and Telegram and WhatsApp both
+run without GMS anyway, provisioning currently pays a cost (extra background crashes, ~3 s per
+clone, a heavier container) for no functional gain on these apps. A reasonable next step is to
+make GMS provisioning opt-in per clone rather than automatic, so only an app that genuinely
+needs Google sign-in — and a user who accepts the trade — pays for it. That is a product
+decision, recorded here rather than taken silently.

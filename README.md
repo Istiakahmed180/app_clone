@@ -4,8 +4,10 @@
 
 **Any installed app can now be cloned, and APKs can be imported without installing them.**
 
-**Arbitrary third-party application compatibility is still not guaranteed** — only the
-controlled test app and VLC have been verified, on one device.
+**Arbitrary third-party application compatibility is still not guaranteed.** Verified on a
+physical OnePlus CPH2605 (Android 15, arm64): the controlled test app, VLC, and — cloning and
+launching to first-run onboarding in isolated containers — Telegram and WhatsApp. Google
+sign-in inside a clone does not work (see the GMS findings in `docs/PHASE_4_COMPATIBILITY.md`).
 
 > ## ⛔ This build must not be distributed
 >
@@ -299,7 +301,8 @@ multiple simultaneous instances of one app.
 
 It does **not** provide:
 
-- support for any package other than `com.example.virtualtestapp`
+- guaranteed support for arbitrary apps. Verified working: the test app, VLC, Telegram and
+  WhatsApp (launch + container isolation) on one device; other apps may still fail
 - an independent Android UID — guests run under the **host's** UID and inherit its permission
   grants; isolation is at the container/storage level, not the kernel UID level
 - GMS virtualization. Measured, not assumed: inside a container
