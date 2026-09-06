@@ -27,7 +27,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val analyzer = AppCompatibilityAnalyzer(appContext)
     private val shortcuts = CloneShortcutManager(appContext)
     private val permissionBridge = PermissionBridge()
-    private val consent = ConsentManager(appContext)
     private val battery = BatteryOptimization(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
@@ -178,36 +177,9 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 }
             }
 
-            // Consent and Doze prompts are main-thread, Activity-bound and short. They must
-            // not go through async(): UMP requires the main thread, and the engine executor
-            // is a single queue that a long install would sit in front of.
-            "getConsentStatus" -> result.success(
-                success("CONSENT_STATUS", "Consent state read.", consent.status()),
-            )
-
-            "requestConsent" -> {
-                val host = activity ?: return result.success(noActivity("Consent"))
-                consent.request(
-                    host,
-                    call.argument<String>("debugGeography"),
-                    call.argument<String>("testDeviceHashedId"),
-                ) { state ->
-                    reply(result, success("CONSENT_RESOLVED", "Consent flow finished.", state))
-                }
-            }
-
-            "showPrivacyOptions" -> {
-                val host = activity ?: return result.success(noActivity("The privacy options form"))
-                consent.showPrivacyOptions(host) { state ->
-                    reply(result, success("CONSENT_RESOLVED", "Privacy options closed.", state))
-                }
-            }
-
-            "resetConsent" -> {
-                consent.reset()
-                result.success(success("CONSENT_RESET", "Consent state cleared.", consent.status()))
-            }
-
+            // The Doze prompt is main-thread, Activity-bound and short. It must not go
+            // through async(): the engine executor is a single queue that a long install
+            // would sit in front of.
             "isIgnoringBatteryOptimizations" -> result.success(
                 success(
                     "BATTERY_STATE",

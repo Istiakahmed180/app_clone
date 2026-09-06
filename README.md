@@ -151,7 +151,6 @@ android/app/src/main/kotlin/co/tdevs/duplika/
 ├── DuplikaApplication.kt           host Application; attaches the engine in every process
 └── native/
     ├── NativeBridge.kt             MethodChannel handling and dispatch
-    ├── ConsentManager.kt           GDPR/TCF consent form (Google UMP)
     ├── BatteryOptimization.kt      Doze exemption prompt, with a settings fallback
     ├── RealVirtualizationEngine.kt application-facing virtualization API
     ├── VirtualizationEngineAdapter.kt  backend abstraction + error codes

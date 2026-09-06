@@ -43,8 +43,6 @@ void main() {
           return <Object?, Object?>{'installed': false, 'packageName': 'x'};
         case 'getPlatformInfo':
           return <Object?, Object?>{};
-        case 'requestConsent':
-          return ok(<String, Object?>{'status': 'notRequired'});
         case 'isIgnoringBatteryOptimizations':
           return ok(<String, Object?>{'ignoring': ignoringBattery});
         default:

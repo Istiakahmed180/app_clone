@@ -23,9 +23,4 @@ class LegalConstants {
   /// it for typo fixes -- an unnecessary re-prompt teaches users to dismiss without
   /// reading.
   static const int termsVersion = 1;
-
-  /// UMP debug geography used in debug builds so the consent form is reachable outside
-  /// the EEA. UMP ignores it in a release build. Set to the empty string to disable the
-  /// override and see exactly what a real user in this region would see.
-  static const String debugConsentGeography = 'EEA';
 }

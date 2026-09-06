@@ -37,14 +37,6 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
-        <!-- The UMP consent SDK reads the publisher identity from here; there is no
-             separate UMP id. The value comes from the `admobApplicationId` manifest
-             placeholder in app/build.gradle.kts, which currently holds Google's public
-             sample id. See docs/ONBOARDING.md. -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${admobApplicationId}" />
-
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

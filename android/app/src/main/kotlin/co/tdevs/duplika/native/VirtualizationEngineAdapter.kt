@@ -118,6 +118,6 @@ object EngineErrorCodes {
     /** No activity on this device can handle either battery optimisation screen. */
     const val BATTERY_PROMPT_UNAVAILABLE = "BATTERY_PROMPT_UNAVAILABLE"
 
-    /** A consent or Doze prompt was asked for while no Activity was in the foreground. */
+    /** A Doze prompt was asked for while no Activity was in the foreground. */
     const val NO_ACTIVITY = "NO_ACTIVITY"
 }

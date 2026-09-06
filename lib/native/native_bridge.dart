@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import '../core/constants/app_constants.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
+import '../data/models/battery_prompt_screen.dart';
 import '../data/models/compatibility_report.dart';
-import '../data/models/consent_state.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
@@ -275,47 +275,8 @@ class NativeBridge {
       _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
 
   // ---------------------------------------------------------------------------
-  // Onboarding: consent and Doze exemption
+  // Onboarding: Doze exemption
   // ---------------------------------------------------------------------------
-
-  /// The stored consent state, without contacting the network.
-  Future<ConsentState> getConsentStatus() async {
-    final EngineResponse response = await _invokeEngine('getConsentStatus');
-    return ConsentState.fromMap(response.data);
-  }
-
-  /// Runs the UMP consent flow, showing the form when one is required.
-  ///
-  /// Never throws for a consent failure. A form that cannot load is reported through
-  /// [ConsentState.failed] so the caller can log it and let the user proceed; consent
-  /// gates nothing in this app.
-  ///
-  /// [debugGeography] and [testDeviceHashedId] force the form to appear outside the EEA
-  /// during development. UMP ignores both in a release build.
-  Future<ConsentState> requestConsent({
-    String? debugGeography,
-    String? testDeviceHashedId,
-  }) async {
-    try {
-      final EngineResponse response = await _invokeEngine('requestConsent', <String, dynamic>{
-        'debugGeography': debugGeography,
-        'testDeviceHashedId': testDeviceHashedId,
-      });
-      return ConsentState.fromMap(response.data);
-    } on NativeBridgeException catch (error, stackTrace) {
-      _logger.error('Consent request unavailable', error, stackTrace);
-      return ConsentState.unknown;
-    }
-  }
-
-  /// Re-opens the consent form so a user can change or withdraw their answer.
-  Future<ConsentState> showPrivacyOptions() async {
-    final EngineResponse response = await _invokeEngine('showPrivacyOptions');
-    if (!response.success) {
-      throw VirtualizationException(response.message, code: response.code);
-    }
-    return ConsentState.fromMap(response.data);
-  }
 
   /// Whether Android currently exempts Duplika from Doze.
   ///

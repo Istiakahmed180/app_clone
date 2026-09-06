@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:duplika/core/services/onboarding_store.dart';
-import 'package:duplika/data/models/consent_state.dart';
 import 'package:duplika/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:duplika/native/native_bridge.dart';
 
@@ -34,7 +33,6 @@ void main() {
     store = OnboardingStore(storage: storage);
     calls = <String>[];
     responses = <String, Map<Object?, Object?>>{
-      'requestConsent': ok(<String, Object?>{'status': 'obtained', 'shown': true}),
       'isIgnoringBatteryOptimizations': ok(<String, Object?>{'ignoring': false}),
       'requestIgnoreBatteryOptimizations': ok(<String, Object?>{'screen': 'dialog'}),
     };
@@ -52,12 +50,12 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  test('a first launch asks for consent, then stops on the terms', () async {
+  test('a first launch stops on the terms, and asks nothing else first', () async {
     await controller.start();
 
-    expect(calls, contains('requestConsent'));
     expect(controller.step.value, OnboardingStep.terms);
-    expect(controller.consent.value.status, ConsentStatus.obtained);
+    // Nothing may be asked ahead of the terms -- they are the only gate.
+    expect(calls, isEmpty);
     // The Doze offer must wait until the terms are settled.
     expect(controller.showBackgroundPrompt.value, isFalse);
   });
@@ -88,20 +86,6 @@ void main() {
     expect(await store.hasAcceptedCurrentTerms(), isFalse);
   });
 
-  test('a consent failure is recorded but does not stop onboarding', () async {
-    responses['requestConsent'] = ok(<String, Object?>{
-      'status': 'required',
-      'shown': false,
-      'errorCode': 3,
-      'errorMessage': 'No form configured',
-    });
-
-    await controller.start();
-
-    expect(controller.consent.value.failed, isTrue);
-    expect(controller.step.value, OnboardingStep.terms);
-  });
-
   test('a native bridge with no handler at all still reaches the terms', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
@@ -109,7 +93,6 @@ void main() {
 
     await controller.start();
 
-    expect(controller.consent.value.status, ConsentStatus.unknown);
     expect(controller.step.value, OnboardingStep.terms);
   });
 
