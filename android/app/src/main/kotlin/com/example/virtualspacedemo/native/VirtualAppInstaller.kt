@@ -13,6 +13,7 @@ class VirtualAppInstaller(
     private val context: Context,
     private val adapter: VirtualizationEngineAdapter,
     private val securityChecker: AppSecurityChecker,
+    private val analyzer: AppCompatibilityAnalyzer,
 ) {
 
     fun install(packageName: String, virtualUserId: Int): EngineResult<Unit> {
@@ -28,7 +29,48 @@ class VirtualAppInstaller(
         // real install. Re-installing is idempotent and does not clear container data
         // (only the explicit clearPackage does), so always going through is both safe and
         // the only way to guarantee the per-user record exists.
+        provisionGmsIfNeeded(virtualUserId, analyzer.analyze(packageName).requiresGms)
         return adapter.installPackage(packageName, virtualUserId)
+    }
+
+    /**
+     * Gives this container its own copy of the Google packages when its app needs them.
+     *
+     * A guest cannot see the host's Google Play services -- measured, not assumed: inside a
+     * container `isGooglePlayServicesAvailable` returns SERVICE_MISSING and
+     * `com.google.android.gms` is not visible to the guest at all, so Google sign-in, push
+     * and maps fail at their first call. Provisioning puts those packages inside the
+     * container so there is something for the guest to find.
+     *
+     * Only containers that need GMS get it: this installs a set of packages rather than one,
+     * so doing it unconditionally would slow down every clone to no purpose.
+     *
+     * Failure is deliberately not fatal. A clone whose GMS provisioning failed is exactly the
+     * clone the compatibility warning already describes, so the app is still installed and the
+     * user still gets it -- degraded rather than absent. The reason is logged.
+     */
+    private fun provisionGmsIfNeeded(virtualUserId: Int, requiresGms: Boolean) {
+        // Logged unconditionally: whether a container gets GMS decides whether Google sign-in
+        // and push work inside it, and silently skipping was previously indistinguishable from
+        // provisioning that ran and did nothing.
+        Slog.i(Slog.INSTALL, "GMS check for user $virtualUserId: requiresGms=$requiresGms")
+        if (!requiresGms) {
+            return
+        }
+        if (!adapter.isGmsSupported()) {
+            Slog.w(Slog.INSTALL, "App needs GMS but this device has none; skipping provisioning")
+            return
+        }
+        // No "already provisioned?" short-circuit, for the same reason install() has none:
+        // the engine answers that question with isInstalled, which falls back to the *host*
+        // package manager. The host has Google Play services, so it reports every container
+        // as already provisioned and the real work is skipped -- measured, after this check
+        // silently suppressed provisioning entirely. Re-provisioning is idempotent.
+        when (val result = adapter.installGms(virtualUserId)) {
+            is EngineResult.Success -> Unit
+            is EngineResult.Failure ->
+                Slog.e(Slog.INSTALL, "GMS provisioning failed (${result.code}): ${result.message}")
+        }
     }
 
     /**
@@ -49,6 +91,7 @@ class VirtualAppInstaller(
             AppSecurityChecker.Verdict.Allowed -> Unit
         }
 
+        provisionGmsIfNeeded(virtualUserId, analyzer.analyzeApk(apkPath, packageName).requiresGms)
         return adapter.installApkFile(apkPath, virtualUserId)
     }
 

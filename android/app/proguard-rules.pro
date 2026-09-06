@@ -43,3 +43,13 @@
 -keepattributes InnerClasses
 -keepattributes EnclosingMethod
 -keepattributes Exceptions
+
+# -- Optimisation off ---------------------------------------------------------
+# Renaming was not the whole problem. With the Google packages provisioned into a
+# container the guest died in Bcore's own bind path --
+#   java.lang.ClassCastException: android.app.ContextImpl cannot be cast to
+#   android.app.Application  at BActivityThread.handleBindApplication
+# -- while the identical clone without provisioning launched fine, and the same
+# provisioned clone launched fine from an unminified build. The classes were kept;
+# what broke was R8 rewriting the reflection-heavy bind path around them.
+-dontoptimize

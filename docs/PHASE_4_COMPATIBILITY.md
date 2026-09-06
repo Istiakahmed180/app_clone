@@ -373,3 +373,66 @@ the host's identity. That work sits directly against the security posture in `do
 Play Integrity and SafetyNet attest to *who is calling*, and a container cannot satisfy them
 honestly. Any GMS support therefore has a hard ceiling — sign-in and push may be reachable,
 attestation is not, and this project does not bypass attestation.
+
+## Provisioning GMS into a container — implemented, and where it stops
+
+The engine already ships the machinery: `BlackBoxCore.installGms(userId)`, `isSupportGms()`, and
+a `GmsCore` that installs a set of Google packages (`com.google.android.gms`, `gsf`,
+`com.android.vending` and others) into a container, plus `GmsProxy` and
+`GoogleAccountManagerProxy` fakes. None of it was being called.
+
+`VirtualAppInstaller` now provisions a container before installing a guest that needs GMS, and
+only such containers — the set costs about 3 s on a OnePlus CPH2605, which is not worth paying
+for every clone.
+
+### What it changed
+
+Same device, same app, `GmsProbe` inside the container:
+
+| Probe | Not provisioned | Provisioned |
+| --- | --- | --- |
+| `isGooglePlayServicesAvailable` | `1` SERVICE_MISSING | `9` **SERVICE_INVALID** |
+| `com.google.android.gms` | NOT VISIBLE | **visible, 26.32.34** |
+
+Provisioning does what it claims: the guest can now see Google Play services, at the host's real
+version. The failure moved from "absent" to "present but rejected".
+
+### Where it stops: SERVICE_INVALID
+
+`SERVICE_INVALID` is `GoogleApiAvailability` reporting that the Google Play services it found is
+not authentic — an APK signature check, made by the client library before any Google API is
+used. Provisioning cannot satisfy it by installing more packages: the container would have to
+present the signing certificate of the real Google Play services.
+
+That is a deliberate stopping point, not an oversight. **It has not been attempted, and should
+not be without an explicit decision**, because "make an authenticity check pass" is the same
+shape as the security constraints this project holds to in `docs/SECURITY.md`. The narrow,
+arguable case — that the host genuinely does have authentic GMS installed and the container is
+only failing to report its real certificate — is a judgement for the project owner, not
+something to slip in as a bug fix.
+
+So: sign-in, push and maps still fail. They fail one step later, and for a reason that is now
+named rather than guessed.
+
+### Two defects this uncovered
+
+**A short-circuit that silently disabled the whole feature.** The first version skipped
+provisioning when `isGmsInstalled(userId)` said the container already had it. Decompiling shows
+`BlackBoxCore.isInstallGms` delegates to `isInstalled`, which this codebase already documents as
+answering from the *host* package manager. The host has GMS, so every container claimed to be
+provisioned and nothing ever ran. The check is gone, for the same reason `install()` has no
+"already installed?" short-circuit. The provisioning decision is now logged unconditionally.
+
+**R8 broke the guest bind path, but only with GMS present.** A provisioned clone died with
+
+```
+java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+    at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication
+```
+
+while the identical unprovisioned clone launched fine, and the same provisioned container
+launched fine from an unminified build. Keep rules were not enough — the classes were kept and
+R8's *optimisation* rewrote the reflection-heavy bind path around them. `-dontoptimize` in
+`android/app/proguard-rules.pro` fixes it, verified on device in a minified release build. That
+is a blunt instrument; a narrower rule would be better if anyone finds which optimisation is at
+fault.

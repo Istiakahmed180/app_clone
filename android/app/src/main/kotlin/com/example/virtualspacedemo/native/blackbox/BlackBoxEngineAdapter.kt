@@ -210,6 +210,31 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         )
     }
 
+    override fun isGmsSupported(): Boolean =
+        runCatching { BlackBoxCore.get().isSupportGms() }.getOrDefault(false)
+
+    override fun installGms(virtualUserId: Int): EngineResult<Unit> =
+        guarded(EngineErrorCodes.GMS_INSTALL_FAILED) {
+            withServiceRetry {
+                warmUpPackageService()
+                doInstallGms(virtualUserId)
+            }
+        }
+
+    private fun doInstallGms(virtualUserId: Int): EngineResult<Unit> {
+        val result = BlackBoxCore.get().installGms(virtualUserId)
+            ?: return noResponse("Google Play services install into user $virtualUserId")
+
+        return if (result.success) {
+            Slog.i(Slog.INSTALL, "Provisioned Google Play services into user $virtualUserId")
+            EngineResult.ok()
+        } else {
+            val reason = result.msg ?: "the engine refused to install Google Play services"
+            Slog.e(Slog.INSTALL, "GMS provisioning failed for user $virtualUserId: $reason")
+            EngineResult.Failure(EngineErrorCodes.GMS_INSTALL_FAILED, reason)
+        }
+    }
+
     override fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.APP_INSTALL_FAILED) {
             withServiceRetry {

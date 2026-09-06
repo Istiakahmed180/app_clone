@@ -33,6 +33,23 @@ interface VirtualizationEngineAdapter {
 
     fun installPackage(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
+    /**
+     * Whether Google Play services exists on the host at all. False means no container can
+     * ever be given GMS, because a container can only be given what the host already has.
+     */
+    fun isGmsSupported(): Boolean
+
+    /**
+     * Provisions the Google packages into this container.
+     *
+     * A guest cannot see the host's Google Play services: its package manager does not report
+     * `com.google.android.gms` at all, so every Google API fails its first availability check.
+     * This installs the Google packages into the container itself so the guest has something
+     * to find. It is slow relative to a normal install -- it installs a set of packages, not
+     * one -- so callers should provision only containers whose app actually needs GMS.
+     */
+    fun installGms(virtualUserId: Int): EngineResult<Unit>
+
     /** Installs a standalone APK file (not necessarily installed on the host). */
     fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit>
 
@@ -80,6 +97,7 @@ object EngineErrorCodes {
     const val APP_NOT_SUPPORTED = "APP_NOT_SUPPORTED"
     const val SECURE_ENV_REQUIRED = "SECURE_ENV_REQUIRED"
     const val APP_INSTALL_FAILED = "APP_INSTALL_FAILED"
+    const val GMS_INSTALL_FAILED = "GMS_INSTALL_FAILED"
 
     /**
      * The backend returned no answer at all (a null result), rather than refusing.

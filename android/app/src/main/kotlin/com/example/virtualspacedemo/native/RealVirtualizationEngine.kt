@@ -18,7 +18,8 @@ class RealVirtualizationEngine(
 
     private val profileManager = VirtualProfileManager(context)
     private val securityChecker = AppSecurityChecker(context)
-    private val installer = VirtualAppInstaller(context, adapter, securityChecker)
+    private val analyzer = AppCompatibilityAnalyzer(context)
+    private val installer = VirtualAppInstaller(context, adapter, securityChecker, analyzer)
     private val launcher = VirtualAppLauncher(adapter)
     private val installedApps = InstalledAppsProvider(context)
     private val apkImporter = ApkImporter(context)
@@ -75,7 +76,7 @@ class RealVirtualizationEngine(
         installedApps.iconsFor(packageNames)
 
     fun analyzeApk(apkPath: String, packageName: String): Map<String, Any?> =
-        AppCompatibilityAnalyzer(context).analyzeApk(apkPath, packageName).toMap()
+        analyzer.analyzeApk(apkPath, packageName).toMap()
 
     fun describeApp(packageName: String): Map<String, Any?>? =
         installedApps.describeInstalled(packageName)
