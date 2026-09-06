@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <application
-        android:label="Virtual Space"
-        android:name=".VirtualSpaceApplication"
+        android:label="Duplika"
+        android:name=".DuplikaApplication"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -53,7 +53,7 @@
 
          This is a Play-policy-sensitive permission: a dual-app/cloning product is one of
          Google's permitted use cases, but it must be declared and justified at review.
-         Virtual Space uses it ONLY to list launchable apps for the picker; it never
+         Duplika uses it ONLY to list launchable apps for the picker; it never
          inspects another app's private data. See docs/SECURITY.md. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -102,7 +102,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" tools:node="remove" />
     <!--
       MANAGE_EXTERNAL_STORAGE is deliberately NOT removed. Guests run under the host's
-      identity, so a cloned media or file app can only reach shared storage if Virtual Space
+      identity, so a cloned media or file app can only reach shared storage if Duplika
       itself holds this. Stripping it made the engine refuse with
       "All files access not granted for launching: <package>", and a cloned VLC then sat on
       "Loading..." forever with no way for the user to fix it: the permission was not even
@@ -146,7 +146,7 @@
     <uses-permission android:name="com.android.voicemail.permission.READ_WRITE_ALL_VOICEMAIL" tools:node="remove" />
     <uses-permission android:name="com.apusapps.launcher.permission.READ_SETTINGS" tools:node="remove" />
     <uses-permission android:name="com.bbk.launcher2.permission.READ_SETTINGS" tools:node="remove" />
-    <uses-permission android:name="com.example.virtualspacedemo.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
+    <uses-permission android:name="co.tdevs.duplika.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
     <uses-permission android:name="com.google.android.gms.permission.ACCESS_BACKGROUND_LOCATION" tools:node="remove" />
     <uses-permission android:name="com.google.android.gms.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
     <uses-permission android:name="com.google.android.gms.permission.ACCESS_FINE_LOCATION" tools:node="remove" />

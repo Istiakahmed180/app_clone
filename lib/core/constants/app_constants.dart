@@ -2,7 +2,7 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String appTitle = 'Virtual Space';
+  static const String appTitle = 'Duplika';
 
   /// The controlled test application.
   ///

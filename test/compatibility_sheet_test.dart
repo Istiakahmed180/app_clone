@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/data/models/compatibility_report.dart';
-import 'package:virtual_space_demo/features/apps/widgets/compatibility_sheet.dart';
+import 'package:duplika/data/models/compatibility_report.dart';
+import 'package:duplika/features/apps/widgets/compatibility_sheet.dart';
 
 Future<void> _pump(WidgetTester tester, CompatibilityReport report) async {
   await tester.pumpWidget(

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/core/constants/app_constants.dart';
-import 'package:virtual_space_demo/core/errors/app_exception.dart';
-import 'package:virtual_space_demo/data/models/virtual_profile_model.dart';
-import 'package:virtual_space_demo/data/repositories/virtual_profile_repository.dart';
+import 'package:duplika/core/constants/app_constants.dart';
+import 'package:duplika/core/errors/app_exception.dart';
+import 'package:duplika/data/models/virtual_profile_model.dart';
+import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 
 import 'fakes/in_memory_profile_storage.dart';
 

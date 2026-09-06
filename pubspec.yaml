@@ -1,5 +1,5 @@
-name: virtual_space_demo
-description: "A new Flutter project."
+name: duplika
+description: "Duplika — run a second, isolated copy of any app on one device."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

@@ -1,5 +1,10 @@
 # Phase 4 — App Compatibility Layer
 
+> **Note on the captured output below.** These runs predate the rename from *Virtual Space*
+> to **Duplika**, so device transcripts here still show the old host package
+> `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
+> host package is now `co.tdevs.duplika`.
+
 Device of record: **OnePlus CPH2605, Android 15 (API 35), arm64-v8a**.
 
 ## Why this phase exists
@@ -240,7 +245,7 @@ Points worth knowing:
   user confirmed it — the launcher shows its own dialog. The message says so rather than
   claiming the shortcut exists.
 - Launchers that cannot pin are reported as `SHORTCUTS_UNSUPPORTED` instead of failing quietly.
-- The icon falls back to Virtual Space's own when the guest package is not installed on the
+- The icon falls back to Duplika's own when the guest package is not installed on the
   host, which is the normal case for a clone made from an imported APK.
 - **Deleting a clone disables its shortcut** with a reason. An app cannot delete a shortcut the
   user pinned, so a stale tile that silently does nothing is the alternative.
@@ -282,7 +287,7 @@ normal app.
 
 Two consequences worth stating plainly rather than discovering later:
 
-- In notification settings the user manages these under **Virtual Space**, not under the
+- In notification settings the user manages these under **Duplika**, not under the
   cloned app, and cannot silence one clone without silencing all of them.
 - `POST_NOTIFICATIONS` is a single host-wide grant. Denying it silences every clone at once.
   This is the same host-identity limit that applies to camera, microphone and storage, and
@@ -295,7 +300,7 @@ Two consequences worth stating plainly rather than discovering later:
   Sign-in, push and maps will still fail inside clones of GMS-dependent apps.
 - **GMS detection is heuristic** (see above).
 - **Permission bridging is host-wide, not per-clone.** Granting the camera for one clone
-  grants it to Virtual Space, and therefore to every clone. Per-clone permission scoping
+  grants it to Duplika, and therefore to every clone. Per-clone permission scoping
   would require the engine to virtualize permission checks, which it does not.
 - Compatibility is now shown on existing clones too, not only in the picker. `HomeController`
   analyses each **distinct** cloned package once per refresh and `ProfileCard` surfaces the most
@@ -506,7 +511,7 @@ covers `installGms` defaulting false and being forwarded on both the installed-a
 
 ## Full real-app test matrix (2026-09-06, clean reinstall)
 
-Virtual Space uninstalled (all containers dropped) and reinstalled from the release build, then
+Duplika uninstalled (all containers dropped) and reinstalled from the release build, then
 five real apps cloned with the default configuration (GMS opt-in OFF) and launched on the
 OnePlus CPH2605 (Android 15 / API 35).
 
@@ -598,7 +603,7 @@ remaining engine/GMS-deep limitations; the AppOps one is closed.
 
 ## Clean-slate full retest on the patched engine (2026-09-06)
 
-Virtual Space uninstalled and reinstalled, then all five apps cloned (default config, GMS off)
+Duplika uninstalled and reinstalled, then all five apps cloned (default config, GMS off)
 and launched on the OnePlus CPH2605.
 
 | App | Launched to first screen | App-process crash | Verdict |

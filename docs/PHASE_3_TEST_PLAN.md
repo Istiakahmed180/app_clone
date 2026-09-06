@@ -1,12 +1,17 @@
 # Phase 3 — APK Import, Multi-App, Multi-Instance
 
+> **Note on the captured output below.** These runs predate the rename from *Virtual Space*
+> to **Duplika**, so device transcripts here still show the old host package
+> `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
+> host package is now `co.tdevs.duplika`.
+
 Device of record: **OnePlus CPH2605, Android 15 (API 35), arm64-v8a**.
 
 ## What Phase 3 adds
 
 | Capability | How it works |
 | --- | --- |
-| **Multi-app** | `InstalledAppsProvider` lists launchable apps (label, package, icon) for a picker. Any app may be cloned except Virtual Space itself and system components. |
+| **Multi-app** | `InstalledAppsProvider` lists launchable apps (label, package, icon) for a picker. Any app may be cloned except Duplika itself and system components. |
 | **Multi-instance** | Several profiles may share one package; each gets its own `virtualUserId`. Names auto-increment ("Telegram", "Telegram 2"). |
 | **APK import** | The user picks an `.apk`; it is streamed to app storage, parsed with `getPackageArchiveInfo`, admitted by the same security policy, then installed into a container. |
 

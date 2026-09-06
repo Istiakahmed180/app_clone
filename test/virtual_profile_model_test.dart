@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/data/models/platform_info.dart';
-import 'package:virtual_space_demo/data/models/test_app_model.dart';
-import 'package:virtual_space_demo/data/models/virtual_profile_model.dart';
+import 'package:duplika/data/models/platform_info.dart';
+import 'package:duplika/data/models/test_app_model.dart';
+import 'package:duplika/data/models/virtual_profile_model.dart';
 
 void main() {
   test('VirtualProfileModel survives a JSON round trip', () {

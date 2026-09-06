@@ -40,7 +40,7 @@ NativeBridge (Dart)  ──── MethodChannel "virtual_space/native_bridge" �
 package names and integer `virtualUserId`s, which every container engine exposes in some form.
 
 Swapping backends means writing one new adapter and changing one line in
-`VirtualSpaceApplication.engine`.
+`DuplikaApplication.engine`.
 
 ## Why the engine is a prebuilt AAR
 
@@ -60,7 +60,7 @@ Reproduction steps are in `VIRTUALIZATION_ENGINE.md`.
 
 The engine adds stub processes (`:p0` … `:pN`) and a `:black` service process to the host
 manifest. The host `Application` class is instantiated in **all** of them, so
-`VirtualSpaceApplication` does engine attachment first and keeps everything else out of
+`DuplikaApplication` does engine attachment first and keeps everything else out of
 `attachBaseContext`.
 
 A guest app runs in one of those stub processes under the **host's** UID — not its own. That is

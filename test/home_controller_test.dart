@@ -1,11 +1,11 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/core/constants/app_constants.dart';
-import 'package:virtual_space_demo/core/virtualization/real_virtualization_engine.dart';
-import 'package:virtual_space_demo/data/models/virtual_profile_model.dart';
-import 'package:virtual_space_demo/data/repositories/virtual_profile_repository.dart';
-import 'package:virtual_space_demo/features/home/controllers/home_controller.dart';
-import 'package:virtual_space_demo/native/native_bridge.dart';
+import 'package:duplika/core/constants/app_constants.dart';
+import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
+import 'package:duplika/data/models/virtual_profile_model.dart';
+import 'package:duplika/data/repositories/virtual_profile_repository.dart';
+import 'package:duplika/features/home/controllers/home_controller.dart';
+import 'package:duplika/native/native_bridge.dart';
 
 import 'fakes/in_memory_profile_storage.dart';
 

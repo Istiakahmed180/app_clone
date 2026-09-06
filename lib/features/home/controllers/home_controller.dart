@@ -76,7 +76,7 @@ class HomeController extends GetxController {
   bool needsPermissions(VirtualProfileModel profile) =>
       compatibility[profile.packageName]?.needsPermissions ?? false;
 
-  /// Asks the user to grant the guest's outstanding permissions to Virtual Space.
+  /// Asks the user to grant the guest's outstanding permissions to Duplika.
   ///
   /// Guests run under the host's identity, so the grant has to land on the host. Without
   /// this the card could only state the problem: a clone whose app needs media access would

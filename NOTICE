@@ -1,5 +1,5 @@
-Virtual Space
-Copyright 2026 the Virtual Space authors
+Duplika
+Copyright 2026 the Duplika authors
 
 ================================================================================
 DISTRIBUTION STATUS: NOT CLEARED
@@ -62,7 +62,7 @@ androidx.appcompat, com.google.android.material
 Provenance of these notices
     The copies of xDL and Dobby inside the vendored engine carry no licence
     headers -- xdl.c begins with roughly 22 blank lines where the upstream MIT
-    notice normally sits. Virtual Space did not remove them; they were already
+    notice normally sits. Duplika did not remove them; they were already
     absent in the artefact obtained upstream.
 
     The texts in licenses/ were therefore retrieved from the upstream projects

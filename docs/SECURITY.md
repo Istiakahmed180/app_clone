@@ -1,6 +1,6 @@
 # Security Posture — Phase 2
 
-## What Virtual Space deliberately does not do
+## What Duplika deliberately does not do
 
 The engine is used strictly as an application-level container. None of the following is
 implemented, and none should be added without an explicit decision recorded here:
@@ -12,7 +12,7 @@ implemented, and none should be added without an explicit decision recorded here
 - stealth execution or hiding the container from the apps running inside it
 - screenshot or `FLAG_SECURE` defeat
 
-### Backend options pinned by Virtual Space
+### Backend options pinned by Duplika
 
 The backend exposes switches that would weaken this posture. `BlackBoxEngineAdapter`
 pins them explicitly rather than accepting defaults:
@@ -28,7 +28,7 @@ pins them explicitly rather than accepting defaults:
 ## REQUIRE_SECURE_ENV
 
 Google requires on-device Android containers to honour an application's declaration that it
-must not be virtualized. Virtual Space treats that declaration as binding.
+must not be virtualized. Duplika treats that declaration as binding.
 
 `AppSecurityChecker` runs **before** any install into a container. If the target declares the
 requirement, installation is rejected with `SECURE_ENV_REQUIRED` and no virtual user is created.
@@ -72,11 +72,11 @@ override path.
 
 ## Data boundaries
 
-- Virtual Space never reads `/data/data/com.example.virtualtestapp` — the normally installed
+- Duplika never reads `/data/data/com.example.virtualtestapp` — the normally installed
   app's private directory. Only the package *identity* is passed to the engine, which resolves
   the APK through the platform's own `PackageManager`.
 - Container data lives under the host's own sandbox at
-  `/data/data/com.example.virtualspacedemo/blackbox/data/user/<virtualUserId>/`.
+  `/data/data/co.tdevs.duplika/blackbox/data/user/<virtualUserId>/`.
 - Logging (`Slog`) records package names, profile ids and engine status only. Target
   application data, credentials and tokens are never logged.
 
@@ -86,7 +86,7 @@ override path.
 `QUERY_ALL_PACKAGES` is the only way to do that. It is now requested.
 
 This is a Play-policy-sensitive permission. A dual-app/cloning product is one of Google's
-permitted use cases, but the declaration must be justified at review. Virtual Space uses it for
+permitted use cases, but the declaration must be justified at review. Duplika uses it for
 exactly one purpose — listing launchable apps for the clone picker — and never to inspect
 another application's private data.
 
@@ -135,7 +135,7 @@ same way.
 **Changed in Phase 3.** The single-package allow-list is gone; arbitrary installed apps and
 imported APKs may be cloned. The policy is now a deny-list plus the secure-environment rule:
 
-- Virtual Space refuses to clone **itself** (it would recurse).
+- Duplika refuses to clone **itself** (it would recurse).
 - It refuses **system/framework packages** (`android`, `com.android.systemui`,
   `com.android.settings`, `com.android.providers.*`) — cloning these yields a broken container.
 - `REQUIRE_SECURE_ENV` rejection is unchanged. For an **installed** app it is read through

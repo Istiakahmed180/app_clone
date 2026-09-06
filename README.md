@@ -1,4 +1,4 @@
-# Virtual Space — Phase 4
+# Duplika — Phase 4
 
 **Phase 4 adds an app compatibility layer: verdicts, permission bridging and honest warnings.**
 
@@ -132,7 +132,7 @@ virtual_space_demo/lib/
 
 - Dart null safety, strong typing, `const` constructors where they apply.
 - GetX for state management and routing; dependencies are registered in `AppBinding`.
-- `flutter_screenutil` is initialised exactly once, in `VirtualSpaceApp`.
+- `flutter_screenutil` is initialised exactly once, in `DuplikaApp`.
 - Widgets contain no business logic, no persistence and no platform-channel calls.
 - Controllers translate `AppException` into user-facing strings; raw platform errors never reach
   the UI.
@@ -142,9 +142,9 @@ Layering: `View → Controller → VirtualizationEngine → Repository / NativeB
 ## 6. Kotlin architecture
 
 ```
-android/app/src/main/kotlin/com/example/virtualspacedemo/
+android/app/src/main/kotlin/co/tdevs/duplika/
 ├── MainActivity.kt                 entry point; attaches and detaches the bridge
-├── VirtualSpaceApplication.kt      host Application; attaches the engine in every process
+├── DuplikaApplication.kt           host Application; attaches the engine in every process
 └── native/
     ├── NativeBridge.kt             MethodChannel handling and dispatch
     ├── RealVirtualizationEngine.kt application-facing virtualization API
@@ -288,7 +288,7 @@ Manual acceptance walkthrough:
 
 1. Open Virtual Test App → counter `0`, name `Test User`. Increase, edit the name, Save.
 2. Close and reopen → both values persist. Reset → counter returns to `0`.
-3. Open Virtual Space → the test app shows as **Installed** with its version.
+3. Open Duplika → the test app shows as **Installed** with its version.
 4. Add "Profile 1" and "Profile 2". Restart → both persist.
 5. Rename Profile 1, restart → the rename persists.
 6. Delete Profile 2 (a confirmation dialog appears), restart → it stays deleted.
@@ -326,7 +326,7 @@ x86_64 is unsupported: Bcore ships no x86_64 native library.
 - The virtualization backend is third-party (NewBlackbox/Bcore, Apache-2.0), vendored as a
   prebuilt AAR and confined behind `VirtualizationEngineAdapter`. See
   `docs/DEPENDENCY_LICENSE_AUDIT.md` for open provenance risk and `docs/SECURITY.md` for the
-  backend options Virtual Space pins off (`FLAG_SECURE` defeat, root hiding, VPN mode).
+  backend options Duplika pins off (`FLAG_SECURE` defeat, root hiding, VPN mode).
 - Applications declaring `REQUIRE_SECURE_ENV` are rejected, with no override path.
 
 ## 15. Recommended next direction
@@ -341,7 +341,7 @@ Not started. In rough priority order:
 3. **Decide on the backend**: patch Bcore's broken `isRunningApplication` upstream, or move to
    another backend behind the existing adapter.
 5. **Per-clone notification control.** Guest notifications already work (see
-   `docs/PHASE_4_COMPATIBILITY.md`), but they are posted under Virtual Space's identity, so a
+   `docs/PHASE_4_COMPATIBILITY.md`), but they are posted under Duplika's identity, so a
    user cannot silence one clone without silencing all of them.
 6. **Decide what to do about Google Play Services**, which most popular apps depend on and
    which this build does not virtualize.

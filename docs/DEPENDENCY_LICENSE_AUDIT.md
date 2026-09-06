@@ -29,7 +29,7 @@ These are compiled into `libblackbox.so`; they are not separate Gradle dependenc
 
 1. **Stripped attribution in vendored native code — ADDRESSED 2026-09-06.**
    The MIT licence for xDL and the Apache-2.0 licence for Dobby both require their notices to
-   travel with the code. The copies inside Bcore do not carry them. Virtual Space did not remove
+   travel with the code. The copies inside Bcore do not carry them. Duplika did not remove
    these notices — they were already absent upstream — but shipping this build would still
    redistribute them without attribution.
 
@@ -74,7 +74,7 @@ These are compiled into `libblackbox.so`; they are not separate Gradle dependenc
    published under GPL-3.0 before later commercial relicensing. NewBlackbox declares Apache-2.0
    for the whole repository, but **that declaration has not been traced back to the origin of
    each derived file.** If any Bcore file descends from a GPL-3.0 VirtualApp revision, the
-   Apache-2.0 declaration would not be sufficient and Virtual Space could inherit copyleft
+   Apache-2.0 declaration would not be sufficient and Duplika could inherit copyleft
    obligations. This is the single largest legal risk in Phase 2 and is unresolved.
 
 3. **JitPack in the build.** FreeReflection resolves from `jitpack.io`, which builds artefacts

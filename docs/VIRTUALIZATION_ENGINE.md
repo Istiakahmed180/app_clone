@@ -14,7 +14,7 @@
 
 Measured, not assumed:
 
-| | NewBlackbox declares | Virtual Space uses | Resolution |
+| | NewBlackbox declares | Duplika uses | Resolution |
 | --- | --- | --- | --- |
 | Gradle | 8.14.5 | 9.1.0 | Kept separate — Bcore built by its own wrapper, consumed as an AAR |
 | AGP | 8.13.2 | 9.0.1 | Same |

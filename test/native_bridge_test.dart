@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/core/errors/app_exception.dart';
-import 'package:virtual_space_demo/data/models/compatibility_report.dart';
-import 'package:virtual_space_demo/data/models/installed_app_model.dart';
-import 'package:virtual_space_demo/data/models/test_app_model.dart';
-import 'package:virtual_space_demo/native/native_bridge.dart';
+import 'package:duplika/core/errors/app_exception.dart';
+import 'package:duplika/data/models/compatibility_report.dart';
+import 'package:duplika/data/models/installed_app_model.dart';
+import 'package:duplika/data/models/test_app_model.dart';
+import 'package:duplika/native/native_bridge.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

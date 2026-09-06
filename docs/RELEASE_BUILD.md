@@ -1,5 +1,10 @@
 # Release builds
 
+> **Note on the captured output below.** These runs predate the rename from *Virtual Space*
+> to **Duplika**, so device transcripts here still show the old host package
+> `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
+> host package is now `co.tdevs.duplika`.
+
 The release build minifies. The virtualization engine does not survive
 minification without help, and the way it fails is silent and total, so this is
 worth understanding before changing anything here.

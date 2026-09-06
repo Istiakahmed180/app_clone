@@ -7,8 +7,8 @@ import 'routes/app_bindings.dart';
 import 'routes/app_routes.dart';
 import 'theme/app_theme.dart';
 
-class VirtualSpaceApp extends StatelessWidget {
-  const VirtualSpaceApp({super.key});
+class DuplikaApp extends StatelessWidget {
+  const DuplikaApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -175,8 +175,8 @@ class _SheetBodyState extends State<_SheetBody> {
               ),
               SizedBox(height: 4.h),
               Text(
-                'Clones run under Virtual Space\'s identity, so these are granted to '
-                'Virtual Space itself. You can decline and clone anyway.',
+                'Clones run under Duplika\'s identity, so these are granted to '
+                'Duplika itself. You can decline and clone anyway.',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),

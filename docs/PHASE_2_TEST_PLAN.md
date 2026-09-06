@@ -1,5 +1,10 @@
 # Phase 2 Test Plan and Results
 
+> **Note on the captured output below.** These runs predate the rename from *Virtual Space*
+> to **Duplika**, so device transcripts here still show the old host package
+> `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
+> host package is now `co.tdevs.duplika`.
+
 Device of record: **OnePlus CPH2605, Android 15 (API 35), arm64-v8a**.
 Emulators were used for build validation only — Bcore ships no x86_64 native library, and an
 emulator is not evidence of production behaviour.

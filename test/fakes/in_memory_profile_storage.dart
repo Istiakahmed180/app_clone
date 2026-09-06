@@ -1,4 +1,4 @@
-import 'package:virtual_space_demo/core/services/profile_storage.dart';
+import 'package:duplika/core/services/profile_storage.dart';
 
 /// Storage fake that keeps values in a map, so repository behaviour (including
 /// reload-from-storage) can be tested without a platform channel.

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_space_demo/data/models/compatibility_report.dart';
+import 'package:duplika/data/models/compatibility_report.dart';
 
 void main() {
   Map<String, dynamic> report({
