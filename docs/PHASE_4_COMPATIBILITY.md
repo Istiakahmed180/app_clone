@@ -503,3 +503,68 @@ app) twice:
 Tests: `test/compatibility_sheet_test.dart` covers the checkbox's visibility and that the
 returned decision defaults off and flips when ticked; `test/real_virtualization_engine_test.dart`
 covers `installGms` defaulting false and being forwarded on both the installed-app and APK paths.
+
+## Full real-app test matrix (2026-09-06, clean reinstall)
+
+Virtual Space uninstalled (all containers dropped) and reinstalled from the release build, then
+five real apps cloned with the default configuration (GMS opt-in OFF) and launched on the
+OnePlus CPH2605 (Android 15 / API 35).
+
+| App | Cloned | Launched | First screen | Result |
+| --- | --- | --- | --- | --- |
+| Telegram | yes | `ProxyActivity$P1` | "Start Messaging" onboarding | ✅ clean, 0 crashes |
+| Discord | yes | `ProxyActivity$P0` | "Welcome to Discord" | ✅ clean, 0 crashes |
+| VLC | yes | `ProxyActivity$P0` | "Welcome to VLC!" | ✅ clean, 0 crashes |
+| WhatsApp | yes | `ProxyActivity$P0` | "Welcome to WhatsApp" | ⚠️ reaches onboarding; one background worker crash (see below); process survives |
+| Facebook | yes | fell back to host UI | — | ❌ process crashes on startup (see below) |
+
+So three of five (and the two flagship messengers minus WhatsApp's caveat) launch cleanly to
+their first screen with isolated containers and no GMS provisioning.
+
+### The two failures are engine/GMS-deep, not app-layer bugs
+
+**WhatsApp — AppOps hook stale for API 30+.** A background worker crashes with:
+
+```
+java.lang.ClassCastException: Couldn't convert result of type java.lang.Integer
+    to android.app.SyncNotedAppOp
+    at $Proxy37.noteOperation
+    at AppOpsManager.noteOpNoThrow
+    at Environment.isExternalStorageLegacy
+    at ...AbstractAppShellDelegate.lambda$performAsyncInit
+```
+
+The engine replaces `IAppOpsService` with its own proxy so guest app-ops resolve under the host
+identity. That proxy returns the pre-Android-11 `int` from `noteOperation`, but API 30+ expects
+a `SyncNotedAppOp`, so any guest that calls `Environment.isExternalStorageLegacy()` during init
+(WhatsApp does; Telegram, Discord and VLC do not) hits a `ClassCastException`. WhatsApp's shell
+tolerates it — the process stays up and onboarding is usable — but storage-dependent features
+may be affected, and registration past the phone-number step is unverified.
+
+**Facebook — Firebase InstanceID legacy path under GMS absence.** The process crashes with:
+
+```
+java.lang.IllegalArgumentException: com.facebook.katana: Targeting S+ requires that one of
+    FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.
+    at PendingIntent.getBroadcast
+    at firebase-iid-executor
+```
+
+This is Facebook's own bundled Firebase code. With no reachable Google Play services, Firebase
+InstanceID falls back to a legacy self-broadcast path that builds a `PendingIntent` without the
+mutability flag Android 12+ requires, and throws. It is triggered by GMS absence but the faulty
+call is inside the app, not the engine.
+
+### Why these are not fixed here
+
+Both live below the Flutter/adapter layer this project controls:
+
+- The AppOps proxy is compiled into `libblackbox`/`classes.jar`. There is no `ClientConfiguration`
+  switch for it, and the engine source is not vendored, so its return type cannot be corrected
+  from the app. This is the same class of limitation as the GMS signature wall — it needs a
+  newer or patched engine (which is also why apps like Phantom, on a more current core, run
+  WhatsApp: their AppOps hook returns the modern `SyncNotedAppOp`).
+- The Facebook crash is in a third-party app's own library reacting to GMS absence; the app layer
+  cannot rewrite Facebook's PendingIntent call.
+
+Neither was papered over. Recorded here so the engine-upgrade decision is made on evidence.
