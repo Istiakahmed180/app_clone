@@ -313,3 +313,63 @@ Two consequences worth stating plainly rather than discovering later:
   **"Not analysed"** rather than "Supported".
 - Banking, payment, authenticator and anti-cheat apps remain untested and out of scope.
 - Verified on one device and one OEM build.
+
+## Google Play services — measured, and what actually breaks
+
+Until now the compatibility layer flagged GMS-dependent apps as "Limited" on the strength of
+manifest markers alone. Nobody had measured what a guest actually sees, so the warning text was
+a prediction. It is now a measurement.
+
+### Method
+
+`virtual_test_app` gained a `GmsProbe` that runs the same checks a real GMS-dependent app makes
+— `GoogleApiAvailability.isGooglePlayServicesAvailable`, package lookups for
+`com.google.android.gms` and `com.android.vending`, and building a Google Sign-In intent — and
+logs each line under the `GmsProbe` tag. The app declares `<queries>` for both packages, so a
+"not visible" result cannot be blamed on Android 11 package filtering.
+
+The probe was run twice on the same device (emulator `sdk_gphone64_arm64`, Android 17 / API 37,
+GMS 26.32.34 installed): once as a normal installation, once as a clone in virtual user 1. No
+account is involved anywhere — building the sign-in intent stops short of any credential.
+
+### Result
+
+| Probe | Normal install | Inside a clone |
+| --- | --- | --- |
+| `isGooglePlayServicesAvailable` | `0` SUCCESS | **`1` SERVICE_MISSING** |
+| `com.google.android.gms` | visible, 26.32.34 | **NOT VISIBLE** |
+| `com.android.vending` | visible, 52.9.21-34 | visible, **33.8.16-21** |
+| Google Sign-In intent | resolves | resolves |
+
+### What this means
+
+**GMS is not broken inside a container — it is invisible.** The guest's package manager does not
+report `com.google.android.gms` at all, so every Google API fails its very first check and takes
+the "Play services missing" path. This is one root cause, not a scattering of separate defects:
+Google Sign-In, FCM push, the Maps SDK and Play Integrity all begin with exactly this call.
+
+Two details sharpen the picture:
+
+- The engine clearly *has* a mechanism for answering package queries on a guest's behalf: it
+  reports `com.android.vending` as present, at **33.8.16-21 — a version that is not the one
+  installed on this device** (52.9.21-34). That answer is synthesised, not passed through. GMS
+  simply is not in whatever table produces it.
+- The sign-in intent still **resolves**, because Google Sign-In targets an activity inside the
+  calling app rather than GMS. So a cloned app does not fail cleanly at the button. It starts a
+  flow that cannot complete, which is why these apps hang or show a generic error instead of
+  saying "Google Play services is missing".
+
+### Consequence for the warning text
+
+The current wording — "Sign-in, push notifications and maps are likely to fail" — is accurate,
+and "likely" is now the only inaccurate word. On this evidence they *do* fail. The wording is
+left as-is until the same probe has run on more than one device.
+
+### Cost of closing the gap
+
+Making GMS visible is not a manifest change. The guest would need its package queries answered
+for `com.google.android.gms` and its calls routed to the real service while still running under
+the host's identity. That work sits directly against the security posture in `docs/SECURITY.md`:
+Play Integrity and SafetyNet attest to *who is calling*, and a container cannot satisfy them
+honestly. Any GMS support therefore has a hard ceiling — sign-in and push may be reachable,
+attestation is not, and this project does not bypass attestation.

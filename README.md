@@ -302,7 +302,11 @@ It does **not** provide:
 - support for any package other than `com.example.virtualtestapp`
 - an independent Android UID — guests run under the **host's** UID and inherit its permission
   grants; isolation is at the container/storage level, not the kernel UID level
-- GMS, Play Store, Firebase, push, camera, mic or location virtualization
+- GMS virtualization. Measured, not assumed: inside a container
+  `isGooglePlayServicesAvailable` returns `SERVICE_MISSING` and `com.google.android.gms` is
+  not visible to the guest at all, so Google sign-in, FCM push and the Maps SDK fail at their
+  first call (`docs/PHASE_4_COMPATIBILITY.md`)
+- Firebase, camera, mic or location virtualization
 - a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
 - any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 
