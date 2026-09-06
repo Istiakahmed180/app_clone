@@ -17,6 +17,18 @@ REPO="https://github.com/ALEX5402/NewBlackbox.git"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PATCHES_DIR="$REPO_ROOT/engine-patches"
 SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}}"
+
+# Bcore builds on JDK 17 (this repo lowers its Java level below). If the shell's JAVA_HOME is
+# unset or points at a directory with no java (a common stale-config problem), pick a real
+# JDK 17 via java_home so the Gradle build does not fail with "invalid directory".
+if [ ! -x "${JAVA_HOME:-}/bin/java" ]; then
+    if [ -x /usr/libexec/java_home ] && /usr/libexec/java_home -v 17 >/dev/null 2>&1; then
+        JAVA_HOME="$(/usr/libexec/java_home -v 17)"; export JAVA_HOME
+        echo "==> Using JAVA_HOME=$JAVA_HOME"
+    else
+        echo "WARNING: no valid JAVA_HOME and no JDK 17 found via java_home; the build may fail." >&2
+    fi
+fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
