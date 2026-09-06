@@ -87,6 +87,7 @@ class HomeView extends GetView<HomeController> {
               warnings: controller.warningsFor(profile),
               canLaunch: controller.providesRuntimeIsolation,
               onLaunch: () => _launch(context, profile),
+              needsPermissions: controller.needsPermissions(profile),
               onAction: (ProfileCardAction action) =>
                   _handleAction(context, profile, action),
             ))
@@ -117,6 +118,19 @@ class HomeView extends GetView<HomeController> {
     ProfileCardAction action,
   ) async {
     switch (action) {
+      case ProfileCardAction.grantPermissions:
+        final String? error = await controller.grantPermissions(profile);
+        if (!context.mounted) {
+          return;
+        }
+        _showMessage(
+          context,
+          error ??
+              (controller.needsPermissions(profile)
+                  ? 'Some permissions are still missing. The clone will keep working '
+                      'without them, but features that need them will not.'
+                  : 'Permissions granted. Relaunch the clone to pick them up.'),
+        );
       case ProfileCardAction.rename:
         final String? name = await showRenameProfileDialog(
           context,

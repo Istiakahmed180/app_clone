@@ -19,6 +19,8 @@ Future<void> _pump(
   List<CompatibilityFinding> warnings = const <CompatibilityFinding>[],
   int siblingCount = 1,
   int instanceIndex = 1,
+  bool needsPermissions = false,
+  ValueChanged<ProfileCardAction>? onAction,
 }) async {
   await tester.pumpWidget(
     ScreenUtilInit(
@@ -30,10 +32,11 @@ Future<void> _pump(
             state: const VirtualProfileState(installed: true, running: false, virtualUserId: 0),
             canLaunch: true,
             onLaunch: () {},
-            onAction: (_) {},
+            onAction: onAction ?? (_) {},
             siblingCount: siblingCount,
             instanceIndex: instanceIndex,
             warnings: warnings,
+            needsPermissions: needsPermissions,
           ),
         ),
       ),
@@ -129,4 +132,38 @@ void main() {
 
     expect(find.text('Example · clone 2 of 3'), findsOneWidget);
   });
+
+  testWidgets(
+    'a clone missing permissions offers a way to grant them',
+    (WidgetTester tester) async {
+      // Warning text alone is a dead end: the guest silently gets nothing (VLC sits on
+      // "Loading." with no media) and the card previously offered no way to fix it.
+      ProfileCardAction? chosen;
+      await _pump(
+        tester,
+        needsPermissions: true,
+        onAction: (ProfileCardAction a) => chosen = a,
+      );
+
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      expect(find.text('Grant permissions'), findsOneWidget);
+
+      await tester.tap(find.text('Grant permissions'));
+      await tester.pumpAndSettle();
+      expect(chosen, ProfileCardAction.grantPermissions);
+    },
+  );
+
+  testWidgets(
+    'a clone that needs nothing does not offer the grant action',
+    (WidgetTester tester) async {
+      await _pump(tester);
+
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      expect(find.text('Grant permissions'), findsNothing);
+      expect(find.text('Rename'), findsOneWidget);
+    },
+  );
 }

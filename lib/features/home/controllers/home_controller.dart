@@ -69,6 +69,31 @@ class HomeController extends GetxController {
         .toList(growable: false);
   }
 
+  /// Whether this clone's app still needs runtime permissions the host does not hold.
+  ///
+  /// Read from the same analysis the warning text comes from, so the menu entry appears
+  /// exactly when the warning does.
+  bool needsPermissions(VirtualProfileModel profile) =>
+      compatibility[profile.packageName]?.needsPermissions ?? false;
+
+  /// Asks the user to grant the guest's outstanding permissions to Virtual Space.
+  ///
+  /// Guests run under the host's identity, so the grant has to land on the host. Without
+  /// this the card could only state the problem: a clone whose app needs media access would
+  /// sit there with nothing to show and no way to fix it.
+  ///
+  /// Returns null on success, or a user-facing message.
+  Future<String?> grantPermissions(VirtualProfileModel profile) async {
+    try {
+      await _nativeBridge.requestGuestPermissions(profile.packageName);
+      // The grant changes the verdict, so re-analyse rather than trusting the cached one.
+      await _loadCompatibility();
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
   Uint8List? iconFor(VirtualProfileModel profile) => appIcons[profile.packageName];

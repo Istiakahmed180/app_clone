@@ -8,7 +8,7 @@ import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
 import 'app_icon.dart';
 
-enum ProfileCardAction { rename, clone, addShortcut, delete }
+enum ProfileCardAction { grantPermissions, rename, clone, addShortcut, delete }
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
@@ -21,6 +21,7 @@ class ProfileCard extends StatelessWidget {
     this.siblingCount = 1,
     this.instanceIndex = 1,
     this.warnings = const <CompatibilityFinding>[],
+    this.needsPermissions = false,
     super.key,
   });
 
@@ -36,6 +37,13 @@ class ProfileCard extends StatelessWidget {
 
   /// Compatibility problems affecting this clone's app, if any.
   final List<CompatibilityFinding> warnings;
+
+  /// Whether this clone's app needs runtime permissions the host does not hold yet.
+  ///
+  /// The card already warns about it, but a warning with no way to act on it is a dead end:
+  /// the guest silently gets nothing (VLC, for example, sits on "Loading." forever with no
+  /// media). When true, the menu offers granting them.
+  final bool needsPermissions;
   final bool canLaunch;
   final VoidCallback onLaunch;
   final ValueChanged<ProfileCardAction> onAction;
@@ -95,20 +103,25 @@ class ProfileCard extends StatelessWidget {
                 PopupMenuButton<ProfileCardAction>(
                   onSelected: onAction,
                   itemBuilder: (BuildContext context) =>
-                      const <PopupMenuEntry<ProfileCardAction>>[
-                    PopupMenuItem<ProfileCardAction>(
+                      <PopupMenuEntry<ProfileCardAction>>[
+                    if (needsPermissions)
+                      const PopupMenuItem<ProfileCardAction>(
+                        value: ProfileCardAction.grantPermissions,
+                        child: Text('Grant permissions'),
+                      ),
+                    const PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.rename,
                       child: Text('Rename'),
                     ),
-                    PopupMenuItem<ProfileCardAction>(
+                    const PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.clone,
                       child: Text('Add another clone'),
                     ),
-                    PopupMenuItem<ProfileCardAction>(
+                    const PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.addShortcut,
                       child: Text('Add to home screen'),
                     ),
-                    PopupMenuItem<ProfileCardAction>(
+                    const PopupMenuItem<ProfileCardAction>(
                       value: ProfileCardAction.delete,
                       child: Text('Delete'),
                     ),
