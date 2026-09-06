@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -42,6 +43,43 @@ class AppPickerController extends GetxController {
             app.appName.toLowerCase().contains(needle) ||
             app.packageName.toLowerCase().contains(needle))
         .toList(growable: false);
+  }
+
+  /// [visibleApps] cut into alphabetical sections, in draw order.
+  ///
+  /// Sections are what keep the list lazy under a grouped layout: the outer list builds
+  /// one bordered group at a time, so a device with three hundred apps still only lays
+  /// out what is on screen. Anything not starting with a letter collects under '#',
+  /// last, rather than being scattered through A-Z by its raw code point.
+  List<AppSection> get sections {
+    final List<InstalledAppModel> visible = visibleApps.toList()
+      ..sort((InstalledAppModel a, InstalledAppModel b) =>
+          a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+
+    final Map<String, List<InstalledAppModel>> grouped =
+        <String, List<InstalledAppModel>>{};
+    for (final InstalledAppModel app in visible) {
+      grouped.putIfAbsent(_initial(app.appName), () => <InstalledAppModel>[]).add(app);
+    }
+
+    final List<String> letters = grouped.keys.toList()..sort();
+    // '#' sorts before 'A' by code point, which would open the list on the odd names.
+    if (letters.remove('#')) {
+      letters.add('#');
+    }
+
+    return letters
+        .map((String letter) => AppSection(letter: letter, apps: grouped[letter]!))
+        .toList(growable: false);
+  }
+
+  static String _initial(String name) {
+    final String trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      return '#';
+    }
+    final String first = trimmed[0].toUpperCase();
+    return RegExp(r'[A-Z]').hasMatch(first) ? first : '#';
   }
 
   /// When opened from a profile card, the picker arrives pre-filtered to that package
@@ -228,4 +266,14 @@ class AppPickerController extends GetxController {
       isWorking.value = false;
     }
   }
+}
+
+/// One alphabetical group in the picker.
+@immutable
+class AppSection {
+  const AppSection({required this.letter, required this.apps});
+
+  /// The heading: a single A-Z letter, or '#' for everything else.
+  final String letter;
+  final List<InstalledAppModel> apps;
 }

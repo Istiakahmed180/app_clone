@@ -116,7 +116,9 @@ void main() {
     expect(warning, findsOneWidget);
     // Width is whatever the list gives it; the height is the assertion.
     expect(tester.getSize(warning).height, 0);
-    expect(find.text('Your Virtual Apps'), findsOneWidget);
+    // What the user gets instead: the identity block and a way to add a clone.
+    expect(find.text('Duplika'), findsOneWidget);
+    expect(find.text('Add clone'), findsOneWidget);
   });
 
   testWidgets('a device the engine cannot run on says so, in the backend\'s words',

@@ -12,6 +12,8 @@ import '../../onboarding/widgets/background_permission_banner.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
 import '../controllers/home_controller.dart';
+import '../widgets/add_clone_tile.dart';
+import '../widgets/home_header.dart';
 import '../widgets/virtualization_warning.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -20,12 +22,6 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAddProfile,
-        icon: const Icon(Icons.add),
-        label: const Text('Add clone'),
-      ),
       bottomNavigationBar: Obx(
         () => _onboarding.showBackgroundPrompt.value
             ? BackgroundPermissionBanner(
@@ -44,17 +40,21 @@ class HomeView extends GetView<HomeController> {
           return RefreshIndicator(
             onRefresh: controller.refreshAll,
             child: ListView(
-              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 96.h),
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
               children: <Widget>[
+                const HomeHeader(
+                  title: AppConstants.appTitle,
+                  subtitle: 'Your private copies',
+                ),
                 VirtualizationWarning(
                   virtualizationActive: controller.providesRuntimeIsolation,
                   problem: controller.virtualizationProblem,
                 ),
-                Text(
-                  'Your Virtual Apps',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: AddCloneTile(onTap: _openAddProfile),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 24.h),
                 if (controller.errorMessage.value != null)
                   Padding(
                     padding: EdgeInsets.only(bottom: 12.h),
@@ -88,15 +88,24 @@ class HomeView extends GetView<HomeController> {
   List<Widget> _buildProfileSection(BuildContext context) {
     if (controller.profiles.isEmpty) {
       return <Widget>[
-        SizedBox(height: 48.h),
-        const EmptyState(
+        EmptyState(
           title: 'No clones yet',
           message: 'Add a clone of an installed app, or import an APK.',
+          actionLabel: 'Add your first clone',
+          onAction: _openAddProfile,
         ),
       ];
     }
 
-    return controller.profiles
+    return <Widget>[
+      Padding(
+        padding: EdgeInsets.only(bottom: 12.h),
+        child: Text(
+          'Your clones',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
+      ...controller.profiles
         .map((VirtualProfileModel profile) => ProfileCard(
               profile: profile,
               state: controller.stateFor(profile),
@@ -109,8 +118,8 @@ class HomeView extends GetView<HomeController> {
               needsPermissions: controller.needsPermissions(profile),
               onAction: (ProfileCardAction action) =>
                   _handleAction(context, profile, action),
-            ))
-        .toList(growable: false);
+            )),
+    ];
   }
 
   Future<void> _openAddProfile() async {

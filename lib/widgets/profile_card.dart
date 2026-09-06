@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/virtual_profile_model.dart';
+import '../app/theme/status_colors.dart';
 import 'app_icon.dart';
 
 enum ProfileCardAction { grantPermissions, rename, clone, addShortcut, delete }
@@ -50,12 +51,12 @@ class ProfileCard extends StatelessWidget {
 
   /// Status is derived from what the engine reports, never assumed from the fact that
   /// a profile row exists.
-  ({String label, Color color}) _status(ColorScheme scheme) {
+  ({String label, Color color}) _status(ColorScheme scheme, StatusColors status) {
     if (state.running) {
       return (label: 'Running', color: scheme.primary);
     }
     if (state.installed) {
-      return (label: 'Ready', color: scheme.tertiary);
+      return (label: 'Ready', color: status.positive);
     }
     // The container is missing, but launching rebuilds it, so this is not an error.
     return (label: 'Rebuilds on launch', color: scheme.outline);
@@ -132,7 +133,8 @@ class ProfileCard extends StatelessWidget {
             SizedBox(height: 8.h),
             Builder(
               builder: (BuildContext context) {
-                final ({String label, Color color}) status = _status(theme.colorScheme);
+                final ({String label, Color color}) status =
+                    _status(theme.colorScheme, StatusColors.of(context));
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
@@ -165,6 +167,11 @@ class ProfileCard extends StatelessWidget {
                 padding: EdgeInsets.only(right: 8.w),
                 child: FilledButton.tonalIcon(
                   onPressed: canLaunch ? onLaunch : null,
+                  // Compact: the theme's pill padding is sized for a screen's main call
+                  // to action, and this one sits inside a card next to two others.
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                  ),
                   icon: const Icon(Icons.play_arrow_rounded),
                   label: const Text('Launch'),
                 ),
@@ -187,7 +194,8 @@ class _Warning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final Color colour = finding.blocking ? scheme.error : scheme.tertiary;
+    final Color colour =
+        finding.blocking ? scheme.error : StatusColors.of(context).warning;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
