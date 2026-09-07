@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <application android:theme="@style/AppTheme" android:label="Ladder Level 4">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service android:name=".HeartbeatService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <receiver android:name=".TestReceiver" android:exported="false">
+            <intent-filter><action android:name="com.example.duplikaladder.level4.TEST_BROADCAST" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>
