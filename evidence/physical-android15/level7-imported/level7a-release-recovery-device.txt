@@ -1,0 +1,11 @@
+ADB devices:
+List of devices attached
+KNOJORMFV4GERKHM	device
+emulator-5554	device
+
+Device model:
+CPH2605
+Android release:
+15
+Android API:
+35
