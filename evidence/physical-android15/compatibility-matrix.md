@@ -3,6 +3,39 @@
 Device: OnePlus CPH2605, Android 15 / API 35  
 ADB serial: `KNOJORMFV4GERKHM`
 
+## Level 7 status
+
+| Level | Feature | Debug | Release | Status |
+|---|---|---|---|---|
+| 7 | Split APK Import | PASS | PARTIAL | ADB Blocked |
+
+Status: **PARTIALLY VERIFIED - ADB BLOCKED**
+
+Verified in both Debug and Release: multi-APK import, package-set installation, guest launch, guest UI, and native ABI split loading. Debug relaunch is verified with `launches=2`.
+
+### Pending verification
+
+- Device: OnePlus CPH2605 / Android 15 / API 35
+- Test: Release relaunch with the imported split APK
+- Expected UI: `marker=split_marker` and `native=abi-native-loaded`
+- Expected persistence: the relaunch count increments on the second launch
+- Blocker: local ADB daemon cannot start: `could not install *smartsocket* listener: Operation not permitted`
+
+### Verification checklist when ADB is restored
+
+1. Run `adb devices` and confirm serial `KNOJORMFV4GERKHM` is authorized and online.
+2. Confirm the existing Release host app and Level 7 guest profile are present; do not rebuild unless the profile is missing.
+3. Launch the existing Level 7 guest through the Duplika UI.
+4. Confirm the guest package is `com.example.duplikaladder.level7fixture`.
+5. Confirm the first UI contains `marker=split_marker` and `native=abi-native-loaded`.
+6. Capture logcat before closing the guest.
+7. Close the guest through the normal UI/back flow.
+8. Relaunch the same Level 7 guest profile through the Duplika UI.
+9. Confirm the guest UI appears again with the same marker and native-loaded value.
+10. Confirm the relaunch count increased.
+11. Save the complete logcat and screenshot as the final Release relaunch evidence.
+12. Only then change the matrix Release result from `PARTIAL` to `PASS` and Level 7 status to `FULL PASS`.
+
 The Level 2–4 APKs are controlled ordinary third-party-style test applications. They are single APKs, have no GMS dependency, and do not use vendor APIs or native libraries.
 
 | App | Package type | Install | Launch | UI | Basic function | Relaunch | Debug | Release | Failure layer |
