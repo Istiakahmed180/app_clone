@@ -36,7 +36,7 @@ class ApkImporter(private val context: Context) {
             val path: String,
             val packageName: String,
             val versionName: String?,
-            val versionCode: Long,
+            val versionCode: Long?,
             val splitName: String?,
             val applicationInfo: android.content.pm.ApplicationInfo?,
         )
@@ -78,20 +78,12 @@ class ApkImporter(private val context: Context) {
         }
 
         val packageName = archives.first().packageName
-        val versionCode = archives.first().versionCode
         if (archives.any { it.packageName != packageName }) {
             return ApkInfo.Invalid(
                 EngineErrorCodes.APK_PACKAGE_MISMATCH,
                 "All selected APKs must belong to the same application.",
             )
         }
-        if (archives.any { it.versionCode != versionCode }) {
-            return ApkInfo.Invalid(
-                EngineErrorCodes.APK_VERSION_MISMATCH,
-                "All selected APKs must have the same version.",
-            )
-        }
-
         val bases = archives.filter { it.splitName == null }
         if (bases.size != 1) {
             return ApkInfo.Invalid(
@@ -100,6 +92,20 @@ class ApkImporter(private val context: Context) {
             )
         }
         val splits = archives.filter { it.splitName != null }
+        val versionCode = bases.single().versionCode
+            ?: return ApkInfo.Invalid(
+                EngineErrorCodes.APK_INVALID,
+                "The base APK does not declare a version.",
+            )
+        // Standalone split manifests normally omit versionCode/versionName; those values
+        // belong to the base manifest. Only reject a split when it explicitly identifies a
+        // different version.
+        if (archives.any { it.versionCode != null && it.versionCode != versionCode }) {
+            return ApkInfo.Invalid(
+                EngineErrorCodes.APK_VERSION_MISMATCH,
+                "All selected APKs must have the same version.",
+            )
+        }
         val splitNames = splits.mapNotNull { it.splitName }
         if (splitNames.size != splitNames.toSet().size) {
             return ApkInfo.Invalid(
@@ -143,7 +149,7 @@ class ApkImporter(private val context: Context) {
         val packageName: String,
         val splitName: String?,
         val versionName: String?,
-        val versionCode: Long,
+        val versionCode: Long?,
     )
 
     /** PackageManager rejects a standalone split archive; read its manifest identity only. */
@@ -167,7 +173,9 @@ class ApkImporter(private val context: Context) {
                     splitName = parser.getAttributeValue(null, "split")
                         ?: parser.getAttributeValue(ns, "split"),
                     versionName = parser.getAttributeValue(ns, "versionName"),
-                    versionCode = parser.getAttributeIntValue(ns, "versionCode", -1).toLong(),
+                    versionCode = parser.getAttributeValue(ns, "versionCode")?.let {
+                        parser.getAttributeIntValue(ns, "versionCode", -1).toLong()
+                    },
                 )
                 break
             }
