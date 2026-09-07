@@ -1,0 +1,40 @@
+Application: Markor
+Package: net.gsantner.markor
+Version: 2.15.2
+APK: net.gsantner.markor_161.apk
+Type: single APK
+Target SDK: 35
+WebView evidence: Markor document preview uses android.webkit.WebView; test will load local rendered Markdown then navigate a public HTTPS link (https://www.example.com).
+SHA256:
+283427de8b8a60140c3f42f88ff9256206adcdc5db513965889d57756134860a  compatibility_test_ladder/real_apps/net.gsantner.markor_161.apk
+Launchable activities:
+        <activity
+            android:name="net.gsantner.markor.activity.MainActivity"
+                    android:name="android.intent.action.MAIN" />
+                    android:name="android.intent.category.LAUNCHER" />
+        </activity>
+        <activity
+            android:name="net.gsantner.markor.activity.SettingsActivity"
+            android:parentActivityName="net.gsantner.markor.activity.MainActivity" />
+        <activity
+            android:name="net.gsantner.markor.activity.StoragePermissionActivity"
+            android:parentActivityName="net.gsantner.markor.activity.MainActivity" />
+        <activity
+            android:name="net.gsantner.markor.activity.ActionButtonSettingsActivity"
+            android:parentActivityName="net.gsantner.markor.activity.SettingsActivity">
+                android:value=".activity.SettingsActivity" />
+        </activity>
+        <activity
+        </activity>
+        <activity
+            android:name="net.gsantner.markor.activity.openeditor.OpenEditorTodoActivity"
+                    android:name="android.intent.category.LAUNCHER" />
+                    android:name="android.intent.action.MAIN" />
+        </activity>
+        <activity
+            android:name="net.gsantner.markor.activity.IntroActivity" />
+        <activity
+            android:name="net.gsantner.markor.activity.openeditor.OpenEditorQuickNoteActivity"
+                    android:name="android.intent.category.LAUNCHER" />
+                    android:name="android.intent.action.MAIN" />
+        </activity>
