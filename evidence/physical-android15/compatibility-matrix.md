@@ -15,6 +15,17 @@ The Level 2–4 APKs are controlled ordinary third-party-style test applications
 | Markor 2.15.2 (`net.gsantner.markor`) | Single APK | PASS | PASS | PASS | PASS: file view, virtual Documents path, To-Do/QuickNote navigation | PASS | PASS | PASS | Limited host storage permissions; app still launched and functioned |
 | OnePlus Calculator | OEM/system APK | PASS | FAIL | FAIL | Not reached | FAIL | FAIL | FAIL | Guest invokes unsupported Android 15/Oplus `IBinder.getExtension` path |
 | Chrome | Split APK | PASS | FAIL | FAIL | Not reached | Not tested | FAIL | Not tested | Bcore split/package parsing and launch rebuild path; parser warnings for modern manifest elements |
+| Level 7 split fixture (`com.example.duplikaladder.level7fixture`) | Base + ABI split (`base.apk` + `split_config.arm64_v8a.apk`) | PASS | PASS | PASS | PASS: native library loaded from ABI split; base resources resolved | PASS: `launches=2` after relaunch | PASS | PASS | None observed |
+
+## Level 7 general split APK matrix
+
+Physical device: OnePlus CPH2605, Android 15 / API 35. The fixture was installed on the host with Android's `install-multiple`, then cloned through the normal Duplika picker. The guest UI was required for PASS.
+
+| Application | Package type | Android features | Install | Launch | UI | Functionality | Relaunch | Debug | Release | Failure layer |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| Level 7 fixture | Base + one ABI split | JNI library in `split_config.arm64_v8a.apk`; SharedPreferences | PASS | PASS | PASS | PASS: `native=abi-native-loaded` and split marker visible | PASS: `launches=2` | PASS | PASS | None observed |
+| Level 7 fixture | Base + ABI split + language configuration split | JNI library; multiple split paths | PASS | PASS | PASS | PASS: native library loaded and UI reached with all three APK paths | PASS: `launches=4` | Not tested | PASS | None observed |
+| Level 7D candidate | Complex real-world split APK | Not selected: only safe third-party split package found was Binance, which is out of scope for this ladder | Not tested | Not tested | Not tested | Not tested | Not tested | Not tested | Not tested | No safe in-scope candidate available |
 
 ## Level 6 modern Android API matrix
 
@@ -40,6 +51,10 @@ The Level 6 probe is a single APK with no GMS dependency. It was installed and e
 - Chrome: `debug-chrome-launch.log` and `chrome-install.log`.
 - Level 6 Debug: `level6-debug-launch.log`, `level6-debug-permissions-notification.log`, `level6-debug-notification-tap.log`, `level6-debug-job.log`, `level6-debug-open-document.log`, `level6-debug-create-document.log`, `level6-debug-sqlite.log`, `level6-debug-explicit-intent.log`, `level6-debug-implicit-intent.log`, and `level6-debug-relaunch.log`.
 - Level 6 Release: `level6-release-build.log`, `host-release-build-level6.log`, `level6-release-launch.log`, `level6-release-permissions.log`, `level6-release-notification-post.log`, `level6-release-job.log`, `level6-release-open-document.log`, `level6-release-explicit-intent.log`, `level6-release-implicit-intent.log`, `level6-release-sqlite.log`, and `level6-release-relaunch.log`.
+- Level 7 Debug ABI split: `level7a-debug-split-launch.log` and `level7a-debug-split-relaunch.log`; the fixture UI reported `native=abi-native-loaded` and `launches=2` after relaunch.
+- Level 7 Release ABI split: `level7a-release-split-launch.log`; the fixture UI reported `native=abi-native-loaded` and `launches=3` after the Release run.
+- Level 7 Release three-APK run: `level7c-release-three-apk-launch.log`; the fixture UI reported `native=abi-native-loaded` and `launches=4` with `base.apk`, `split_config.arm64_v8a.apk`, and `split_config.en.apk` installed together.
+- `level7c-debug-three-apk-launch.log` is retained as a non-result diagnostic; it captured the wrong existing profile after the home-screen scroll and is not counted as a Level 7C Debug test.
 
 ## Findings and limits
 
@@ -47,7 +62,9 @@ The Level 6 probe is a single APK with no GMS dependency. It was installed and e
 - Real-app APKs used for Level 5 were downloaded as single APKs from the F-Droid repository: AntennaPod 3.11.2 and Markor 2.15.2. Fossify Notes was selected but not included in the PASS matrix because its clone was not completed.
 - The host Release build was installed after the Debug runs; Markor was independently relaunched and verified under both host variants. AntennaPod was independently verified under both host variants.
 - `<queries>`, service-level `<property>`, and application-level `<uses-native-library>` generate Bcore parser warnings in the Chrome evidence. The current `ApkManifestReader` handles only narrow security metadata, not complete package parsing.
-- No general split-APK implementation was added. Chrome remains a separate split-APK investigation.
+- The tested host-installed split path is working with the existing Bcore split-path plumbing: Android exposed `base.apk` plus `split_config.arm64_v8a.apk` (and, in the three-APK run, `split_config.en.apk`), Bcore opened both code paths, and Android's native loader loaded `liblevel7fixture.so` directly from the ABI split. No engine redesign or app-specific workaround was needed in this phase.
+- The current imported-APK path still accepts and retains only one APK (`File`/`apkPath`) rather than a grouped base-plus-splits set. Therefore this phase verifies split packages distributed through the host PackageManager, but does not claim imported multi-APK support. The first unverified boundary for imported splits is APK selection/retention before Bcore installation, not guest launch.
+- Level 7A (base plus one non-ABI configuration split) and Level 7D (a complex safe real-world split app) remain unverified. The available physical third-party split package was Binance and was intentionally excluded as a financial application.
 - GMS, OEM/system-app compatibility, Play Integrity, and security bypasses remain intentionally out of scope.
 - The confirmed permission root cause was Android 15 routing `Context.checkSelfPermission()` through `IActivityManager.checkPermissionForDevice()`. Bcore translated the virtual UID (`10013`) only on the older `checkPermission()` path, so the host grant was not visible to the guest. The general hook now maps the virtual UID to the host UID while preserving the device ID and existing older-path behavior.
 - Permission evidence: `level6-debug-permission-hook-result.log`, `level6-debug-permission-pass.log`, and `level6-release-permission-hook-result.log`. Regression evidence: `level6-release-permission-regression.log`.
