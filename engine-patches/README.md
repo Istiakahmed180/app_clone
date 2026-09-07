@@ -5,6 +5,16 @@ commit `89b59836c66f173756a4ae258cf379a957649820`). These live here as source pa
 because the engine ships as a prebuilt `android/app/libs/bcore.aar` and is not built from
 source in this project.
 
+## 0005 — Permission-gated public media paths
+
+`IOCore` previously redirected the complete shared-storage tree into each clone's private
+`blackbox/storage/emulated/<user>` tree. That isolated app-specific data correctly, but it
+also left media apps unable to see the host's existing `Music`, `Movies`, `DCIM`, `Pictures`,
+`Download`, and related public directories. The patch adds native path rules for existing
+public media directories before the broad redirect, but only when the host package has the
+user-granted `android:manage_external_storage` app-op. It does not grant permissions or
+expose media when that app-op is denied.
+
 ## 0001 — AppOps SyncNotedAppOp return type (fixes WhatsApp crash on API 30+)
 
 **Symptom.** A cloned WhatsApp reaches onboarding but a background worker crashes:

@@ -1,0 +1,100 @@
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/IOCore.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/IOCore.java
+@@ -1,9 +1,11 @@
+ package top.niunaijun.blackbox.core;
+ 
+ import android.annotation.SuppressLint;
++import android.app.AppOpsManager;
+ import android.content.Context;
+ import android.content.pm.ApplicationInfo;
+ import android.content.pm.PackageManager;
++import android.os.Build;
+ import android.os.Environment;
+ import android.os.Process;
+ import android.text.TextUtils;
+@@ -20,6 +22,7 @@
+ 
+ import top.niunaijun.blackbox.core.env.BEnvironment;
+ import top.niunaijun.blackbox.utils.FileUtils;
++import top.niunaijun.blackbox.utils.Slog;
+ import top.niunaijun.blackbox.utils.TrieTree;
+ 
+ 
+@@ -102,8 +105,66 @@
+         return new File(redirectPath(pathStr, rule));
+     }
+ 
+-    
++    /**
++     * Public media is intentionally outside the per-clone private tree. A guest can only
++     * reach it when the host has the user-granted MANAGE_EXTERNAL_STORAGE app-op. Without
++     * that app-op the existing private redirect remains in force, preserving isolation.
++     *
++     * These rules must be installed before the broad /storage/emulated rule below. The
++     * native IO hook uses first-match order, so a later public rule would never be reached.
++     */
++    private void addPermissionGatedPublicMediaRules(Map<String, String> rule) {
++        if (!hasHostAllFilesAccess()) {
++            Slog.w(TAG, "Host has no All files access; keeping public media inside the virtual tree");
++            return;
++        }
+ 
++        String sharedRoot = new File(
++                "/storage/emulated/" + BlackBoxCore.getHostUserId()).getAbsolutePath();
++        String[] publicDirectories = new String[] {
++                Environment.DIRECTORY_MUSIC,
++                Environment.DIRECTORY_MOVIES,
++                Environment.DIRECTORY_DCIM,
++                Environment.DIRECTORY_PICTURES,
++                Environment.DIRECTORY_DOWNLOADS,
++                Environment.DIRECTORY_DOCUMENTS,
++                Environment.DIRECTORY_PODCASTS,
++                Environment.DIRECTORY_ALARMS,
++                Environment.DIRECTORY_RINGTONES,
++                Environment.DIRECTORY_NOTIFICATIONS,
++                "Audiobooks",
++                "Recordings"
++        };
++        for (String directory : publicDirectories) {
++            File publicPath = new File(sharedRoot, directory);
++            if (publicPath.isDirectory()) {
++                String path = publicPath.getAbsolutePath();
++                rule.put(path, path);
++                Slog.i(TAG, "Exposing permission-granted public media path: " + path);
++            }
++        }
++    }
++
++    private boolean hasHostAllFilesAccess() {
++        Context host = BlackBoxCore.getContext();
++        if (host == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
++            return true;
++        }
++        try {
++            AppOpsManager appOps = host.getSystemService(AppOpsManager.class);
++            if (appOps == null) return false;
++            int mode = appOps.unsafeCheckOpNoThrow(
++                    "android:manage_external_storage",
++                    Process.myUid(),
++                    host.getPackageName());
++            return mode == AppOpsManager.MODE_ALLOWED;
++        } catch (Throwable error) {
++            Slog.w(TAG, "Unable to verify host All files access: " + error.getMessage());
++            return false;
++        }
++    }
++
++
+     public void enableRedirect(Context context) {
+         Map<String, String> rule = new LinkedHashMap<>();
+         Set<String> blackRule = new HashSet<>();
+@@ -130,6 +191,9 @@
+             FileUtils.mkdirs(profilesRefDir.getAbsolutePath());
+             rule.put(String.format("/data/misc/profiles/cur/%d/%s", BlackBoxCore.getUserId(), packageName), profilesCurDir.getAbsolutePath());
+             rule.put(String.format("/data/misc/profiles/ref/%d/%s", BlackBoxCore.getUserId(), packageName), profilesRefDir.getAbsolutePath());
++
++            // Add these before the broad external-storage redirect below.
++            addPermissionGatedPublicMediaRules(rule);
+ 
+             if (BlackBoxCore.getContext().getExternalCacheDir() != null && context.getExternalCacheDir() != null) {
+                 File external = BEnvironment.getExternalUserDir(BlackBoxCore.getUserId());
