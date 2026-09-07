@@ -1,6 +1,7 @@
 package co.tdevs.duplika.native
 
 import android.content.Context
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -59,6 +60,17 @@ class VirtualProfileManager(context: Context) {
     }
 
     @Synchronized
+    fun rememberApkPaths(profileId: String, apkPaths: List<String>) {
+        val paths = readApkPathSets()
+        paths[profileId] = apkPaths
+        writeApkPathSets(paths)
+    }
+
+    @Synchronized
+    fun apkPathsFor(profileId: String): List<String> =
+        readApkPathSets()[profileId] ?: apkPathFor(profileId)?.let { listOf(it) }.orEmpty()
+
+    @Synchronized
     fun apkPathFor(profileId: String): String? = readApkPaths()[profileId]
 
     @Synchronized
@@ -67,6 +79,35 @@ class VirtualProfileManager(context: Context) {
         if (paths.remove(profileId) != null) {
             writeApkPaths(paths)
         }
+    }
+
+    @Synchronized
+    fun forgetApkPaths(profileId: String) {
+        val paths = readApkPathSets()
+        if (paths.remove(profileId) != null) writeApkPathSets(paths)
+        forgetApkPath(profileId)
+    }
+
+    private fun readApkPathSets(): MutableMap<String, List<String>> {
+        val raw = prefs.getString(KEY_APK_PATH_SETS, null) ?: return mutableMapOf()
+        return try {
+            val json = JSONObject(raw)
+            val result = mutableMapOf<String, List<String>>()
+            json.keys().forEach { key ->
+                val values = json.getJSONArray(key)
+                result[key] = List(values.length()) { index -> values.getString(index) }
+            }
+            result
+        } catch (error: Exception) {
+            Slog.e(Slog.PROFILE, "APK path-set map unreadable; starting empty", error)
+            mutableMapOf()
+        }
+    }
+
+    private fun writeApkPathSets(paths: Map<String, List<String>>) {
+        val json = JSONObject()
+        paths.forEach { (key, values) -> json.put(key, JSONArray(values)) }
+        prefs.edit().putString(KEY_APK_PATH_SETS, json.toString()).commit()
     }
 
     private fun readApkPaths(): MutableMap<String, String> {
@@ -111,5 +152,6 @@ class VirtualProfileManager(context: Context) {
         const val PREFS_NAME = "duplika_profile_mapping"
         const val KEY_MAPPING = "profile_to_virtual_user"
         const val KEY_APK_PATHS = "profile_to_apk_path"
+        const val KEY_APK_PATH_SETS = "profile_to_apk_paths"
     }
 }

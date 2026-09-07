@@ -185,20 +185,21 @@ class AppPickerController extends GetxController {
 
   /// Lets the user pick an APK and returns its parsed identity, or `null` if cancelled.
   Future<ApkCandidate?> pickApk() async {
-    final PlatformFile? picked = await FilePicker.pickFile();
-    if (picked == null) {
-      return null;
-    }
-
-    if (!picked.name.toLowerCase().endsWith('.apk')) {
-      errorMessage.value = 'Please choose an .apk file.';
+    final List<PlatformFile> picked = await FilePicker.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: <String>['apk'],
+      withData: false,
+      withReadStream: true,
+    );
+    if (picked.isEmpty) {
       return null;
     }
 
     isWorking.value = true;
     try {
-      final String path = await _materialise(picked);
-      return await _bridge.inspectApk(path);
+      final List<String> paths = await _materialise(picked);
+      return await _bridge.inspectApk(paths);
     } on AppException catch (error) {
       errorMessage.value = error.message;
       return null;
@@ -216,7 +217,7 @@ class AppPickerController extends GetxController {
   /// Android's document picker hands back a `content://` URI, which has no filesystem
   /// path; both `getPackageArchiveInfo` and the engine's installer need a real file.
   /// The copy is streamed so a large APK never has to sit in memory.
-  Future<String> _materialise(PlatformFile picked) async {
+  Future<List<String>> _materialise(List<PlatformFile> pickedFiles) async {
     final Directory cache = await getTemporaryDirectory();
     final Directory imports = Directory('${cache.path}/apk_imports');
 
@@ -228,14 +229,20 @@ class AppPickerController extends GetxController {
     }
     imports.createSync(recursive: true);
 
-    final File target = File('${imports.path}/${DateTime.now().millisecondsSinceEpoch}.apk');
-    final IOSink sink = target.openWrite();
-    try {
-      await sink.addStream(picked.readAsByteStream());
-    } finally {
-      await sink.close();
+    final List<String> paths = <String>[];
+    for (int index = 0; index < pickedFiles.length; index++) {
+      final PlatformFile picked = pickedFiles[index];
+      final String safeName = picked.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+      final File target = File('${imports.path}/${index}_$safeName');
+      final IOSink sink = target.openWrite();
+      try {
+        await sink.addStream(picked.readAsByteStream());
+      } finally {
+        await sink.close();
+      }
+      paths.add(target.path);
     }
-    return target.path;
+    return paths;
   }
 
   /// Installs a previously inspected APK as a new clone.
@@ -253,7 +260,7 @@ class AppPickerController extends GetxController {
         packageName: candidate.packageName,
       );
       await _engine.createProfileFromApk(
-        apkPath: candidate.apkPath,
+        apkPaths: candidate.apkPaths,
         packageName: candidate.packageName,
         appName: candidate.appName,
         profileName: profileName,

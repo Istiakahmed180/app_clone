@@ -232,25 +232,25 @@ class NativeBridge {
   }
 
   /// Reads an imported APK's identity. Throws [VirtualizationException] if unreadable.
-  Future<ApkCandidate> inspectApk(String apkPath) async {
+  Future<ApkCandidate> inspectApk(List<String> apkPaths) async {
     final EngineResponse response =
-        await _invokeEngine('inspectApk', <String, dynamic>{'apkPath': apkPath});
+        await _invokeEngine('inspectApk', <String, dynamic>{'apkPaths': apkPaths});
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
-    return ApkCandidate.fromMap(apkPath, response.data);
+    return ApkCandidate.fromMap(apkPaths, response.data);
   }
 
   Future<EngineResponse> installApkToProfile(
     String profileId,
-    String apkPath,
+    List<String> apkPaths,
     String packageName, {
     bool installGms = false,
   }) =>
       _invokeEngine('installApkToProfile', <String, dynamic>{
         'profileId': profileId,
         'packageName': packageName,
-        'apkPath': apkPath,
+        'apkPaths': apkPaths,
         'installGms': installGms,
       });
 

@@ -232,9 +232,13 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             }
 
             "inspectApk" -> {
-                val apkPath = call.requiredArg("apkPath", result) ?: return
+                val apkPaths = call.argument<List<String>>("apkPaths").orEmpty()
+                if (apkPaths.isEmpty()) {
+                    result.success(failure(EngineErrorCodes.APK_INVALID, "Select at least one APK."))
+                    return
+                }
                 async(result) {
-                    when (val info = engine.inspectApk(apkPath)) {
+                    when (val info = engine.inspectApk(apkPaths)) {
                         is EngineResult.Success ->
                             success("APK_INSPECTED", "APK read successfully.", info.value)
                         is EngineResult.Failure -> failure(info.code, info.message)
@@ -245,10 +249,14 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "installApkToProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
-                val apkPath = call.requiredArg("apkPath", result) ?: return
+                val apkPaths = call.argument<List<String>>("apkPaths").orEmpty()
+                if (apkPaths.isEmpty()) {
+                    result.success(failure(EngineErrorCodes.APK_INVALID, "Select at least one APK."))
+                    return
+                }
                 val provisionGms = call.argument<Boolean>("installGms") ?: false
                 async(result) {
-                    engine.installApkToProfile(profileId, apkPath, packageName, provisionGms)
+                    engine.installApkToProfile(profileId, apkPaths, packageName, provisionGms)
                         .toEnvelope("APP_INSTALLED", "Application installed successfully.")
                 }
             }

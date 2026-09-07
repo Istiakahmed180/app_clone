@@ -39,7 +39,7 @@ abstract class VirtualizationEngine {
 
   /// Creates a profile from a standalone APK the user imported.
   Future<VirtualProfileModel> createProfileFromApk({
-    required String apkPath,
+    required List<String> apkPaths,
     required String packageName,
     required String appName,
     required String profileName,

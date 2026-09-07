@@ -96,7 +96,7 @@ class RealVirtualizationEngine implements VirtualizationEngine {
   /// on the host at all.
   @override
   Future<VirtualProfileModel> createProfileFromApk({
-    required String apkPath,
+    required List<String> apkPaths,
     required String packageName,
     required String appName,
     required String profileName,
@@ -110,7 +110,7 @@ class RealVirtualizationEngine implements VirtualizationEngine {
 
     final EngineResponse response = await _nativeBridge.installApkToProfile(
       profile.id,
-      apkPath,
+      apkPaths,
       packageName,
       installGms: installGms,
     );

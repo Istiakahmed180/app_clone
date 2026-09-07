@@ -86,8 +86,8 @@ class RealVirtualizationEngine(
         installedApps.describeInstalled(packageName)
 
     /** Reads an imported APK's identity so the UI can confirm before installing. */
-    fun inspectApk(apkPath: String): EngineResult<Map<String, Any?>> =
-        when (val info = apkImporter.inspect(apkPath)) {
+    fun inspectApk(apkPaths: List<String>): EngineResult<Map<String, Any?>> =
+        when (val info = apkImporter.inspect(apkPaths)) {
             is ApkImporter.ApkInfo.Invalid -> EngineResult.Failure(info.code, info.message)
             is ApkImporter.ApkInfo.Parsed -> EngineResult.Success(
                 mapOf(
@@ -96,6 +96,9 @@ class RealVirtualizationEngine(
                     "versionName" to info.versionName,
                     "versionCode" to info.versionCode.toString(),
                     "installedOnHost" to apkImporter.isInstalledOnHost(info.packageName),
+                    "apkPaths" to info.apkPaths,
+                    "baseApkPath" to info.baseApkPath,
+                    "splitApkPaths" to info.splitApkPaths,
                 ),
             )
         }
@@ -108,7 +111,7 @@ class RealVirtualizationEngine(
      */
     fun installApkToProfile(
         profileId: String,
-        apkPath: String,
+        apkPaths: List<String>,
         packageName: String,
         provisionGms: Boolean,
     ): EngineResult<Unit> {
@@ -118,8 +121,8 @@ class RealVirtualizationEngine(
 
         // The picker hands back a cache copy, which the system may reclaim. Keep our own
         // copy so a lost container can be rebuilt later without re-picking the file.
-        val retained = retainApk(profileId, apkPath) ?: apkPath
-        val result = installer.installApk(retained, packageName, virtualUserId, provisionGms)
+        val retained = retainApks(profileId, apkPaths) ?: apkPaths
+        val result = installer.installApks(retained, packageName, virtualUserId, provisionGms)
 
         // No isInstalled() guard here: it answers from the host package manager when the
         // engine's service is unhealthy, so for an APK whose package is also installed
@@ -133,23 +136,27 @@ class RealVirtualizationEngine(
 
     /** Drops the user mapping and any retained APK for a profile that never came up. */
     private fun releaseProfileArtifacts(profileId: String) {
-        profileManager.apkPathFor(profileId)?.let { path ->
-            if (!File(path).delete()) {
-                Slog.w(Slog.INSTALL, "Could not delete retained APK for $profileId")
+        profileManager.apkPathsFor(profileId).forEach { path ->
+            if (!File(path).delete() && File(path).exists()) {
+                Slog.w(Slog.INSTALL, "Could not delete retained APK for $profileId: $path")
             }
         }
-        profileManager.forgetApkPath(profileId)
+        profileManager.forgetApkPaths(profileId)
         profileManager.remove(profileId)
     }
 
-    private fun retainApk(profileId: String, apkPath: String): String? = try {
+    private fun retainApks(profileId: String, apkPaths: List<String>): List<String>? = try {
         val store = File(context.filesDir, "imported_apks").apply { mkdirs() }
-        val target = File(store, "$profileId.apk")
-        File(apkPath).inputStream().use { input ->
-            target.outputStream().use(input::copyTo)
+        val profileStore = File(store, profileId).apply { mkdirs() }
+        val retained = apkPaths.mapIndexed { index, apkPath ->
+            val target = File(profileStore, "${index}_${File(apkPath).name}")
+            File(apkPath).inputStream().use { input ->
+                target.outputStream().use(input::copyTo)
+            }
+            target.absolutePath
         }
-        profileManager.rememberApkPath(profileId, target.absolutePath)
-        target.absolutePath
+        profileManager.rememberApkPaths(profileId, retained)
+        retained
     } catch (error: Throwable) {
         Slog.w(Slog.INSTALL, "Could not retain imported APK: ${error.message}")
         null
@@ -209,9 +216,9 @@ class RealVirtualizationEngine(
         // unconditionally would add the (currently non-functional, SERVICE_INVALID) Google
         // packages and their background crashes to a clone that may never have asked for
         // them. If GMS is persisted per profile later, thread that flag through here.
-        val retainedApk = profileManager.apkPathFor(profileId)
-        val result = if (retainedApk != null && File(retainedApk).isFile) {
-            installer.installApk(retainedApk, packageName, virtualUserId, provisionGms = false)
+        val retainedApks = profileManager.apkPathsFor(profileId)
+        val result = if (retainedApks.isNotEmpty() && retainedApks.all { File(it).isFile }) {
+            installer.installApks(retainedApks, packageName, virtualUserId, provisionGms = false)
         } else {
             installer.install(packageName, virtualUserId, provisionGms = false)
         }

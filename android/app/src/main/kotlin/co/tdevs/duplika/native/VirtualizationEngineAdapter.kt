@@ -50,8 +50,8 @@ interface VirtualizationEngineAdapter {
      */
     fun installGms(virtualUserId: Int): EngineResult<Unit>
 
-    /** Installs a standalone APK file (not necessarily installed on the host). */
-    fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit>
+    /** Installs a standalone APK or a validated base-plus-splits set. */
+    fun installApkFiles(apkPaths: List<String>, virtualUserId: Int): EngineResult<Unit>
 
     fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
@@ -109,6 +109,10 @@ object EngineErrorCodes {
     const val SHORTCUT_REQUEST_FAILED = "SHORTCUT_REQUEST_FAILED"
     const val APK_INVALID = "APK_INVALID"
     const val APK_UNREADABLE = "APK_UNREADABLE"
+    const val APK_PACKAGE_MISMATCH = "APK_PACKAGE_MISMATCH"
+    const val APK_VERSION_MISMATCH = "APK_VERSION_MISMATCH"
+    const val APK_BASE_REQUIRED = "APK_BASE_REQUIRED"
+    const val APK_DUPLICATE_SPLIT = "APK_DUPLICATE_SPLIT"
     const val APP_ALREADY_CLONED = "APP_ALREADY_CLONED"
     const val PROFILE_CREATE_FAILED = "PROFILE_CREATE_FAILED"
     const val PROFILE_DELETE_FAILED = "PROFILE_DELETE_FAILED"

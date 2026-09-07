@@ -35,7 +35,7 @@ class InstalledAppModel {
 @immutable
 class ApkCandidate {
   const ApkCandidate({
-    required this.apkPath,
+    required this.apkPaths,
     required this.packageName,
     required this.appName,
     required this.installedOnHost,
@@ -43,9 +43,9 @@ class ApkCandidate {
     this.versionCode,
   });
 
-  factory ApkCandidate.fromMap(String apkPath, Map<String, dynamic> map) {
+  factory ApkCandidate.fromMap(List<String> apkPaths, Map<String, dynamic> map) {
     return ApkCandidate(
-      apkPath: apkPath,
+      apkPaths: List<String>.unmodifiable(apkPaths),
       packageName: map['packageName'] as String? ?? '',
       appName: map['appName'] as String? ?? '',
       installedOnHost: map['installedOnHost'] as bool? ?? false,
@@ -54,7 +54,8 @@ class ApkCandidate {
     );
   }
 
-  final String apkPath;
+  final List<String> apkPaths;
+  String get apkPath => apkPaths.first;
   final String packageName;
   final String appName;
   final bool installedOnHost;

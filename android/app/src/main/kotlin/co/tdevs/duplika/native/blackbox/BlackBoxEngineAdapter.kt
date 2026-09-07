@@ -235,34 +235,37 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         }
     }
 
-    override fun installApkFile(apkPath: String, virtualUserId: Int): EngineResult<Unit> =
+    override fun installApkFiles(apkPaths: List<String>, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.APP_INSTALL_FAILED) {
             withServiceRetry {
                 warmUpPackageService()
-                doInstallApk(apkPath, virtualUserId)
+                doInstallApks(apkPaths, virtualUserId)
             }
         }
 
-    private fun doInstallApk(apkPath: String, virtualUserId: Int): EngineResult<Unit> {
-        val file = File(apkPath)
-        if (!file.isFile) {
-            return EngineResult.Failure(
-                EngineErrorCodes.APK_UNREADABLE,
-                "The selected APK could not be read.",
-            )
+    private fun doInstallApks(apkPaths: List<String>, virtualUserId: Int): EngineResult<Unit> {
+        if (apkPaths.isEmpty()) {
+            return EngineResult.Failure(EngineErrorCodes.APK_INVALID, "No APKs were selected.")
         }
-
-        val result = BlackBoxCore.get().installPackageAsUser(file, virtualUserId)
-            ?: return noResponse("APK install into user $virtualUserId")
-
-        return if (result.success) {
+        apkPaths.forEach { apkPath ->
+            if (!File(apkPath).isFile) {
+                return EngineResult.Failure(
+                    EngineErrorCodes.APK_UNREADABLE,
+                    "One of the selected APKs could not be read.",
+                )
+            }
+        }
+        apkPaths.forEachIndexed { index, apkPath ->
+            val result = BlackBoxCore.get().installPackageAsUser(File(apkPath), virtualUserId)
+                ?: return noResponse("APK ${index + 1} install into user $virtualUserId")
+            if (!result.success) {
+                val reason = result.msg ?: "the engine refused the APK install"
+                Slog.e(Slog.INSTALL, "APK ${index + 1} install failed: $reason")
+                return EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
+            }
             Slog.i(Slog.INSTALL, "Installed APK ${result.packageName} into user $virtualUserId")
-            EngineResult.ok()
-        } else {
-            val reason = result.msg ?: "the engine refused the install"
-            Slog.e(Slog.INSTALL, "APK install failed: $reason")
-            EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
         }
+        return EngineResult.ok()
     }
 
     override fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit> =

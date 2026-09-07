@@ -25,7 +25,7 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
 
   @override
   Future<VirtualProfileModel> createProfileFromApk({
-    required String apkPath,
+    required List<String> apkPaths,
     required String packageName,
     required String appName,
     required String profileName,

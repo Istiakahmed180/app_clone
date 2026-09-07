@@ -2,6 +2,7 @@ package co.tdevs.duplika.native
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import java.io.File
 
 /**
@@ -18,46 +19,115 @@ class ApkImporter(private val context: Context) {
             val appName: String,
             val versionName: String?,
             val versionCode: Long,
+            val apkPaths: List<String>,
+            val baseApkPath: String,
+            val splitApkPaths: List<String>,
         ) : ApkInfo
 
         data class Invalid(val code: String, val message: String) : ApkInfo
     }
 
-    fun inspect(apkPath: String): ApkInfo {
-        val file = File(apkPath)
-        if (!file.isFile || !file.canRead()) {
+    fun inspect(apkPaths: List<String>): ApkInfo {
+        if (apkPaths.isEmpty()) {
+            return ApkInfo.Invalid(EngineErrorCodes.APK_INVALID, "Select at least one APK.")
+        }
+
+        data class Archive(
+            val path: String,
+            val packageName: String,
+            val versionName: String?,
+            val versionCode: Long,
+            val splitName: String?,
+            val applicationInfo: android.content.pm.ApplicationInfo?,
+        )
+
+        val archives = mutableListOf<Archive>()
+        for (apkPath in apkPaths) {
+            val file = File(apkPath)
+            if (!file.isFile || !file.canRead()) {
+                return ApkInfo.Invalid(
+                    EngineErrorCodes.APK_UNREADABLE,
+                    "One of the selected APKs could not be read.",
+                )
+            }
+            val packageInfo = context.packageManager.getPackageArchiveInfo(apkPath, 0)
+            if (packageInfo != null) {
+                archives += Archive(
+                    path = apkPath,
+                    packageName = packageInfo.packageName,
+                    versionName = packageInfo.versionName,
+                    versionCode = longVersionCode(packageInfo),
+                    splitName = packageInfo.splitNames?.singleOrNull(),
+                    applicationInfo = packageInfo.applicationInfo,
+                )
+            } else {
+                val manifest = readManifest(apkPath)
+                    ?: return ApkInfo.Invalid(
+                        EngineErrorCodes.APK_INVALID,
+                        "One of the selected files is not a valid APK manifest.",
+                    )
+                archives += Archive(
+                    path = apkPath,
+                    packageName = manifest.packageName,
+                    versionName = manifest.versionName,
+                    versionCode = manifest.versionCode,
+                    splitName = manifest.splitName,
+                    applicationInfo = null,
+                )
+            }
+        }
+
+        val packageName = archives.first().packageName
+        val versionCode = archives.first().versionCode
+        if (archives.any { it.packageName != packageName }) {
             return ApkInfo.Invalid(
-                EngineErrorCodes.APK_UNREADABLE,
-                "The selected file could not be read.",
+                EngineErrorCodes.APK_PACKAGE_MISMATCH,
+                "All selected APKs must belong to the same application.",
+            )
+        }
+        if (archives.any { it.versionCode != versionCode }) {
+            return ApkInfo.Invalid(
+                EngineErrorCodes.APK_VERSION_MISMATCH,
+                "All selected APKs must have the same version.",
             )
         }
 
-        val packageInfo = context.packageManager.getPackageArchiveInfo(apkPath, 0)
+        val bases = archives.filter { it.splitName == null }
+        if (bases.size != 1) {
+            return ApkInfo.Invalid(
+                EngineErrorCodes.APK_BASE_REQUIRED,
+                "Select exactly one base APK and one or more configuration splits.",
+            )
+        }
+        val splits = archives.filter { it.splitName != null }
+        val splitNames = splits.mapNotNull { it.splitName }
+        if (splitNames.size != splitNames.toSet().size) {
+            return ApkInfo.Invalid(
+                EngineErrorCodes.APK_DUPLICATE_SPLIT,
+                "Duplicate APK splits were selected.",
+            )
+        }
+
+        val base = bases.single()
+        val applicationInfo = base.applicationInfo
             ?: return ApkInfo.Invalid(
                 EngineErrorCodes.APK_INVALID,
-                "The selected file is not a valid APK.",
+                "The base APK does not declare an application.",
             )
-
-        val applicationInfo = packageInfo.applicationInfo
-            ?: return ApkInfo.Invalid(
-                EngineErrorCodes.APK_INVALID,
-                "The APK does not declare an application.",
-            )
-
-        // An archive's ApplicationInfo has no paths set, so the label cannot be resolved
-        // until they are pointed at the file itself.
-        applicationInfo.sourceDir = apkPath
-        applicationInfo.publicSourceDir = apkPath
-
+        applicationInfo.sourceDir = base.path
+        applicationInfo.publicSourceDir = base.path
         val label = runCatching {
             context.packageManager.getApplicationLabel(applicationInfo).toString()
-        }.getOrDefault(packageInfo.packageName)
+        }.getOrDefault(packageName)
 
         return ApkInfo.Parsed(
-            packageName = packageInfo.packageName,
+            packageName = packageName,
             appName = label,
-            versionName = packageInfo.versionName,
-            versionCode = longVersionCode(packageInfo),
+            versionName = base.versionName,
+            versionCode = versionCode,
+            apkPaths = archives.map { it.path },
+            baseApkPath = base.path,
+            splitApkPaths = splits.map { it.path },
         )
     }
 
@@ -68,6 +138,44 @@ class ApkImporter(private val context: Context) {
             @Suppress("DEPRECATION")
             info.versionCode.toLong()
         }
+
+    private data class ManifestInfo(
+        val packageName: String,
+        val splitName: String?,
+        val versionName: String?,
+        val versionCode: Long,
+    )
+
+    /** PackageManager rejects a standalone split archive; read its manifest identity only. */
+    private fun readManifest(path: String): ManifestInfo? = runCatching {
+        val constructor = AssetManager::class.java.getDeclaredConstructor()
+        constructor.isAccessible = true
+        val assets = constructor.newInstance()
+        val addAssetPath = AssetManager::class.java
+            .getDeclaredMethod("addAssetPath", String::class.java)
+        addAssetPath.isAccessible = true
+        val cookie = addAssetPath.invoke(assets, path) as Int
+        if (cookie == 0) return@runCatching null
+        val parser = assets.openXmlResourceParser(cookie, "AndroidManifest.xml")
+        var result: ManifestInfo? = null
+        while (parser.next() != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+            if (parser.eventType == org.xmlpull.v1.XmlPullParser.START_TAG && parser.name == "manifest") {
+                val ns = "http://schemas.android.com/apk/res/android"
+                result = ManifestInfo(
+                    packageName = parser.getAttributeValue(null, "package")
+                        ?: return@runCatching null,
+                    splitName = parser.getAttributeValue(null, "split")
+                        ?: parser.getAttributeValue(ns, "split"),
+                    versionName = parser.getAttributeValue(ns, "versionName"),
+                    versionCode = parser.getAttributeIntValue(ns, "versionCode", -1).toLong(),
+                )
+                break
+            }
+        }
+        parser.close()
+        assets.close()
+        result
+    }.getOrNull()
 
     fun isInstalledOnHost(packageName: String): Boolean = try {
         context.packageManager.getPackageInfo(packageName, 0)

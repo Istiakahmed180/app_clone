@@ -95,13 +95,13 @@ class VirtualAppInstaller(
      * applies as for an installed app — an APK that declares a secure-environment
      * requirement is rejected before the engine ever sees it.
      */
-    fun installApk(
-        apkPath: String,
+    fun installApks(
+        apkPaths: List<String>,
         packageName: String,
         virtualUserId: Int,
         provisionGms: Boolean,
     ): EngineResult<Unit> {
-        when (val verdict = securityChecker.checkApk(packageName, apkPath)) {
+        when (val verdict = securityChecker.checkApk(packageName, apkPaths.first())) {
             is AppSecurityChecker.Verdict.Rejected ->
                 return EngineResult.Failure(verdict.code, verdict.message)
             AppSecurityChecker.Verdict.Allowed -> Unit
@@ -109,9 +109,9 @@ class VirtualAppInstaller(
 
         provisionGmsIfRequested(
             virtualUserId,
-            provisionGms && analyzer.analyzeApk(apkPath, packageName).requiresGms,
+            provisionGms && analyzer.analyzeApk(apkPaths.first(), packageName).requiresGms,
         )
-        return adapter.installApkFile(apkPath, virtualUserId)
+        return adapter.installApkFiles(apkPaths, virtualUserId)
     }
 
     fun uninstall(packageName: String, virtualUserId: Int): EngineResult<Unit> =
