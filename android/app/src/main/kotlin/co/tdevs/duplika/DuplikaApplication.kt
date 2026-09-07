@@ -17,6 +17,7 @@ class DuplikaApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        WebViewProcessIsolation.configure()
         engine.attachBaseContext(this, base)
     }
 

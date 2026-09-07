@@ -5,8 +5,11 @@ Guest: Markor 2.15.2 (`net.gsantner.markor`)
 
 ## Finding
 
-The first observed Release-only failure is in the guest application bind path,
-not in WebView. The minified Release log records the following order:
+The initial observed Release-only failure appeared to be in the guest
+application bind path. That earlier run is retained as historical evidence in
+`release-file-open-failure.log`.
+
+The clean physical re-test below did not reproduce that bind failure.
 
 1. Bcore cannot obtain its PackageManager service.
 2. Fallback `ApplicationInfo`/`PackageInfo` objects are created with null APK
@@ -27,8 +30,9 @@ diagnostic log is `release-file-open-nominify.log`; it contains no fatal
 exception, null-APK-path failure, or PackageManager-null failure for that file
 open.
 
-This establishes R8/minification as the current causal boundary for the
-Release-only startup failure. It does not yet identify the minimal keep rule.
+At that stage this appeared to establish R8/minification as the causal
+boundary, but the clean minified re-test below did not reproduce it. No R8
+rule should be added from this earlier run alone.
 
 A second temporary broad keep diagnostic for `co.tdevs.duplika.**` was built,
 but could not be physically tested because the local ADB daemon failed again
@@ -37,9 +41,10 @@ temporary rule was removed; no unverified workaround remains in project code.
 
 ## Current status
 
-No WebView fix was attempted. No Bcore or virtualization-engine source was
-modified. A physical post-fix Debug/Release verification remains pending until
-ADB connectivity is restored and a minimal general R8 rule is confirmed.
+The R8 hypothesis remains unconfirmed and no R8 keep rule was added. The
+general WebView process-isolation fix is implemented in
+`WebViewProcessIsolation.kt` and has passed physical Debug and minified Release
+verification, including local preview and same-profile relaunch.
 
 ## ADB recovery state
 
@@ -55,3 +60,25 @@ The current shell cannot query the parent process because macOS denied the
 process-list request, and new ADB clients cannot connect to the listener:
 `Operation not permitted`. No project-code or engine changes were made for
 this infrastructure failure. Full diagnostics are in `adb-recovery.log`.
+
+## Clean minified Release re-test
+
+After ADB was restored from the normal macOS Terminal, a clean minified
+Release APK was built and installed on the physical device. Through the
+user-facing Duplika flow, Markor reached `MainActivity` and `IntroActivity`.
+The startup log contains no `FATAL EXCEPTION`, `Unable to makeApplication`, or
+`ContextImpl`→`Application` failure.
+
+Opening a document then produced the explicit first fatal error:
+
+`Using WebView from more than one process at once with the same data directory`
+
+The lock owner and current process were both `net.gsantner.markor` with
+different PIDs. The stack enters `DraggableScrollbarWebView` inflation and
+Markor's `ApplicationObject.onCreate`, then Bcore's activity binding delegate.
+This is a WebView multi-process data-directory failure, not evidence of an R8
+retention failure. The PackageManager-null messages in this run were warnings;
+the guest reached its UI.
+
+No broad keep rule or minimal R8 rule was added. The confirmed WebView fix and
+its final physical evidence are documented in `webview-root-cause-analysis.md`.
