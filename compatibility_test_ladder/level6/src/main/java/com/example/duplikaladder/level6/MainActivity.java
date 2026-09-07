@@ -10,6 +10,10 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
@@ -47,6 +51,7 @@ public class MainActivity extends Activity {
         status.setText(permissionStatus());
         root.addView(status);
         add(root, "REQUEST RUNTIME PERMISSIONS", v -> requestRuntimePermissions());
+        add(root, "OPEN CAMERA (PROTECTED API)", v -> openCamera());
         add(root, "POST LOCAL NOTIFICATION", v -> postNotification());
         add(root, "SCHEDULE JOB", v -> scheduleJob());
         add(root, "OPEN DOCUMENT", v -> startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("text/plain").addCategory(Intent.CATEGORY_OPENABLE), OPEN_DOCUMENT));
@@ -67,8 +72,36 @@ public class MainActivity extends Activity {
     }
 
     private String permissionStatus() {
-        return "permission notification=" + (Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-                + " camera=" + (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
+        int selfNotification = Build.VERSION.SDK_INT < 33 ? PackageManager.PERMISSION_GRANTED : checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS);
+        int selfCamera = checkSelfPermission(Manifest.permission.CAMERA);
+        int packageNotification = getPackageManager().checkPermission(Manifest.permission.POST_NOTIFICATIONS, getPackageName());
+        int packageCamera = getPackageManager().checkPermission(Manifest.permission.CAMERA, getPackageName());
+        String result = "permission notification=" + (selfNotification == PackageManager.PERMISSION_GRANTED)
+                + " camera=" + (selfCamera == PackageManager.PERMISSION_GRANTED);
+        log("permission APIs self(notification,camera)=" + selfNotification + "," + selfCamera
+                + " packageManager=" + packageNotification + "," + packageCamera
+                + " package=" + getPackageName() + " uid=" + android.os.Process.myUid());
+        return result;
+    }
+
+    private void openCamera() {
+        try {
+            CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
+            String[] ids = manager.getCameraIdList();
+            log("camera ids=" + ids.length);
+            manager.openCamera(ids[0], new CameraDevice.StateCallback() {
+                @Override public void onOpened(CameraDevice camera) {
+                    log("camera open PASS id=" + camera.getId());
+                    camera.close();
+                }
+                @Override public void onDisconnected(CameraDevice camera) { log("camera disconnected"); camera.close(); }
+                @Override public void onError(CameraDevice camera, int error) { log("camera error=" + error); camera.close(); }
+            }, null);
+        } catch (SecurityException e) {
+            log("camera open SECURITY_EXCEPTION=" + e.getMessage());
+        } catch (CameraAccessException | RuntimeException e) {
+            log("camera open ERROR=" + e);
+        }
     }
 
     private void postNotification() {
@@ -92,7 +125,7 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); handleDeepLink(intent); }
-    @Override public void onRequestPermissionsResult(int r, String[] p, int[] g) { super.onRequestPermissionsResult(r, p, g); status.setText(permissionStatus()); log("permission result=" + r + " " + permissionStatus()); }
+    @Override public void onRequestPermissionsResult(int r, String[] p, int[] g) { super.onRequestPermissionsResult(r, p, g); status.setText(permissionStatus()); log("permission result=" + r + " permissions=" + java.util.Arrays.toString(p) + " grants=" + java.util.Arrays.toString(g) + " " + permissionStatus()); }
     @Override protected void onActivityResult(int r, int c, Intent data) { super.onActivityResult(r, c, data); log("document result request=" + r + " result=" + c + " uri=" + (data == null ? "null" : data.getData())); }
     private void log(String s) { android.util.Log.i("LadderLevel6", s); }
 }

@@ -22,9 +22,9 @@ The Level 6 probe is a single APK with no GMS dependency. It was installed and e
 
 | Application | Feature/API | Install | Launch | Functionality | Relaunch | Debug | Release | Warnings | Failure layer |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
-| Ladder Level 6 | Runtime camera/notification permissions | PASS | PASS | PARTIAL: Android permission UI opened as Duplika, but guest status remained `false` after the camera result | PASS: relaunch retained the observed guest state | PARTIAL | PARTIAL | Host-identity permission behavior; no artificial grant applied | Permission virtualization / host identity |
-| Ladder Level 6 | Notification channel, local notification, PendingIntent tap | PASS | PASS | Debug PASS: notification posted and tap returned to guest UI; Release FAIL: `BNotificationManager.createNotificationChannel` dereferenced a null `IBNotificationManagerService` stub | Debug PASS; Release relaunch PASS before notification test | PASS | FAIL | Release produced guest `FATAL EXCEPTION` | Bcore notification service initialization |
-| Ladder Level 6 | JobScheduler / JobService | PASS | PASS | FAIL: `JobServiceStub: Schedule: args[0] is null, returning RESULT_FAILURE`; no guest `onStartJob` | PASS | FAIL | FAIL | Same failure in both variants | Bcore JobScheduler hook/proxy |
+| Ladder Level 6 | Runtime camera/notification permissions | PASS | PASS | PASS: guest `checkSelfPermission` and `PackageManager.checkPermission` both returned GRANTED; callback returned `[0,0]`; real `CameraManager.openCamera` passed | PASS: status remained `notification=true camera=true` after relaunch | PASS | PASS | No artificial grant; host permission state was used | Android 15 `checkPermissionForDevice` UID translation |
+| Ladder Level 6 | Notification channel, local notification, PendingIntent tap | PASS | PASS | PASS: notification posted and tap returned to guest UI | PASS | PASS | PASS | No new warning after notification fix | None observed |
+| Ladder Level 6 | JobScheduler / JobService | PASS | PASS | PASS: schedule returned `1`; guest `onStartJob` reached | PASS | PASS | PASS | Android 15 `JobInfo` was found at `args[1]` | None observed |
 | Ladder Level 6 | Storage Access Framework / `ACTION_OPEN_DOCUMENT` | PASS | PASS | PARTIAL: DocumentsUI opened and cancel returned to guest; selection/save persistence not completed | Not tested | PARTIAL | PARTIAL | DocumentsUI is host system UI | SAF result/path virtualization remains incomplete to classify |
 | Ladder Level 6 | SQLite local persistence | PASS | PASS | PASS: value read and incremented | Debug PASS: persisted value increased across relaunch; Release value read as `4` after the Release run, but was not re-read after the final relaunch | PASS | PARTIAL | None material to the probe | None observed |
 | Ladder Level 6 | Explicit and implicit internal intents | PASS | PASS | PASS: `LinkActivity` UI reached for both paths | PASS | PASS | PASS | None material to the probe | None observed |
@@ -43,10 +43,11 @@ The Level 6 probe is a single APK with no GMS dependency. It was installed and e
 
 ## Findings and limits
 
-- No core-engine source files were modified for this ladder.
+- The core engine architecture was not redesigned. The vendored Bcore AAR was rebuilt with one general Android 15 permission-hook override; the Level 6 APK was also extended with diagnostic logging and a real camera protected-API probe.
 - Real-app APKs used for Level 5 were downloaded as single APKs from the F-Droid repository: AntennaPod 3.11.2 and Markor 2.15.2. Fossify Notes was selected but not included in the PASS matrix because its clone was not completed.
 - The host Release build was installed after the Debug runs; Markor was independently relaunched and verified under both host variants. AntennaPod was independently verified under both host variants.
 - `<queries>`, service-level `<property>`, and application-level `<uses-native-library>` generate Bcore parser warnings in the Chrome evidence. The current `ApkManifestReader` handles only narrow security metadata, not complete package parsing.
 - No general split-APK implementation was added. Chrome remains a separate split-APK investigation.
 - GMS, OEM/system-app compatibility, Play Integrity, and security bypasses remain intentionally out of scope.
-- Level 6 has not changed the core engine. The first confirmed modern-API failures are permission state virtualization, JobScheduler dispatch, and Release notification-service initialization. No speculative core fix was applied.
+- The confirmed permission root cause was Android 15 routing `Context.checkSelfPermission()` through `IActivityManager.checkPermissionForDevice()`. Bcore translated the virtual UID (`10013`) only on the older `checkPermission()` path, so the host grant was not visible to the guest. The general hook now maps the virtual UID to the host UID while preserving the device ID and existing older-path behavior.
+- Permission evidence: `level6-debug-permission-hook-result.log`, `level6-debug-permission-pass.log`, and `level6-release-permission-hook-result.log`. Regression evidence: `level6-release-permission-regression.log`.
