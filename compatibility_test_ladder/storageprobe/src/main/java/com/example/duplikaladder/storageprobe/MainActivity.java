@@ -3,6 +3,7 @@ package com.example.duplikaladder.storageprobe;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +25,10 @@ public final class MainActivity extends Activity {
     private static final String TAG = "StorageProbe";
     private static final String STATE_FILE = "probe-state.txt";
 
+    static { System.loadLibrary("storageprobe"); }
+
+    private static native String nativeProbe(String directory);
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -38,14 +43,16 @@ public final class MainActivity extends Activity {
 
     private String collectReport() {
         StringBuilder out = new StringBuilder();
-        line(out, "Storage Probe 1.0");
+        line(out, "VLC Storage Probe 2.0");
         line(out, "process=" + ApplicationIdentity.processName());
         line(out, "uid=" + Process.myUid() + " pid=" + Process.myPid());
         line(out, "package=" + getPackageName());
         line(out, "sdk=" + Build.VERSION.SDK_INT);
         line(out, "externalStorageState=" + safe(() -> Environment.getExternalStorageState()));
         line(out, "externalStorageDirectory=" + safe(() -> Environment.getExternalStorageDirectory().getAbsolutePath()));
-        line(out, "isExternalStorageManager=" + safe(() -> Boolean.toString(Environment.isExternalStorageManager())));
+        line(out, "environment.isExternalStorageManager=" + safe(() -> Boolean.toString(Environment.isExternalStorageManager())));
+        appendExternalDirs(out);
+        appendPermissions(out);
         line(out, "filesDir=" + describe(getFilesDir()));
         line(out, "cacheDir=" + describe(getCacheDir()));
         line(out, "externalFilesDir=" + describe(getExternalFilesDir(null)));
@@ -58,7 +65,9 @@ public final class MainActivity extends Activity {
         appendWrite(out, "cache", getCacheDir());
         appendWrite(out, "externalFiles", getExternalFilesDir(null));
         if (getExternalFilesDir(null) != null) {
-            appendWriteAt(out, "externalFiles.medialibThumbnails", new File(getExternalFilesDir(null), "medialib/thumbnails"));
+            File externalFiles = getExternalFilesDir(null);
+            File thumbnails = new File(externalFiles, "medialib/thumbnails");
+            appendVlcPath(out, thumbnails);
         }
         appendWrite(out, "externalCache", getExternalCacheDir());
         if (media != null) for (int i = 0; i < media.length; i++) appendWrite(out, "externalMedia[" + i + "]", media[i]);
@@ -70,6 +79,58 @@ public final class MainActivity extends Activity {
         try { writeText(new File(getFilesDir(), "last-report.txt"), out.toString()); }
         catch (Throwable t) { line(out, "internalPersistence.report=EXCEPTION " + exception(t)); }
         return out.toString();
+    }
+
+    private void appendExternalDirs(StringBuilder out) {
+        try {
+            File[] dirs = getExternalFilesDirs(null);
+            line(out, "context.getExternalFilesDirs.count=" + (dirs == null ? "null" : dirs.length));
+            if (dirs != null) for (int i = 0; i < dirs.length; i++) {
+                line(out, "context.getExternalFilesDirs[" + i + "]=" + describeCanonical(dirs[i]));
+            }
+        } catch (Throwable t) { line(out, "context.getExternalFilesDirs=EXCEPTION " + exception(t)); }
+    }
+
+    private void appendVlcPath(StringBuilder out, File thumbnails) {
+        line(out, "vlc.externalFilesDir=" + describeCanonical(getExternalFilesDir(null)));
+        File db = getDir("db", MODE_PRIVATE);
+        line(out, "vlc.dbDir=" + describeCanonical(db));
+        line(out, "vlc.dbDir.canWrite=" + db.canWrite());
+        line(out, "vlc.thumbnailPath=" + describeCanonical(thumbnails));
+        appendWriteAt(out, "vlc.thumbnailPath", thumbnails);
+        try { line(out, "vlc.nativeProbe.begin"); line(out, nativeProbe(thumbnails.getAbsolutePath()).trim()); }
+        catch (Throwable t) { line(out, "vlc.nativeProbe=EXCEPTION " + exception(t)); }
+    }
+
+    private void appendPermissions(StringBuilder out) {
+        String[] permissions = {
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.MANAGE_EXTERNAL_STORAGE",
+                "android.permission.READ_MEDIA_AUDIO",
+                "android.permission.READ_MEDIA_VIDEO",
+                "android.permission.READ_MEDIA_IMAGES"
+        };
+        for (String permission : permissions) {
+            try { line(out, "permission." + permission + "=" + permissionState(checkSelfPermission(permission))); }
+            catch (Throwable t) { line(out, "permission." + permission + "=EXCEPTION " + exception(t)); }
+        }
+        AppOpsManager ops = getSystemService(AppOpsManager.class);
+        if (ops == null) { line(out, "appops=null"); return; }
+        String[] opNames = {
+                "android:manage_external_storage",
+                "android:read_external_storage",
+                "android:write_external_storage",
+                "android:read_media_audio",
+                "android:read_media_video",
+                "android:read_media_images"
+        };
+        for (String op : opNames) {
+            try {
+                int mode = ops.unsafeCheckOpNoThrow(op, Process.myUid(), getPackageName());
+                line(out, "appops." + op + "=" + appOpState(mode) + "(" + mode + ")");
+            } catch (Throwable t) { line(out, "appops." + op + "=EXCEPTION " + exception(t)); }
+        }
     }
 
     private void appendVolumes(StringBuilder out) {
@@ -104,6 +165,21 @@ public final class MainActivity extends Activity {
     }
 
     private static String describe(File f) { return f == null ? "null" : f.getAbsolutePath() + " exists=" + f.exists() + " readable=" + f.canRead() + " writable=" + f.canWrite(); }
+    private static String describeCanonical(File f) {
+        if (f == null) return "null";
+        try { return f.getAbsolutePath() + " canonical=" + f.getCanonicalPath() + " exists=" + f.exists() + " readable=" + f.canRead() + " writable=" + f.canWrite(); }
+        catch (Throwable t) { return f.getAbsolutePath() + " canonical=EXCEPTION " + exception(t); }
+    }
+    private static String permissionState(int state) {
+        return state == PackageManager.PERMISSION_GRANTED ? "GRANTED" : "DENIED";
+    }
+    private static String appOpState(int mode) {
+        if (mode == AppOpsManager.MODE_ALLOWED) return "ALLOWED";
+        if (mode == AppOpsManager.MODE_IGNORED) return "IGNORED";
+        if (mode == AppOpsManager.MODE_ERRORED) return "ERRORED";
+        if (mode == AppOpsManager.MODE_DEFAULT) return "DEFAULT";
+        return "MODE_" + mode;
+    }
     private static String safe(ThrowingSupplier<String> s) { try { return s.get(); } catch (Throwable t) { return "EXCEPTION " + exception(t); } }
     private static String exception(Throwable t) { return t.getClass().getName() + ":" + String.valueOf(t.getMessage()); }
     private static void line(StringBuilder b, String s) { b.append(s).append('\n'); }
