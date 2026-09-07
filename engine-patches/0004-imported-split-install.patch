@@ -1,0 +1,201 @@
+diff --git a/Bcore/src/main/aidl/top/niunaijun/blackbox/core/system/pm/IBPackageManagerService.aidl b/Bcore/src/main/aidl/top/niunaijun/blackbox/core/system/pm/IBPackageManagerService.aidl
+index 1613405..10e0d07 100644
+--- a/Bcore/src/main/aidl/top/niunaijun/blackbox/core/system/pm/IBPackageManagerService.aidl
++++ b/Bcore/src/main/aidl/top/niunaijun/blackbox/core/system/pm/IBPackageManagerService.aidl
+@@ -37,6 +37,7 @@ interface IBPackageManagerService {
+     List<ProviderInfo> queryContentProviders(String processName, int uid, int flags, int userId);
+ 
+     InstallResult installPackageAsUser(String file, in InstallOption option, int userId);
++    InstallResult installPackageSetAsUser(String baseFile, in String[] splitFiles, in InstallOption option, int userId);
+     void uninstallPackageAsUser(String packageName, int userId);
+     void uninstallPackage(String packageName);
+     void clearPackage(String packageName, int userId);
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/BlackBoxCore.java b/Bcore/src/main/java/top/niunaijun/blackbox/BlackBoxCore.java
+index 766bfae..097f9e7 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/BlackBoxCore.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/BlackBoxCore.java
+@@ -1167,6 +1167,17 @@ public class BlackBoxCore extends ClientConfiguration {
+         return getBPackageManager().installPackageAsUser(apk.getAbsolutePath(), InstallOption.installByStorage(), userId);
+     }
+ 
++    /** Installs a base APK and configuration/ABI splits as one atomic package set. */
++    public InstallResult installPackageSetAsUser(File baseApk, File[] splitApks, int userId) {
++        String[] splitPaths = new String[splitApks == null ? 0 : splitApks.length];
++        for (int i = 0; i < splitPaths.length; i++) {
++            splitPaths[i] = splitApks[i].getAbsolutePath();
++        }
++        return getBPackageManager().installPackageSetAsUser(
++                baseApk.getAbsolutePath(), splitPaths,
++                InstallOption.installByStorage(), userId);
++    }
++
+     public InstallResult installPackageAsUser(Uri apk, int userId) {
+         
+         return getBPackageManager().installPackageAsUser(apk.toString(), InstallOption.installByStorage().makeUriFile(), userId);
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageInstallerService.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageInstallerService.java
+index 2454921..22def01 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageInstallerService.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageInstallerService.java
+@@ -37,6 +37,11 @@ public class BPackageInstallerService extends IBPackageInstallerService.Stub imp
+             int exec = executor.exec(ps, option, userId);
+             Slog.d(TAG, "installPackageAsUser: " + executor.getClass().getSimpleName() + " exec: " + exec);
+             if (exec != 0) {
++                // Package-set installation is atomic: a failed split must not leave the
++                // copied base/splits available to a later package-manager scan.
++                if (!option.isFlag(InstallOption.FLAG_SYSTEM)) {
++                    new RemoveAppExecutor().exec(ps, option, userId);
++                }
+                 return exec;
+             }
+         }
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
+index d5d0a05..eac01a0 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
+@@ -515,7 +515,23 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
+     @Override
+     public InstallResult installPackageAsUser(String file, InstallOption option, int userId) {
+         synchronized (mInstallLock) {
+-            return installPackageAsUserLocked(file, option, userId);
++            return installPackageAsUserLocked(file, null, option, userId);
++        }
++    }
++
++    @Override
++    public InstallResult installPackageSetAsUser(String baseFile, String[] splitFiles,
++                                                 InstallOption option, int userId) {
++        synchronized (mInstallLock) {
++            if (splitFiles == null) {
++                splitFiles = new String[0];
++            }
++            for (String splitFile : splitFiles) {
++                if (splitFile == null || splitFile.length() == 0 || !new File(splitFile).isFile()) {
++                    return new InstallResult().installError("Split APK is missing.");
++                }
++            }
++            return installPackageAsUserLocked(baseFile, splitFiles, option, userId);
+         }
+     }
+ 
+@@ -645,7 +661,8 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
+         }
+     }
+ 
+-    private InstallResult installPackageAsUserLocked(String file, InstallOption option, int userId) {
++    private InstallResult installPackageAsUserLocked(String file, String[] splitFiles,
++                                                     InstallOption option, int userId) {
+         long l = System.currentTimeMillis();
+         InstallResult result = new InstallResult();
+         File apkFile = null;
+@@ -693,6 +710,9 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
+                 return result.installError("parser apk error.");
+             }
+             result.packageName = aPackage.packageName;
++            if (splitFiles != null) {
++                aPackage.splitCodePaths = splitFiles;
++            }
+ 
+             if (option.isFlag(InstallOption.FLAG_SYSTEM)) {
+                 aPackage.applicationInfo = BlackBoxCore.getPackageManager().getPackageInfo(aPackage.packageName, 0).applicationInfo;
+@@ -808,4 +828,4 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
+             mComponentResolver.addAllComponents(value.pkg);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java
+index 0d76cd2..0251090 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java
+@@ -32,12 +32,14 @@ public class CopyExecutor implements Executor {
+                 // base.apk's directory: /data/app/<pkg>/ belongs to another app and
+                 // File.listFiles() on it returns null for us, which is why a directory scan
+                 // finds nothing at all.
+-                String[] splits = null;
+-                try {
+-                    splits = BlackBoxCore.getPackageManager()
+-                            .getApplicationInfo(ps.pkg.packageName, 0).splitSourceDirs;
+-                } catch (Throwable ignored) {
+-                    // Not installed on the host (an imported APK); it has no splits.
++                String[] splits = ps.pkg.splitCodePaths;
++                if (splits == null || splits.length == 0) {
++                    try {
++                        splits = BlackBoxCore.getPackageManager()
++                                .getApplicationInfo(ps.pkg.packageName, 0).splitSourceDirs;
++                    } catch (Throwable ignored) {
++                        // Not installed on the host and no imported split set.
++                    }
+                 }
+                 Slog.i("SplitDiag", "pkg=" + ps.pkg.packageName
+                         + " base=" + ps.pkg.baseCodePath
+@@ -49,12 +51,26 @@ public class CopyExecutor implements Executor {
+                     }
+                 }
+                 if (splits != null) {
++                    String[] installedSplits = new String[splits.length];
++                    int splitIndex = 0;
+                     for (String split : splits) {
+                         if (split == null) {
+                             continue;
+                         }
+                         try {
+-                            NativeUtils.copyNativeLib(new File(split), libDir);
++                            File splitFile = new File(split);
++                            NativeUtils.copyNativeLib(splitFile, libDir);
++                            if (option.isFlag(InstallOption.FLAG_STORAGE)
++                                    && ps.pkg.splitCodePaths != null) {
++                                File installedSplit = BEnvironment.getSplitApkFile(
++                                        ps.pkg.packageName, splitFile.getName());
++                                FileUtils.copyFile(splitFile, installedSplit);
++                                installedSplit.setReadOnly();
++                                installedSplits[splitIndex] = installedSplit.getAbsolutePath();
++                            } else {
++                                installedSplits[splitIndex] = split;
++                            }
++                            splitIndex++;
+                             String[] got = libDir.list();
+                             Slog.i("SplitDiag", "  after " + new File(split).getName()
+                                     + " libCount=" + (got == null ? -1 : got.length));
+@@ -62,7 +78,13 @@ public class CopyExecutor implements Executor {
+                             Slog.e("SplitDiag", "  copyNativeLib failed for " + split, e);
+                         }
+                     }
+-                    ps.pkg.splitCodePaths = splits;
++                    if (ps.pkg.splitCodePaths != null) {
++                        String[] compact = new String[splitIndex];
++                        System.arraycopy(installedSplits, 0, compact, 0, splitIndex);
++                        ps.pkg.splitCodePaths = compact;
++                    } else {
++                        ps.pkg.splitCodePaths = splits;
++                    }
+                 }
+             }
+         } catch (Exception e) {
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/frameworks/BPackageManager.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/frameworks/BPackageManager.java
+index bfeaa90..4628d79 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/frameworks/BPackageManager.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/frameworks/BPackageManager.java
+@@ -522,6 +522,17 @@ public class BPackageManager extends BlackManager<IBPackageManagerService> {
+         return null;
+     }
+ 
++    /** Installs one base APK and its split APKs as a single package. */
++    public InstallResult installPackageSetAsUser(String baseFile, String[] splitFiles,
++                                                 InstallOption option, int userId) {
++        try {
++            return getService().installPackageSetAsUser(baseFile, splitFiles, option, userId);
++        } catch (RemoteException e) {
++            crash(e);
++        }
++        return null;
++    }
++
+     public List<ApplicationInfo> getInstalledApplications(int flags, int userId) {
+         try {
+             return getService().getInstalledApplications(flags, userId);
+@@ -832,4 +843,3 @@ public class BPackageManager extends BlackManager<IBPackageManagerService> {
+         return info;
+     }
+ }
+-

@@ -255,16 +255,16 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
                 )
             }
         }
-        apkPaths.forEachIndexed { index, apkPath ->
-            val result = BlackBoxCore.get().installPackageAsUser(File(apkPath), virtualUserId)
-                ?: return noResponse("APK ${index + 1} install into user $virtualUserId")
-            if (!result.success) {
-                val reason = result.msg ?: "the engine refused the APK install"
-                Slog.e(Slog.INSTALL, "APK ${index + 1} install failed: $reason")
-                return EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
-            }
-            Slog.i(Slog.INSTALL, "Installed APK ${result.packageName} into user $virtualUserId")
+        val base = File(apkPaths.first())
+        val splits = apkPaths.drop(1).map(::File).toTypedArray()
+        val result = BlackBoxCore.get().installPackageSetAsUser(base, splits, virtualUserId)
+            ?: return noResponse("APK package set install into user $virtualUserId")
+        if (!result.success) {
+            val reason = result.msg ?: "the engine refused the APK package set"
+            Slog.e(Slog.INSTALL, "APK package set install failed: $reason")
+            return EngineResult.Failure(EngineErrorCodes.APP_INSTALL_FAILED, reason)
         }
+        Slog.i(Slog.INSTALL, "Installed APK package set ${result.packageName} into user $virtualUserId")
         return EngineResult.ok()
     }
 
