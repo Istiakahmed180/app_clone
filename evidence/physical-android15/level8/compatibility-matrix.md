@@ -8,7 +8,7 @@ ADB serial: `KNOJORMFV4GERKHM`
 | Application | Package | Category | APK type | Install | Launch | Function | Relaunch | Debug | Release | Status | Failure category |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Fossify Notes 1.5.0 | `org.fossify.notes` | Productivity / database / storage | Single APK | PASS | PASS | PASS: created `Level8_note`, restored after relaunch | PASS: note restored | PASS | PASS | PASS | None observed |
-| AntennaPod 3.11.2 | `de.danoeh.antennapod` | Networking / media / native libraries | Single APK | Previously verified Level 5; Level 8 batch pending | Pending | Pending | Pending | Pending | Pending | PENDING | — |
+| AntennaPod 3.11.2 | `de.danoeh.antennapod` | Networking / media / native libraries | Single APK | PASS: actual user-facing import and install | PASS: guest `MainActivity` visible | PASS: public HTTPS podcast search for `science` returned visible results | PASS: same profile relaunched and UI visible | PASS | PASS | PASS | No core failure; one remote artwork URL logged a Glide load warning |
 | Markor 2.15.2 | `net.gsantner.markor` | Productivity / storage / multi-activity | Single APK | Previously verified Level 5; Level 8 batch pending | Pending | Pending | Pending | Pending | Pending | PENDING | — |
 | Level 7 split fixture | `com.example.duplikaladder.level7fixture` | Split / ABI native library | Base + ABI split | Level 7 PASS | Level 7 PASS | Level 7 PASS | Level 7 PASS | PASS | PASS | Regression reference | — |
 
