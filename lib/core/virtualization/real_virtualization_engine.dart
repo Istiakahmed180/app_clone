@@ -13,7 +13,7 @@ import 'virtualization_engine.dart';
 /// engine confirms the application is installed in its virtual environment, so the host
 /// can never claim a profile is ready while the engine disagrees.
 class RealVirtualizationEngine implements VirtualizationEngine {
-  const RealVirtualizationEngine({
+  RealVirtualizationEngine({
     required this._repository,
     required this._nativeBridge,
   });
@@ -23,17 +23,31 @@ class RealVirtualizationEngine implements VirtualizationEngine {
 
   static const AppLogger _logger = AppLogger('RealVirtualizationEngine');
 
+  bool _available = false;
+
   /// Reported by the native adapter, not assumed. The UI only claims isolation when
   /// the backend is genuinely available on this device.
   @override
-  bool get providesRuntimeIsolation => true;
+  bool get providesRuntimeIsolation => _available;
 
   @override
   Future<void> initialize() async {
+    final VirtualizationAvailability availability =
+        await _nativeBridge.isVirtualizationAvailable();
+    if (!availability.available) {
+      _available = false;
+      throw VirtualizationException(
+        availability.message ?? 'The virtualization engine is unavailable.',
+        code: availability.code ?? 'VIRTUALIZATION_NOT_AVAILABLE',
+      );
+    }
+
     final EngineResponse response = await _nativeBridge.initializeVirtualization();
     if (!response.success) {
+      _available = false;
       throw VirtualizationException(response.message, code: response.code);
     }
+    _available = true;
   }
 
   @override

@@ -13,10 +13,7 @@ import '../../../data/models/virtual_profile_model.dart';
 import '../../../native/native_bridge.dart';
 
 class HomeController extends GetxController {
-  HomeController({
-    required this._engine,
-    required this._nativeBridge,
-  });
+  HomeController({required this._engine, required this._nativeBridge});
 
   final VirtualizationEngine _engine;
   final NativeBridge _nativeBridge;
@@ -40,14 +37,16 @@ class HomeController extends GetxController {
   /// True only when the abstraction claims isolation AND the native backend confirms
   /// it is actually usable on this device.
   bool get providesRuntimeIsolation =>
-      _engine.providesRuntimeIsolation && (virtualization.value?.available ?? false);
+      _engine.providesRuntimeIsolation &&
+      (virtualization.value?.available ?? false);
 
   String? get virtualizationProblem {
     final VirtualizationAvailability? state = virtualization.value;
     if (state == null || state.available) {
       return null;
     }
-    return state.message ?? 'The virtualization engine is unavailable on this device.';
+    return state.message ??
+        'The virtualization engine is unavailable on this device.';
   }
 
   VirtualProfileState stateFor(VirtualProfileModel profile) =>
@@ -65,7 +64,9 @@ class HomeController extends GetxController {
       return const <CompatibilityFinding>[];
     }
     return report.findings
-        .where((CompatibilityFinding f) => f.code != AppConstants.errorAppNotFound)
+        .where(
+          (CompatibilityFinding f) => f.code != AppConstants.errorAppNotFound,
+        )
         .toList(growable: false);
   }
 
@@ -96,25 +97,34 @@ class HomeController extends GetxController {
 
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
-  Uint8List? iconFor(VirtualProfileModel profile) => appIcons[profile.packageName];
+  Uint8List? iconFor(VirtualProfileModel profile) =>
+      appIcons[profile.packageName];
 
   /// How many profiles share this profile's package, used to label multi-instance clones.
   int siblingCount(VirtualProfileModel profile) => _siblings(profile).length;
 
   /// This clone's 1-based position among clones of the same app, ordered by creation.
   int instanceIndex(VirtualProfileModel profile) {
-    final int index = _siblings(profile)
-        .indexWhere((VirtualProfileModel other) => other.id == profile.id);
+    final int index = _siblings(
+      profile,
+    ).indexWhere((VirtualProfileModel other) => other.id == profile.id);
     return index < 0 ? 1 : index + 1;
   }
 
-  List<VirtualProfileModel> _siblings(VirtualProfileModel profile) => profiles
-      .where((VirtualProfileModel other) => other.packageName == profile.packageName)
-      .toList(growable: false)
-    ..sort((VirtualProfileModel a, VirtualProfileModel b) =>
-        a.createdAt.compareTo(b.createdAt));
+  List<VirtualProfileModel> _siblings(VirtualProfileModel profile) =>
+      profiles
+          .where(
+            (VirtualProfileModel other) =>
+                other.packageName == profile.packageName,
+          )
+          .toList(growable: false)
+        ..sort(
+          (VirtualProfileModel a, VirtualProfileModel b) =>
+              a.createdAt.compareTo(b.createdAt),
+        );
 
-  String get testAppName => testApp.value?.displayName ?? AppConstants.testAppFallbackName;
+  String get testAppName =>
+      testApp.value?.displayName ?? AppConstants.testAppFallbackName;
 
   @override
   void onReady() {
@@ -136,17 +146,36 @@ class HomeController extends GetxController {
 
   Future<void> _loadVirtualization() async {
     try {
+      // NativeApplication attaches Bcore before Flutter starts, but the Dart engine
+      // still needs to complete its readiness handshake before the UI enables clone
+      // launch. Without this call RealVirtualizationEngine remains in its initial
+      // unavailable state even though the native backend is healthy.
+      await _engine.initialize();
       virtualization.value = await _nativeBridge.isVirtualizationAvailable();
     } on AppException catch (error, stackTrace) {
-      _logger.error('Virtualization availability lookup failed', error, stackTrace);
-      virtualization.value = null;
+      _logger.error(
+        'Virtualization availability lookup failed',
+        error,
+        stackTrace,
+      );
+      try {
+        virtualization.value = await _nativeBridge.isVirtualizationAvailable();
+      } on AppException catch (availabilityError, availabilityStackTrace) {
+        _logger.error(
+          'Virtualization availability lookup failed after initialization',
+          availabilityError,
+          availabilityStackTrace,
+        );
+        virtualization.value = null;
+      }
     }
   }
 
   /// Engine state is read per profile rather than inferred, so the card never shows
   /// "Ready" for a container the engine does not actually have.
   Future<void> _loadProfileStates() async {
-    final Map<String, VirtualProfileState> states = <String, VirtualProfileState>{};
+    final Map<String, VirtualProfileState> states =
+        <String, VirtualProfileState>{};
     for (final VirtualProfileModel profile in profiles) {
       try {
         states[profile.id] = await _engine.profileState(profile.id);
@@ -165,8 +194,9 @@ class HomeController extends GetxController {
     }
     try {
       // Only the packages actually cloned, not every launchable app on the device.
-      final Set<String> packages =
-          profiles.map((VirtualProfileModel p) => p.packageName).toSet();
+      final Set<String> packages = profiles
+          .map((VirtualProfileModel p) => p.packageName)
+          .toSet();
       appIcons.assignAll(await _nativeBridge.getAppIcons(packages));
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not load app icons', error, stackTrace);
@@ -175,19 +205,25 @@ class HomeController extends GetxController {
 
   /// Analyses each distinct cloned package once, not once per clone.
   Future<void> _loadCompatibility() async {
-    final Set<String> packages =
-        profiles.map((VirtualProfileModel p) => p.packageName).toSet();
+    final Set<String> packages = profiles
+        .map((VirtualProfileModel p) => p.packageName)
+        .toSet();
     if (packages.isEmpty) {
       compatibility.clear();
       return;
     }
 
-    final Map<String, CompatibilityReport> reports = <String, CompatibilityReport>{};
+    final Map<String, CompatibilityReport> reports =
+        <String, CompatibilityReport>{};
     for (final String packageName in packages) {
       try {
         reports[packageName] = await _nativeBridge.analyzeApp(packageName);
       } on AppException catch (error, stackTrace) {
-        _logger.error('Compatibility analysis failed for $packageName', error, stackTrace);
+        _logger.error(
+          'Compatibility analysis failed for $packageName',
+          error,
+          stackTrace,
+        );
       }
     }
     compatibility.assignAll(reports);
@@ -204,12 +240,15 @@ class HomeController extends GetxController {
 
   Future<void> _loadTestApp() async {
     try {
-      testApp.value = await _nativeBridge.getTestAppInfo() ??
+      testApp.value =
+          await _nativeBridge.getTestAppInfo() ??
           const TestAppModel.notInstalled(AppConstants.testAppPackage);
       platformInfo.value = await _nativeBridge.getPlatformInfo();
     } on NativeBridgeException catch (error, stackTrace) {
       _logger.error('Native lookup failed', error, stackTrace);
-      testApp.value = const TestAppModel.notInstalled(AppConstants.testAppPackage);
+      testApp.value = const TestAppModel.notInstalled(
+        AppConstants.testAppPackage,
+      );
     }
   }
 
@@ -239,7 +278,10 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<String?> renameProfile(VirtualProfileModel profile, String name) async {
+  Future<String?> renameProfile(
+    VirtualProfileModel profile,
+    String name,
+  ) async {
     try {
       await _engine.renameProfile(profile.id, name);
       await _loadProfiles();

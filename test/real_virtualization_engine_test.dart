@@ -21,11 +21,22 @@ void main() {
   late Map<String, Object?> lastArgs;
   late Map<String, Map<Object?, Object?>> responses;
 
-  Map<Object?, Object?> ok(String code, [Map<String, Object?> data = const <String, Object?>{}]) =>
-      <Object?, Object?>{'success': true, 'code': code, 'message': 'ok', 'data': data};
+  Map<Object?, Object?> ok(
+    String code, [
+    Map<String, Object?> data = const <String, Object?>{},
+  ]) => <Object?, Object?>{
+    'success': true,
+    'code': code,
+    'message': 'ok',
+    'data': data,
+  };
 
-  Map<Object?, Object?> fail(String code, String message) =>
-      <Object?, Object?>{'success': false, 'code': code, 'message': message, 'data': <Object?, Object?>{}};
+  Map<Object?, Object?> fail(String code, String message) => <Object?, Object?>{
+    'success': false,
+    'code': code,
+    'message': message,
+    'data': <Object?, Object?>{},
+  };
 
   setUp(() {
     storage = InMemoryProfileStorage();
@@ -38,6 +49,10 @@ void main() {
       'deleteProfile': ok('PROFILE_DELETED'),
       'stopProfile': ok('PROFILE_STOPPED'),
       'initializeVirtualization': ok('ENGINE_READY'),
+      'isVirtualizationAvailable': <Object?, Object?>{
+        'available': true,
+        'backend': 'test',
+      },
       'isAppInstalledInProfile': ok('PROFILE_STATE', <String, Object?>{
         'installed': true,
         'running': false,
@@ -47,10 +62,10 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
-      calls.add(call.method);
-      lastArgs[call.method] = call.arguments;
-      return responses[call.method];
-    });
+          calls.add(call.method);
+          lastArgs[call.method] = call.arguments;
+          return responses[call.method];
+        });
 
     engine = RealVirtualizationEngine(
       repository: repository,
@@ -64,12 +79,16 @@ void main() {
   });
 
   Future<VirtualProfileModel> create(String name) => engine.createProfile(
-        packageName: AppConstants.testAppPackage,
-        appName: AppConstants.testAppFallbackName,
-        profileName: name,
-      );
+    packageName: AppConstants.testAppPackage,
+    appName: AppConstants.testAppFallbackName,
+    profileName: name,
+  );
 
-  test('claims runtime isolation', () {
+  test('claims runtime isolation only after initialization', () async {
+    expect(engine.providesRuntimeIsolation, isFalse);
+
+    await engine.initialize();
+
     expect(engine.providesRuntimeIsolation, isTrue);
   });
 
@@ -102,58 +121,77 @@ void main() {
   });
 
   test('a failed install rolls the profile metadata back', () async {
-    responses['installAppToProfile'] =
-        fail('APP_INSTALL_FAILED', 'Engine refused the install.');
+    responses['installAppToProfile'] = fail(
+      'APP_INSTALL_FAILED',
+      'Engine refused the install.',
+    );
 
     await expectLater(
       create('Profile 1'),
-      throwsA(isA<VirtualizationException>()
-          .having((VirtualizationException e) => e.code, 'code', 'APP_INSTALL_FAILED')),
+      throwsA(
+        isA<VirtualizationException>().having(
+          (VirtualizationException e) => e.code,
+          'code',
+          'APP_INSTALL_FAILED',
+        ),
+      ),
     );
 
     // The host must not keep a profile the engine never provisioned.
     expect(await repository.getProfiles(), isEmpty);
   });
 
-  test('a rejected secure-environment app surfaces its code and stores nothing', () async {
-    responses['installAppToProfile'] = fail(
-      AppConstants.errorSecureEnvRequired,
-      'This application requires a secure environment.',
-    );
-
-    await expectLater(
-      create('Profile 1'),
-      throwsA(isA<VirtualizationException>().having(
-        (VirtualizationException e) => e.code,
-        'code',
+  test(
+    'a rejected secure-environment app surfaces its code and stores nothing',
+    () async {
+      responses['installAppToProfile'] = fail(
         AppConstants.errorSecureEnvRequired,
-      )),
-    );
-    expect(await repository.getProfiles(), isEmpty);
-  });
+        'This application requires a secure environment.',
+      );
 
-  test('launching a profile goes through the engine, not the platform launcher', () async {
-    final VirtualProfileModel profile = await create('Profile 1');
-    calls.clear();
+      await expectLater(
+        create('Profile 1'),
+        throwsA(
+          isA<VirtualizationException>().having(
+            (VirtualizationException e) => e.code,
+            'code',
+            AppConstants.errorSecureEnvRequired,
+          ),
+        ),
+      );
+      expect(await repository.getProfiles(), isEmpty);
+    },
+  );
 
-    await engine.launchProfile(profile.id);
+  test(
+    'launching a profile goes through the engine, not the platform launcher',
+    () async {
+      final VirtualProfileModel profile = await create('Profile 1');
+      calls.clear();
 
-    expect(calls, contains('launchProfile'));
-    expect(calls, isNot(contains('launchTestApp')));
-  });
+      await engine.launchProfile(profile.id);
+
+      expect(calls, contains('launchProfile'));
+      expect(calls, isNot(contains('launchTestApp')));
+    },
+  );
 
   test('a failed launch reports the engine code', () async {
     final VirtualProfileModel profile = await create('Profile 1');
-    responses['launchProfile'] =
-        fail('VIRTUAL_APP_LAUNCH_FAILED', 'Engine refused to launch.');
+    responses['launchProfile'] = fail(
+      'VIRTUAL_APP_LAUNCH_FAILED',
+      'Engine refused to launch.',
+    );
 
     expect(
       engine.launchProfile(profile.id),
-      throwsA(isA<VirtualizationException>().having(
-        (VirtualizationException e) => e.code,
-        'code',
-        'VIRTUAL_APP_LAUNCH_FAILED',
-      )),
+      throwsA(
+        isA<VirtualizationException>().having(
+          (VirtualizationException e) => e.code,
+          'code',
+          'VIRTUAL_APP_LAUNCH_FAILED',
+        ),
+      ),
     );
   });
 
@@ -186,17 +224,22 @@ void main() {
     expect(await repository.getProfiles(), isEmpty);
   });
 
-  test('a failed container delete keeps the profile visible for retry', () async {
-    final VirtualProfileModel profile = await create('Profile 1');
-    responses['deleteProfile'] =
-        fail('PROFILE_DELETE_FAILED', 'Engine could not release the container.');
+  test(
+    'a failed container delete keeps the profile visible for retry',
+    () async {
+      final VirtualProfileModel profile = await create('Profile 1');
+      responses['deleteProfile'] = fail(
+        'PROFILE_DELETE_FAILED',
+        'Engine could not release the container.',
+      );
 
-    await expectLater(
-      engine.deleteProfile(profile.id),
-      throwsA(isA<VirtualizationException>()),
-    );
-    expect(await repository.getProfile(profile.id), isNotNull);
-  });
+      await expectLater(
+        engine.deleteProfile(profile.id),
+        throwsA(isA<VirtualizationException>()),
+      );
+      expect(await repository.getProfile(profile.id), isNotNull);
+    },
+  );
 
   test('profileState reflects what the engine reports', () async {
     final VirtualProfileModel profile = await create('Profile 1');
@@ -208,24 +251,31 @@ void main() {
   });
 
   group('multi-app and APK import', () {
-    test('creating a profile from an APK installs it and keeps the metadata', () async {
-      responses['installApkToProfile'] = ok('APP_INSTALLED');
+    test(
+      'creating a profile from an APK installs it and keeps the metadata',
+      () async {
+        responses['installApkToProfile'] = ok('APP_INSTALLED');
 
-      final VirtualProfileModel profile = await engine.createProfileFromApk(
-        apkPath: '/tmp/example.apk',
-        packageName: 'org.example.imported',
-        appName: 'Imported App',
-        profileName: 'Imported App',
-      );
+        final VirtualProfileModel profile = await engine.createProfileFromApk(
+          apkPath: '/tmp/example.apk',
+          packageName: 'org.example.imported',
+          appName: 'Imported App',
+          profileName: 'Imported App',
+        );
 
-      expect(calls, contains('installApkToProfile'));
-      expect((await repository.getProfile(profile.id))?.packageName, 'org.example.imported');
-      expect(
-        (lastArgs['installApkToProfile']! as Map<Object?, Object?>)['installGms'],
-        isFalse,
-        reason: 'APK import must also default GMS provisioning off',
-      );
-    });
+        expect(calls, contains('installApkToProfile'));
+        expect(
+          (await repository.getProfile(profile.id))?.packageName,
+          'org.example.imported',
+        );
+        expect(
+          (lastArgs['installApkToProfile']!
+              as Map<Object?, Object?>)['installGms'],
+          isFalse,
+          reason: 'APK import must also default GMS provisioning off',
+        );
+      },
+    );
 
     test('opting in forwards installGms on the APK path too', () async {
       responses['installApkToProfile'] = ok('APP_INSTALLED');
@@ -239,13 +289,17 @@ void main() {
       );
 
       expect(
-        (lastArgs['installApkToProfile']! as Map<Object?, Object?>)['installGms'],
+        (lastArgs['installApkToProfile']!
+            as Map<Object?, Object?>)['installGms'],
         isTrue,
       );
     });
 
     test('a failed APK install rolls the profile back', () async {
-      responses['installApkToProfile'] = fail('APK_INVALID', 'Not a valid APK.');
+      responses['installApkToProfile'] = fail(
+        'APK_INVALID',
+        'Not a valid APK.',
+      );
 
       await expectLater(
         engine.createProfileFromApk(
@@ -254,8 +308,13 @@ void main() {
           appName: 'Imported App',
           profileName: 'Imported App',
         ),
-        throwsA(isA<VirtualizationException>()
-            .having((VirtualizationException e) => e.code, 'code', 'APK_INVALID')),
+        throwsA(
+          isA<VirtualizationException>().having(
+            (VirtualizationException e) => e.code,
+            'code',
+            'APK_INVALID',
+          ),
+        ),
       );
       expect(await repository.getProfiles(), isEmpty);
     });
@@ -271,10 +330,10 @@ void main() {
       );
 
       final List<VirtualProfileModel> profiles = await repository.getProfiles();
-      expect(profiles.map((VirtualProfileModel p) => p.packageName).toSet(), <String>{
-        AppConstants.testAppPackage,
-        'org.example.imported',
-      });
+      expect(
+        profiles.map((VirtualProfileModel p) => p.packageName).toSet(),
+        <String>{AppConstants.testAppPackage, 'org.example.imported'},
+      );
     });
   });
 
@@ -350,16 +409,26 @@ void main() {
   });
 
   test('initialize surfaces an unavailable engine', () async {
-    responses['initializeVirtualization'] =
-        fail('VIRTUALIZATION_NOT_AVAILABLE', 'Engine unavailable.');
+    responses['isVirtualizationAvailable'] = <Object?, Object?>{
+      'available': false,
+      'backend': 'test',
+      'code': 'VIRTUALIZATION_NOT_AVAILABLE',
+      'message': 'Engine unavailable.',
+    };
+    responses['initializeVirtualization'] = fail(
+      'VIRTUALIZATION_NOT_AVAILABLE',
+      'Engine unavailable.',
+    );
 
     expect(
       engine.initialize(),
-      throwsA(isA<VirtualizationException>().having(
-        (VirtualizationException e) => e.code,
-        'code',
-        'VIRTUALIZATION_NOT_AVAILABLE',
-      )),
+      throwsA(
+        isA<VirtualizationException>().having(
+          (VirtualizationException e) => e.code,
+          'code',
+          'VIRTUALIZATION_NOT_AVAILABLE',
+        ),
+      ),
     );
   });
 }
