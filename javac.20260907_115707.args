@@ -1,0 +1,12 @@
+-source
+8
+-target
+8
+-cp
+/Users/tdevs/Library/Android/sdk/platforms/android-35/android.jar:/var/folders/z6/v1cms8hd4f38m545kth20_ph0000gn/T/tmp.6DOKGZS8Mk/classes.jar:/Users/tdevs/Desktop/Projects/Others/virtual_space_demo/android/app/libs/black-reflection.jar
+-d
+/var/folders/z6/v1cms8hd4f38m545kth20_ph0000gn/T/tmp.6DOKGZS8Mk/classes
+/Users/tdevs/Desktop/Projects/Others/virtual_space_demo/engine-patches/overrides/top/niunaijun/blackbox/fake/service/IActivityManagerProxy$checkPermission.java
+/Users/tdevs/Desktop/Projects/Others/virtual_space_demo/engine-patches/overrides/top/niunaijun/blackbox/fake/service/IJobServiceProxy$Schedule.java
+/Users/tdevs/Desktop/Projects/Others/virtual_space_demo/engine-patches/overrides/top/niunaijun/blackbox/fake/service/IPermissionManagerProxy.java
+/Users/tdevs/Desktop/Projects/Others/virtual_space_demo/engine-patches/overrides/top/niunaijun/blackbox/fake/frameworks/BNotificationManager.java
