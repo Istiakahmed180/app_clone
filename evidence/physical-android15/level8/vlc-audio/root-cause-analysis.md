@@ -1,8 +1,10 @@
 # Level 8D root-cause analysis — current state
 
-## Debug
+## VLC failures
 
-The first reproducible failure is:
+### Debug
+
+The first reproducible VLC failure is:
 
 ```text
 java.lang.ArrayIndexOutOfBoundsException: length=0; index=0
@@ -12,22 +14,14 @@ java.lang.ArrayIndexOutOfBoundsException: length=0; index=0
     at org.videolan.vlc.gui.MainActivity.onPrepareOptionsMenu(MainActivity.kt:281)
 ```
 
-The Android 15 framework implementation first evaluates
-`sCurrentUser.getExternalDirs()[0]`. Therefore the immediate failure is an
-empty external-directory result exposed to the guest framework state. The
-failure is reached through VLC's permission-status query, but it is not a
-VLC-specific native crash.
+Android 15 evaluates `sCurrentUser.getExternalDirs()[0]` in this framework
+method. The VLC crash therefore proves that VLC observed an empty external
+directory result in that execution path. It does not, by itself, prove that
+the virtual storage service always returns an empty volume list.
 
-The vendored Bcore binary confirms that its virtual storage service rewrites
-the returned `StorageVolume` path to `BEnvironment.getExternalUserDir(user)`.
-That service can therefore affect the external-directory state used by the
-framework. The existing log does not yet prove whether the empty result is
-caused by the service returning no volumes, an Android 15 API-shape mismatch,
-or a later framework transformation. No fix is claimed at this stage.
+### Release
 
-## Release
-
-The first media-specific failure is:
+The first media-specific VLC failure is:
 
 ```text
 MediaLibrary.cpp:669 initialize Failed to create thumbnail directory
@@ -36,22 +30,41 @@ storage/emulated/0/Android/data/org.videolan.vlc/files/medialib/thumbnails/):
 Permission denied
 ```
 
-This occurs after VLC's native libraries load. Bcore's decompiled
-`BEnvironment` shows that the guest external data path is composed beneath
-the host's `getExternalFilesDir("blackbox")`. The native media library then
-attempts to create its thumbnail directory at that redirected path and gets
-`EACCES`. The evidence establishes a general virtual external-storage write
-boundary, but does not yet identify whether the denial is from the Android 15
-external-storage provider, directory provisioning/ownership, or a native path
-mapping mismatch.
+VLC's native libraries load before this error. The failure occurs while the
+native media library creates its thumbnail directory at a redirected virtual
+external-data path.
 
-## Relationship
+## Controlled storage diagnostic
 
-The failures are related by the virtual external-storage surface, but they are
-not the same failure:
+A minimal APK (`com.example.duplikaladder.storageprobe`) was built and tested
+through the physical Duplika import flow on the OnePlus CPH2605, Android 15 /
+API 35. It was tested in both Debug and Release, with the following results:
 
-1. Debug fails while querying the external-volume list (`getExternalDirs()[0]`).
-2. Release reaches native media initialization and fails creating a directory.
+- standalone host Debug and Release each reported one mounted primary volume;
+- guest Debug and Release each reported one mounted virtual volume;
+- guest `Environment.isExternalStorageManager()` returned without throwing;
+- guest external files, cache, media, and the exact nested
+  `medialib/thumbnails` directory all passed mkdir/write/read checks;
+- guest user-specific virtual paths were consistent across multiple imported
+  profiles; and
+- Release guest relaunch preserved the diagnostic counter.
 
-The current evidence is insufficient to select a safe general implementation
-change. Level 8D remains PARTIAL.
+These results disprove both of the currently broad hypotheses:
+
+1. all guest apps receive no external storage volume on Android 15; and
+2. guest app-specific external storage cannot create/write the nested VLC-like
+   thumbnail path.
+
+The diagnostic does not reproduce VLC's failure. Consequently, the exact
+remaining boundary is unresolved: it may involve VLC's own permission/path
+setup, its native media-library timing or path handling, or an interaction
+specific to VLC's process/runtime behavior. The current evidence is not enough
+to justify a general production storage or Bcore change.
+
+## Decision
+
+No production code, Bcore code, Flutter code, Kotlin engine code, or storage
+redirection logic was changed for this investigation. Level 8D remains
+**PARTIAL** because VLC local media playback was not verified in both Debug and
+Release. Further work requires VLC-specific tracing against the controlled
+diagnostic results, not a speculative global storage fix.
