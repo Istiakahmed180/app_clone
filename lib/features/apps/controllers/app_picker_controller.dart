@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../core/diagnostics/diagnostic_event.dart';
+import '../../../core/diagnostics/diagnostic_operation.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
@@ -196,20 +198,43 @@ class AppPickerController extends GetxController {
       return null;
     }
 
-    isWorking.value = true;
-    try {
-      final List<String> paths = await _materialise(picked);
-      return await _bridge.inspectApk(paths);
-    } on AppException catch (error) {
-      errorMessage.value = error.message;
-      return null;
-    } on IOException catch (error, stackTrace) {
-      _logger.error('Could not copy the selected APK', error, stackTrace);
-      errorMessage.value = 'The selected APK could not be read.';
-      return null;
-    } finally {
-      isWorking.value = false;
-    }
+    // The pick gets its own correlation id. Staging the files, reading their manifests
+    // and validating the split set are three separate failure points across Dart and
+    // Kotlin, and this is what makes them read as one sequence in the console.
+    return DiagnosticOperation.run<ApkCandidate?>(
+      'apk_import',
+      (DiagnosticOperation operation) async {
+        operation.step(
+          'User selected ${picked.length} file(s) to import',
+          source: DiagnosticSource.apkImporter,
+          category: DiagnosticCategory.import,
+          metadata: <String, String>{'selectedFiles': '${picked.length}'},
+        );
+
+        isWorking.value = true;
+        try {
+          final List<String> paths = await _materialise(picked);
+          operation.step(
+            'Staged ${paths.length} APK file(s) into the app cache',
+            source: DiagnosticSource.apkImporter,
+            category: DiagnosticCategory.import,
+          );
+          return await _bridge.inspectApk(paths);
+        } on AppException catch (error) {
+          errorMessage.value = error.message;
+          return null;
+        } on IOException catch (error, stackTrace) {
+          _logger.error('Could not copy the selected APK', error, stackTrace);
+          errorMessage.value = 'The selected APK could not be read.';
+          return null;
+        } finally {
+          isWorking.value = false;
+        }
+      },
+      name: 'APK import',
+      source: DiagnosticSource.apkImporter,
+      category: DiagnosticCategory.import,
+    );
   }
 
   /// Copies the picked file into app cache and returns its real path.

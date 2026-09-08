@@ -2,6 +2,10 @@ package co.tdevs.duplika
 
 import android.app.Application
 import android.content.Context
+import co.tdevs.duplika.diagnostics.CrashCapture
+import co.tdevs.duplika.diagnostics.DiagCategory
+import co.tdevs.duplika.diagnostics.DiagSource
+import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import co.tdevs.duplika.native.blackbox.BlackBoxEngineAdapter
 
@@ -17,6 +21,22 @@ class DuplikaApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+
+        // First, and before the engine: attaching Bcore rewrites this process's data
+        // directory for guest apps, so the log directory has to be resolved against the
+        // host's real filesDir while it is still the real one. Doing it first is also
+        // what lets the WebView and engine attach steps below be instrumented at all —
+        // they are the two most common places for a process to fail on start-up.
+        DiagnosticLogger.initialize(base)
+        CrashCapture.install()
+
+        DiagnosticLogger.info(
+            DiagSource.ANDROID,
+            DiagCategory.APP_LIFECYCLE,
+            "Process attachBaseContext: ${DiagnosticLogger.currentProcessName()}",
+            metadata = mapOf("buildType" to DiagnosticLogger.buildType()),
+        )
+
         WebViewProcessIsolation.configure()
         engine.attachBaseContext(this, base)
     }
@@ -24,6 +44,11 @@ class DuplikaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         engine.onCreate(this)
+        DiagnosticLogger.info(
+            DiagSource.ANDROID,
+            DiagCategory.APP_LIFECYCLE,
+            "Process onCreate: ${DiagnosticLogger.currentProcessName()}",
+        )
     }
 
     companion object {

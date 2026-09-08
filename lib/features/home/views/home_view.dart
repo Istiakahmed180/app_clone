@@ -42,9 +42,14 @@ class HomeView extends GetView<HomeController> {
             child: ListView(
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
               children: <Widget>[
-                const HomeHeader(
+                HomeHeader(
                   title: AppConstants.appTitle,
                   subtitle: 'Your private copies',
+                  trailing: IconButton(
+                    tooltip: 'Developer Tools',
+                    icon: const Icon(Icons.terminal_outlined),
+                    onPressed: () => Get.toNamed<void>(AppRoutes.developerTools),
+                  ),
                 ),
                 VirtualizationWarning(
                   virtualizationActive: controller.providesRuntimeIsolation,

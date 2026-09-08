@@ -1,0 +1,294 @@
+========================================================================
+DUPLIKA DIAGNOSTICS REPORT
+
+Generated:      2026-09-08 10:05:20.612
+Events:         74
+Filter:         no filter
+Build:          debug
+App version:    1.0.0
+Device:         CPH2605 · Android 15 (API 35)
+Engine status:  READY
+========================================================================
+
+APPLICATION
+-----------
+  Package                   co.tdevs.duplika
+  Version                   1.0.0
+  Version code              1
+  Flutter build type        debug
+  Native build type         debug
+  Process                   co.tdevs.duplika
+  Process id                22256
+  UID                       10956
+
+DEVICE
+------
+  Manufacturer              OnePlus
+  Model                     CPH2605
+  Device                    OP5955L1
+  Android                   15
+  API level                 35
+  Supported ABIs            arm64-v8a, armeabi-v7a, armeabi
+  Primary ABI               arm64-v8a
+
+RUNTIME
+-------
+  Dart                      3.12.2 (stable) (Tue Jun 9 01:11:39 2026 -0700) on "android_arm64"
+  Flutter framework         not reported at runtime (see build metadata)
+  Host OS                   android CPH2605_15.0.0.1901(EX01)
+
+VIRTUALIZATION ENGINE
+---------------------
+  Status                    READY
+  Backend                   NewBlackbox/Bcore
+  Detail                    The backend reports itself usable on this device.
+  Bcore attached            true
+  Virtual users             
+
+STORAGE
+-------
+  Internal free             28160692224
+  Internal total            113957109760
+  External storage state    mounted
+  All-files access          false
+
+DIAGNOSTICS
+-----------
+  Captured at               2026-09-08T10:02:59.808377
+  Native events retained    8
+  Native log bytes          14265
+  Native processes seen     co.tdevs.duplika, co.tdevs.duplika_black
+
+========================================================================
+FAILURES (2)
+
+  2026-09-08 10:04:26.174  ERROR
+  Source:       KOTLIN / CRASH
+  Package:      -
+  Profile:      -
+  Process:      co.tdevs.duplika
+  Operation:    -
+  Message:      Native diagnostics self-test exception captured
+  Exception:    java.lang.IllegalStateException
+  Details:      Deliberate self-test exception from DiagnosticsBridge
+  Stack trace:
+    java.lang.IllegalStateException: Deliberate self-test exception from DiagnosticsBridge
+    	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.selfTest(DiagnosticsBridge.kt:165)
+    	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.onMethodCall$lambda$8(DiagnosticsBridge.kt:137)
+    	at co.tdevs.duplika.diagnostics.DiagnosticsBridge$$ExternalSyntheticLambda8.invoke(D8$$SyntheticClass:0)
+    	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.async$lambda$0(DiagnosticsBridge.kt:266)
+    	at co.tdevs.duplika.diagnostics.DiagnosticsBridge$$ExternalSyntheticLambda14.run(D8$$SyntheticClass:0)
+    	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+    	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+    	at java.lang.Thread.run(Thread.java:1572)
+
+  2026-09-08 09:59:12.503  ERROR
+  Source:       FLUTTER / CRASH
+  Package:      -
+  Profile:      -
+  Process:      co.tdevs.duplika
+  Operation:    -
+  Message:            [Get] the improper use of a GetX has been detected. 
+  Exception:    String
+  Details:            [Get] the improper use of a GetX has been detected. 
+                      You should only use GetX or Obx for the specific widget that will be updated.
+                      If you are seeing this error, you probably did not insert any observable variables into GetX/Obx 
+                      or insert them outside the scope that GetX considers suitable for an update 
+                      (example: GetX => HeavyWidget => variableObservable).
+                      If you need to update a parent widget and a child widget, wrap each one in an Obx/GetX.
+                      
+                Context: building Obx(has builder, dirty, state: ObxState#b66b3)
+                Library: widgets library
+  Stack trace:
+    #0      RxInterface.notifyChildren (package:get/get_rx/src/rx_types/rx_core/rx_interface.dart:29:7)
+    #1      ObxState.build (package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart:56:19)
+    #2      StatefulElement.build (package:flutter/src/widgets/framework.dart:5931:27)
+    #3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5817:15)
+    #4      StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5982:11)
+    #5      Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+    #6      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+    #7      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5973:11)
+    #8      ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+    #9      Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #10     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #11     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+    #12     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+    #13     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+    #14     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+    #15     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #16     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #17     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+    #18     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #19     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #20     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+    #21     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+    #22     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+    #23     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+    #24     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #25     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #26     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+    #27     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #28     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #29     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+    #30     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #31     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    #32     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+    #33     StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5982:11)
+    #34     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+    #35     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+    #36     StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5973:11)
+    #37     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+    #38     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+    #39     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+    ... 60 more frames
+
+
+========================================================================
+OPERATIONS (1)
+
+  engine_init_20260908_001  engine initialization  [SUCCESS, 338129 ms, 23 events]
+
+========================================================================
+EVENT TIMELINE
+
+09:57:13.217 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika
+09:57:13.227 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika suffix=duplika_co_tdevs_duplika
+09:57:13.350 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+09:57:14.237 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika:black
+09:57:14.245 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika:black suffix=duplika_co_tdevs_duplika_black
+09:57:14.767 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+09:57:14.866 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+09:57:14.866 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika:black
+09:57:14.881 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+09:57:14.881 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika
+09:57:16.134 [INFO   ] ANDROID/APP_LIFECYCLE — Flutter engine configured; platform channels attached
+09:57:16.513 [INFO   ] FLUTTER/APP_LIFECYCLE — Duplika starting (debug build)
+09:57:17.662 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization started
+09:57:18.978 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine availability: available (NewBlackbox/Bcore)
+09:57:18.980 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call started: initializeVirtualization
+09:57:19.319 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine initialization started
+09:57:19.320 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine reports itself ready (NewBlackbox/Bcore)
+09:57:19.335 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call succeeded: initializeVirtualization (355 ms)
+09:57:19.338 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization finished
+09:57:23.623 [INFO   ] METHOD_CHANNEL/UNKNOWN — Call started: requestIgnoreBatteryOptimizations
+09:57:23.933 [INFO   ] METHOD_CHANNEL/UNKNOWN — Call succeeded: requestIgnoreBatteryOptimizations (310 ms)
+09:57:51.557 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika
+09:57:51.565 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika suffix=duplika_co_tdevs_duplika
+09:57:51.639 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+09:57:52.252 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika:black
+09:57:52.261 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika:black suffix=duplika_co_tdevs_duplika_black
+09:57:52.723 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+09:57:52.791 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+09:57:52.801 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+09:57:52.802 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika
+09:57:52.804 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika:black
+09:57:53.545 [INFO   ] ANDROID/APP_LIFECYCLE — Flutter engine configured; platform channels attached
+09:57:53.865 [INFO   ] FLUTTER/APP_LIFECYCLE — Duplika starting (debug build)
+09:57:54.910 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization started
+09:57:55.537 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine availability: available (NewBlackbox/Bcore)
+09:57:55.538 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call started: initializeVirtualization
+09:57:55.622 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine initialization started
+09:57:55.624 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine reports itself ready (NewBlackbox/Bcore)
+09:57:56.099 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call succeeded: initializeVirtualization (561 ms)
+09:57:56.101 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization finished
+09:59:12.503 [ERROR  ] FLUTTER/CRASH —       [Get] the improper use of a GetX has been detected. 
+    details:       [Get] the improper use of a GetX has been detected. 
+          You should only use GetX or Obx for the specific widget that will be updated.
+          If you are seeing this error, you probably did not insert any observable variables into GetX/Obx 
+          or insert them outside the scope that GetX considers suitable for an update 
+          (example: GetX => HeavyWidget => variableObservable).
+          If you need to update a parent widget and a child widget, wrap each one in an Obx/GetX.
+          
+    Context: building Obx(has builder, dirty, state: ObxState#b66b3)
+    Library: widgets library
+    exception: String
+    stack:
+      #0      RxInterface.notifyChildren (package:get/get_rx/src/rx_types/rx_core/rx_interface.dart:29:7)
+      #1      ObxState.build (package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart:56:19)
+      #2      StatefulElement.build (package:flutter/src/widgets/framework.dart:5931:27)
+      #3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5817:15)
+      #4      StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5982:11)
+      #5      Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+      #6      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+      #7      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5973:11)
+      #8      ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+      #9      Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #10     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #11     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+      #12     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+      #13     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+      #14     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+      #15     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #16     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #17     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+      #18     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #19     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #20     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+      #21     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+      #22     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+      #23     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+      #24     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #25     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #26     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+      #27     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #28     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #29     SingleChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7115:14)
+      #30     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #31     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      #32     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5841:16)
+      #33     StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5982:11)
+      #34     Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+      #35     ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5799:5)
+      #36     StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5973:11)
+      #37     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5793:5)
+      #38     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4587:20)
+      #39     Element.updateChild (package:flutter/src/widgets/framework.dart:4059:18)
+      ... 60 more frames
+10:02:50.883 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika
+10:02:50.893 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika suffix=duplika_co_tdevs_duplika
+10:02:50.971 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+10:02:51.761 [INFO   ] ANDROID/APP_LIFECYCLE — Process attachBaseContext: co.tdevs.duplika:black
+10:02:51.771 [INFO   ] WEBVIEW/WEBVIEW — WebView data directory configured for process=co.tdevs.duplika:black suffix=duplika_co_tdevs_duplika_black
+10:02:52.299 [INFO   ] BCORE/APP_LIFECYCLE — Engine attached in process co.tdevs.duplika
+10:02:52.390 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+10:02:52.392 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika:black
+10:02:52.402 [INFO   ] BCORE/APP_LIFECYCLE — Engine created
+10:02:52.402 [INFO   ] ANDROID/APP_LIFECYCLE — Process onCreate: co.tdevs.duplika
+10:02:53.574 [INFO   ] ANDROID/APP_LIFECYCLE — Flutter engine configured; platform channels attached
+10:02:53.875 [INFO   ] FLUTTER/APP_LIFECYCLE — Duplika starting (debug build)
+10:02:54.934 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization started
+10:02:54.940 [DEBUG  ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call started: isVirtualizationAvailable
+10:02:54.958 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call started: isIgnoringBatteryOptimizations
+10:02:55.715 [DEBUG  ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call succeeded: isVirtualizationAvailable (773 ms)
+10:02:55.716 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine availability: available (NewBlackbox/Bcore)
+10:02:55.717 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call started: initializeVirtualization
+10:02:55.720 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call succeeded: isIgnoringBatteryOptimizations (762 ms)
+10:02:55.764 [INFO   ] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine initialization started
+10:02:55.767 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — Engine reports itself ready (NewBlackbox/Bcore)
+10:02:55.791 [INFO   ] METHOD_CHANNEL/UNKNOWN op=engine_init_20260908_001 — Call succeeded: initializeVirtualization (73 ms)
+10:02:55.792 [SUCCESS] VIRTUAL_ENGINE/APP_LIFECYCLE op=engine_init_20260908_001 — engine initialization finished
+10:02:55.792 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call started: isVirtualizationAvailable
+10:02:55.793 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call succeeded: isVirtualizationAvailable (1 ms)
+10:02:55.796 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call started: getTestAppInfo
+10:02:55.802 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call succeeded: getTestAppInfo (5 ms)
+10:02:55.803 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call started: getPlatformInfo
+10:02:55.806 [DEBUG  ] METHOD_CHANNEL/UNKNOWN — Call succeeded: getPlatformInfo (2 ms)
+10:03:24.599 [INFO   ] STORAGE/STORAGE — Storage diagnostics started
+10:03:24.915 [SUCCESS] STORAGE/STORAGE — Storage diagnostics finished
+10:04:26.167 [INFO   ] SYSTEM/APP_LIFECYCLE — Native diagnostics self-test started
+10:04:26.174 [ERROR  ] KOTLIN/CRASH — Native diagnostics self-test exception captured
+    details: Deliberate self-test exception from DiagnosticsBridge
+    exception: java.lang.IllegalStateException
+    stack:
+      java.lang.IllegalStateException: Deliberate self-test exception from DiagnosticsBridge
+      	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.selfTest(DiagnosticsBridge.kt:165)
+      	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.onMethodCall$lambda$8(DiagnosticsBridge.kt:137)
+      	at co.tdevs.duplika.diagnostics.DiagnosticsBridge$$ExternalSyntheticLambda8.invoke(D8$$SyntheticClass:0)
+      	at co.tdevs.duplika.diagnostics.DiagnosticsBridge.async$lambda$0(DiagnosticsBridge.kt:266)
+      	at co.tdevs.duplika.diagnostics.DiagnosticsBridge$$ExternalSyntheticLambda14.run(D8$$SyntheticClass:0)
+      	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+      	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+      	at java.lang.Thread.run(Thread.java:1572)
+
+========================================================================
+END OF REPORT

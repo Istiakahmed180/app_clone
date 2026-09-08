@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import co.tdevs.duplika.DuplikaApplication
+import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import io.flutter.plugin.common.BinaryMessenger
@@ -67,12 +68,19 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     }
 
     private fun submit(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
+        // The correlation id is thread-local, and the work is about to hop threads.
+        // Capturing it here — on the platform thread, still inside the scope installed
+        // by onMethodCall — and re-applying it on the engine thread is what keeps a
+        // container install's events tied to the launch that asked for it.
+        val scope = DiagnosticLogger.currentOperation()
         engineExecutor.execute {
-            val response = try {
-                work()
-            } catch (error: Throwable) {
-                Slog.e(Slog.ENGINE, "Engine work failed", error)
-                failure("BRIDGE_ERROR", error.message ?: "Native call failed.")
+            val response = DiagnosticLogger.withOperation(scope?.id, scope?.name) {
+                try {
+                    work()
+                } catch (error: Throwable) {
+                    Slog.e(Slog.ENGINE, "Engine work failed", error)
+                    failure("BRIDGE_ERROR", error.message ?: "Native call failed.")
+                }
             }
             mainHandler.post { reply(result, response) }
         }
@@ -108,14 +116,23 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        try {
-            dispatch(call, result)
-        } catch (error: Throwable) {
-            // Surface the failure instead of leaving the Dart future hanging.
-            Slog.e(Slog.ENGINE, "Bridge call ${call.method} threw", error)
-            result.success(
-                failure("BRIDGE_ERROR", error.message ?: "Native call failed."),
-            )
+        // Every Dart call carries the id of the operation that made it (see
+        // ChannelDiagnostics on the Flutter side). Installing it for the duration of the
+        // dispatch means the engine, installer and launcher below emit events tagged with
+        // that operation without any of them taking a diagnostics parameter.
+        DiagnosticLogger.withOperation(
+            call.argument<String>(ARG_OPERATION_ID),
+            call.argument<String>(ARG_OPERATION_NAME),
+        ) {
+            try {
+                dispatch(call, result)
+            } catch (error: Throwable) {
+                // Surface the failure instead of leaving the Dart future hanging.
+                Slog.e(Slog.ENGINE, "Bridge call ${call.method} threw", error)
+                result.success(
+                    failure("BRIDGE_ERROR", error.message ?: "Native call failed."),
+                )
+            }
         }
     }
 
@@ -434,5 +451,12 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     companion object {
         const val CHANNEL_NAME = "duplika/native_bridge"
+
+        /**
+         * Diagnostics-only argument keys, prefixed so they can never collide with a real
+         * parameter and are skipped by the argument summariser on the Dart side.
+         */
+        const val ARG_OPERATION_ID = "__opId"
+        const val ARG_OPERATION_NAME = "__opName"
     }
 }

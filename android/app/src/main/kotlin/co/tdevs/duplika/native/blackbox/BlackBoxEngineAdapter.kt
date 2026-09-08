@@ -36,11 +36,11 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             core.doAttachBaseContext(base, hostConfiguration(base))
             core.onAfterMainApplicationAttach(application, base)
             initialized = true
-            Slog.i(Slog.ENGINE, "Engine attached in process ${application.packageName}")
+            Slog.i(Slog.BCORE, "Engine attached in process ${application.packageName}")
         } catch (error: Throwable) {
             // A failure here must not take the host UI down; checkAvailability reports it.
             initialized = false
-            Slog.e(Slog.ENGINE, "Engine attach failed", error)
+            Slog.e(Slog.BCORE, "Engine attach failed", error)
         }
     }
 
@@ -49,10 +49,10 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         try {
             BlackBoxCore.get().doCreate()
             warmUpPackageService()
-            Slog.i(Slog.ENGINE, "Engine created")
+            Slog.i(Slog.BCORE, "Engine created")
         } catch (error: Throwable) {
             initialized = false
-            Slog.e(Slog.ENGINE, "Engine create failed", error)
+            Slog.e(Slog.BCORE, "Engine create failed", error)
         }
     }
 
@@ -81,7 +81,7 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         try {
             BlackBoxCore.getBPackageManager().forceReinitialize()
         } catch (error: Throwable) {
-            Slog.w(Slog.ENGINE, "Package service warm-up failed: ${error.message}")
+            Slog.w(Slog.BCORE, "Package service warm-up failed: ${error.message}")
         }
     }
 
@@ -103,9 +103,9 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             if (first !is EngineResult.Failure || first.code != EngineErrorCodes.ENGINE_NO_RESPONSE) {
                 return first
             }
-            Slog.w(Slog.ENGINE, "Engine gave no response; retrying after service backoff")
+            Slog.w(Slog.BCORE, "Engine gave no response; retrying after service backoff")
         } catch (error: Throwable) {
-            Slog.w(Slog.ENGINE, "Engine service unavailable (${error.javaClass.simpleName}); retrying")
+            Slog.w(Slog.BCORE, "Engine service unavailable (${error.javaClass.simpleName}); retrying")
         }
 
         SystemClock.sleep(RETRY_TIMEOUT_MS + 200L)
@@ -113,7 +113,7 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         return try {
             block()
         } catch (error: Throwable) {
-            Slog.e(Slog.ENGINE, "Engine service still unavailable after retry", error)
+            Slog.e(Slog.BCORE, "Engine service still unavailable after retry", error)
             EngineResult.Failure(
                 EngineErrorCodes.ENGINE_INITIALIZATION_FAILED,
                 "The virtualization engine service is not responding.",
@@ -203,7 +203,7 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
      * retried. Giving it its own code lets [withServiceRetry] treat it as transient.
      */
     private fun noResponse(what: String): EngineResult.Failure {
-        Slog.w(Slog.ENGINE, "No response from the engine for $what")
+        Slog.w(Slog.BCORE, "No response from the engine for $what")
         return EngineResult.Failure(
             EngineErrorCodes.ENGINE_NO_RESPONSE,
             "The virtualization engine did not respond.",
@@ -339,7 +339,7 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
     ): EngineResult<Unit> = try {
         block()
     } catch (error: Throwable) {
-        Slog.e(Slog.ENGINE, "Engine call failed ($code)", error)
+        Slog.e(Slog.BCORE, "Engine call failed ($code)", error)
         EngineResult.Failure(code, error.message ?: "Engine call failed.")
     }
 

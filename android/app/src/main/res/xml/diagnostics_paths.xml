@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The only paths the diagnostics FileProvider will ever hand out.
+
+  Scoped to the single cache subdirectory the exporter writes into: a provider rooted at
+  the whole cache directory would also expose the staged APK copies that APK import
+  leaves there, which is not something a share sheet should be able to reach.
+-->
+<paths>
+    <cache-path name="diagnostics_export" path="diagnostics_export/" />
+</paths>

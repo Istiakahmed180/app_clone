@@ -2,6 +2,8 @@ import '../../data/models/engine_result.dart';
 import '../../data/models/virtual_profile_model.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../native/native_bridge.dart';
+import '../diagnostics/diagnostic_event.dart';
+import '../diagnostics/diagnostic_operation.dart';
 import '../errors/app_exception.dart';
 import '../utils/app_logger.dart';
 import 'virtualization_engine.dart';
@@ -30,25 +32,52 @@ class RealVirtualizationEngine implements VirtualizationEngine {
   @override
   bool get providesRuntimeIsolation => _available;
 
-  @override
-  Future<void> initialize() async {
-    final VirtualizationAvailability availability =
-        await _nativeBridge.isVirtualizationAvailable();
-    if (!availability.available) {
-      _available = false;
-      throw VirtualizationException(
-        availability.message ?? 'The virtualization engine is unavailable.',
-        code: availability.code ?? 'VIRTUALIZATION_NOT_AVAILABLE',
-      );
-    }
+  /// Correlation ids are minted here, at the top of each user-visible operation.
+  ///
+  /// This layer is the right place for them: it is the outermost point that knows what
+  /// the user asked for, and everything below it — the channel, the Kotlin engine, the
+  /// installer, Bcore — inherits the id without being told about it. A launch that fails
+  /// four layers down then reads as one timeline rather than as scattered lines.
+  static const DiagnosticSource _source = DiagnosticSource.virtualEngine;
 
-    final EngineResponse response = await _nativeBridge.initializeVirtualization();
-    if (!response.success) {
-      _available = false;
-      throw VirtualizationException(response.message, code: response.code);
-    }
-    _available = true;
-  }
+  @override
+  Future<void> initialize() => DiagnosticOperation.run<void>(
+        'engine_init',
+        (DiagnosticOperation operation) async {
+          final VirtualizationAvailability availability =
+              await _nativeBridge.isVirtualizationAvailable();
+          operation.step(
+            'Engine availability: ${availability.available ? 'available' : 'unavailable'}'
+            ' (${availability.backend})',
+            source: _source,
+            category: DiagnosticCategory.appLifecycle,
+            level: availability.available
+                ? DiagLevel.info
+                : DiagLevel.warning,
+            metadata: <String, String>{
+              if (availability.code != null) 'code': availability.code!,
+            },
+          );
+
+          if (!availability.available) {
+            _available = false;
+            throw VirtualizationException(
+              availability.message ?? 'The virtualization engine is unavailable.',
+              code: availability.code ?? 'VIRTUALIZATION_NOT_AVAILABLE',
+            );
+          }
+
+          final EngineResponse response = await _nativeBridge.initializeVirtualization();
+          if (!response.success) {
+            _available = false;
+            throw VirtualizationException(response.message, code: response.code);
+          }
+          _available = true;
+        },
+        name: 'engine initialization',
+        source: _source,
+        category: DiagnosticCategory.appLifecycle,
+      );
 
   @override
   Future<List<VirtualProfileModel>> getProfiles() => _repository.getProfiles();
@@ -70,27 +99,48 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     required String appName,
     required String profileName,
     bool installGms = false,
-  }) async {
-    final VirtualProfileModel profile = await _repository.createProfile(
-      packageName: packageName,
-      appName: appName,
-      profileName: profileName,
-    );
+  }) =>
+      DiagnosticOperation.run<VirtualProfileModel>(
+        'clone',
+        (DiagnosticOperation operation) async {
+          final VirtualProfileModel profile = await _repository.createProfile(
+            packageName: packageName,
+            appName: appName,
+            profileName: profileName,
+          );
+          operation.step(
+            'Profile metadata written: ${profile.id}',
+            source: _source,
+            category: DiagnosticCategory.profile,
+            metadata: <String, String>{'installGms': '$installGms'},
+          );
 
-    final EngineResponse response = await _nativeBridge.installAppToProfile(
-      profile.id,
-      packageName,
-      installGms: installGms,
-    );
+          final EngineResponse response = await _nativeBridge.installAppToProfile(
+            profile.id,
+            packageName,
+            installGms: installGms,
+          );
 
-    if (!response.success) {
-      _logger.error('Install failed for ${profile.id}: ${response.code}');
-      await _repository.deleteProfile(profile.id);
-      throw VirtualizationException(response.message, code: response.code);
-    }
+          if (!response.success) {
+            _logger.error('Install failed for ${profile.id}: ${response.code}');
+            operation.step(
+              'Rolling back profile metadata after a failed install',
+              source: _source,
+              category: DiagnosticCategory.profile,
+              level: DiagLevel.warning,
+              metadata: <String, String>{'code': response.code},
+            );
+            await _repository.deleteProfile(profile.id);
+            throw VirtualizationException(response.message, code: response.code);
+          }
 
-    return profile;
-  }
+          return profile;
+        },
+        name: 'clone $appName',
+        packageName: packageName,
+        source: _source,
+        category: DiagnosticCategory.install,
+      );
 
   /// Same two-sided contract as [createProfile], for an APK that may not be installed
   /// on the host at all.
@@ -101,46 +151,88 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     required String appName,
     required String profileName,
     bool installGms = false,
-  }) async {
-    final VirtualProfileModel profile = await _repository.createProfile(
-      packageName: packageName,
-      appName: appName,
-      profileName: profileName,
-    );
+  }) =>
+      DiagnosticOperation.run<VirtualProfileModel>(
+        'import',
+        (DiagnosticOperation operation) async {
+          final VirtualProfileModel profile = await _repository.createProfile(
+            packageName: packageName,
+            appName: appName,
+            profileName: profileName,
+          );
+          operation.step(
+            'Profile metadata written for an imported APK set: ${profile.id}',
+            source: _source,
+            category: DiagnosticCategory.import,
+            metadata: <String, String>{
+              'apkCount': '${apkPaths.length}',
+              'installGms': '$installGms',
+            },
+          );
 
-    final EngineResponse response = await _nativeBridge.installApkToProfile(
-      profile.id,
-      apkPaths,
-      packageName,
-      installGms: installGms,
-    );
+          final EngineResponse response = await _nativeBridge.installApkToProfile(
+            profile.id,
+            apkPaths,
+            packageName,
+            installGms: installGms,
+          );
 
-    if (!response.success) {
-      _logger.error('APK install failed for ${profile.id}: ${response.code}');
-      await _repository.deleteProfile(profile.id);
-      throw VirtualizationException(response.message, code: response.code);
-    }
+          if (!response.success) {
+            _logger.error('APK install failed for ${profile.id}: ${response.code}');
+            operation.step(
+              'Rolling back profile metadata after a failed APK install',
+              source: _source,
+              category: DiagnosticCategory.import,
+              level: DiagLevel.warning,
+              metadata: <String, String>{'code': response.code},
+            );
+            await _repository.deleteProfile(profile.id);
+            throw VirtualizationException(response.message, code: response.code);
+          }
 
-    return profile;
-  }
+          return profile;
+        },
+        name: 'import $appName',
+        packageName: packageName,
+        source: _source,
+        category: DiagnosticCategory.import,
+      );
 
   /// Removes the virtual environment first; metadata is only dropped once the engine
   /// has released the container, so a failure leaves a visible profile to retry.
   @override
   Future<void> deleteProfile(String profileId) async {
+    // Resolved before the operation starts so the timeline can be labelled with the app
+    // and package rather than with a bare UUID.
     final VirtualProfileModel? profile = await _repository.getProfile(profileId);
     if (profile == null) {
       throw ProfileNotFoundException(profileId);
     }
 
-    final EngineResponse response =
-        await _nativeBridge.deleteVirtualProfile(profileId, profile.packageName);
+    return DiagnosticOperation.run<void>(
+      'delete',
+      (DiagnosticOperation operation) async {
+        final EngineResponse response =
+            await _nativeBridge.deleteVirtualProfile(profileId, profile.packageName);
 
-    if (!response.success) {
-      throw VirtualizationException(response.message, code: response.code);
-    }
+        if (!response.success) {
+          throw VirtualizationException(response.message, code: response.code);
+        }
 
-    await _repository.deleteProfile(profileId);
+        await _repository.deleteProfile(profileId);
+        operation.step(
+          'Profile metadata removed',
+          source: _source,
+          category: DiagnosticCategory.profile,
+          level: DiagLevel.success,
+        );
+      },
+      name: 'delete ${profile.appName}',
+      packageName: profile.packageName,
+      profileId: profileId,
+      source: _source,
+      category: DiagnosticCategory.profile,
+    );
   }
 
   /// Metadata only — the virtual environment is keyed by profile id, so a rename can
@@ -157,12 +249,28 @@ class RealVirtualizationEngine implements VirtualizationEngine {
       throw ProfileNotFoundException(profileId);
     }
 
-    final EngineResponse response =
-        await _nativeBridge.launchProfile(profileId, profile.packageName);
+    return DiagnosticOperation.run<void>(
+      'launch',
+      (DiagnosticOperation operation) async {
+        operation.step(
+          'Profile resolved: ${profile.profileName} (${profile.packageName})',
+          source: _source,
+          category: DiagnosticCategory.launch,
+        );
 
-    if (!response.success) {
-      throw VirtualizationException(response.message, code: response.code);
-    }
+        final EngineResponse response =
+            await _nativeBridge.launchProfile(profileId, profile.packageName);
+
+        if (!response.success) {
+          throw VirtualizationException(response.message, code: response.code);
+        }
+      },
+      name: 'launch ${profile.appName}',
+      packageName: profile.packageName,
+      profileId: profileId,
+      source: _source,
+      category: DiagnosticCategory.launch,
+    );
   }
 
   Future<void> stopProfile(String profileId) async {

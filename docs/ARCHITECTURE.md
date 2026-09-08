@@ -91,3 +91,17 @@ so the engine's own view is treated as authoritative.
   application data. This is asserted by a test.
 - **Status**: `installed` / `running` are read back from the engine per profile. The UI never
   infers "Ready" from the existence of a row.
+
+## Diagnostics
+
+A separate, additive layer sits alongside the above: a central structured logger on both
+sides of the channel, a correlation id that travels from Dart into the Kotlin engine, and
+an in-app Developer Console. It observes; it does not participate in control flow.
+
+One detail is architectural rather than incidental: **native events are persisted
+natively, per process.** Bcore's stub processes (`:p0`, `:p1`, `:black`) instantiate
+`DuplikaApplication` but have no Flutter engine, so a failure inside one of them cannot be
+sent over a method channel. Each process appends to its own file under the host's real
+`filesDir`, and the main process merges them for the console.
+
+See `diagnostics-system.md`.

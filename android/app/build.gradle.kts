@@ -14,6 +14,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    buildFeatures {
+        // Stated rather than inherited. The diagnostics logger stamps every event with
+        // the build type it was captured in, which it reads from BuildConfig.DEBUG, and
+        // AGP's default for this feature has changed between major versions.
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "co.tdevs.duplika"
         // You can update the following values to match your application needs.
@@ -65,6 +72,10 @@ dependencies {
     implementation("com.moandjiezana.toml:toml4j:0.7.2")
     implementation("com.github.tiann:FreeReflection:3.2.2")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // FileProvider, used to hand exported diagnostics reports to the share sheet.
+    // Declared explicitly because it is imported directly rather than pulled in only
+    // as an appcompat transitive.
+    implementation("androidx.core:core:1.13.1")
     implementation("com.google.android.material:material:1.12.0")
 
     androidTestImplementation("androidx.test:core-ktx:1.6.1")

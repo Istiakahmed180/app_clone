@@ -2,6 +2,10 @@ package co.tdevs.duplika.native
 
 import android.app.Activity
 import android.content.pm.PackageManager
+import co.tdevs.duplika.diagnostics.DiagCategory
+import co.tdevs.duplika.diagnostics.DiagLevel
+import co.tdevs.duplika.diagnostics.DiagSource
+import co.tdevs.duplika.diagnostics.DiagnosticLogger
 
 /**
  * Requests, from the user, the runtime permissions a guest application needs.
@@ -70,19 +74,48 @@ class PermissionBridge {
     ) {
         val outstanding = permissions.filterNot(isGranted)
 
+        // The check itself is worth recording. A guest that says "permission denied" and a
+        // host that already holds the grant look identical from the outside, and this is
+        // the line that tells them apart.
+        record(
+            DiagLevel.INFO,
+            "PERMISSION_CHECK",
+            "Checked ${permissions.size} guest permission(s); ${outstanding.size} outstanding",
+            mapOf(
+                "requested" to permissions.joinToString(","),
+                "outstanding" to outstanding.joinToString(","),
+            ),
+        )
+
         if (outstanding.isEmpty()) {
+            record(
+                DiagLevel.SUCCESS,
+                "PERMISSION_ALREADY_GRANTED",
+                "Every permission this guest needs is already granted to the host",
+            )
             onResult(Outcome.Answered(permissions.associateWith { true }))
             return
         }
 
         if (pending != null) {
             Slog.w(Slog.PROFILE, "A permission request is already on screen")
+            record(
+                DiagLevel.WARNING,
+                "PERMISSION_REQUEST_BUSY",
+                "A permission request is already on screen; this one was refused",
+            )
             onResult(Outcome.Busy)
             return
         }
 
         pending = onResult
         Slog.i(Slog.PROFILE, "Requesting ${outstanding.size} permission(s) for a guest app")
+        record(
+            DiagLevel.INFO,
+            "PERMISSION_REQUEST_SHOWN",
+            "Asking the user for ${outstanding.size} permission(s)",
+            mapOf("permissions" to outstanding.joinToString(",")),
+        )
         ask(outstanding.toTypedArray(), REQUEST_CODE)
     }
 
@@ -96,6 +129,11 @@ class PermissionBridge {
         val callback = pending ?: return
         pending = null
         Slog.w(Slog.PROFILE, "Permission request abandoned; host is gone")
+        record(
+            DiagLevel.WARNING,
+            "PERMISSION_REQUEST_CANCELLED",
+            "The permission dialog was abandoned before the user answered",
+        )
         callback(Outcome.Cancelled)
     }
 
@@ -117,8 +155,36 @@ class PermissionBridge {
         }.toMap()
 
         Slog.i(Slog.PROFILE, "Permission result: ${grants.count { it.value }}/${grants.size} granted")
+        val denied = grants.filterValues { !it }.keys
+        record(
+            if (denied.isEmpty()) DiagLevel.SUCCESS else DiagLevel.WARNING,
+            "PERMISSION_RESULT",
+            "User granted ${grants.count { it.value }} of ${grants.size} permission(s)",
+            mapOf(
+                "granted" to grants.filterValues { it }.keys.joinToString(","),
+                // A denial is the user's decision and is respected, so it is a warning
+                // rather than an error — but it has to be visible, because it is the
+                // reason a feature inside the clone will not work.
+                "denied" to denied.joinToString(","),
+            ),
+        )
         callback(Outcome.Answered(grants))
         return true
+    }
+
+    private fun record(
+        level: DiagLevel,
+        event: String,
+        message: String,
+        metadata: Map<String, String> = emptyMap(),
+    ) {
+        DiagnosticLogger.log(
+            level = level,
+            source = DiagSource.PERMISSION,
+            category = DiagCategory.PERMISSION,
+            message = message,
+            metadata = metadata + ("event" to event),
+        )
     }
 
     private companion object {

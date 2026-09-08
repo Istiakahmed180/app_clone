@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/diagnostics/channel_diagnostics.dart';
+import '../core/diagnostics/diagnostic_operation.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
 import '../data/models/battery_prompt_screen.dart';
@@ -316,10 +318,30 @@ class NativeBridge {
     return EngineResponse.fromMap(result);
   }
 
+  /// Every platform call goes through here, which is why the diagnostics wrapper lives
+  /// here and not at the thirty-odd call sites above: a method added later is
+  /// instrumented by construction rather than by remembering to instrument it.
   Future<Map<String, dynamic>> _invokeMap(
     String method, [
     Map<String, dynamic>? arguments,
-  ]) async {
+  ]) {
+    final Map<String, dynamic>? payload = _withCorrelation(arguments);
+    return ChannelDiagnostics.trace<Map<String, dynamic>>(
+      channel: channelName,
+      method: method,
+      arguments: payload,
+      // The envelope's own verdict, not the payload: a result summary that reprinted
+      // the data would put installed-app lists and icon maps into the log.
+      describeResult: (Map<String, dynamic> result) =>
+          'success=${result['success'] ?? '-'} code=${result['code'] ?? '-'}',
+      call: () => _rawInvoke(method, payload),
+    );
+  }
+
+  Future<Map<String, dynamic>> _rawInvoke(
+    String method,
+    Map<String, dynamic>? arguments,
+  ) async {
     try {
       final Map<Object?, Object?>? raw =
           await _channel.invokeMethod<Map<Object?, Object?>>(method, arguments);
@@ -334,6 +356,28 @@ class NativeBridge {
       _logger.error('$method unavailable on this platform', error, stackTrace);
       throw NativeBridgeException('This feature is only available on Android.');
     }
+  }
+
+  /// Adds the ambient operation id to a call's arguments.
+  ///
+  /// This is what lets the Kotlin side tag its own events — engine, installer, guest
+  /// process — with the operation that caused them, so a failed launch reads as one
+  /// timeline instead of as unrelated host and native lines. The keys are prefixed with
+  /// `__` so they can never collide with a real parameter, and native code that does not
+  /// look for them simply ignores them.
+  ///
+  /// Returns null when there is nothing to add, so a call that took no arguments still
+  /// takes none.
+  Map<String, dynamic>? _withCorrelation(Map<String, dynamic>? arguments) {
+    final DiagnosticOperation? operation = DiagnosticOperation.current;
+    if (operation == null) {
+      return arguments;
+    }
+    return <String, dynamic>{
+      ...?arguments,
+      '__opId': operation.id,
+      '__opName': operation.name,
+    };
   }
 
   String _launchMessageFor(String code) {

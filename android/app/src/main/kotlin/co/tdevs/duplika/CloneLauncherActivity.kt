@@ -3,6 +3,9 @@ package co.tdevs.duplika
 import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
+import co.tdevs.duplika.diagnostics.DiagCategory
+import co.tdevs.duplika.diagnostics.DiagSource
+import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import co.tdevs.duplika.native.EngineResult
 import co.tdevs.duplika.native.RealVirtualizationEngine
 import co.tdevs.duplika.native.Slog
@@ -20,6 +23,7 @@ class CloneLauncherActivity : Activity() {
 
         val profileId = intent?.getStringExtra(EXTRA_PROFILE_ID)
         val packageName = intent?.getStringExtra(EXTRA_PACKAGE_NAME)
+        val operationId = "shortcut_${System.currentTimeMillis().toString(36)}"
 
         if (profileId.isNullOrBlank() || packageName.isNullOrBlank()) {
             Slog.w(Slog.LAUNCH, "Shortcut carried no profile; ignoring")
@@ -27,16 +31,30 @@ class CloneLauncherActivity : Activity() {
             return
         }
 
-        val engine = RealVirtualizationEngine(applicationContext, DuplikaApplication.engine)
-        when (val result = engine.launchProfile(profileId, packageName)) {
-            is EngineResult.Success ->
-                Slog.i(Slog.LAUNCH, "Shortcut launched $packageName")
+        // Given its own correlation id, because a shortcut launch never passes through
+        // Flutter: without one, the engine and guest-process events it produces would
+        // arrive in the console untied to anything.
+        DiagnosticLogger.withOperation(operationId, "shortcut launch $packageName") {
+            DiagnosticLogger.info(
+                DiagSource.ACTIVITY,
+                DiagCategory.ACTIVITY,
+                "Shortcut launch requested for $packageName",
+                packageName = packageName,
+                profileId = profileId,
+                metadata = mapOf("event" to "SHORTCUT_LAUNCH_STARTED"),
+            )
 
-            is EngineResult.Failure -> {
-                // A shortcut can outlive the clone it points at, so say why rather than
-                // failing silently on the home screen.
-                Slog.w(Slog.LAUNCH, "Shortcut launch failed: ${result.code}")
-                Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+            val engine = RealVirtualizationEngine(applicationContext, DuplikaApplication.engine)
+            when (val result = engine.launchProfile(profileId, packageName)) {
+                is EngineResult.Success ->
+                    Slog.i(Slog.LAUNCH, "Shortcut launched $packageName")
+
+                is EngineResult.Failure -> {
+                    // A shortcut can outlive the clone it points at, so say why rather than
+                    // failing silently on the home screen.
+                    Slog.w(Slog.LAUNCH, "Shortcut launch failed: ${result.code}")
+                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+                }
             }
         }
 

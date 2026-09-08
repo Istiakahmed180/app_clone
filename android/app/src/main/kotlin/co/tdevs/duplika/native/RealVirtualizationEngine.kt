@@ -1,6 +1,11 @@
 package co.tdevs.duplika.native
 
 import android.content.Context
+import co.tdevs.duplika.diagnostics.DiagCategory
+import co.tdevs.duplika.diagnostics.DiagLevel
+import co.tdevs.duplika.diagnostics.DiagRedactor
+import co.tdevs.duplika.diagnostics.DiagSource
+import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import java.io.File
 
 /**
@@ -42,7 +47,58 @@ class RealVirtualizationEngine(
             )
         }
 
-    fun initialize(): EngineResult<Unit> = adapter.initialize(context)
+    fun initialize(): EngineResult<Unit> {
+        phase("ENGINE_INITIALIZATION_STARTED", DiagCategory.APP_LIFECYCLE, "Engine initialization started")
+        val result = adapter.initialize(context)
+        when (result) {
+            is EngineResult.Success -> phase(
+                "ENGINE_INITIALIZATION_SUCCESS",
+                DiagCategory.APP_LIFECYCLE,
+                "Engine reports itself ready (${adapter.backendName})",
+                level = DiagLevel.SUCCESS,
+            )
+            is EngineResult.Failure -> phase(
+                "ENGINE_INITIALIZATION_FAILED",
+                DiagCategory.APP_LIFECYCLE,
+                "Engine initialization failed: ${result.message}",
+                level = DiagLevel.ERROR,
+                metadata = mapOf("code" to result.code),
+            )
+        }
+        return result
+    }
+
+    /**
+     * Records one named lifecycle boundary.
+     *
+     * Named phases rather than free prose: the console's search is only as good as the
+     * vocabulary in the log, and `GUEST_PROCESS_FAILED` is something a developer can look
+     * for without knowing how the sentence around it was worded. The phase name is carried
+     * in metadata so it survives message edits.
+     */
+    private fun phase(
+        event: String,
+        category: DiagCategory,
+        message: String,
+        level: DiagLevel = DiagLevel.INFO,
+        packageName: String? = null,
+        profileId: String? = null,
+        virtualUserId: Int? = null,
+        error: Throwable? = null,
+        metadata: Map<String, String> = emptyMap(),
+    ) {
+        DiagnosticLogger.log(
+            level = level,
+            source = DiagSource.VIRTUAL_ENGINE,
+            category = category,
+            message = message,
+            error = error,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+            metadata = metadata + ("event" to event),
+        )
+    }
 
     fun isAppSupported(packageName: String): Boolean =
         securityChecker.check(packageName) is AppSecurityChecker.Verdict.Allowed
@@ -61,14 +117,80 @@ class RealVirtualizationEngine(
         packageName: String,
         provisionGms: Boolean,
     ): EngineResult<Unit> {
-        requireAvailable()?.let { return it }
+        requireAvailable()?.let { availability ->
+            phase(
+                "PACKAGE_INSTALL_FAILED",
+                DiagCategory.INSTALL,
+                "Install refused: the engine is unavailable (${availability.code})",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                metadata = mapOf("code" to availability.code),
+            )
+            return availability
+        }
 
+        phase(
+            "PROFILE_CREATION_STARTED",
+            DiagCategory.PROFILE,
+            "Allocating a virtual user for this profile",
+            profileId = profileId,
+            packageName = packageName,
+        )
         val virtualUserId = profileManager.getOrCreate(profileId)
+        phase(
+            "PROFILE_CREATION_SUCCESS",
+            DiagCategory.PROFILE,
+            "Profile mapped to virtual user $virtualUserId",
+            level = DiagLevel.SUCCESS,
+            profileId = profileId,
+            packageName = packageName,
+            virtualUserId = virtualUserId,
+        )
+
+        phase(
+            "PACKAGE_INSTALL_STARTED",
+            DiagCategory.INSTALL,
+            "Installing $packageName from the host package manager",
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+            metadata = mapOf("provisionGms" to provisionGms.toString()),
+        )
         val result = installer.install(packageName, virtualUserId, provisionGms)
 
         // Same reasoning as installApkToProfile: the engine's own verdict is authoritative.
         if (result is EngineResult.Failure) {
+            phase(
+                "PACKAGE_INSTALL_FAILED",
+                DiagCategory.INSTALL,
+                "Install of $packageName failed: ${result.message}",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+                metadata = mapOf("code" to result.code),
+            )
             releaseProfileArtifacts(profileId)
+            phase(
+                "PROFILE_CREATION_FAILED",
+                DiagCategory.PROFILE,
+                "Virtual user $virtualUserId released after a failed install",
+                level = DiagLevel.WARNING,
+                profileId = profileId,
+                packageName = packageName,
+                virtualUserId = virtualUserId,
+            )
+        } else {
+            phase(
+                "PACKAGE_INSTALL_SUCCESS",
+                DiagCategory.INSTALL,
+                "Installed $packageName into virtual user $virtualUserId",
+                level = DiagLevel.SUCCESS,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+            )
         }
         return result
     }
@@ -86,22 +208,70 @@ class RealVirtualizationEngine(
         installedApps.describeInstalled(packageName)
 
     /** Reads an imported APK's identity so the UI can confirm before installing. */
-    fun inspectApk(apkPaths: List<String>): EngineResult<Map<String, Any?>> =
-        when (val info = apkImporter.inspect(apkPaths)) {
-            is ApkImporter.ApkInfo.Invalid -> EngineResult.Failure(info.code, info.message)
-            is ApkImporter.ApkInfo.Parsed -> EngineResult.Success(
-                mapOf(
-                    "packageName" to info.packageName,
-                    "appName" to info.appName,
-                    "versionName" to info.versionName,
-                    "versionCode" to info.versionCode.toString(),
-                    "installedOnHost" to apkImporter.isInstalledOnHost(info.packageName),
-                    "apkPaths" to info.apkPaths,
-                    "baseApkPath" to info.baseApkPath,
-                    "splitApkPaths" to info.splitApkPaths,
-                ),
-            )
+    fun inspectApk(apkPaths: List<String>): EngineResult<Map<String, Any?>> {
+        phase(
+            "APK_IMPORT_STARTED",
+            DiagCategory.IMPORT,
+            "Reading ${apkPaths.size} selected APK file(s)",
+            metadata = mapOf(
+                "selectedFiles" to apkPaths.size.toString(),
+                // Sanitised: the filename is what identifies which archive failed, and
+                // the directories above it are the user's business, not a report's.
+                "files" to apkPaths.joinToString(", ") { DiagRedactor.sanitizePath(it) },
+            ),
+        )
+
+        return when (val info = apkImporter.inspect(apkPaths)) {
+            is ApkImporter.ApkInfo.Invalid -> {
+                phase(
+                    "APK_VALIDATION_FAILED",
+                    DiagCategory.IMPORT,
+                    "APK validation failed: ${info.message}",
+                    level = DiagLevel.ERROR,
+                    metadata = mapOf("code" to info.code),
+                )
+                EngineResult.Failure(info.code, info.message)
+            }
+
+            is ApkImporter.ApkInfo.Parsed -> {
+                phase(
+                    "APK_METADATA_PARSED",
+                    DiagCategory.IMPORT,
+                    "Parsed ${info.packageName} ${info.versionName ?: "?"} " +
+                        "(${info.splitApkPaths.size} split(s))",
+                    packageName = info.packageName,
+                    metadata = mapOf(
+                        "versionCode" to info.versionCode.toString(),
+                        "baseApk" to DiagRedactor.sanitizePath(info.baseApkPath),
+                        "splitCount" to info.splitApkPaths.size.toString(),
+                        "splits" to info.splitApkPaths.joinToString(", ") {
+                            DiagRedactor.sanitizePath(it)
+                        },
+                        "installedOnHost" to apkImporter.isInstalledOnHost(info.packageName).toString(),
+                    ),
+                )
+                phase(
+                    "APK_VALIDATION_SUCCESS",
+                    DiagCategory.IMPORT,
+                    "APK set accepted for ${info.packageName}",
+                    level = DiagLevel.SUCCESS,
+                    packageName = info.packageName,
+                )
+                EngineResult.Success(
+                    mapOf(
+                        "packageName" to info.packageName,
+                        "appName" to info.appName,
+                        "versionName" to info.versionName,
+                        "versionCode" to info.versionCode.toString(),
+                        "installedOnHost" to apkImporter.isInstalledOnHost(info.packageName),
+                        "apkPaths" to info.apkPaths,
+                        "baseApkPath" to info.baseApkPath,
+                        "splitApkPaths" to info.splitApkPaths,
+                    ),
+                )
+            }
         }
+    }
 
     /**
      * Creates the virtual user if needed and installs an imported APK into it.
@@ -115,13 +285,60 @@ class RealVirtualizationEngine(
         packageName: String,
         provisionGms: Boolean,
     ): EngineResult<Unit> {
-        requireAvailable()?.let { return it }
+        requireAvailable()?.let { availability ->
+            phase(
+                "PACKAGE_INSTALL_FAILED",
+                DiagCategory.INSTALL,
+                "APK install refused: the engine is unavailable (${availability.code})",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                metadata = mapOf("code" to availability.code),
+            )
+            return availability
+        }
 
         val virtualUserId = profileManager.getOrCreate(profileId)
+        phase(
+            "PROFILE_CREATION_SUCCESS",
+            DiagCategory.PROFILE,
+            "Profile mapped to virtual user $virtualUserId",
+            level = DiagLevel.SUCCESS,
+            profileId = profileId,
+            packageName = packageName,
+            virtualUserId = virtualUserId,
+        )
 
         // The picker hands back a cache copy, which the system may reclaim. Keep our own
         // copy so a lost container can be rebuilt later without re-picking the file.
         val retained = retainApks(profileId, apkPaths) ?: apkPaths
+        phase(
+            "PACKAGE_INSTALL_STARTED",
+            DiagCategory.INSTALL,
+            "Installing an imported APK set for $packageName",
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+            metadata = mapOf(
+                "apkCount" to retained.size.toString(),
+                "retainedCopy" to (retained !== apkPaths).toString(),
+                "provisionGms" to provisionGms.toString(),
+            ),
+        )
+        // Split installs are the Level 7 path, and "which archive went in" is the first
+        // question when one of them is the wrong ABI or a duplicate split.
+        retained.forEachIndexed { index, path ->
+            phase(
+                if (index == 0) "BASE_APK_INSTALL" else "SPLIT_APK_INSTALL",
+                DiagCategory.INSTALL,
+                (if (index == 0) "Base APK: " else "Split APK: ") + DiagRedactor.sanitizePath(path),
+                level = DiagLevel.DEBUG,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+                metadata = mapOf("index" to index.toString()),
+            )
+        }
         val result = installer.installApks(retained, packageName, virtualUserId, provisionGms)
 
         // No isInstalled() guard here: it answers from the host package manager when the
@@ -129,7 +346,28 @@ class RealVirtualizationEngine(
         // normally it would report success and leave an orphan profile behind. If the
         // engine said the install failed, treat it as failed.
         if (result is EngineResult.Failure) {
+            phase(
+                "PACKAGE_INSTALL_FAILED",
+                DiagCategory.INSTALL,
+                "APK install of $packageName failed: ${result.message}",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+                metadata = mapOf("code" to result.code, "apkCount" to retained.size.toString()),
+            )
             releaseProfileArtifacts(profileId)
+        } else {
+            phase(
+                "PACKAGE_INSTALL_SUCCESS",
+                DiagCategory.INSTALL,
+                "Installed imported $packageName into virtual user $virtualUserId",
+                level = DiagLevel.SUCCESS,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+                metadata = mapOf("apkCount" to retained.size.toString()),
+            )
         }
         return result
     }
@@ -177,22 +415,129 @@ class RealVirtualizationEngine(
     }
 
     fun launchProfile(profileId: String, packageName: String): EngineResult<Unit> {
-        requireAvailable()?.let { return it }
+        phase(
+            "ACTIVITY_LAUNCH_STARTED",
+            DiagCategory.LAUNCH,
+            "Launch requested for $packageName",
+            packageName = packageName,
+            profileId = profileId,
+        )
+
+        requireAvailable()?.let { availability ->
+            phase(
+                "ACTIVITY_LAUNCH_FAILED",
+                DiagCategory.LAUNCH,
+                "Launch refused: the engine is unavailable (${availability.code})",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                metadata = mapOf("code" to availability.code),
+            )
+            return availability
+        }
 
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
-            ?: return EngineResult.Failure(
+        if (virtualUserId == null) {
+            phase(
+                "ACTIVITY_LAUNCH_FAILED",
+                DiagCategory.LAUNCH,
+                "This profile has no virtual user mapping",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                metadata = mapOf("code" to EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED),
+            )
+            return EngineResult.Failure(
                 EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
                 "This profile has no virtual environment yet.",
             )
+        }
 
+        phase(
+            "GUEST_PROCESS_STARTING",
+            DiagCategory.PROCESS,
+            "Starting $packageName in virtual user $virtualUserId",
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
         val first = launcher.launch(packageName, virtualUserId)
         if (first is EngineResult.Success) {
+            phase(
+                "GUEST_PROCESS_STARTED",
+                DiagCategory.PROCESS,
+                "Guest process accepted the launch of $packageName",
+                level = DiagLevel.SUCCESS,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+            )
+            phase(
+                "ACTIVITY_LAUNCH_SUCCESS",
+                DiagCategory.LAUNCH,
+                "Launched $packageName",
+                level = DiagLevel.SUCCESS,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+            )
             return first
         }
 
+        phase(
+            "GUEST_PROCESS_FAILED",
+            DiagCategory.PROCESS,
+            "First launch attempt failed: ${(first as EngineResult.Failure).message}",
+            level = DiagLevel.WARNING,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+            metadata = mapOf("code" to first.code, "attempt" to "1"),
+        )
+
         // The container may have been dropped by the engine; rebuild it and try once more.
-        repair(profileId, packageName, virtualUserId)?.let { return it }
-        return launcher.launch(packageName, virtualUserId)
+        repair(profileId, packageName, virtualUserId)?.let { repairFailure ->
+            phase(
+                "ACTIVITY_LAUNCH_FAILED",
+                DiagCategory.LAUNCH,
+                "Container rebuild failed: ${repairFailure.message}",
+                level = DiagLevel.ERROR,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+                metadata = mapOf("code" to repairFailure.code),
+            )
+            return repairFailure
+        }
+
+        val second = launcher.launch(packageName, virtualUserId)
+        when (second) {
+            is EngineResult.Success -> {
+                phase(
+                    "ACTIVITY_LAUNCH_SUCCESS",
+                    DiagCategory.LAUNCH,
+                    "Launched $packageName after rebuilding its container",
+                    level = DiagLevel.SUCCESS,
+                    packageName = packageName,
+                    profileId = profileId,
+                    virtualUserId = virtualUserId,
+                    metadata = mapOf("attempt" to "2"),
+                )
+            }
+            is EngineResult.Failure -> {
+                phase(
+                    "ACTIVITY_LAUNCH_FAILED",
+                    DiagCategory.LAUNCH,
+                    "Launch of $packageName failed after a rebuild: ${second.message}",
+                    level = DiagLevel.ERROR,
+                    packageName = packageName,
+                    profileId = profileId,
+                    virtualUserId = virtualUserId,
+                    metadata = mapOf("code" to second.code, "attempt" to "2"),
+                )
+            }
+        }
+        return second
     }
 
     /**
@@ -210,6 +555,15 @@ class RealVirtualizationEngine(
         virtualUserId: Int,
     ): EngineResult.Failure? {
         Slog.w(Slog.INSTALL, "Launch failed for user $virtualUserId; rebuilding container")
+        phase(
+            "GUEST_RELAUNCH",
+            DiagCategory.LAUNCH,
+            "Rebuilding the container for $packageName before a second launch attempt",
+            level = DiagLevel.WARNING,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
 
         // Rebuild without re-provisioning GMS. The per-clone opt-in is not persisted, so
         // this recovery path cannot know whether the clone had it; re-provisioning
@@ -235,6 +589,14 @@ class RealVirtualizationEngine(
     fun stopProfile(profileId: String, packageName: String): EngineResult<Unit> {
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.ok()
+        phase(
+            "GUEST_CLOSE",
+            DiagCategory.PROCESS,
+            "Stopping $packageName in virtual user $virtualUserId",
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
         return launcher.stop(packageName, virtualUserId)
     }
 
@@ -254,6 +616,20 @@ class RealVirtualizationEngine(
         installer.uninstall(packageName, virtualUserId)
         val deletion = adapter.deleteVirtualUser(virtualUserId)
         releaseProfileArtifacts(profileId)
+        phase(
+            if (deletion is EngineResult.Success) "PROFILE_DELETE_SUCCESS" else "PROFILE_DELETE_FAILED",
+            DiagCategory.PROFILE,
+            if (deletion is EngineResult.Success) {
+                "Removed the virtual environment for virtual user $virtualUserId"
+            } else {
+                "Could not remove virtual user $virtualUserId: " +
+                    (deletion as EngineResult.Failure).message
+            },
+            level = if (deletion is EngineResult.Success) DiagLevel.SUCCESS else DiagLevel.ERROR,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
         return deletion
     }
 

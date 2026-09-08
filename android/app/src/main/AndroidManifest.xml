@@ -37,6 +37,22 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
+        <!-- Hands exported diagnostics reports to the Android share sheet.
+
+             Not exported, no permission required, and scoped by res/xml/diagnostics_paths.xml
+             to the one cache subdirectory the exporter writes into. Each share grants a
+             temporary read URI to the chosen app only; nothing is copied into shared
+             storage and no storage permission is involved. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="co.tdevs.duplika.diagnostics.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/diagnostics_paths" />
+        </provider>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

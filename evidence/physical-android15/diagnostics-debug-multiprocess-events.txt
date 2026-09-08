@@ -1,0 +1,14 @@
+--------- beginning of main
+09-08 09:57:51.563 I/Duplika.ANDROID(16818): Process attachBaseContext: co.tdevs.duplika
+09-08 09:57:51.565 I/Duplika.WebView(16818): WebView data directory configured for process=co.tdevs.duplika suffix=duplika_co_tdevs_duplika
+09-08 09:57:51.639 I/Duplika.Bcore(16818): Engine attached in process co.tdevs.duplika
+09-08 09:57:52.259 I/Duplika.ANDROID(16854): Process attachBaseContext: co.tdevs.duplika:black
+09-08 09:57:52.261 I/Duplika.WebView(16854): WebView data directory configured for process=co.tdevs.duplika:black suffix=duplika_co_tdevs_duplika_black
+09-08 09:57:52.723 I/Duplika.Bcore(16854): Engine attached in process co.tdevs.duplika
+09-08 09:57:52.791 I/Duplika.Bcore(16854): Engine created
+09-08 09:57:52.801 I/Duplika.Bcore(16818): Engine created
+09-08 09:57:52.802 I/Duplika.ANDROID(16818): Process onCreate: co.tdevs.duplika
+09-08 09:57:52.805 I/Duplika.ANDROID(16854): Process onCreate: co.tdevs.duplika:black
+09-08 09:57:53.545 I/Duplika.ANDROID(16818): Flutter engine configured; platform channels attached
+09-08 09:57:55.624 I/Duplika.VIRTUAL_ENGINE(16818): [engine_init_20260908_001] Engine initialization started
+09-08 09:57:55.627 I/Duplika.VIRTUAL_ENGINE(16818): [engine_init_20260908_001] Engine reports itself ready (NewBlackbox/Bcore)

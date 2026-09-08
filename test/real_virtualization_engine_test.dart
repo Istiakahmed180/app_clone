@@ -257,7 +257,7 @@ void main() {
         responses['installApkToProfile'] = ok('APP_INSTALLED');
 
         final VirtualProfileModel profile = await engine.createProfileFromApk(
-          apkPath: '/tmp/example.apk',
+          apkPaths: <String>['/tmp/example.apk'],
           packageName: 'org.example.imported',
           appName: 'Imported App',
           profileName: 'Imported App',
@@ -281,7 +281,7 @@ void main() {
       responses['installApkToProfile'] = ok('APP_INSTALLED');
 
       await engine.createProfileFromApk(
-        apkPath: '/tmp/example.apk',
+        apkPaths: <String>['/tmp/example.apk'],
         packageName: 'org.example.imported',
         appName: 'Imported App',
         profileName: 'Imported App',
@@ -303,7 +303,7 @@ void main() {
 
       await expectLater(
         engine.createProfileFromApk(
-          apkPath: '/tmp/bad.apk',
+          apkPaths: <String>['/tmp/bad.apk'],
           packageName: 'org.example.imported',
           appName: 'Imported App',
           profileName: 'Imported App',
@@ -323,7 +323,7 @@ void main() {
       await create('Test App');
       responses['installApkToProfile'] = ok('APP_INSTALLED');
       await engine.createProfileFromApk(
-        apkPath: '/tmp/example.apk',
+        apkPaths: <String>['/tmp/example.apk'],
         packageName: 'org.example.imported',
         appName: 'Imported App',
         profileName: 'Imported App',

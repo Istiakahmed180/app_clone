@@ -7,10 +7,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// the content, where it scrolls away with everything else, rather than a fixed bar that
 /// spends a permanent strip of a phone screen restating the app's own name.
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({required this.title, required this.subtitle, super.key});
+  const HomeHeader({
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+    super.key,
+  });
 
   final String title;
   final String subtitle;
+
+  /// Optional action beside the identity block.
+  ///
+  /// The header is the only fixed chrome the home screen has, so an app-level action
+  /// with nowhere else to live goes here rather than growing an AppBar the layout was
+  /// specifically designed without.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -18,16 +30,24 @@ class HomeHeader extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: 28.h),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(title, style: theme.textTheme.headlineMedium),
-          SizedBox(height: 2.h),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(title, style: theme.textTheme.headlineMedium),
+                SizedBox(height: 2.h),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
           ),
+          ?trailing,
         ],
       ),
     );
