@@ -24,11 +24,9 @@ import '../models/virtual_profile_model.dart';
 ///
 /// Empty and over-long names are still rejected.
 class VirtualProfileRepository {
-  VirtualProfileRepository({
-    ProfileStorage? storage,
-    Uuid? uuid,
-  })  : _storage = storage ?? const SharedPreferencesProfileStorage(),
-        _uuid = uuid ?? const Uuid();
+  VirtualProfileRepository({ProfileStorage? storage, Uuid? uuid})
+    : _storage = storage ?? const SharedPreferencesProfileStorage(),
+      _uuid = uuid ?? const Uuid();
 
   final ProfileStorage _storage;
   final Uuid _uuid;
@@ -47,7 +45,11 @@ class VirtualProfileRepository {
           .map(VirtualProfileModel.fromJson)
           .toList(growable: false);
     } on Object catch (error, stackTrace) {
-      _logger.error('Stored profile data could not be decoded', error, stackTrace);
+      _logger.error(
+        'Stored profile data could not be decoded',
+        error,
+        stackTrace,
+      );
       throw const StorageException('Saved profiles could not be read.');
     }
   }
@@ -75,7 +77,9 @@ class VirtualProfileRepository {
     required String appName,
     required String packageName,
   }) async {
-    final String base = appName.trim().isEmpty ? packageName.trim() : appName.trim();
+    final String base = appName.trim().isEmpty
+        ? packageName.trim()
+        : appName.trim();
     // Clamped here rather than left to fail in [createProfile]: an app whose own name is
     // longer than the limit would otherwise make cloning it impossible.
     if (base.length <= AppConstants.maxProfileNameLength) {
@@ -87,7 +91,17 @@ class VirtualProfileRepository {
   /// How many profiles already clone [packageName].
   Future<int> instanceCountFor(String packageName) async {
     final List<VirtualProfileModel> profiles = await getProfiles();
-    return profiles.where((VirtualProfileModel p) => p.packageName == packageName).length;
+    return profiles
+        .where((VirtualProfileModel p) => p.packageName == packageName)
+        .length;
+  }
+
+  /// Every package that has at least one clone.
+  ///
+  /// One read for the whole picker, rather than [instanceCountFor] per row.
+  Future<Set<String>> clonedPackageNames() async {
+    final List<VirtualProfileModel> profiles = await getProfiles();
+    return profiles.map((VirtualProfileModel p) => p.packageName).toSet();
   }
 
   Future<VirtualProfileModel> createProfile({
@@ -116,18 +130,25 @@ class VirtualProfileRepository {
     bool? enabled,
   }) async {
     final List<VirtualProfileModel> profiles = await getProfiles();
-    final int index = profiles.indexWhere((VirtualProfileModel p) => p.id == profileId);
+    final int index = profiles.indexWhere(
+      (VirtualProfileModel p) => p.id == profileId,
+    );
     if (index == -1) {
       throw ProfileNotFoundException(profileId);
     }
 
-    final String? name = profileName == null ? null : _validateName(profileName);
+    final String? name = profileName == null
+        ? null
+        : _validateName(profileName);
 
-    final VirtualProfileModel updated =
-        profiles[index].copyWith(profileName: name, enabled: enabled);
+    final VirtualProfileModel updated = profiles[index].copyWith(
+      profileName: name,
+      enabled: enabled,
+    );
 
-    final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(profiles)
-      ..[index] = updated;
+    final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(
+      profiles,
+    )..[index] = updated;
     await _persist(next);
     return updated;
   }
@@ -147,7 +168,9 @@ class VirtualProfileRepository {
 
   Future<void> _persist(List<VirtualProfileModel> profiles) async {
     final String encoded = jsonEncode(
-      profiles.map((VirtualProfileModel p) => p.toJson()).toList(growable: false),
+      profiles
+          .map((VirtualProfileModel p) => p.toJson())
+          .toList(growable: false),
     );
     await _storage.write(AppConstants.profilesStorageKey, encoded);
   }

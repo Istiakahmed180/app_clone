@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
 import java.io.ByteArrayOutputStream
+import java.util.zip.ZipFile
 
 /**
  * Enumerates the launchable applications a user may clone.
@@ -81,13 +82,65 @@ class InstalledAppsProvider(private val context: Context) {
             packageManager.getPackageInfo(info.packageName, 0)
         }.getOrNull()
 
+        // Base plus every split the installer wrote. `splitSourceDirs` is the only
+        // public way to count them, and it is null for a plain single-APK install.
+        val apkCount = 1 + (info.splitSourceDirs?.size ?: 0)
+
         return mapOf(
             "packageName" to info.packageName,
             "appName" to label(info),
             "versionName" to packageInfo?.versionName,
             "system" to info.isSystemApp(),
+            "abis" to abisOf(info),
+            "apkCount" to apkCount,
+            "firstInstallTime" to packageInfo?.firstInstallTime,
+            "lastUpdateTime" to packageInfo?.lastUpdateTime,
             "icon" to if (includeIcons) encodeIcon(info) else null,
         )
+    }
+
+    /**
+     * The ABI directories this package actually ships native code for.
+     *
+     * Read from the archive rather than from `ApplicationInfo`: the only field that
+     * names an ABI is `primaryCpuAbi`, which is hidden, and `nativeLibraryDir` names one
+     * ABI at best and does not exist at all for a package installed with
+     * `extractNativeLibs="false"`. The archive is the source of truth, and reading it
+     * only touches the zip's central directory.
+     *
+     * An empty list is a real answer: it means the package is pure bytecode, which is
+     * what the picker's "No native code" filter is about.
+     */
+    private fun abisOf(info: ApplicationInfo): List<String> {
+        val found = LinkedHashSet<String>()
+        val sources = buildList {
+            add(info.sourceDir)
+            info.splitSourceDirs?.let(::addAll)
+        }
+
+        for (source in sources) {
+            runCatching {
+                ZipFile(source).use { zip ->
+                    val entries = zip.entries()
+                    while (entries.hasMoreElements()) {
+                        val name = entries.nextElement().name
+                        if (!name.startsWith(LIB_PREFIX)) {
+                            continue
+                        }
+                        val abi = name.substring(LIB_PREFIX.length).substringBefore('/')
+                        if (abi.isNotEmpty() && KNOWN_ABIS.contains(abi)) {
+                            found.add(abi)
+                            // Every known ABI accounted for; nothing left to learn from
+                            // the remaining entries, which can number in the thousands.
+                            if (found.size == KNOWN_ABIS.size) {
+                                return found.toList()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return found.toList()
     }
 
     private fun label(info: ApplicationInfo): String =
@@ -189,6 +242,15 @@ class InstalledAppsProvider(private val context: Context) {
     }
 
     private companion object {
+        const val LIB_PREFIX = "lib/"
+
+        /**
+         * The four ABIs Android still ships. Anything else in `lib/` is not a CPU
+         * directory, and matching a fixed set keeps a malformed archive from inventing
+         * architectures the filter cannot offer.
+         */
+        val KNOWN_ABIS = setOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+
         const val ICON_PX = 144
 
         /**

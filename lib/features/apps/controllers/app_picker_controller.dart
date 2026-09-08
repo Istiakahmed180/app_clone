@@ -34,20 +34,132 @@ class AppPickerController extends GetxController {
   final RxString query = ''.obs;
   final RxnString errorMessage = RxnString();
 
-  /// Apps matching the current search, by name or package.
+  /// How the list is ordered.
+  final Rx<AppSort> sort = AppSort.name.obs;
+
+  /// Which apps the list shows at all.
+  ///
+  /// Everything, by default: a user who came here to clone a specific app should find
+  /// it, and hiding system apps meant the camera or the browser simply was not there
+  /// with no hint that a filter was the reason.
+  final Rx<AppFilter> filter = AppFilter.all.obs;
+  final Rx<ArchitectureFilter> architecture = ArchitectureFilter.all.obs;
+  final Rx<PackageTypeFilter> packageType = PackageTypeFilter.all.obs;
+
+  /// Packages that already have at least one clone.
+  ///
+  /// Drives the tick on an app's icon and the Not added / Already added filters. Loaded
+  /// with the list rather than queried per row, so a hundred rows do not mean a hundred
+  /// repository reads.
+  final RxSet<String> clonedPackages = <String>{}.obs;
+
+  /// Well-known apps offered as a shortcut above the list.
+  ///
+  /// A fixed list intersected with what is installed, not a popularity measurement:
+  /// Duplika cannot see how much anything is used, and claiming to would be a lie
+  /// dressed as a feature. These are simply the apps people most often clone.
+  static const List<String> quickPickPackages = <String>[
+    'com.facebook.katana',
+    'com.instagram.android',
+    'org.telegram.messenger',
+    'com.whatsapp',
+    'com.zhiliaoapp.musically',
+    'com.snapchat.android',
+    'com.twitter.android',
+    'com.facebook.orca',
+    'com.viber.voip',
+    'com.discord',
+  ];
+
+  /// The quick picks that are actually on this device, in the order above.
+  List<InstalledAppModel> get quickPicks {
+    final Map<String, InstalledAppModel> byPackage =
+        <String, InstalledAppModel>{
+          for (final InstalledAppModel app in apps) app.packageName: app,
+        };
+    return <InstalledAppModel>[
+      for (final String package in quickPickPackages)
+        if (byPackage[package] != null) byPackage[package]!,
+    ];
+  }
+
+  /// Apps matching the search and every active filter, in the chosen order.
   List<InstalledAppModel> get visibleApps {
     final String needle = query.value.trim().toLowerCase();
-    if (needle.isEmpty) {
-      return apps;
-    }
-    return apps
-        .where(
-          (InstalledAppModel app) =>
-              app.appName.toLowerCase().contains(needle) ||
-              app.packageName.toLowerCase().contains(needle),
-        )
-        .toList(growable: false);
+
+    final List<InstalledAppModel> matching = apps.where((
+      InstalledAppModel app,
+    ) {
+      if (needle.isNotEmpty &&
+          !app.appName.toLowerCase().contains(needle) &&
+          !app.packageName.toLowerCase().contains(needle)) {
+        return false;
+      }
+      return _passesFilter(app) &&
+          _passesArchitecture(app) &&
+          _passesPackageType(app);
+    }).toList();
+
+    matching.sort(_comparator);
+    return List<InstalledAppModel>.unmodifiable(matching);
   }
+
+  bool _passesFilter(InstalledAppModel app) => switch (filter.value) {
+    AppFilter.all => true,
+    AppFilter.userApps => !app.isSystem,
+    AppFilter.systemApps => app.isSystem,
+    AppFilter.notAdded => !clonedPackages.contains(app.packageName),
+    AppFilter.alreadyAdded => clonedPackages.contains(app.packageName),
+  };
+
+  bool _passesArchitecture(InstalledAppModel app) =>
+      switch (architecture.value) {
+        ArchitectureFilter.all => true,
+        ArchitectureFilter.only64Bit => app.supports64Bit && !app.supports32Bit,
+        ArchitectureFilter.only32Bit => app.supports32Bit && !app.supports64Bit,
+        ArchitectureFilter.both => app.supports32Bit && app.supports64Bit,
+        ArchitectureFilter.noNativeCode => !app.hasNativeCode,
+      };
+
+  bool _passesPackageType(InstalledAppModel app) => switch (packageType.value) {
+    PackageTypeFilter.all => true,
+    PackageTypeFilter.single => !app.isSplit,
+    PackageTypeFilter.split => app.isSplit,
+  };
+
+  /// The sort comparator. Apps with no timestamp fall to the end of a time sort rather
+  /// than to the top: "unknown" is not "newest".
+  int Function(InstalledAppModel, InstalledAppModel) get _comparator =>
+      switch (sort.value) {
+        AppSort.name =>
+          (InstalledAppModel a, InstalledAppModel b) =>
+              a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
+        AppSort.recentlyInstalled =>
+          (InstalledAppModel a, InstalledAppModel b) =>
+              _descending(a.installedAt, b.installedAt),
+        AppSort.recentlyUpdated =>
+          (InstalledAppModel a, InstalledAppModel b) =>
+              _descending(a.updatedAt, b.updatedAt),
+      };
+
+  static int _descending(DateTime? a, DateTime? b) {
+    if (a == null && b == null) {
+      return 0;
+    }
+    if (a == null) {
+      return 1;
+    }
+    if (b == null) {
+      return -1;
+    }
+    return b.compareTo(a);
+  }
+
+  /// Whether the list is grouped by initial letter.
+  ///
+  /// Only a name sort is: A-Z headers over a list ordered by install date would label
+  /// groups that are not groups.
+  bool get isAlphabetical => sort.value == AppSort.name;
 
   /// [visibleApps] cut into alphabetical sections, in draw order.
   ///
@@ -56,11 +168,13 @@ class AppPickerController extends GetxController {
   /// out what is on screen. Anything not starting with a letter collects under '#',
   /// last, rather than being scattered through A-Z by its raw code point.
   List<AppSection> get sections {
-    final List<InstalledAppModel> visible = visibleApps.toList()
-      ..sort(
-        (InstalledAppModel a, InstalledAppModel b) =>
-            a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
-      );
+    final List<InstalledAppModel> visible = visibleApps;
+    if (!isAlphabetical) {
+      // One unlabelled group, so a time-ordered list stays in its order.
+      return <AppSection>[
+        if (visible.isNotEmpty) AppSection(letter: '', apps: visible),
+      ];
+    }
 
     final Map<String, List<InstalledAppModel>> grouped =
         <String, List<InstalledAppModel>>{};
@@ -113,6 +227,7 @@ class AppPickerController extends GetxController {
     isLoading.value = true;
     try {
       apps.assignAll(await _bridge.listInstalledApps());
+      clonedPackages.assignAll(await _repository.clonedPackageNames());
       errorMessage.value = null;
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not list installed apps', error, stackTrace);
@@ -207,14 +322,19 @@ class AppPickerController extends GetxController {
   }
 
   /// Lets the user pick an APK and returns its parsed identity, or `null` if cancelled.
-  Future<ApkCandidate?> pickApk() async {
+  ///
+  /// [packageFormat] narrows the picker to the `.papk.bin` files Duplika's own share
+  /// produces. Two entry points rather than one filter for everything, because a user
+  /// looking for a package Duplika sent them should not have to find it among every APK
+  /// on the device — and a user importing a split set should not see only `.bin`.
+  /// The `bin` extension is kept in step with `AppSharer.EXTENSION`.
+  Future<ApkCandidate?> pickApk({bool packageFormat = false}) async {
     final List<PlatformFile> picked = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      // 'bin' is here for the `.papk.bin` files Duplika itself shares: sharing an
-      // archive nothing can read back would make the share sheet pointless. Kept in
-      // step with `AppSharer.EXTENSION`.
-      allowedExtensions: <String>['apk', 'bin'],
+      allowedExtensions: packageFormat
+          ? <String>['bin']
+          : <String>['apk', 'bin'],
       withData: false,
       withReadStream: true,
     );
@@ -336,3 +456,15 @@ class AppSection {
   final String letter;
   final List<InstalledAppModel> apps;
 }
+
+/// How the picker orders its list.
+enum AppSort { name, recentlyInstalled, recentlyUpdated }
+
+/// Which apps the picker shows.
+enum AppFilter { all, userApps, systemApps, notAdded, alreadyAdded }
+
+/// Which architectures the picker shows.
+enum ArchitectureFilter { all, only64Bit, only32Bit, both, noNativeCode }
+
+/// Which package layouts the picker shows.
+enum PackageTypeFilter { all, single, split }

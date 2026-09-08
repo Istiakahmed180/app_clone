@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,7 @@ import '../../../data/models/installed_app_model.dart';
 import '../../../widgets/app_icon.dart';
 import '../../../widgets/empty_state.dart';
 import '../controllers/app_picker_controller.dart';
+import '../widgets/app_filter_sheet.dart';
 import '../widgets/compatibility_sheet.dart';
 
 /// Lets the user clone an installed app, or import an APK that is not installed.
@@ -30,20 +33,25 @@ class AppPickerView extends GetView<AppPickerController> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (controller.errorMessage.value != null) {
-                  return _centred(EmptyState(
-                    title: 'Could not list apps',
-                    message: controller.errorMessage.value!,
-                    icon: Icons.error_outline,
-                  ));
+                  return _centred(
+                    EmptyState(
+                      title: 'Could not list apps',
+                      message: controller.errorMessage.value!,
+                      icon: Icons.error_outline,
+                    ),
+                  );
                 }
 
                 final List<AppSection> sections = controller.sections;
                 if (sections.isEmpty) {
-                  return _centred(const EmptyState(
-                    title: 'No matching apps',
-                    message: 'Try a different search, or import an APK instead.',
-                    icon: Icons.search_off,
-                  ));
+                  return _centred(
+                    const EmptyState(
+                      title: 'No matching apps',
+                      message:
+                          'Try a different search, or import an APK instead.',
+                      icon: Icons.search_off,
+                    ),
+                  );
                 }
 
                 return ListView.builder(
@@ -53,11 +61,21 @@ class AppPickerView extends GetView<AppPickerController> {
                   itemCount: sections.length + 1,
                   itemBuilder: (BuildContext context, int index) {
                     if (index == 0) {
-                      return _installedHeading(context, controller.visibleApps.length);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _quickPicks(context),
+                          _installedHeading(
+                            context,
+                            controller.visibleApps.length,
+                          ),
+                        ],
+                      );
                     }
                     final AppSection section = sections[index - 1];
                     return _SectionGroup(
                       section: section,
+                      clonedPackages: controller.clonedPackages,
                       analyze: controller.analyze,
                       onTap: (InstalledAppModel app) => _clone(context, app),
                     );
@@ -77,9 +95,9 @@ class AppPickerView extends GetView<AppPickerController> {
   }
 
   Widget _centred(Widget child) => ListView(
-        padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
-        children: <Widget>[child],
-      );
+    padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
+    children: <Widget>[child],
+  );
 
   Widget _header(BuildContext context) {
     return Padding(
@@ -92,7 +110,7 @@ class AppPickerView extends GetView<AppPickerController> {
             icon: const Icon(Icons.arrow_back_ios_new),
             iconSize: 20.r,
           ),
-          Text('Add a clone', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Add app', style: Theme.of(context).textTheme.headlineMedium),
         ],
       ),
     );
@@ -115,13 +133,14 @@ class AppPickerView extends GetView<AppPickerController> {
             ),
           ),
           SizedBox(width: 12.w),
-          // The APK import sits beside the search rather than in the header: both are
-          // ways of naming the app to clone, and the header is only an identity block.
+          // Sort, filter and both import routes live behind one button beside the
+          // search: they all answer the same question the search does — which app —
+          // and there are too many of them for a header.
           Material(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(AppTheme.cardRadius.r),
             child: InkWell(
-              onTap: () => _importApk(context),
+              onTap: () => _openFilters(context),
               borderRadius: BorderRadius.circular(AppTheme.cardRadius.r),
               child: Ink(
                 width: 56.w,
@@ -130,16 +149,65 @@ class AppPickerView extends GetView<AppPickerController> {
                   borderRadius: BorderRadius.circular(AppTheme.cardRadius.r),
                   border: Border.all(color: theme.colorScheme.outline),
                 ),
-                child: Icon(
-                  Icons.folder_open_outlined,
-                  size: 22.r,
-                  color: theme.colorScheme.onSurfaceVariant,
+                child: Tooltip(
+                  message: 'Filter and sort',
+                  child: Icon(
+                    Icons.tune,
+                    size: 22.r,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// A short row of the apps people most often clone.
+  ///
+  /// Not a popularity measurement — Duplika cannot see what the user actually uses, and
+  /// a "Popular" list computed from nothing would be a decoration. It is a fixed set of
+  /// well-known apps, shown only where they are installed, to save scrolling past two
+  /// hundred rows for the common case. Hidden while a search is active, where the list
+  /// itself is already the answer.
+  Widget _quickPicks(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final List<InstalledAppModel> picks = controller.quickPicks;
+    if (picks.isEmpty || controller.query.value.trim().isNotEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Popular', style: theme.textTheme.titleLarge),
+        SizedBox(height: 2.h),
+        Text('Quick picks', style: theme.textTheme.bodySmall),
+        SizedBox(height: 12.h),
+        SizedBox(
+          height: 108.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            // Bleeds into the screen's own margin at both ends, so a card that is
+            // half off the edge reads as "there is more" rather than as clipped.
+            padding: EdgeInsets.symmetric(horizontal: 2.w),
+            clipBehavior: Clip.none,
+            itemCount: picks.length,
+            separatorBuilder: (BuildContext context, int index) =>
+                SizedBox(width: 10.w),
+            itemBuilder: (BuildContext context, int index) => _QuickPickCard(
+              app: picks[index],
+              isCloned: controller.clonedPackages.contains(
+                picks[index].packageName,
+              ),
+              onTap: () => _quickClone(context, picks[index]),
+            ),
+          ),
+        ),
+        SizedBox(height: 20.h),
+      ],
     );
   }
 
@@ -156,16 +224,56 @@ class AppPickerView extends GetView<AppPickerController> {
           Text('Installed apps', style: theme.textTheme.titleLarge),
           Text(
             count == 1 ? '1 app' : '$count apps',
-            style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
         ],
       ),
     );
   }
 
+  /// Clones a quick pick straight away, with no sheet in between.
+  ///
+  /// The Popular row exists to make the common case one tap, so it does not ask. It
+  /// still refuses to start an install the engine has already said cannot work: a
+  /// blocking verdict is reported instead of being walked into. Non-blocking findings —
+  /// missing permissions, no virtualized Play services — are not raised here; the
+  /// clone's own Space Info is where those are dealt with afterwards.
+  Future<void> _quickClone(BuildContext context, InstalledAppModel app) async {
+    final CompatibilityReport report = await controller.analyze(
+      app.packageName,
+    );
+    if (!context.mounted) {
+      return;
+    }
+    if (report.verdict == CompatibilityVerdict.unsupported) {
+      _showMessage(
+        context,
+        report.findings
+                .firstWhereOrNull((CompatibilityFinding f) => f.blocking)
+                ?.message ??
+            'This app cannot be cloned on this device.',
+      );
+      return;
+    }
+
+    final String? error = await controller.cloneInstalledApp(app);
+    if (!context.mounted) {
+      return;
+    }
+    if (error != null) {
+      _showMessage(context, error);
+      return;
+    }
+    Get.back<bool>(result: true);
+  }
+
   Future<void> _clone(BuildContext context, InstalledAppModel app) async {
     final int existing = await controller.instanceCount(app.packageName);
-    final CompatibilityReport report = await controller.analyze(app.packageName);
+    final CompatibilityReport report = await controller.analyze(
+      app.packageName,
+    );
     if (!context.mounted) {
       return;
     }
@@ -183,8 +291,10 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
 
-    final String? error =
-        await controller.cloneInstalledApp(app, installGms: decision.installGms);
+    final String? error = await controller.cloneInstalledApp(
+      app,
+      installGms: decision.installGms,
+    );
     if (!context.mounted) {
       return;
     }
@@ -195,8 +305,44 @@ class AppPickerView extends GetView<AppPickerController> {
     Get.back<bool>(result: true);
   }
 
-  Future<void> _importApk(BuildContext context) async {
-    final ApkCandidate? candidate = await controller.pickApk();
+  /// Opens the sort/filter sheet and acts on whichever way it was closed.
+  Future<void> _openFilters(BuildContext context) async {
+    final AppFilterResult? result = await showAppFilterSheet(
+      context,
+      current: AppFilterSelection(
+        sort: controller.sort.value,
+        filter: controller.filter.value,
+        architecture: controller.architecture.value,
+        packageType: controller.packageType.value,
+      ),
+    );
+    if (result == null || !context.mounted) {
+      return;
+    }
+
+    if (result.importFiles) {
+      await _importApk(context);
+      return;
+    }
+    if (result.importPackage) {
+      await _importApk(context, packageFormat: true);
+      return;
+    }
+
+    final AppFilterSelection selection = result.selection!;
+    controller.sort.value = selection.sort;
+    controller.filter.value = selection.filter;
+    controller.architecture.value = selection.architecture;
+    controller.packageType.value = selection.packageType;
+  }
+
+  Future<void> _importApk(
+    BuildContext context, {
+    bool packageFormat = false,
+  }) async {
+    final ApkCandidate? candidate = await controller.pickApk(
+      packageFormat: packageFormat,
+    );
     if (candidate == null) {
       if (context.mounted && controller.errorMessage.value != null) {
         _showMessage(context, controller.errorMessage.value!);
@@ -220,15 +366,18 @@ class AppPickerView extends GetView<AppPickerController> {
       appName: candidate.appName,
       report: report,
       existingClones: existing,
-      onGrantPermissions: () => _grantPermissions(context, candidate.packageName),
+      onGrantPermissions: () =>
+          _grantPermissions(context, candidate.packageName),
     );
 
     if (!decision.proceed || !context.mounted) {
       return;
     }
 
-    final String? error =
-        await controller.cloneApk(candidate, installGms: decision.installGms);
+    final String? error = await controller.cloneApk(
+      candidate,
+      installGms: decision.installGms,
+    );
     if (!context.mounted) {
       return;
     }
@@ -247,8 +396,9 @@ class AppPickerView extends GetView<AppPickerController> {
     BuildContext context,
     String packageName,
   ) async {
-    final PermissionRequestResult? result =
-        await controller.requestPermissions(packageName);
+    final PermissionRequestResult? result = await controller.requestPermissions(
+      packageName,
+    );
 
     if (result == null && context.mounted) {
       final String? reason = controller.errorMessage.value;
@@ -267,15 +417,19 @@ class AppPickerView extends GetView<AppPickerController> {
   }
 }
 
-/// One alphabetical group: the letter, then its apps in a single bordered card.
+/// One group of apps in a single bordered card, under its letter.
+///
+/// The letter is empty under a time sort, where the whole list is one group.
 class _SectionGroup extends StatelessWidget {
   const _SectionGroup({
     required this.section,
+    required this.clonedPackages,
     required this.analyze,
     required this.onTap,
   });
 
   final AppSection section;
+  final Set<String> clonedPackages;
   final Future<CompatibilityReport> Function(String packageName) analyze;
   final ValueChanged<InstalledAppModel> onTap;
 
@@ -288,14 +442,18 @@ class _SectionGroup extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
-            child: Text(
-              section.letter,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(color: theme.colorScheme.primary),
+          // No letter under a time sort: an A-Z header over a list ordered by install
+          // date would label a group that is not one.
+          if (section.letter.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
+              child: Text(
+                section.letter,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
             ),
-          ),
           Card(
             // Rows are clipped to the card so a row's ripple cannot paint over the
             // rounded corner it sits in.
@@ -306,6 +464,9 @@ class _SectionGroup extends StatelessWidget {
                   if (i > 0) const Divider(),
                   _AppRow(
                     app: section.apps[i],
+                    isCloned: clonedPackages.contains(
+                      section.apps[i].packageName,
+                    ),
                     // Analysis is per-app and cached, so the badge resolves lazily as
                     // rows scroll into view rather than stalling the whole list.
                     analyze: () => analyze(section.apps[i].packageName),
@@ -322,9 +483,19 @@ class _SectionGroup extends StatelessWidget {
 }
 
 class _AppRow extends StatelessWidget {
-  const _AppRow({required this.app, required this.analyze, required this.onTap});
+  const _AppRow({
+    required this.app,
+    required this.isCloned,
+    required this.analyze,
+    required this.onTap,
+  });
 
   final InstalledAppModel app;
+
+  /// Whether this app already has at least one clone. Marked on the icon, because a
+  /// user scanning two hundred rows for "did I already do this one" should not have to
+  /// read anything.
+  final bool isCloned;
   final Future<CompatibilityReport> Function() analyze;
   final VoidCallback onTap;
 
@@ -338,7 +509,7 @@ class _AppRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         child: Row(
           children: <Widget>[
-            AppIcon(bytes: app.icon, size: 44.r),
+            _IconWithTick(icon: app.icon, size: 44.r, isCloned: isCloned),
             SizedBox(width: 14.w),
             Expanded(
               child: Column(
@@ -357,17 +528,22 @@ class _AppRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (app.versionName != null || app.isSystem) ...<Widget>[
-                    SizedBox(height: 6.h),
-                    Wrap(
-                      spacing: 6.w,
-                      runSpacing: 4.h,
-                      children: <Widget>[
-                        if (app.versionName != null) _Chip(label: 'v${app.versionName}'),
-                        if (app.isSystem) const _Chip(label: 'System'),
-                      ],
-                    ),
-                  ],
+                  SizedBox(height: 6.h),
+                  Wrap(
+                    spacing: 6.w,
+                    runSpacing: 4.h,
+                    children: <Widget>[
+                      // What the archive is, before what version it is: whether an app
+                      // is 32-bit or a split set decides whether it can be cloned at
+                      // all on a given device, and the picker's filters are about
+                      // exactly these two facts.
+                      _Chip(label: app.architectureLabel),
+                      _Chip(label: app.packageTypeLabel),
+                      if (app.versionName != null)
+                        _Chip(label: 'v${app.versionName}'),
+                      if (app.isSystem) const _Chip(label: 'System'),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -393,26 +569,31 @@ class _Trailing extends StatelessWidget {
 
     return FutureBuilder<CompatibilityReport>(
       future: analyze(),
-      builder: (BuildContext context, AsyncSnapshot<CompatibilityReport> snapshot) {
-        final CompatibilityReport? report = snapshot.data;
-        if (report != null && report.verdict != CompatibilityVerdict.supported) {
-          final bool blocked = report.verdict == CompatibilityVerdict.unsupported;
-          return Icon(
-            blocked ? Icons.block : Icons.info_outline,
-            size: 22.r,
-            color: blocked ? scheme.error : StatusColors.of(context).warning,
-          );
-        }
-        return Container(
-          width: 28.r,
-          height: 28.r,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: scheme.primary, width: 1.5),
-          ),
-          child: Icon(Icons.add, size: 18.r, color: scheme.primary),
-        );
-      },
+      builder:
+          (BuildContext context, AsyncSnapshot<CompatibilityReport> snapshot) {
+            final CompatibilityReport? report = snapshot.data;
+            if (report != null &&
+                report.verdict != CompatibilityVerdict.supported) {
+              final bool blocked =
+                  report.verdict == CompatibilityVerdict.unsupported;
+              return Icon(
+                blocked ? Icons.block : Icons.info_outline,
+                size: 22.r,
+                color: blocked
+                    ? scheme.error
+                    : StatusColors.of(context).warning,
+              );
+            }
+            return Container(
+              width: 28.r,
+              height: 28.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: scheme.primary, width: 1.5),
+              ),
+              child: Icon(Icons.add, size: 18.r, color: scheme.primary),
+            );
+          },
     );
   }
 }
@@ -433,6 +614,142 @@ class _Chip extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Text(label, style: theme.textTheme.labelSmall),
+    );
+  }
+}
+
+/// An app icon carrying the "already cloned" tick.
+class _IconWithTick extends StatelessWidget {
+  const _IconWithTick({
+    required this.icon,
+    required this.size,
+    required this.isCloned,
+  });
+
+  final Uint8List? icon;
+  final double size;
+  final bool isCloned;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppIcon image = AppIcon(bytes: icon, size: size);
+    if (!isCloned) {
+      return image;
+    }
+
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        image,
+        Positioned(
+          right: -2.r,
+          bottom: -2.r,
+          child: Container(
+            width: 16.r,
+            height: 16.r,
+            decoration: BoxDecoration(
+              color: scheme.primary,
+              shape: BoxShape.circle,
+              // Ringed in the surface colour so the tick reads as an overlay rather
+              // than as part of the app's own artwork.
+              border: Border.all(color: scheme.surface, width: 1.5),
+            ),
+            child: Icon(Icons.check, size: 10.r, color: scheme.onPrimary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One card in the Popular row.
+///
+/// Square, so a row of them reads as a set of icons rather than a row of boxes, and
+/// deliberately smaller than a list row: this is a shortcut, not the list.
+class _QuickPickCard extends StatelessWidget {
+  const _QuickPickCard({
+    required this.app,
+    required this.isCloned,
+    required this.onTap,
+  });
+
+  final InstalledAppModel app;
+  final bool isCloned;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final BorderRadius radius = BorderRadius.circular(AppTheme.tileRadius.r);
+
+    return SizedBox(
+      width: 96.w,
+      child: Material(
+        color: theme.colorScheme.surface,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: Stack(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.fromLTRB(6.w, 18.h, 6.w, 10.h),
+                  child: Column(
+                    children: <Widget>[
+                      _IconWithTick(
+                        icon: app.icon,
+                        size: 44.r,
+                        isCloned: isCloned,
+                      ),
+                      SizedBox(height: 10.h),
+                      // Takes the space that is left and centres in it, so one-line and
+                      // two-line names sit on the same baseline across the row.
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            app.appName,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 6.h,
+                  right: 6.w,
+                  child: Container(
+                    width: 18.r,
+                    height: 18.r,
+                    decoration: BoxDecoration(
+                      // A tinted disc, not a bare glyph: on a busy icon the plus alone
+                      // read as part of the artwork.
+                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 12.r,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
