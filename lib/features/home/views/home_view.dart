@@ -85,29 +85,17 @@ class HomeView extends GetView<HomeController> {
 
   /// App-level actions. Kept as one menu so the header stays an identity block rather
   /// than a row of icons.
+  ///
+  /// No Refresh entry: the grid is already a [RefreshIndicator], so pulling down does
+  /// the same thing, and a menu item that duplicates a gesture the screen already has
+  /// only makes the menu longer.
   Widget _overflowMenu(BuildContext context) {
-    return PopupMenuButton<_HomeMenuAction>(
+    return PopupMenuButton<void>(
       tooltip: 'More',
-      onSelected: (_HomeMenuAction action) {
-        switch (action) {
-          case _HomeMenuAction.refresh:
-            controller.refreshAll();
-          case _HomeMenuAction.developerTools:
-            Get.toNamed<void>(AppRoutes.developerTools);
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<_HomeMenuAction>>[
-        const PopupMenuItem<_HomeMenuAction>(
-          value: _HomeMenuAction.refresh,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.refresh),
-            title: Text('Refresh'),
-          ),
-        ),
-        const PopupMenuItem<_HomeMenuAction>(
-          value: _HomeMenuAction.developerTools,
-          child: ListTile(
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<void>>[
+        PopupMenuItem<void>(
+          onTap: () => Get.toNamed<void>(AppRoutes.developerTools),
+          child: const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.terminal_outlined),
             title: Text('Developer Tools'),
@@ -290,5 +278,3 @@ class HomeView extends GetView<HomeController> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
-
-enum _HomeMenuAction { refresh, developerTools }
