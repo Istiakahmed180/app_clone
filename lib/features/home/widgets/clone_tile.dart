@@ -124,7 +124,7 @@ class CloneTile extends StatelessWidget {
 
   /// The icon, with a presence dot when the engine reports the guest as running.
   Widget _iconWithRunningDot(BuildContext context) {
-    final Widget appIcon = AppIcon(bytes: icon, size: 46.r);
+    final Widget appIcon = AppIcon(bytes: icon, size: 52.r, onPlate: true);
     if (!state.running) {
       return appIcon;
     }
