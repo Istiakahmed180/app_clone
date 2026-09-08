@@ -84,10 +84,17 @@ class ErrorCenterTab extends StatelessWidget {
 
   Widget _summary(BuildContext context, List<DiagnosticEvent> failures) {
     final ThemeData theme = Theme.of(context);
-    final int fatal = failures
+    // Self-tests are counted apart from the total: they are recorded at ERROR so that
+    // capture can be proven, and folding them into "3 failures" would make the headline
+    // number report work the developer did to themselves.
+    final List<DiagnosticEvent> real = failures
+        .where((DiagnosticEvent event) => !event.isSelfTest)
+        .toList(growable: false);
+    final int selfTests = failures.length - real.length;
+    final int fatal = real
         .where((DiagnosticEvent event) => event.level == DiagLevel.fatal)
         .length;
-    final int withTraces = failures
+    final int withTraces = real
         .where((DiagnosticEvent event) =>
             event.stackTrace != null && event.stackTrace!.isNotEmpty)
         .length;
@@ -105,7 +112,7 @@ class ErrorCenterTab extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DiagnosticTag(
-                  label: '${failures.length} total',
+                  label: '${real.length} total',
                   color: theme.colorScheme.error,
                 ),
                 if (fatal > 0)
@@ -115,6 +122,11 @@ class ErrorCenterTab extends StatelessWidget {
                     icon: Icons.dangerous_outlined,
                   ),
                 DiagnosticTag(label: '$withTraces with a stack trace'),
+                if (selfTests > 0)
+                  DiagnosticTag(
+                    label: '$selfTests self-test',
+                    icon: Icons.science_outlined,
+                  ),
               ],
             ),
           ],
@@ -161,7 +173,8 @@ class ErrorCenterTab extends StatelessWidget {
     }
 
     // Fixed order, so the list does not reshuffle as new failures arrive. Crashes lead
-    // because an unhandled exception outranks a handled verdict.
+    // because an unhandled exception outranks a handled verdict; the self-test goes last
+    // because it is the only entry here nobody needs to act on.
     const List<String> order = <String>[
       'Crashes and unhandled exceptions',
       'Virtualization engine',
@@ -171,6 +184,7 @@ class ErrorCenterTab extends StatelessWidget {
       'Platform channel',
       'Storage',
       'Other',
+      selfTestGroup,
     ];
 
     return <_ErrorGroup>[
@@ -179,7 +193,15 @@ class ErrorCenterTab extends StatelessWidget {
     ];
   }
 
+  /// Its own group, so a deliberately raised test exception cannot be read as a real
+  /// failure. Still listed rather than hidden: seeing it arrive is how the self-test
+  /// proves capture works.
+  static const String selfTestGroup = 'Diagnostics self-test (not a failure)';
+
   static String _titleFor(DiagnosticEvent event) {
+    if (event.metadata['selfTest'] == 'true') {
+      return selfTestGroup;
+    }
     if (event.category == DiagnosticCategory.crash ||
         event.level == DiagLevel.fatal) {
       return 'Crashes and unhandled exceptions';

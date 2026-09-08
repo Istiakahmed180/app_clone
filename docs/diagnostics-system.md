@@ -273,8 +273,14 @@ worth confirming with a real create-and-delete.
 
 **Native self-test** (overflow menu) raises a real `IllegalStateException` through the
 real Kotlin logger, so "does native capture work on this build, on this device" can be
-answered rather than assumed. Its metadata carries `selfTest: true`, so it can never be
-mistaken for a genuine failure. In a release build it asks for confirmation first.
+answered rather than assumed. In a release build it asks for confirmation first.
+
+It is recorded at `ERROR` with a full stack trace, because that record *is* the proof —
+so it is kept out of the failure counts by identity, not by severity. Its metadata
+carries `selfTest: true`; its category is `APP_LIFECYCLE`, not `CRASH`, since nothing
+crashed; the Error Center files it under its own *Diagnostics self-test (not a failure)*
+group, last; and neither the Errors badge nor the summary's failure total counts it. It is
+never hidden: seeing it arrive is the whole point.
 
 ---
 

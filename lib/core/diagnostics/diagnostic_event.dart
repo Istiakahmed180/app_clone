@@ -206,6 +206,13 @@ class DiagnosticEvent {
 
   bool get isFailure => level.severity >= DiagLevel.error.severity;
 
+  /// A deliberately raised test exception, not something that went wrong.
+  ///
+  /// It is recorded at `ERROR` with a full stack trace on purpose — that record is what
+  /// proves capture works — so anything that counts *actionable* failures has to be able
+  /// to tell the two apart.
+  bool get isSelfTest => metadata['selfTest'] == 'true';
+
   /// Null entries are dropped rather than written as `null`, which keeps the stored
   /// line small — the persistent log is size-bounded, so every absent field is
   /// budget for another event.

@@ -151,6 +151,58 @@ void main() {
     expect(find.textContaining('Storage'), findsWidgets);
   });
 
+  testWidgets('a self-test is listed apart from real failures and not counted as one',
+      (WidgetTester tester) async {
+    // The self-test is recorded at ERROR with a stack trace on purpose, so it has to be
+    // separated by grouping rather than by severity — otherwise a test the developer
+    // just ran reads as a crash.
+    final DiagnosticsController withSelfTest = DiagnosticsController(
+      repository: DiagnosticsRepository(
+        logger: DiagnosticLogger.instance,
+        native: _FakeNative(
+          history: <DiagnosticEvent>[
+            ...events,
+            DiagnosticEvent(
+              id: 'selftest',
+              sequence: 9,
+              timestamp: DateTime(2026, 9, 8, 9, 10, 9),
+              level: DiagLevel.error,
+              source: DiagnosticSource.kotlin,
+              category: DiagnosticCategory.appLifecycle,
+              message: 'Native diagnostics self-test exception captured',
+              stackTrace: 'java.lang.IllegalStateException',
+              metadata: const <String, String>{'selfTest': 'true'},
+            ),
+          ],
+        ),
+      ),
+    );
+    withSelfTest.onInit();
+    await withSelfTest.reload();
+
+    // The badge counts actionable failures only: one real error, not two.
+    expect(withSelfTest.failureCount, 1);
+
+    await pump(tester, ErrorCenterTab(controller: withSelfTest));
+
+    expect(find.text('1 total'), findsOneWidget);
+    expect(find.text('1 self-test'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.textContaining(ErrorCenterTab.selfTestGroup),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining(ErrorCenterTab.selfTestGroup), findsOneWidget);
+    expect(
+      find.text('Native diagnostics self-test exception captured'),
+      findsOneWidget,
+      reason: 'grouped apart, but never hidden — arriving is what it proves',
+    );
+
+    withSelfTest.onClose();
+  });
+
   testWidgets('the operations tab lists the correlated operation',
       (WidgetTester tester) async {
     await pump(tester, OperationsTab(controller: controller));

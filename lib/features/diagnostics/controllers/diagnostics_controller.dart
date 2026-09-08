@@ -80,7 +80,12 @@ class DiagnosticsController extends GetxController {
 
   int get totalLoaded => repository.events.length;
 
-  int get failureCount => repository.recentFailures().length;
+  /// Actionable failures only, which is what the Errors badge shows. A self-test the
+  /// developer just ran on purpose is not a red badge.
+  int get failureCount => repository
+      .recentFailures()
+      .where((DiagnosticEvent event) => !event.isSelfTest)
+      .length;
 
   List<String> get knownPackages => repository.knownPackages();
 

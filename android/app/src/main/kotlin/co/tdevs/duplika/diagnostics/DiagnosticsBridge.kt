@@ -149,9 +149,13 @@ class DiagnosticsBridge(context: Context) {
     /**
      * Proves native capture works on this build, on this device.
      *
-     * Raises a real exception through a real code path and records the real result. It
-     * is labelled as a self-test in its own metadata, so it can never be mistaken for a
-     * genuine failure while reading a report.
+     * Raises a real exception through a real code path and records the real result,
+     * stack trace included — that record *is* the proof, so it stays at `ERROR`.
+     *
+     * The category is deliberately NOT [DiagCategory.CRASH]: nothing crashed here, the
+     * exception is caught on the line below, and filing it as a crash put it at the top
+     * of the console's error list next to genuine unhandled failures. `selfTest` in the
+     * metadata is what the UI groups on.
      */
     private fun selfTest(): Map<String, Any?> {
         DiagnosticLogger.info(
@@ -166,7 +170,7 @@ class DiagnosticsBridge(context: Context) {
         } catch (error: IllegalStateException) {
             DiagnosticLogger.error(
                 DiagSource.KOTLIN,
-                DiagCategory.CRASH,
+                DiagCategory.APP_LIFECYCLE,
                 "Native diagnostics self-test exception captured",
                 error,
                 metadata = mapOf("selfTest" to "true"),
