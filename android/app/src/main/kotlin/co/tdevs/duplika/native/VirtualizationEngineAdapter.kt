@@ -55,6 +55,23 @@ interface VirtualizationEngineAdapter {
 
     fun uninstallPackage(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
+    /**
+     * Deletes everything the guest has written in this container: databases, shared
+     * preferences, files and caches. The package stays installed, so the next launch is
+     * a first launch.
+     */
+    fun clearPackageData(packageName: String, virtualUserId: Int): EngineResult<Unit>
+
+    /**
+     * Deletes only the guest's cache directories, internal and external.
+     *
+     * Separate from [clearPackageData] because the two answer different questions: a
+     * cache clear frees space and fixes a corrupt download without costing the user
+     * their logins, and offering only the destructive one would make people use it for
+     * both.
+     */
+    fun clearPackageCache(packageName: String, virtualUserId: Int): EngineResult<Unit>
+
     fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean
 
     fun launch(packageName: String, virtualUserId: Int): EngineResult<Unit>
@@ -115,6 +132,10 @@ object EngineErrorCodes {
     const val APK_DUPLICATE_SPLIT = "APK_DUPLICATE_SPLIT"
     const val APP_ALREADY_CLONED = "APP_ALREADY_CLONED"
     const val PROFILE_CREATE_FAILED = "PROFILE_CREATE_FAILED"
+    const val CLEAR_DATA_FAILED = "CLEAR_DATA_FAILED"
+    const val CLEAR_CACHE_FAILED = "CLEAR_CACHE_FAILED"
+    const val APK_NOT_AVAILABLE = "APK_NOT_AVAILABLE"
+    const val SHARE_FAILED = "SHARE_FAILED"
     const val PROFILE_DELETE_FAILED = "PROFILE_DELETE_FAILED"
     const val VIRTUAL_APP_NOT_INSTALLED = "VIRTUAL_APP_NOT_INSTALLED"
     const val VIRTUAL_APP_LAUNCH_FAILED = "VIRTUAL_APP_LAUNCH_FAILED"

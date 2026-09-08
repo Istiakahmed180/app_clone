@@ -273,11 +273,48 @@ class RealVirtualizationEngine implements VirtualizationEngine {
     );
   }
 
+  @override
   Future<void> stopProfile(String profileId) async {
     final VirtualProfileModel? profile = await _repository.getProfile(profileId);
     if (profile == null) {
       return;
     }
     await _nativeBridge.stopProfile(profileId, profile.packageName);
+  }
+
+  @override
+  Future<void> clearProfileData(String profileId) =>
+      _mutateContainer(profileId, _nativeBridge.clearProfileData, 'clear_data');
+
+  @override
+  Future<void> clearProfileCache(String profileId) =>
+      _mutateContainer(profileId, _nativeBridge.clearProfileCache, 'clear_cache');
+
+  /// Shared shape for the container operations that neither create nor destroy a
+  /// profile: resolve it, call the engine, and raise the engine's own verdict.
+  Future<void> _mutateContainer(
+    String profileId,
+    Future<EngineResponse> Function(String profileId, String packageName) call,
+    String operationKind,
+  ) async {
+    final VirtualProfileModel? profile = await _repository.getProfile(profileId);
+    if (profile == null) {
+      throw ProfileNotFoundException(profileId);
+    }
+
+    return DiagnosticOperation.run<void>(
+      operationKind,
+      (DiagnosticOperation operation) async {
+        final EngineResponse response = await call(profileId, profile.packageName);
+        if (!response.success) {
+          throw VirtualizationException(response.message, code: response.code);
+        }
+      },
+      name: '$operationKind ${profile.appName}',
+      packageName: profile.packageName,
+      profileId: profileId,
+      source: _source,
+      category: DiagnosticCategory.profile,
+    );
   }
 }

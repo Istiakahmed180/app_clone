@@ -323,6 +323,58 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Stops the guest if it is running. Returns null on success.
+  Future<String?> forceStop(VirtualProfileModel profile) async {
+    try {
+      await _engine.stopProfile(profile.id);
+      // The card's dot is driven by engine-reported state, so re-read it rather than
+      // assuming the stop took effect.
+      await _loadProfileStates();
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
+  /// Empties this clone's caches. Logins and settings survive.
+  Future<String?> clearCache(VirtualProfileModel profile) async {
+    try {
+      await _engine.clearProfileCache(profile.id);
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
+  /// Empties this clone's container. The next launch is a first launch.
+  Future<String?> clearStorage(VirtualProfileModel profile) async {
+    try {
+      await _engine.clearProfileData(profile.id);
+      await _loadProfileStates();
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
+  /// Offers this clone's APK to the share sheet.
+  ///
+  /// Goes straight to the bridge rather than through [VirtualizationEngine]: sharing a
+  /// file is a host operation, not something a container backend would implement — the
+  /// same reason shortcuts and permission requests bypass the engine.
+  Future<String?> shareApp(VirtualProfileModel profile) async {
+    try {
+      await _nativeBridge.shareProfileApk(
+        profileId: profile.id,
+        packageName: profile.packageName,
+        label: profile.appName,
+      );
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
   Future<String?> deleteProfile(VirtualProfileModel profile) async {
     try {
       await _engine.deleteProfile(profile.id);

@@ -74,6 +74,25 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
     await _repository.updateProfile(profileId, profileName: profileName);
   }
 
+  /// This engine has no container, so there is nothing to stop, clear or empty. Each
+  /// refuses rather than returning quietly: reporting success for work that never
+  /// happened is exactly the lie the rest of this class is written to avoid.
+  @override
+  Future<void> stopProfile(String profileId) async => _noContainer('stop a clone');
+
+  @override
+  Future<void> clearProfileData(String profileId) async =>
+      _noContainer("clear a clone's data");
+
+  @override
+  Future<void> clearProfileCache(String profileId) async =>
+      _noContainer("clear a clone's cache");
+
+  Never _noContainer(String action) => throw VirtualizationException(
+        'This engine keeps no container, so it cannot $action.',
+        code: AppConstants.errorVirtualAppNotInstalled,
+      );
+
   @override
   Future<void> launchProfile(String profileId) async {
     final VirtualProfileModel? profile = await _repository.getProfile(profileId);

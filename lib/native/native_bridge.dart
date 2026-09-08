@@ -273,6 +273,32 @@ class NativeBridge {
   Future<EngineResponse> stopProfile(String profileId, String packageName) =>
       _invokeEngine('stopProfile', _profileArgs(profileId, packageName));
 
+  /// Empties this clone's container. The package stays installed.
+  Future<EngineResponse> clearProfileData(String profileId, String packageName) =>
+      _invokeEngine('clearProfileData', _profileArgs(profileId, packageName));
+
+  /// Empties only this clone's caches.
+  Future<EngineResponse> clearProfileCache(String profileId, String packageName) =>
+      _invokeEngine('clearProfileCache', _profileArgs(profileId, packageName));
+
+  /// Offers this clone's APK to the Android share sheet.
+  ///
+  /// Success means the chooser opened, not that anything was sent — the user still picks
+  /// a target, or dismisses it.
+  Future<void> shareProfileApk({
+    required String profileId,
+    required String packageName,
+    required String label,
+  }) async {
+    final EngineResponse response = await _invokeEngine('shareProfileApk', <String, dynamic>{
+      ..._profileArgs(profileId, packageName),
+      'label': label,
+    });
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+  }
+
   Future<EngineResponse> deleteVirtualProfile(String profileId, String packageName) =>
       _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
 

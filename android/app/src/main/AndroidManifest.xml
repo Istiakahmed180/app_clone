@@ -53,6 +53,21 @@
                 android:resource="@xml/diagnostics_paths" />
         </provider>
 
+        <!-- Hands a cloned app's APK to the Android share sheet.
+
+             Its own authority and its own paths file, kept separate from the diagnostics
+             provider so each stays scoped to one directory. Not exported; each share
+             grants a temporary read URI to the chosen app only. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="co.tdevs.duplika.share.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/shared_apk_paths" />
+        </provider>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

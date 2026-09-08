@@ -339,6 +339,35 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "clearProfileData" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                async(result) {
+                    engine.clearProfileData(profileId, packageName)
+                        .toEnvelope("PROFILE_DATA_CLEARED", "Clone data cleared.")
+                }
+            }
+
+            "clearProfileCache" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                async(result) {
+                    engine.clearProfileCache(profileId, packageName)
+                        .toEnvelope("PROFILE_CACHE_CLEARED", "Clone cache cleared.")
+                }
+            }
+
+            "shareProfileApk" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                val label = call.argument<String>("label").orEmpty().ifBlank { packageName }
+                // Copying a whole APK belongs off the platform thread.
+                async(result) {
+                    engine.shareProfileApk(profileId, packageName, label)
+                        .toEnvelope("APK_SHARED", "Share sheet opened.")
+                }
+            }
+
             "launchProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return

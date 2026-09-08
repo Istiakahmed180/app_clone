@@ -15,6 +15,7 @@ import '../widgets/add_clone_tile.dart';
 import '../widgets/clone_action_sheet.dart';
 import '../widgets/clone_tile.dart';
 import '../widgets/home_header.dart';
+import '../widgets/space_info_sheet.dart';
 import '../widgets/virtualization_warning.dart';
 
 /// The clone launcher.
@@ -196,14 +197,72 @@ class HomeView extends GetView<HomeController> {
       icon: controller.iconFor(profile),
       siblingCount: controller.siblingCount(profile),
       instanceIndex: controller.instanceIndex(profile),
-      warnings: controller.warningsFor(profile),
-      needsPermissions: controller.needsPermissions(profile),
-      canLaunch: controller.providesRuntimeIsolation,
     );
     if (action == null || !context.mounted) {
       return;
     }
     await _handleAction(context, profile, action);
+  }
+
+  /// Opens the facts about one clone, and applies the one fix it offers.
+  Future<void> _openSpaceInfo(
+    BuildContext context,
+    VirtualProfileModel profile,
+  ) async {
+    final bool grant = await showSpaceInfoSheet(
+      context,
+      profile: profile,
+      state: controller.stateFor(profile),
+      icon: controller.iconFor(profile),
+      siblingCount: controller.siblingCount(profile),
+      instanceIndex: controller.instanceIndex(profile),
+      warnings: controller.warningsFor(profile),
+      needsPermissions: controller.needsPermissions(profile),
+      engineActive: controller.providesRuntimeIsolation,
+    );
+    if (!grant || !context.mounted) {
+      return;
+    }
+
+    final String? error = await controller.grantPermissions(profile);
+    if (!context.mounted) {
+      return;
+    }
+    _showMessage(
+      context,
+      error ??
+          (controller.needsPermissions(profile)
+              ? 'Some permissions are still missing. The clone will keep working '
+                    'without them, but features that need them will not.'
+              : 'Permissions granted. Relaunch the clone to pick them up.'),
+    );
+  }
+
+  Future<bool?> _confirmClearStorage(
+    BuildContext context,
+    VirtualProfileModel profile,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text('Clear ${profile.profileName}?'),
+        content: const Text(
+          'Everything this clone has stored \u2014 accounts, messages, settings, '
+          'downloads \u2014 is deleted. The clone itself stays, and its next launch '
+          'will be a first launch. This cannot be undone.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleAction(
@@ -212,21 +271,47 @@ class HomeView extends GetView<HomeController> {
     CloneAction action,
   ) async {
     switch (action) {
-      case CloneAction.launch:
-        await _launch(context, profile);
-      case CloneAction.grantPermissions:
-        final String? error = await controller.grantPermissions(profile);
+      case CloneAction.spaceInfo:
+        await _openSpaceInfo(context, profile);
+      case CloneAction.forceStop:
+        final String? error = await controller.forceStop(profile);
+        if (!context.mounted) {
+          return;
+        }
+        _showMessage(context, error ?? 'Stopped ${profile.profileName}.');
+      case CloneAction.clearCache:
+        final String? error = await controller.clearCache(profile);
+        if (!context.mounted) {
+          return;
+        }
+        _showMessage(
+          context,
+          error ?? 'Cache cleared for ${profile.profileName}.',
+        );
+      case CloneAction.clearStorage:
+        // Confirmed: this is every login, message and setting inside the clone, and
+        // there is no undo. Uninstall is the only other action that asks.
+        final bool confirmed =
+            await _confirmClearStorage(context, profile) ?? false;
+        if (!confirmed || !context.mounted) {
+          return;
+        }
+        final String? error = await controller.clearStorage(profile);
         if (!context.mounted) {
           return;
         }
         _showMessage(
           context,
           error ??
-              (controller.needsPermissions(profile)
-                  ? 'Some permissions are still missing. The clone will keep working '
-                        'without them, but features that need them will not.'
-                  : 'Permissions granted. Relaunch the clone to pick them up.'),
+              '${profile.profileName} was reset. Its next launch is a first launch.',
         );
+      case CloneAction.shareApp:
+        final String? error = await controller.shareApp(profile);
+        // Only a failure is worth saying: on success the share sheet is already on
+        // screen, and a snack bar behind it would be talking over the answer.
+        if (error != null && context.mounted) {
+          _showMessage(context, error);
+        }
       case CloneAction.rename:
         final String? name = await showRenameProfileDialog(
           context,

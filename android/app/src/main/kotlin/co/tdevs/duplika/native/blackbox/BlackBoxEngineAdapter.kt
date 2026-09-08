@@ -12,6 +12,7 @@ import co.tdevs.duplika.native.Slog
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import top.niunaijun.blackbox.BlackBoxCore
 import top.niunaijun.blackbox.app.configuration.ClientConfiguration
+import top.niunaijun.blackbox.core.env.BEnvironment
 
 /**
  * The ONLY file in Duplika permitted to reference NewBlackbox (`top.niunaijun.*`).
@@ -272,6 +273,53 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         guarded(EngineErrorCodes.PROFILE_DELETE_FAILED) {
             BlackBoxCore.get().uninstallPackageAsUser(packageName, virtualUserId)
             EngineResult.ok()
+        }
+
+    override fun clearPackageData(packageName: String, virtualUserId: Int): EngineResult<Unit> =
+        guarded(EngineErrorCodes.CLEAR_DATA_FAILED) {
+            // Bcore's own API, which also drops the container's cache directories.
+            BlackBoxCore.get().clearPackage(packageName, virtualUserId)
+            Slog.i(Slog.INSTALL, "Cleared data for $packageName in user $virtualUserId")
+            EngineResult.ok()
+        }
+
+    /**
+     * Deletes the container's cache directories and nothing else.
+     *
+     * Bcore has no cache-only API, so the two directories are emptied directly. Their
+     * paths come from [BEnvironment], which is Bcore's own public accessor for them —
+     * the layout is not guessed or reflected into, and this stays inside the one file
+     * allowed to know the backend.
+     *
+     * A missing directory is success, not failure: a guest that has never run has no
+     * cache to clear.
+     */
+    override fun clearPackageCache(packageName: String, virtualUserId: Int): EngineResult<Unit> =
+        guarded(EngineErrorCodes.CLEAR_CACHE_FAILED) {
+            val targets = listOf(
+                runCatching { BEnvironment.getDataCacheDir(packageName, virtualUserId) }.getOrNull(),
+                runCatching {
+                    BEnvironment.getExternalDataCacheDir(packageName, virtualUserId)
+                }.getOrNull(),
+            )
+
+            var failed = 0
+            targets.filterNotNull().forEach { directory ->
+                if (directory.exists() && !directory.deleteRecursively()) {
+                    failed++
+                    Slog.w(Slog.INSTALL, "Could not fully clear cache at ${directory.name}")
+                }
+            }
+
+            if (failed > 0) {
+                EngineResult.Failure(
+                    EngineErrorCodes.CLEAR_CACHE_FAILED,
+                    "Part of this clone's cache could not be deleted.",
+                )
+            } else {
+                Slog.i(Slog.INSTALL, "Cleared cache for $packageName in user $virtualUserId")
+                EngineResult.ok()
+            }
         }
 
     override fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean =

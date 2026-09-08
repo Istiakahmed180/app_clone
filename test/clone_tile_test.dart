@@ -4,11 +4,13 @@ import 'package:duplika/data/models/engine_result.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
+import 'package:duplika/features/home/widgets/space_info_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-VirtualProfileModel _profile({String profileName = 'Example'}) => VirtualProfileModel(
+VirtualProfileModel _profile({String profileName = 'Example'}) =>
+    VirtualProfileModel(
       id: 'p1',
       packageName: 'org.example',
       appName: 'Example',
@@ -74,15 +76,15 @@ Future<void> _pumpTile(
 
 /// Pumps a screen whose only job is to open the sheet, so the sheet is tested through
 /// the same route the app uses rather than by constructing it directly.
+CloneAction? _lastChoice;
+
 Future<CloneAction?> _openSheet(
   WidgetTester tester, {
   VirtualProfileState state = _ready,
-  List<CompatibilityFinding> warnings = const <CompatibilityFinding>[],
   int siblingCount = 1,
   int instanceIndex = 1,
-  bool needsPermissions = false,
-  bool canLaunch = true,
 }) async {
+  _lastChoice = null;
   CloneAction? chosen;
   await tester.pumpWidget(
     ScreenUtilInit(
@@ -93,15 +95,12 @@ Future<CloneAction?> _openSheet(
           body: Builder(
             builder: (BuildContext context) => TextButton(
               onPressed: () async {
-                chosen = await showCloneActionSheet(
+                chosen = _lastChoice = await showCloneActionSheet(
                   context,
                   profile: _profile(),
                   state: state,
-                  warnings: warnings,
                   siblingCount: siblingCount,
                   instanceIndex: instanceIndex,
-                  needsPermissions: needsPermissions,
-                  canLaunch: canLaunch,
                 );
               },
               child: const Text('open'),
@@ -124,8 +123,9 @@ void main() {
       expect(find.text('Example'), findsOneWidget);
     });
 
-    testWidgets('carries no compatibility marker, healthy or not',
-        (WidgetTester tester) async {
+    testWidgets('carries no compatibility marker, healthy or not', (
+      WidgetTester tester,
+    ) async {
       // The grid is meant to read as a home screen. A warning badge on every tile made
       // it read as a list of faults, so problems live in the long-press sheet only —
       // see the showCloneActionSheet group below.
@@ -136,24 +136,26 @@ void main() {
       expect(find.byIcon(Icons.block), findsNothing);
     });
 
-    testWidgets('numbers a clone only when it has siblings', (WidgetTester tester) async {
+    testWidgets('numbers a clone only when it has siblings', (
+      WidgetTester tester,
+    ) async {
       await _pumpTile(tester);
-      expect(find.text('1'), findsNothing,
-          reason: 'a lone clone needs no instance number');
+      expect(
+        find.text('1'),
+        findsNothing,
+        reason: 'a lone clone needs no instance number',
+      );
 
       await _pumpTile(tester, siblingCount: 3, instanceIndex: 2);
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('tapping launches, holding opens the actions',
-        (WidgetTester tester) async {
+    testWidgets('tapping launches, holding opens the actions', (
+      WidgetTester tester,
+    ) async {
       int taps = 0;
       int holds = 0;
-      await _pumpTile(
-        tester,
-        onTap: () => taps++,
-        onLongPress: () => holds++,
-      );
+      await _pumpTile(tester, onTap: () => taps++, onLongPress: () => holds++);
 
       await tester.tap(find.byType(CloneTile));
       await tester.pumpAndSettle();
@@ -166,8 +168,9 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('stays interactive when the engine cannot launch it',
-        (WidgetTester tester) async {
+    testWidgets('stays interactive when the engine cannot launch it', (
+      WidgetTester tester,
+    ) async {
       // Dimmed, not disabled: the sheet is the only way to rename or delete a clone,
       // and losing that because the engine is down would be worse than a dim tile.
       int holds = 0;
@@ -178,111 +181,219 @@ void main() {
       expect(holds, 1);
     });
 
-    testWidgets('describes everything it encodes visually, for screen readers',
-        (WidgetTester tester) async {
-      final SemanticsHandle semantics = tester.ensureSemantics();
-      await _pumpTile(
-        tester,
-        state: const VirtualProfileState(
-          installed: true,
-          running: true,
-          virtualUserId: 1,
-        ),
-        siblingCount: 2,
-        instanceIndex: 2,
-      );
+    testWidgets(
+      'describes everything it encodes visually, for screen readers',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        await _pumpTile(
+          tester,
+          state: const VirtualProfileState(
+            installed: true,
+            running: true,
+            virtualUserId: 1,
+          ),
+          siblingCount: 2,
+          instanceIndex: 2,
+        );
 
-      expect(
-        find.bySemanticsLabel('Example, clone 2 of 2, running'),
-        findsOneWidget,
-      );
-      semantics.dispose();
-    });
+        expect(
+          find.bySemanticsLabel('Example, clone 2 of 2, running'),
+          findsOneWidget,
+        );
+        semantics.dispose();
+      },
+    );
   });
 
   group('showCloneActionSheet', () {
-    testWidgets('reports the engine status and the virtual user',
-        (WidgetTester tester) async {
+    testWidgets('offers every action, grouped by what it costs', (
+      WidgetTester tester,
+    ) async {
       await _openSheet(tester);
 
+      // The three things done *with* a clone.
+      expect(find.text('Clone'), findsOneWidget);
+      expect(find.text('Shortcut'), findsOneWidget);
+      expect(find.text('Space info'), findsOneWidget);
+
+      // The things done *to* it.
+      expect(find.text('Manage'), findsOneWidget);
+      expect(find.text('Edit name'), findsOneWidget);
+      expect(find.text('Force stop'), findsOneWidget);
+      expect(find.text('Clear cache'), findsOneWidget);
+      expect(find.text('Clear storage'), findsOneWidget);
+      expect(find.text('Share app'), findsOneWidget);
+
+      // And the one that destroys it.
+      expect(find.text('Uninstall'), findsOneWidget);
+    });
+
+    testWidgets('does not offer launch, which tapping the tile already does', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(tester);
+
+      expect(find.text('Launch'), findsNothing);
+    });
+
+    testWidgets('names the space rather than repeating the app name', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(tester, instanceIndex: 2, siblingCount: 3);
+
+      expect(find.text('Example'), findsOneWidget, reason: 'the title');
+      expect(find.text('Space 2'), findsOneWidget);
+    });
+
+    testWidgets('each action closes the sheet with its own answer', (
+      WidgetTester tester,
+    ) async {
+      // One per band, so a mis-wired tile cannot pass by borrowing its neighbour.
+      for (final (String label, CloneAction expected)
+          in <(String, CloneAction)>[
+            ('Clone', CloneAction.clone),
+            ('Space info', CloneAction.spaceInfo),
+            ('Force stop', CloneAction.forceStop),
+            ('Clear storage', CloneAction.clearStorage),
+            ('Uninstall', CloneAction.delete),
+          ]) {
+        await _openSheet(tester);
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(_lastChoice, expected, reason: label);
+      }
+    });
+
+    testWidgets('the close button answers nothing at all', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(tester);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(_lastChoice, isNull);
+      expect(find.text('Manage'), findsNothing);
+    });
+  });
+
+  group('showSpaceInfoSheet', () {
+    Future<bool> open(
+      WidgetTester tester, {
+      VirtualProfileState state = _ready,
+      List<CompatibilityFinding> warnings = const <CompatibilityFinding>[],
+      bool needsPermissions = false,
+      bool engineActive = true,
+    }) async {
+      bool granted = false;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => TextButton(
+                  onPressed: () async {
+                    granted = await showSpaceInfoSheet(
+                      context,
+                      profile: _profile(),
+                      state: state,
+                      warnings: warnings,
+                      needsPermissions: needsPermissions,
+                      engineActive: engineActive,
+                      siblingCount: 2,
+                      instanceIndex: 1,
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      return granted;
+    }
+
+    testWidgets('reports the engine status and the container', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
       expect(find.text('Ready'), findsOneWidget);
-      expect(find.text('user 0'), findsOneWidget);
+      expect(find.text('virtual user 0'), findsOneWidget);
+      expect(find.text('org.example'), findsOneWidget);
+      expect(find.text('1 of 2'), findsOneWidget);
     });
 
-    testWidgets('a container the engine has lost says it rebuilds, not that it failed',
-        (WidgetTester tester) async {
-      await _openSheet(
-        tester,
-        state: const VirtualProfileState(installed: false, running: false),
-      );
+    testWidgets(
+      'a container the engine has lost says it rebuilds, not that it failed',
+      (WidgetTester tester) async {
+        await open(
+          tester,
+          state: const VirtualProfileState(installed: false, running: false),
+        );
 
-      expect(find.text('Rebuilds on launch'), findsOneWidget);
+        expect(find.text('Rebuilds on launch'), findsOneWidget);
+        expect(find.text('not allocated yet'), findsOneWidget);
+      },
+    );
+
+    testWidgets('a dead engine is reported as such, not as a ready clone', (
+      WidgetTester tester,
+    ) async {
+      await open(tester, engineActive: false);
+
+      expect(find.text('Engine unavailable'), findsOneWidget);
+      expect(find.text('Ready'), findsNothing);
     });
 
-    testWidgets('shows every finding, blocking first', (WidgetTester tester) async {
-      await _openSheet(
+    testWidgets('shows every finding, blocking first', (
+      WidgetTester tester,
+    ) async {
+      await open(
         tester,
-        warnings: const <CompatibilityFinding>[_permissionsWarning, _blockingFinding],
+        warnings: const <CompatibilityFinding>[
+          _permissionsWarning,
+          _blockingFinding,
+        ],
       );
 
-      final double blockingY =
-          tester.getTopLeft(find.text(_blockingFinding.message)).dy;
-      final double lesserY =
-          tester.getTopLeft(find.text(_permissionsWarning.message)).dy;
+      final double blockingY = tester
+          .getTopLeft(find.text(_blockingFinding.message))
+          .dy;
+      final double lesserY = tester
+          .getTopLeft(find.text(_permissionsWarning.message))
+          .dy;
       expect(blockingY, lessThan(lesserY));
     });
 
-    testWidgets('offers adding the clone to the home screen',
-        (WidgetTester tester) async {
-      expect(await _openSheet(tester), isNull);
-
-      await tester.tap(find.text('Add to home screen'));
-      await tester.pumpAndSettle();
-      // The sheet closes with its answer; the caller acts on it.
-      expect(find.text('Add to home screen'), findsNothing);
-    });
-
-    testWidgets('a clone missing permissions offers a way to grant them',
-        (WidgetTester tester) async {
-      // Warning text alone is a dead end: the guest silently gets nothing (VLC sits on
-      // "Loading." with no media) and the tile alone offers no way to fix it.
-      await _openSheet(tester, needsPermissions: true);
+    testWidgets('a clone missing permissions offers a way to grant them', (
+      WidgetTester tester,
+    ) async {
+      // The tile carries no marker and the action sheet no status line, so this is the
+      // only place the fix is reachable. Losing it would leave the warning a dead end.
+      await open(tester, needsPermissions: true);
 
       expect(find.text('Grant permissions'), findsOneWidget);
+      await tester.tap(find.text('Grant permissions'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Grant permissions'),
+        findsNothing,
+        reason: 'the sheet closes',
+      );
     });
 
-    testWidgets('a clone that needs nothing does not offer the grant action',
-        (WidgetTester tester) async {
-      await _openSheet(tester);
+    testWidgets('a clone that needs nothing does not offer the grant action', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
 
       expect(find.text('Grant permissions'), findsNothing);
-      expect(find.text('Rename'), findsOneWidget);
-      expect(find.text('Delete'), findsOneWidget);
-    });
-
-    testWidgets('labels a multi-instance clone by position',
-        (WidgetTester tester) async {
-      // The clone carries its app's own name, so the subtitle does not repeat it.
-      await _openSheet(tester, siblingCount: 3, instanceIndex: 2);
-
-      expect(find.text('clone 2 of 3'), findsOneWidget);
-    });
-
-    testWidgets('a lone clone shows its package rather than its own name twice',
-        (WidgetTester tester) async {
-      await _openSheet(tester);
-
-      expect(find.text('org.example'), findsOneWidget);
-    });
-
-    testWidgets('says why launch is unavailable rather than just greying it out',
-        (WidgetTester tester) async {
-      await _openSheet(tester, canLaunch: false);
-
-      expect(
-        find.text('The virtualization engine is not active on this device.'),
-        findsOneWidget,
-      );
     });
   });
 }

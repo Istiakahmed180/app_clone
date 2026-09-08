@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The only path the app-sharing FileProvider will hand out: the staging directory
+  AppSharer copies an APK into, and nothing else. A provider rooted at the whole cache
+  would also expose the APKs picked during import and the diagnostics exports.
+-->
+<paths>
+    <cache-path name="shared_apk" path="shared_apk/" />
+</paths>

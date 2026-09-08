@@ -23,6 +23,17 @@ abstract class VirtualizationEngine {
 
   Future<void> launchProfile(String profileId);
 
+  /// Stops the guest if it is running. Doing nothing is a valid outcome: a clone that
+  /// was not running is already stopped.
+  Future<void> stopProfile(String profileId);
+
+  /// Empties this clone's container — databases, preferences, files, caches — leaving
+  /// the package installed, so the next launch is a first launch.
+  Future<void> clearProfileData(String profileId);
+
+  /// Empties only this clone's caches. Logins and settings survive.
+  Future<void> clearProfileCache(String profileId);
+
   Future<List<VirtualProfileModel>> getProfiles();
 
   /// Whether profiles launched by this engine get isolated runtime state.

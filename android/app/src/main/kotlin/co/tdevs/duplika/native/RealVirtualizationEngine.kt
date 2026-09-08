@@ -400,6 +400,71 @@ class RealVirtualizationEngine(
         null
     }
 
+    /**
+     * Empties this clone's container: the next launch is a first launch.
+     *
+     * The package stays installed, so this is not the same as deleting the profile — the
+     * clone and its virtual user survive, only what the guest wrote is gone.
+     */
+    fun clearProfileData(profileId: String, packageName: String): EngineResult<Unit> {
+        val virtualUserId = profileManager.virtualUserIdFor(profileId)
+            ?: return EngineResult.Failure(
+                EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
+                "This profile has no virtual environment.",
+            )
+
+        // Stopped first: clearing the data underneath a running guest leaves it holding
+        // handles to files that no longer exist, which it experiences as corruption.
+        launcher.stop(packageName, virtualUserId)
+        val result = adapter.clearPackageData(packageName, virtualUserId)
+        phase(
+            if (result is EngineResult.Success) "PROFILE_DATA_CLEARED" else "PROFILE_DATA_CLEAR_FAILED",
+            DiagCategory.PROFILE,
+            if (result is EngineResult.Success) {
+                "Cleared all data for $packageName in virtual user $virtualUserId"
+            } else {
+                "Could not clear data for $packageName"
+            },
+            level = if (result is EngineResult.Success) DiagLevel.SUCCESS else DiagLevel.ERROR,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
+        return result
+    }
+
+    /** Empties only this clone's caches; logins and settings survive. */
+    fun clearProfileCache(profileId: String, packageName: String): EngineResult<Unit> {
+        val virtualUserId = profileManager.virtualUserIdFor(profileId)
+            ?: return EngineResult.Failure(
+                EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
+                "This profile has no virtual environment.",
+            )
+
+        val result = adapter.clearPackageCache(packageName, virtualUserId)
+        phase(
+            if (result is EngineResult.Success) "PROFILE_CACHE_CLEARED" else "PROFILE_CACHE_CLEAR_FAILED",
+            DiagCategory.STORAGE,
+            if (result is EngineResult.Success) {
+                "Cleared the cache for $packageName in virtual user $virtualUserId"
+            } else {
+                "Could not clear the cache for $packageName"
+            },
+            level = if (result is EngineResult.Success) DiagLevel.SUCCESS else DiagLevel.WARNING,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
+        return result
+    }
+
+    /** Offers this clone's APK to the share sheet. */
+    fun shareProfileApk(
+        profileId: String,
+        packageName: String,
+        label: String,
+    ): EngineResult<Unit> = AppSharer(context).share(profileId, packageName, label)
+
     fun uninstallAppFromProfile(profileId: String, packageName: String): EngineResult<Unit> {
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.Failure(
