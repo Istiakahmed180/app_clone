@@ -449,4 +449,32 @@ void main() {
       expect(Get.find<HomeController>().profiles, isEmpty);
     });
   });
+
+  group('layout', () {
+    testWidgets('the header stays put while the clones scroll', (
+      WidgetTester tester,
+    ) async {
+      // Enough clones to need scrolling.
+      for (int index = 0; index < 24; index++) {
+        await repository.createProfile(
+          packageName: 'com.example.app$index',
+          appName: 'App $index',
+          profileName: 'App $index',
+        );
+      }
+      await Get.find<HomeController>().refreshAll();
+      await pumpHome(tester);
+      await tester.pumpAndSettle();
+
+      final double before = tester.getTopLeft(find.text('Duplika')).dy;
+
+      await tester.drag(find.byType(CloneTile).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      // The title has not moved, and the grid has.
+      expect(tester.getTopLeft(find.text('Duplika')).dy, before);
+      expect(find.text('Duplika'), findsOneWidget);
+      expect(find.text('Your private space'), findsOneWidget);
+    });
+  });
 }

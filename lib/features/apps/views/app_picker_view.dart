@@ -44,6 +44,17 @@ class AppPickerView extends GetView<AppPickerController> {
                 }
 
                 final List<AppSection> sections = controller.sections;
+
+                // Read here, not in the item builder. `Obx` only records the observables
+                // touched during its own build, and an item builder runs later, during
+                // layout — so reading these there registered no dependency and the marks
+                // never updated until something else rebuilt the list. Snapshots also
+                // keep a row from seeing the set change mid-frame.
+                final Set<String> cloned = controller.clonedPackages.toSet();
+                final Set<String> cloning = controller.cloning.toSet();
+                final List<InstalledAppModel> picks = controller.quickPicks;
+                final int visibleCount = controller.visibleApps.length;
+
                 if (sections.isEmpty) {
                   return _centred(
                     const EmptyState(
@@ -65,18 +76,16 @@ class AppPickerView extends GetView<AppPickerController> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          _quickPicks(context),
-                          _installedHeading(
-                            context,
-                            controller.visibleApps.length,
-                          ),
+                          _quickPicks(context, picks, cloned, cloning),
+                          _installedHeading(context, visibleCount),
                         ],
                       );
                     }
                     final AppSection section = sections[index - 1];
                     return _SectionGroup(
                       section: section,
-                      clonedPackages: controller.clonedPackages,
+                      clonedPackages: cloned,
+                      cloningPackages: cloning,
                       onTap: (InstalledAppModel app) => _openApp(context, app),
                     );
                   },
@@ -86,8 +95,11 @@ class AppPickerView extends GetView<AppPickerController> {
           ],
         ),
       ),
+      // Only when no row is already saying it. Cloning shows its progress on the row
+      // itself; this bar is what covers the work with no row to point at — staging and
+      // parsing an imported APK.
       bottomNavigationBar: Obx(
-        () => controller.isWorking.value
+        () => controller.isWorking.value && controller.cloning.isEmpty
             ? const LinearProgressIndicator()
             : const SizedBox.shrink(),
       ),
@@ -172,9 +184,13 @@ class AppPickerView extends GetView<AppPickerController> {
   /// well-known apps, shown only where they are installed, to save scrolling past two
   /// hundred rows for the common case. Hidden while a search is active, where the list
   /// itself is already the answer.
-  Widget _quickPicks(BuildContext context) {
+  Widget _quickPicks(
+    BuildContext context,
+    List<InstalledAppModel> picks,
+    Set<String> cloned,
+    Set<String> cloning,
+  ) {
     final ThemeData theme = Theme.of(context);
-    final List<InstalledAppModel> picks = controller.quickPicks;
     if (picks.isEmpty || controller.query.value.trim().isNotEmpty) {
       return const SizedBox.shrink();
     }
@@ -202,6 +218,7 @@ class AppPickerView extends GetView<AppPickerController> {
               isCloned: controller.clonedPackages.contains(
                 picks[index].packageName,
               ),
+              isCloning: controller.cloning.contains(picks[index].packageName),
               onTap: () => _quickClone(context, picks[index]),
             ),
           ),
@@ -235,33 +252,15 @@ class AppPickerView extends GetView<AppPickerController> {
 
   /// Clones straight away, with no sheet in between.
   ///
-  /// Both routes into cloning an installed app come here — the Popular row and a list
-  /// row's Add clone — so neither asks anything.
+  /// Both routes into cloning an installed app come here — the Popular card and a list
+  /// row's Add clone — so neither asks anything. The row shows its own progress; see
+  /// [AppPickerController.cloneNow].
   ///
-  /// It still refuses to start an install the engine has already said cannot work: a
-  /// blocking verdict is reported instead of being walked into. Non-blocking findings
-  /// are not raised at all any more — missing host permissions and the Play services
-  /// option lived in the sheet this replaced, and there is no other route to either for
-  /// an installed app.
+  /// Nothing raises the non-blocking findings any more: the missing host permissions and
+  /// the Play services option lived in the sheet this replaced, and there is no other
+  /// route to either for an installed app.
   Future<void> _quickClone(BuildContext context, InstalledAppModel app) async {
-    final CompatibilityReport report = await controller.analyze(
-      app.packageName,
-    );
-    if (!context.mounted) {
-      return;
-    }
-    if (report.verdict == CompatibilityVerdict.unsupported) {
-      _showMessage(
-        context,
-        report.findings
-                .firstWhereOrNull((CompatibilityFinding f) => f.blocking)
-                ?.message ??
-            'This app cannot be cloned on this device.',
-      );
-      return;
-    }
-
-    final String? error = await controller.cloneInstalledApp(app);
+    final String? error = await controller.cloneNow(app);
     if (!context.mounted) {
       return;
     }
@@ -269,8 +268,17 @@ class AppPickerView extends GetView<AppPickerController> {
       _showMessage(context, error);
       return;
     }
-    Get.back<bool>(result: true);
+
+    // A beat before leaving, so the row is seen finishing rather than the screen
+    // changing under the finger. Short enough not to be a wait of its own.
+    await Future<void>.delayed(_cloneSettle);
+    if (context.mounted) {
+      Get.back<bool>(result: true);
+    }
   }
+
+  /// How long the finished row stays on screen before the picker closes.
+  static const Duration _cloneSettle = Duration(milliseconds: 240);
 
   /// What a picker row does when tapped.
   ///
@@ -432,11 +440,13 @@ class _SectionGroup extends StatelessWidget {
   const _SectionGroup({
     required this.section,
     required this.clonedPackages,
+    required this.cloningPackages,
     required this.onTap,
   });
 
   final AppSection section;
   final Set<String> clonedPackages;
+  final Set<String> cloningPackages;
   final ValueChanged<InstalledAppModel> onTap;
 
   @override
@@ -473,6 +483,9 @@ class _SectionGroup extends StatelessWidget {
                     isCloned: clonedPackages.contains(
                       section.apps[i].packageName,
                     ),
+                    isCloning: cloningPackages.contains(
+                      section.apps[i].packageName,
+                    ),
                     onTap: () => onTap(section.apps[i]),
                   ),
                 ],
@@ -489,6 +502,7 @@ class _AppRow extends StatelessWidget {
   const _AppRow({
     required this.app,
     required this.isCloned,
+    required this.isCloning,
     required this.onTap,
   });
 
@@ -498,6 +512,9 @@ class _AppRow extends StatelessWidget {
   /// user scanning two hundred rows for "did I already do this one" should not have to
   /// read anything.
   final bool isCloned;
+
+  /// Whether a clone of this app is being created right now.
+  final bool isCloning;
   final VoidCallback onTap;
 
   @override
@@ -549,7 +566,7 @@ class _AppRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            const _AddMark(),
+            _AddMark(isCloning: isCloning),
           ],
         ),
       ),
@@ -565,11 +582,30 @@ class _AppRow extends StatelessWidget {
 /// action the row actually performs. The verdict is reported where it can be acted on:
 /// in the clone flow, and on the app's details screen.
 class _AddMark extends StatelessWidget {
-  const _AddMark();
+  const _AddMark({this.isCloning = false});
+
+  /// True while this app's clone is being created. The mark becomes a spinner in place,
+  /// on the row the user tapped — which app is being cloned is the part they need to
+  /// see, and a bar across the bottom of the screen does not say it.
+  final bool isCloning;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    if (isCloning) {
+      return SizedBox(
+        width: 28.r,
+        height: 28.r,
+        child: Padding(
+          padding: EdgeInsets.all(2.r),
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: scheme.primary,
+          ),
+        ),
+      );
+    }
 
     return Container(
       width: 28.r,
@@ -656,11 +692,13 @@ class _QuickPickCard extends StatelessWidget {
   const _QuickPickCard({
     required this.app,
     required this.isCloned,
+    required this.isCloning,
     required this.onTap,
   });
 
   final InstalledAppModel app;
   final bool isCloned;
+  final bool isCloning;
   final VoidCallback onTap;
 
   @override
@@ -714,21 +752,32 @@ class _QuickPickCard extends StatelessWidget {
                 Positioned(
                   top: 6.h,
                   right: 6.w,
-                  child: Container(
-                    width: 18.r,
-                    height: 18.r,
-                    decoration: BoxDecoration(
-                      // A tinted disc, not a bare glyph: on a busy icon the plus alone
-                      // read as part of the artwork.
-                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      size: 12.r,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+                  child: isCloning
+                      ? SizedBox(
+                          width: 18.r,
+                          height: 18.r,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.primary,
+                          ),
+                        )
+                      : Container(
+                          width: 18.r,
+                          height: 18.r,
+                          decoration: BoxDecoration(
+                            // A tinted disc, not a bare glyph: on a busy icon the plus
+                            // alone read as part of the artwork.
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.12,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            size: 12.r,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
                 ),
               ],
             ),

@@ -44,41 +44,58 @@ class HomeView extends GetView<HomeController> {
       ),
       body: OnboardingHost(
         child: SafeArea(
-          child: Obx(() {
-            if (controller.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            return RefreshIndicator(
-              onRefresh: controller.refreshAll,
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
-                children: <Widget>[
-                  HomeHeader(
-                    title: AppConstants.appTitle,
-                    subtitle: 'Your private space',
-                    trailing: _overflowMenu(context),
-                  ),
-                  VirtualizationWarning(
-                    virtualizationActive: controller.providesRuntimeIsolation,
-                    problem: controller.virtualizationProblem,
-                  ),
-                  if (controller.errorMessage.value != null)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 12.h),
-                      child: Text(
-                        controller.errorMessage.value!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  _grid(context),
-                  if (controller.profiles.isEmpty) _emptyState(),
-                ],
+          // The header stays put; only the clones scroll. A launcher's title does not
+          // slide away when you scroll its icons, and with enough clones to need
+          // scrolling the header was the first thing to go.
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                child: HomeHeader(
+                  title: AppConstants.appTitle,
+                  subtitle: 'Your private space',
+                  trailing: _overflowMenu(context),
+                ),
               ),
-            );
-          }),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.refreshAll,
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 32.h),
+                      children: <Widget>[
+                        // Scrolls with the grid rather than pinned under the header:
+                        // it only appears when the engine is down, and a conditional
+                        // block in the fixed part would move the grid up and down as
+                        // it came and went.
+                        VirtualizationWarning(
+                          virtualizationActive:
+                              controller.providesRuntimeIsolation,
+                          problem: controller.virtualizationProblem,
+                        ),
+                        if (controller.errorMessage.value != null)
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: Text(
+                              controller.errorMessage.value!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        _grid(context),
+                        if (controller.profiles.isEmpty) _emptyState(),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:duplika/data/models/installed_app_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/app/theme/app_theme.dart';
 import 'package:duplika/features/apps/controllers/app_picker_controller.dart';
+import 'package:duplika/features/apps/views/app_picker_view.dart';
 import 'package:duplika/features/apps/widgets/installed_app_sheet.dart';
 import 'package:duplika/native/native_bridge.dart';
 import 'package:flutter/material.dart';
@@ -238,6 +239,15 @@ void main() {
 
       expect(controller.quickPicks, isEmpty);
     });
+
+    test('a clone in flight is announced per package, not globally', () {
+      // Per package because the picker draws the spinner on the row it belongs to, so
+      // a single "busy" flag could not say which app is being cloned.
+      expect(controller.cloning, isEmpty);
+      controller.cloning.add('com.apple');
+      expect(controller.cloning.contains('com.apple'), isTrue);
+      expect(controller.cloning.contains('com.zebra'), isFalse);
+    });
   });
 
   group('showInstalledAppSheet', () {
@@ -342,6 +352,131 @@ void main() {
 
       expect(chosen, isNull);
       expect(find.text('Add clone'), findsNothing);
+    });
+  });
+
+  group('AppPickerView rows', () {
+    const MethodChannel channel = MethodChannel(NativeBridge.channelName);
+
+    Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
+      'success': true,
+      'code': 'OK',
+      'message': 'ok',
+      'data': data,
+    };
+
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+            switch (call.method) {
+              case 'listInstalledApps':
+                return ok(<String, Object?>{
+                  'apps': <Object?>[
+                    <Object?, Object?>{
+                      'packageName': 'com.example.one',
+                      'appName': 'Alpha',
+                      'system': false,
+                      'abis': <Object?>['arm64-v8a'],
+                      'apkCount': 1,
+                    },
+                    <Object?, Object?>{
+                      'packageName': 'com.example.two',
+                      'appName': 'Beta',
+                      'system': false,
+                      'abis': <Object?>['arm64-v8a'],
+                      'apkCount': 1,
+                    },
+                    // A curated quick pick, so the Popular row has a card in it.
+                    <Object?, Object?>{
+                      'packageName': 'org.telegram.messenger',
+                      'appName': 'Telegram',
+                      'system': false,
+                      'abis': <Object?>['arm64-v8a'],
+                      'apkCount': 1,
+                    },
+                  ],
+                });
+              default:
+                return ok(<String, Object?>{});
+            }
+          });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+      Get.reset();
+    });
+
+    Future<AppPickerController> pumpPicker(WidgetTester tester) async {
+      final VirtualProfileRepository repository = VirtualProfileRepository(
+        storage: InMemoryProfileStorage(),
+      );
+      final NativeBridge bridge = NativeBridge(channel: channel);
+      final AppPickerController controller = AppPickerController(
+        bridge: bridge,
+        engine: RealVirtualizationEngine(
+          repository: repository,
+          nativeBridge: bridge,
+        ),
+        repository: repository,
+      );
+      Get.put<AppPickerController>(controller);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) =>
+              const GetMaterialApp(home: AppPickerView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return controller;
+    }
+
+    testWidgets('every row carries the add mark', (WidgetTester tester) async {
+      await pumpPicker(tester);
+
+      expect(find.text('Alpha'), findsOneWidget);
+      expect(find.text('Beta'), findsOneWidget);
+      // One per row, and no compatibility glyph in their place: the mark says what the
+      // row does, which is the same for every row.
+      // Three rows plus one Popular card, each with its own mark.
+      expect(find.byIcon(Icons.add), findsNWidgets(4));
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('a quick pick being cloned shows a spinner on its card', (
+      WidgetTester tester,
+    ) async {
+      final AppPickerController controller = await pumpPicker(tester);
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      controller.cloning.add('org.telegram.messenger');
+      await tester.pump();
+
+      // Two: the card in the Popular row and the app's own row in the list below. Both
+      // are the same app being cloned, and both said `+` a moment ago.
+      expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
+    });
+
+    testWidgets('the row being cloned shows a spinner, and only that row', (
+      WidgetTester tester,
+    ) async {
+      final AppPickerController controller = await pumpPicker(tester);
+
+      controller.cloning.add('com.example.one');
+      await tester.pump();
+
+      // On the row the user tapped: which app is being cloned is the part they need to
+      // see, and a bar across the bottom of the screen does not say it.
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.byIcon(Icons.add),
+        findsNWidgets(3),
+        reason: 'the other rows and the Popular card keep their plus',
+      );
     });
   });
 }

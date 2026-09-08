@@ -317,6 +317,42 @@ class AppPickerController extends GetxController {
       <String, CompatibilityReport>{};
 
   /// Clones an installed app. Returns `null` on success, or a user-facing message.
+  /// Packages a clone is being created for.
+  ///
+  /// Kept here so the row itself can say so. Creating a container takes a couple of
+  /// seconds, and a row that looked untouched for that long read as a tap that did not
+  /// register.
+  final RxSet<String> cloning = <String>{}.obs;
+
+  /// Analyses and clones in one call, marked as in flight for the whole of it.
+  ///
+  /// One method rather than the view stringing the two together, so `cloning` covers the
+  /// analysis as well as the install. Marked separately, the row sat unmarked through the
+  /// analysis — a second or so of nothing after a tap — and the global bar filled that
+  /// gap instead, which is the thing the row spinner replaced.
+  ///
+  /// Returns the error message, or null on success.
+  Future<String?> cloneNow(InstalledAppModel app) async {
+    if (cloning.contains(app.packageName) || isWorking.value) {
+      return null;
+    }
+    cloning.add(app.packageName);
+    try {
+      final CompatibilityReport report = await analyze(app.packageName);
+      if (report.verdict == CompatibilityVerdict.unsupported) {
+        // Refused rather than walked into: the engine has already said this cannot
+        // work, so starting the install would only fail later and less clearly.
+        return report.findings
+                .firstWhereOrNull((CompatibilityFinding f) => f.blocking)
+                ?.message ??
+            'This app cannot be cloned on this device.';
+      }
+      return await cloneInstalledApp(app);
+    } finally {
+      cloning.remove(app.packageName);
+    }
+  }
+
   Future<String?> cloneInstalledApp(
     InstalledAppModel app, {
     bool installGms = false,
@@ -324,6 +360,9 @@ class AppPickerController extends GetxController {
     if (isWorking.value) {
       return null;
     }
+    // Before `isWorking`, so no frame exists where the work is in flight and no row is
+    // saying which app it is for — that frame showed the global bar instead.
+    cloning.add(app.packageName);
     isWorking.value = true;
     try {
       final String profileName = await _repository.suggestProfileName(
@@ -340,6 +379,9 @@ class AppPickerController extends GetxController {
     } on AppException catch (error) {
       return error.message;
     } finally {
+      // In `finally`, so a refused create clears the row rather than leaving it
+      // spinning on a clone that is never going to exist.
+      cloning.remove(app.packageName);
       isWorking.value = false;
     }
   }
