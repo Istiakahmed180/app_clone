@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Needed by Test D: SettingsClient talks to Google Play services over the network
+         stack. No account, no location permission, no storage permission. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Android 11+ package filtering would hide com.google.android.gms from this app
+         even on an ordinary installation. Declaring the queries removes that as an
+         explanation, so a "not visible" result inside a guest can only come from the
+         virtualization layer. This is ordinary declared visibility, not a bypass. -->
+    <queries>
+        <package android:name="com.google.android.gms" />
+        <package android:name="com.google.android.gsf" />
+        <package android:name="com.android.vending" />
+    </queries>
+
+    <application
+        android:label="Ladder L9 GMS"
+        android:allowBackup="false"
+        android:theme="@style/Level9Theme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
