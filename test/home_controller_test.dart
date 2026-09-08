@@ -69,6 +69,94 @@ void main() {
         profileName: 'Clone',
       );
 
+  test('the grid groups an app\'s clones together, numbered, apps A-Z', () async {
+    // The repository hands back creation order, which scatters an app's clones across
+    // the grid — Facebook 1, WhatsApp 1, Facebook 2 — and makes the instance numbers
+    // unreadable.
+    Future<void> clone(String app, String package) => repository.createProfile(
+          packageName: package,
+          appName: app,
+          profileName: app,
+        );
+
+    await clone('WhatsApp', 'com.whatsapp');
+    await clone('Facebook', 'com.facebook.katana');
+    await clone('WhatsApp', 'com.whatsapp');
+    await clone('Instagram', 'com.instagram.android');
+    await clone('Facebook', 'com.facebook.katana');
+    await clone('Instagram', 'com.instagram.android');
+
+    await controller.refreshAll();
+
+    expect(
+      controller.profiles.map(
+        (VirtualProfileModel p) =>
+            '${p.appName} ${controller.instanceIndex(p)}',
+      ),
+      <String>[
+        'Facebook 1',
+        'Facebook 2',
+        'Instagram 1',
+        'Instagram 2',
+        'WhatsApp 1',
+        'WhatsApp 2',
+      ],
+    );
+  });
+
+  test('two different apps sharing a name keep their own clones contiguous', () async {
+    // A device can genuinely have two apps called "Notes".
+    await repository.createProfile(
+      packageName: 'com.oneplus.note',
+      appName: 'Notes',
+      profileName: 'Notes',
+    );
+    await repository.createProfile(
+      packageName: 'org.fossify.notes',
+      appName: 'Notes',
+      profileName: 'Notes',
+    );
+    await repository.createProfile(
+      packageName: 'com.oneplus.note',
+      appName: 'Notes',
+      profileName: 'Notes',
+    );
+
+    await controller.refreshAll();
+
+    expect(
+      controller.profiles.map((VirtualProfileModel p) => p.packageName),
+      <String>['com.oneplus.note', 'com.oneplus.note', 'org.fossify.notes'],
+    );
+  });
+
+  test('renaming a clone does not move it away from its siblings', () async {
+    // Grouping is by app, not by the label the user typed.
+    await repository.createProfile(
+      packageName: 'com.whatsapp',
+      appName: 'WhatsApp',
+      profileName: 'WhatsApp',
+    );
+    final VirtualProfileModel second = await repository.createProfile(
+      packageName: 'com.whatsapp',
+      appName: 'WhatsApp',
+      profileName: 'WhatsApp',
+    );
+    await repository.createProfile(
+      packageName: 'com.facebook.katana',
+      appName: 'Facebook',
+      profileName: 'Facebook',
+    );
+
+    await repository.updateProfile(second.id, profileName: 'Aaa work account');
+    await controller.refreshAll();
+
+    expect(
+      controller.profiles.map((VirtualProfileModel p) => p.appName),
+      <String>['Facebook', 'WhatsApp', 'WhatsApp'],
+    );
+  });
+
   test('a real problem is surfaced on the clone', () async {
     final VirtualProfileModel profile = await seedClone();
     responses['analyzeApp'] = ok('APP_ANALYZED', reportWith(<Map<String, Object?>>[

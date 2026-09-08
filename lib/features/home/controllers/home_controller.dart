@@ -231,11 +231,42 @@ class HomeController extends GetxController {
 
   Future<void> _loadProfiles() async {
     try {
-      profiles.assignAll(await _engine.getProfiles());
+      profiles.assignAll(_grouped(await _engine.getProfiles()));
       errorMessage.value = null;
     } on AppException catch (error) {
       errorMessage.value = error.message;
     }
+  }
+
+  /// Grid order: clones of the same app together, numbered ascending, apps A-Z.
+  ///
+  /// The repository returns creation order, which on a grid of icons scatters an app's
+  /// clones — Facebook 1, WhatsApp 1, Facebook 2 — and makes the instance numbers
+  /// unreadable. Grouping puts every Facebook side by side, in order.
+  ///
+  /// Sorted on [VirtualProfileModel.appName], not [VirtualProfileModel.profileName]:
+  /// grouping is by *app*, so renaming one clone must never move it away from its
+  /// siblings. [packageName] breaks the tie between two different apps that share a
+  /// name (a device can genuinely have two apps called "Notes"), so each package's
+  /// clones stay contiguous, and [createdAt] then puts clone 1 before clone 2 — the
+  /// same order [instanceIndex] numbers them in.
+  static List<VirtualProfileModel> _grouped(List<VirtualProfileModel> profiles) {
+    return profiles.toList()
+      ..sort((VirtualProfileModel a, VirtualProfileModel b) {
+        final int byApp =
+            a.appName.toLowerCase().compareTo(b.appName.toLowerCase());
+        if (byApp != 0) {
+          return byApp;
+        }
+        final int byPackage = a.packageName.compareTo(b.packageName);
+        if (byPackage != 0) {
+          return byPackage;
+        }
+        final int byAge = a.createdAt.compareTo(b.createdAt);
+        // Two clones created in the same millisecond would otherwise order
+        // unpredictably between reloads.
+        return byAge != 0 ? byAge : a.id.compareTo(b.id);
+      });
   }
 
   Future<void> _loadTestApp() async {
