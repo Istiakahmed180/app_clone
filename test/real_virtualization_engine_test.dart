@@ -338,7 +338,7 @@ void main() {
   });
 
   group('multi-instance naming', () {
-    test('suggests an unnumbered name for the first clone', () async {
+    test('names the first clone after its app', () async {
       expect(
         await repository.suggestProfileName(
           appName: 'Telegram',
@@ -348,7 +348,10 @@ void main() {
       );
     });
 
-    test('numbers subsequent clones of the same app', () async {
+    test('names subsequent clones of the same app after the app too', () async {
+      // Never "Telegram 2". On a grid of icons the name is the app's identity, and
+      // numbering it makes the tile look like a different app; the instance badge is
+      // what tells two clones apart.
       await repository.createProfile(
         packageName: 'org.telegram.messenger',
         appName: 'Telegram',
@@ -360,20 +363,15 @@ void main() {
           appName: 'Telegram',
           packageName: 'org.telegram.messenger',
         ),
-        'Telegram 2',
+        'Telegram',
       );
     });
 
-    test('skips names already taken by a different app', () async {
-      await repository.createProfile(
-        packageName: 'org.telegram.messenger',
-        appName: 'Telegram',
-        profileName: 'Telegram',
-      );
+    test('is not deflected by a name another app already uses', () async {
       await repository.createProfile(
         packageName: 'org.other.app',
         appName: 'Other',
-        profileName: 'Telegram 2',
+        profileName: 'Telegram',
       );
 
       expect(
@@ -381,7 +379,7 @@ void main() {
           appName: 'Telegram',
           packageName: 'org.telegram.messenger',
         ),
-        'Telegram 3',
+        'Telegram',
       );
     });
 

@@ -127,9 +127,7 @@ class _CloneActionSheet extends StatelessWidget {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          siblingCount > 1
-                              ? '${profile.appName} · clone $instanceIndex of $siblingCount'
-                              : profile.appName,
+                          _subtitle,
                           style: theme.textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -219,6 +217,19 @@ class _CloneActionSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// The second line, which says whatever the title does not already say.
+  ///
+  /// Every clone is named after its app, so repeating the app name under an identical
+  /// title would waste the only line there is. It appears only when the clone has been
+  /// renamed, and the package name fills in when there is nothing else to report.
+  String get _subtitle {
+    final List<String> parts = <String>[
+      if (profile.profileName.trim() != profile.appName.trim()) profile.appName,
+      if (siblingCount > 1) 'clone $instanceIndex of $siblingCount',
+    ];
+    return parts.isEmpty ? profile.packageName : parts.join(' · ');
   }
 
   /// Blocking findings first: they are the ones that decide whether it runs at all.

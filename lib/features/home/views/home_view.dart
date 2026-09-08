@@ -65,7 +65,9 @@ class HomeView extends GetView<HomeController> {
                       padding: EdgeInsets.only(bottom: 12.h),
                       child: Text(
                         controller.errorMessage.value!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ),
                   _grid(context),
@@ -180,7 +182,10 @@ class HomeView extends GetView<HomeController> {
     }
   }
 
-  Future<void> _launch(BuildContext context, VirtualProfileModel profile) async {
+  Future<void> _launch(
+    BuildContext context,
+    VirtualProfileModel profile,
+  ) async {
     final String? error = await controller.launchProfile(profile);
     if (!context.mounted) {
       return;
@@ -230,7 +235,7 @@ class HomeView extends GetView<HomeController> {
           error ??
               (controller.needsPermissions(profile)
                   ? 'Some permissions are still missing. The clone will keep working '
-                      'without them, but features that need them will not.'
+                        'without them, but features that need them will not.'
                   : 'Permissions granted. Relaunch the clone to pick them up.'),
         );
       case CloneAction.rename:
@@ -261,7 +266,8 @@ class HomeView extends GetView<HomeController> {
         }
         _showMessage(
           context,
-          error ?? 'Confirm the shortcut on your home screen to finish adding it.',
+          error ??
+              'Confirm the shortcut on your home screen to finish adding it.',
         );
       case CloneAction.delete:
         final bool confirmed = await showDeleteProfileDialog(

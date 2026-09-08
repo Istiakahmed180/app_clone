@@ -288,9 +288,17 @@ void main() {
 
     testWidgets('labels a multi-instance clone by position',
         (WidgetTester tester) async {
+      // The clone carries its app's own name, so the subtitle does not repeat it.
       await _openSheet(tester, siblingCount: 3, instanceIndex: 2);
 
-      expect(find.text('Example · clone 2 of 3'), findsOneWidget);
+      expect(find.text('clone 2 of 3'), findsOneWidget);
+    });
+
+    testWidgets('a lone clone shows its package rather than its own name twice',
+        (WidgetTester tester) async {
+      await _openSheet(tester);
+
+      expect(find.text('org.example'), findsOneWidget);
     });
 
     testWidgets('says why launch is unavailable rather than just greying it out',

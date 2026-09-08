@@ -10,10 +10,19 @@ import '../models/virtual_profile_model.dart';
 
 /// Owns all persistence of virtual profile metadata.
 ///
-/// Duplicate policy: several profiles may reference the same package, but profile
-/// names must be unique (trimmed, case-insensitive). A duplicate name is rejected
-/// with a [ValidationException] rather than silently overwriting the existing
-/// profile.
+/// Duplicate policy: profiles may freely share a package **and** a name. A clone is
+/// identified by its [VirtualProfileModel.id], never by what it is called, so names
+/// carry no meaning the app depends on.
+///
+/// Names used to be forced unique, which meant the second clone of an app was called
+/// "Camera 2". That is a worse answer than a duplicate: on a grid of icons the name is
+/// the app's identity, and renaming it to something the user never chose makes the tile
+/// look like a different app. Two clones of the same app are told apart by the instance
+/// number on the tile and by "clone 1 of 2" in the action sheet; two clones of
+/// *different* apps with the same label are told apart by their icons — which is exactly
+/// how Android's own launcher handles it.
+///
+/// Empty and over-long names are still rejected.
 class VirtualProfileRepository {
   VirtualProfileRepository({
     ProfileStorage? storage,
@@ -53,31 +62,26 @@ class VirtualProfileRepository {
     return null;
   }
 
-  /// Suggests the next free clone name for an app, e.g. "Telegram", then "Telegram 2".
+  /// The name a new clone should get: the app's own name, every time.
   ///
-  /// Multi-instance means several profiles legitimately share a package, so the name is
-  /// what distinguishes them. Uniqueness is still enforced by [createProfile]; this just
-  /// avoids handing the user a name that would be rejected.
+  /// No numbering, and no consulting the existing profiles. A clone of Camera is called
+  /// "Camera" whether it is the first or the fifth; the tile's instance badge is what
+  /// distinguishes them. The user can still rename any clone afterwards.
+  ///
+  /// Async only because it once had to read the stored profiles to find a free name.
+  /// Kept that way so callers — and their tests — do not all have to change for a
+  /// detail of this method.
   Future<String> suggestProfileName({
     required String appName,
     required String packageName,
   }) async {
-    final List<VirtualProfileModel> profiles = await getProfiles();
-    final Set<String> taken =
-        profiles.map((VirtualProfileModel p) => p.profileName.toLowerCase()).toSet();
-
-    final String base = appName.trim().isEmpty ? packageName : appName.trim();
-    if (!taken.contains(base.toLowerCase())) {
+    final String base = appName.trim().isEmpty ? packageName.trim() : appName.trim();
+    // Clamped here rather than left to fail in [createProfile]: an app whose own name is
+    // longer than the limit would otherwise make cloning it impossible.
+    if (base.length <= AppConstants.maxProfileNameLength) {
       return base;
     }
-
-    for (int index = 2; index < 1000; index++) {
-      final String candidate = '$base $index';
-      if (!taken.contains(candidate.toLowerCase())) {
-        return candidate;
-      }
-    }
-    return '$base ${DateTime.now().millisecondsSinceEpoch}';
+    return base.substring(0, AppConstants.maxProfileNameLength).trimRight();
   }
 
   /// How many profiles already clone [packageName].
@@ -93,7 +97,6 @@ class VirtualProfileRepository {
   }) async {
     final String name = _validateName(profileName);
     final List<VirtualProfileModel> profiles = await getProfiles();
-    _requireUniqueName(profiles, name, excludingId: null);
 
     final VirtualProfileModel profile = VirtualProfileModel(
       id: _uuid.v4(),
@@ -119,9 +122,6 @@ class VirtualProfileRepository {
     }
 
     final String? name = profileName == null ? null : _validateName(profileName);
-    if (name != null) {
-      _requireUniqueName(profiles, name, excludingId: profileId);
-    }
 
     final VirtualProfileModel updated =
         profiles[index].copyWith(profileName: name, enabled: enabled);
@@ -163,18 +163,5 @@ class VirtualProfileRepository {
       );
     }
     return name;
-  }
-
-  void _requireUniqueName(
-    List<VirtualProfileModel> profiles,
-    String name, {
-    required String? excludingId,
-  }) {
-    final String needle = name.toLowerCase();
-    final bool taken = profiles.any((VirtualProfileModel p) =>
-        p.id != excludingId && p.profileName.toLowerCase() == needle);
-    if (taken) {
-      throw ValidationException('A profile named "$name" already exists.');
-    }
   }
 }

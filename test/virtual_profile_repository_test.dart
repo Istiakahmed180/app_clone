@@ -42,15 +42,55 @@ void main() {
       );
     });
 
-    test('rejects a duplicate name without overwriting the existing profile',
-        () async {
-      final VirtualProfileModel first = await create('Profile 1');
+    test('keeps both profiles when two clones share a name', () async {
+      // Deliberate: every clone of an app is called after that app, so the second clone
+      // of Camera is "Camera" and not "Camera 2". Identity is the id, not the label.
+      final VirtualProfileModel first = await create('Camera');
+      final VirtualProfileModel second = await create('Camera');
 
-      expect(create('profile 1'), throwsA(isA<ValidationException>()));
-
+      expect(first.id, isNot(second.id));
       final List<VirtualProfileModel> profiles = await repository.getProfiles();
-      expect(profiles, hasLength(1));
-      expect(profiles.single.id, first.id);
+      expect(profiles, hasLength(2));
+      expect(
+        profiles.map((VirtualProfileModel p) => p.profileName),
+        <String>['Camera', 'Camera'],
+      );
+    });
+
+    test('every clone of an app is named after that app', () async {
+      final String first = await repository.suggestProfileName(
+        appName: 'Camera',
+        packageName: 'com.android.camera2',
+      );
+      await create(first);
+      final String second = await repository.suggestProfileName(
+        appName: 'Camera',
+        packageName: 'com.android.camera2',
+      );
+
+      expect(first, 'Camera');
+      expect(second, 'Camera', reason: 'no numbering, however many clones exist');
+    });
+
+    test('falls back to the package when the app has no name', () async {
+      expect(
+        await repository.suggestProfileName(
+          appName: '   ',
+          packageName: 'org.example.app',
+        ),
+        'org.example.app',
+      );
+    });
+
+    test('clamps a suggestion that would fail validation', () async {
+      // An app whose own name is longer than the limit must still be cloneable.
+      final String suggested = await repository.suggestProfileName(
+        appName: 'x' * (AppConstants.maxProfileNameLength + 10),
+        packageName: 'org.example.app',
+      );
+
+      expect(suggested.length, AppConstants.maxProfileNameLength);
+      expect(create(suggested), completes);
     });
 
     test('allows several profiles referencing the same package', () async {
@@ -94,14 +134,17 @@ void main() {
       expect(renamed.profileName, 'Work');
     });
 
-    test('rejects renaming to an existing name', () async {
+    test('allows renaming a profile to a name another one already has', () async {
+      // Same policy as creation: a duplicate name is the user's business, and refusing
+      // it here while allowing it there would be inconsistent.
       await create('Profile 1');
       final VirtualProfileModel second = await create('Profile 2');
 
-      expect(
-        repository.updateProfile(second.id, profileName: 'Profile 1'),
-        throwsA(isA<ValidationException>()),
-      );
+      final VirtualProfileModel renamed =
+          await repository.updateProfile(second.id, profileName: 'Profile 1');
+
+      expect(renamed.profileName, 'Profile 1');
+      expect(await repository.getProfiles(), hasLength(2));
     });
 
     test('allows renaming a profile to its own current name', () async {
