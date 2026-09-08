@@ -73,7 +73,11 @@ void main() {
       RealVirtualizationEngine(repository: repository, nativeBridge: bridge),
     );
     Get.put<HomeController>(
-      HomeController(engine: Get.find<VirtualizationEngine>(), nativeBridge: bridge),
+      HomeController(
+        engine: Get.find<VirtualizationEngine>(),
+        nativeBridge: bridge,
+        repository: repository,
+      ),
     );
     Get.put<OnboardingController>(onboarding);
   });

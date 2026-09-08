@@ -55,6 +55,7 @@ void main() {
     controller = HomeController(
       engine: RealVirtualizationEngine(repository: repository, nativeBridge: bridge),
       nativeBridge: bridge,
+      repository: repository,
     );
   });
 

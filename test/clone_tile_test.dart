@@ -3,6 +3,7 @@ import 'package:duplika/data/models/compatibility_report.dart';
 import 'package:duplika/data/models/engine_result.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
+import 'package:duplika/features/home/widgets/clone_count_dialog.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/widgets/space_info_sheet.dart';
 import 'package:flutter/material.dart';
@@ -394,6 +395,113 @@ void main() {
       await open(tester);
 
       expect(find.text('Grant permissions'), findsNothing);
+    });
+  });
+
+  group('showCloneCountDialog', () {
+    Future<int?> open(WidgetTester tester) async {
+      int? chosen;
+      bool answered = false;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => TextButton(
+                  onPressed: () async {
+                    chosen = await showCloneCountDialog(
+                      context,
+                      appName: 'Example',
+                    );
+                    answered = true;
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(answered, isFalse, reason: 'still open until answered');
+      return chosen;
+    }
+
+    testWidgets('names the app it is about to copy', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('Clone app'), findsOneWidget);
+      expect(find.text('Create additional copies of Example.'), findsOneWidget);
+      expect(find.text('Choose from 1 to 20'), findsOneWidget);
+    });
+
+    testWidgets('starts at one and steps up', (WidgetTester tester) async {
+      await open(tester);
+      expect(find.text('1'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+
+      expect(find.text('3'), findsOneWidget);
+    });
+
+    testWidgets('will not step below the minimum', (WidgetTester tester) async {
+      await open(tester);
+
+      // Disabled rather than hidden, so the control keeps its shape at the bound.
+      final IconButton minus = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.remove),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(minus.onPressed, isNull);
+
+      await tester.tap(find.byIcon(Icons.remove));
+      await tester.pumpAndSettle();
+      expect(find.text('1'), findsOneWidget);
+    });
+
+    testWidgets('will not step past the maximum', (WidgetTester tester) async {
+      await open(tester);
+
+      for (int i = 0; i < 25; i++) {
+        await tester.tap(find.byIcon(Icons.add));
+        await tester.pump();
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.text('20'), findsOneWidget);
+      final IconButton plus = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.add),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(plus.onPressed, isNull);
+    });
+
+    testWidgets('Cancel answers nothing, Clone answers the count', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Clone app'), findsNothing);
+
+      await open(tester);
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clone'));
+      await tester.pumpAndSettle();
+      expect(find.text('Clone app'), findsNothing);
     });
   });
 }

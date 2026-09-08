@@ -53,6 +53,7 @@ class HomeBinding extends Bindings {
       () => HomeController(
         engine: Get.find<VirtualizationEngine>(),
         nativeBridge: Get.find<NativeBridge>(),
+        repository: Get.find<VirtualProfileRepository>(),
       ),
     );
     Get.lazyPut<OnboardingController>(

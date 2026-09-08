@@ -13,6 +13,7 @@ import '../../profiles/widgets/profile_dialogs.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/add_clone_tile.dart';
 import '../widgets/clone_action_sheet.dart';
+import '../widgets/clone_count_dialog.dart';
 import '../widgets/clone_tile.dart';
 import '../widgets/home_header.dart';
 import '../widgets/space_info_sheet.dart';
@@ -204,6 +205,88 @@ class HomeView extends GetView<HomeController> {
     await _handleAction(context, profile, action);
   }
 
+  /// Makes more copies of an app the user already has a clone of.
+  ///
+  /// Asks for a count and creates them here, rather than sending the user back through
+  /// the picker to choose the app they just long-pressed. The picker is still how a
+  /// *new* app is cloned; this is the shortcut for one already on the grid.
+  Future<void> _cloneAgain(
+    BuildContext context,
+    VirtualProfileModel profile,
+  ) async {
+    final int? count = await showCloneCountDialog(
+      context,
+      appName: profile.appName,
+    );
+    if (count == null || !context.mounted) {
+      return;
+    }
+
+    // Each clone is a container install of a few seconds. A barrier that reports its
+    // progress is the honest thing to show; a frozen grid would read as a hang.
+    final ValueNotifier<String> progress = ValueNotifier<String>(
+      'Creating 1 of $count…',
+    );
+    _showProgress(context, profile, progress);
+
+    final String? error = await controller.createClones(
+      profile,
+      count,
+      onProgress: (int created, int total) => progress.value = created >= total
+          ? 'Finishing…'
+          : 'Creating ${created + 1} of $total…',
+    );
+
+    if (!context.mounted) {
+      progress.dispose();
+      return;
+    }
+    // Closes the barrier, whose route is the top one.
+    Navigator.of(context).pop();
+    progress.dispose();
+
+    _showMessage(
+      context,
+      error ??
+          (count == 1
+              ? 'Added another ${profile.appName}.'
+              : 'Added $count more copies of ${profile.appName}.'),
+    );
+  }
+
+  void _showProgress(
+    BuildContext context,
+    VirtualProfileModel profile,
+    ValueNotifier<String> progress,
+  ) {
+    showDialog<void>(
+      context: context,
+      // Not dismissible: the work carries on regardless, and letting the user close the
+      // barrier would leave clones appearing behind a screen that says nothing.
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+        content: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 22.r,
+              height: 22.r,
+              child: const CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 18.w),
+            Expanded(
+              child: ValueListenableBuilder<String>(
+                valueListenable: progress,
+                builder:
+                    (BuildContext context, String message, Widget? child) =>
+                        Text(message),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Opens the facts about one clone, and applies the one fix it offers.
   Future<void> _openSpaceInfo(
     BuildContext context,
@@ -325,14 +408,7 @@ class HomeView extends GetView<HomeController> {
           _showMessage(context, error);
         }
       case CloneAction.clone:
-        // Reuse the picker pre-filtered to this app rather than duplicating the flow.
-        final Object? created = await Get.toNamed<Object?>(
-          AppRoutes.appPicker,
-          arguments: profile.packageName,
-        );
-        if (created == true) {
-          await controller.refreshAll();
-        }
+        await _cloneAgain(context, profile);
       case CloneAction.addShortcut:
         final String? error = await controller.addShortcut(profile);
         if (!context.mounted) {

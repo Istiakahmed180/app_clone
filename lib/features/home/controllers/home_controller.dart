@@ -10,13 +10,22 @@ import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
+import '../../../data/repositories/virtual_profile_repository.dart';
 import '../../../native/native_bridge.dart';
 
 class HomeController extends GetxController {
-  HomeController({required this._engine, required this._nativeBridge});
+  HomeController({
+    required this._engine,
+    required this._nativeBridge,
+    required this._repository,
+  });
 
   final VirtualizationEngine _engine;
   final NativeBridge _nativeBridge;
+
+  /// Consulted only for what a new clone should be called. The same seam the picker
+  /// uses, so both flows name clones by one rule.
+  final VirtualProfileRepository _repository;
   final AppLogger _logger = const AppLogger('HomeController');
 
   final RxList<VirtualProfileModel> profiles = <VirtualProfileModel>[].obs;
@@ -321,6 +330,53 @@ class HomeController extends GetxController {
     } on AppException catch (error) {
       return error.message;
     }
+  }
+
+  /// Makes [count] more clones of this app.
+  ///
+  /// Each one is a container install of a few seconds, so [onProgress] reports as they
+  /// land and the caller can say so — twenty clones is close to a minute of work, and
+  /// a screen that simply froze would look broken.
+  ///
+  /// Keeps going after a failure and reports the tally. Stopping at the first error
+  /// would leave the user with an unexplained partial result; carrying on gets them as
+  /// many as the engine will give and then says exactly what happened.
+  ///
+  /// Returns null when every clone was created, or a user-facing message otherwise.
+  Future<String?> createClones(
+    VirtualProfileModel profile,
+    int count, {
+    void Function(int created, int total)? onProgress,
+  }) async {
+    int created = 0;
+    String? firstFailure;
+
+    for (int index = 0; index < count; index++) {
+      try {
+        await _engine.createProfile(
+          packageName: profile.packageName,
+          appName: profile.appName,
+          profileName: await _repository.suggestProfileName(
+            appName: profile.appName,
+            packageName: profile.packageName,
+          ),
+        );
+        created++;
+      } on AppException catch (error) {
+        firstFailure ??= error.message;
+      }
+      onProgress?.call(created, count);
+    }
+
+    await refreshAll();
+
+    if (firstFailure == null) {
+      return null;
+    }
+    if (created == 0) {
+      return firstFailure;
+    }
+    return 'Created $created of $count. $firstFailure';
   }
 
   /// Stops the guest if it is running. Returns null on success.
