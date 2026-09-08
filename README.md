@@ -126,10 +126,10 @@ virtual_space_demo/lib/
 ├── native/native_bridge.dart          the ONLY MethodChannel caller
 ├── features/
 │   ├── apps/          clone picker, APK import, compatibility sheet
-│   ├── home/          clone list, engine status notice
+│   ├── home/          clone grid, action sheet, engine status notice
 │   ├── onboarding/    consent, terms, Doze exemption (docs/ONBOARDING.md)
 │   └── profiles/      rename and delete dialogs
-└── widgets/{profile_card, app_icon, empty_state}.dart
+└── widgets/{app_icon, empty_state}.dart
 ```
 
 ## 5. Flutter architecture

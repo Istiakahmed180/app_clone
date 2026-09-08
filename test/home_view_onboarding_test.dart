@@ -118,7 +118,7 @@ void main() {
     expect(tester.getSize(warning).height, 0);
     // What the user gets instead: the identity block and a way to add a clone.
     expect(find.text('Duplika'), findsOneWidget);
-    expect(find.text('Add clone'), findsOneWidget);
+    expect(find.text('Add app'), findsOneWidget);
   });
 
   testWidgets('a device the engine cannot run on says so, in the backend\'s words',

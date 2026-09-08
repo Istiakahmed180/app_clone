@@ -303,15 +303,16 @@ Two consequences worth stating plainly rather than discovering later:
   grants it to Duplika, and therefore to every clone. Per-clone permission scoping
   would require the engine to virtualize permission checks, which it does not.
 - Compatibility is now shown on existing clones too, not only in the picker. `HomeController`
-  analyses each **distinct** cloned package once per refresh and `ProfileCard` surfaces the most
-  serious finding, blocking ones first.
+  analyses each **distinct** cloned package once per refresh. `CloneTile` marks the clone with
+  the most serious finding — blocking ones win — and the long-press sheet
+  (`showCloneActionSheet`) lists every finding in full, blocking first.
 
   One trap was designed around: a clone created from an **imported APK** is normally not
   installed on the host, so a naive analysis reports `APP_NOT_FOUND` as a blocking problem.
   That clone has its own container and works fine, so flagging it would be a false alarm about
   the import feature itself. `HomeController.warningsFor` filters `APP_NOT_FOUND` out, and a
   report that could not be produced at all yields no warnings rather than a scary one. Covered
-  by `test/home_controller_test.dart` and `test/profile_card_test.dart`.
+  by `test/home_controller_test.dart` and `test/clone_tile_test.dart`.
 
 - Imported APKs are now analysed from the archive itself (`analyzeApk`), so they no longer
   fall back to a clean bill of health. If analysis genuinely fails the sheet says

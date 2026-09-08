@@ -5,11 +5,11 @@ import '../../../app/theme/app_theme.dart';
 
 /// The tinted square that starts a new clone.
 ///
-/// It sits in the content rather than floating over it, so it scrolls with the list and
-/// never covers the last card. That is the trade the reference layout makes, and it is
-/// why there is no floating action button on this screen.
+/// It sits in the grid as its first cell rather than floating over it, so it scrolls
+/// with the clones and never covers the last one. That is why there is no floating
+/// action button on this screen.
 class AddCloneTile extends StatelessWidget {
-  const AddCloneTile({required this.onTap, this.label = 'Add clone', super.key});
+  const AddCloneTile({required this.onTap, this.label = 'Add app', super.key});
 
   final VoidCallback onTap;
   final String label;
@@ -28,9 +28,9 @@ class AddCloneTile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
+          // No fixed size: the tile is the first cell of the clone grid, so the grid
+          // decides how big it is and it stays the same size as every icon beside it.
           child: Ink(
-            width: 104.w,
-            height: 112.h,
             decoration: BoxDecoration(
               borderRadius: radius,
               border: Border.all(color: theme.colorScheme.primary, width: 1.5),
@@ -39,20 +39,26 @@ class AddCloneTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  width: 52.r,
-                  height: 52.r,
+                  width: 46.r,
+                  height: 46.r,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.add,
-                    size: 28.r,
+                    size: 26.r,
                     color: theme.colorScheme.onPrimary,
                   ),
                 ),
-                SizedBox(height: 12.h),
-                Text(label, style: theme.textTheme.titleSmall),
+                SizedBox(height: 8.h),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium
+                      ?.copyWith(color: theme.colorScheme.onSurface),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
