@@ -41,9 +41,11 @@ class AppPickerController extends GetxController {
       return apps;
     }
     return apps
-        .where((InstalledAppModel app) =>
-            app.appName.toLowerCase().contains(needle) ||
-            app.packageName.toLowerCase().contains(needle))
+        .where(
+          (InstalledAppModel app) =>
+              app.appName.toLowerCase().contains(needle) ||
+              app.packageName.toLowerCase().contains(needle),
+        )
         .toList(growable: false);
   }
 
@@ -55,13 +57,17 @@ class AppPickerController extends GetxController {
   /// last, rather than being scattered through A-Z by its raw code point.
   List<AppSection> get sections {
     final List<InstalledAppModel> visible = visibleApps.toList()
-      ..sort((InstalledAppModel a, InstalledAppModel b) =>
-          a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+      ..sort(
+        (InstalledAppModel a, InstalledAppModel b) =>
+            a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
+      );
 
     final Map<String, List<InstalledAppModel>> grouped =
         <String, List<InstalledAppModel>>{};
     for (final InstalledAppModel app in visible) {
-      grouped.putIfAbsent(_initial(app.appName), () => <InstalledAppModel>[]).add(app);
+      grouped
+          .putIfAbsent(_initial(app.appName), () => <InstalledAppModel>[])
+          .add(app);
     }
 
     final List<String> letters = grouped.keys.toList()..sort();
@@ -71,7 +77,9 @@ class AppPickerController extends GetxController {
     }
 
     return letters
-        .map((String letter) => AppSection(letter: letter, apps: grouped[letter]!))
+        .map(
+          (String letter) => AppSection(letter: letter, apps: grouped[letter]!),
+        )
         .toList(growable: false);
   }
 
@@ -127,7 +135,11 @@ class AppPickerController extends GetxController {
       _reports[packageName] = report;
       return report;
     } on AppException catch (error, stackTrace) {
-      _logger.error('Compatibility analysis failed for $packageName', error, stackTrace);
+      _logger.error(
+        'Compatibility analysis failed for $packageName',
+        error,
+        stackTrace,
+      );
       return CompatibilityReport.unknown;
     }
   }
@@ -137,17 +149,25 @@ class AppPickerController extends GetxController {
     try {
       return await _bridge.analyzeApk(candidate.apkPath, candidate.packageName);
     } on AppException catch (error, stackTrace) {
-      _logger.error('APK analysis failed for ${candidate.packageName}', error, stackTrace);
+      _logger.error(
+        'APK analysis failed for ${candidate.packageName}',
+        error,
+        stackTrace,
+      );
       return CompatibilityReport.unknown;
     }
   }
 
   /// Asks for the permissions the guest needs. Returns null when it could not be asked.
-  Future<PermissionRequestResult?> requestPermissions(String packageName) async {
+  Future<PermissionRequestResult?> requestPermissions(
+    String packageName,
+  ) async {
     try {
-      final PermissionRequestResult result =
-          await _bridge.requestGuestPermissions(packageName);
-      _reports.remove(packageName); // grants changed; the cached verdict is stale
+      final PermissionRequestResult result = await _bridge
+          .requestGuestPermissions(packageName);
+      _reports.remove(
+        packageName,
+      ); // grants changed; the cached verdict is stale
       return result;
     } on AppException catch (error) {
       errorMessage.value = error.message;
@@ -155,7 +175,8 @@ class AppPickerController extends GetxController {
     }
   }
 
-  final Map<String, CompatibilityReport> _reports = <String, CompatibilityReport>{};
+  final Map<String, CompatibilityReport> _reports =
+      <String, CompatibilityReport>{};
 
   /// Clones an installed app. Returns `null` on success, or a user-facing message.
   Future<String?> cloneInstalledApp(
@@ -190,7 +211,10 @@ class AppPickerController extends GetxController {
     final List<PlatformFile> picked = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: <String>['apk'],
+      // 'bin' is here for the `.papk.bin` files Duplika itself shares: sharing an
+      // archive nothing can read back would make the share sheet pointless. Kept in
+      // step with `AppSharer.EXTENSION`.
+      allowedExtensions: <String>['apk', 'bin'],
       withData: false,
       withReadStream: true,
     );
@@ -257,7 +281,10 @@ class AppPickerController extends GetxController {
     final List<String> paths = <String>[];
     for (int index = 0; index < pickedFiles.length; index++) {
       final PlatformFile picked = pickedFiles[index];
-      final String safeName = picked.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+      final String safeName = picked.name.replaceAll(
+        RegExp(r'[^A-Za-z0-9._-]'),
+        '_',
+      );
       final File target = File('${imports.path}/${index}_$safeName');
       final IOSink sink = target.openWrite();
       try {

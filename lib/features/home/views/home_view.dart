@@ -167,10 +167,11 @@ class HomeView extends GetView<HomeController> {
   }
 
   Future<void> _openAddProfile() async {
-    final Object? created = await Get.toNamed<Object?>(AppRoutes.appPicker);
-    if (created == true) {
-      await controller.refreshAll();
-    }
+    await Get.toNamed<Object?>(AppRoutes.appPicker);
+    // Refreshed unconditionally rather than on the picker's return value: the system
+    // back button pops with no result, and a clone the engine has already installed was
+    // then invisible until the app was restarted.
+    await controller.refreshAll();
   }
 
   Future<void> _launch(
