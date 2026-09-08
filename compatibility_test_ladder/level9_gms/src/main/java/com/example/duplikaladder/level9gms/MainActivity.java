@@ -48,6 +48,8 @@ public class MainActivity extends Activity {
         results.put("C", TestResult.notTested("C", "GMS service resolution"));
         results.put("D", TestResult.notTested("D", "GoogleApi client connection"));
         results.put("E", TestResult.notTested("E", "Google/Firebase dependency diagnostics"));
+        results.put("F", TestResult.notTested("F", "Account identity"));
+        results.put("G", TestResult.notTested("G", "Caller identity coherence"));
         setContentView(buildUi());
 
         // Runs itself. Both halves of the comparison — a normal installation and a clone —
@@ -107,6 +109,8 @@ public class MainActivity extends Activity {
         record(TestAPackageDetection.run(this));
         record(TestBAvailability.run(this));
         record(TestELibraryDiagnostics.run(this));
+        record(TestFAccountIdentity.run(this));
+        record(TestGCallerIdentity.run(this));
 
         // C and D are asynchronous and are chained, so only one bind to Play services is
         // ever outstanding.

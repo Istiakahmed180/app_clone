@@ -3,10 +3,13 @@ https://github.com/ALEX5402/NewBlackbox
 
 PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the source at
 the commit above with the numbered patches in engine-patches applied. These include the
-Android 15 AppOps return-type fix, split APK installation support, and the permission-gated
-public-media path bridge. The media bridge exposes existing public media directories to a
+Android 15 AppOps return-type fix, host-platform package visibility, split APK installation
+support, and the permission-gated public-media path bridge. The media bridge exposes existing public media directories to a
 guest only when the host's user-granted android:manage_external_storage app-op is allowed;
-it does not grant or bypass that permission. To reproduce: clone the repo at that commit,
+it does not grant or bypass that permission. The package-visibility patch lets a guest's
+by-name PackageManager query for Google Play services, GSF and the Play Store be answered by
+the host PackageManager verbatim, and removes an upstream hardcoded fabricated PackageInfo
+for com.android.vending; it changes no signature, permission, UID or identity. To reproduce: clone the repo at that commit,
 apply every engine-patches/*.patch, lower Bcore's compileOptions from JavaVersion.VERSION_21
 to VERSION_17 (local JDK is 17), and run `./gradlew :Bcore:assembleRelease` (NDK
 29.0.13846066). See engine-patches/README.md.
