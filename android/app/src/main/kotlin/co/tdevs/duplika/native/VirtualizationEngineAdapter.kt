@@ -137,6 +137,9 @@ object EngineErrorCodes {
     const val APK_NOT_AVAILABLE = "APK_NOT_AVAILABLE"
     const val SHARE_FAILED = "SHARE_FAILED"
     const val PROFILE_DELETE_FAILED = "PROFILE_DELETE_FAILED"
+
+    /** A hand-typed space identifier was not well-formed and was not stored. */
+    const val SPACE_IDENTITY_INVALID = "SPACE_IDENTITY_INVALID"
     const val VIRTUAL_APP_NOT_INSTALLED = "VIRTUAL_APP_NOT_INSTALLED"
     const val VIRTUAL_APP_LAUNCH_FAILED = "VIRTUAL_APP_LAUNCH_FAILED"
 

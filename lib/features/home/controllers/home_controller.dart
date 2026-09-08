@@ -363,7 +363,8 @@ class HomeController extends GetxController {
   Future<SpaceIdentity> spaceIdentity(
     VirtualProfileModel profile, {
     String action = 'read',
-  }) => _nativeBridge.spaceIdentity(profile.id, action: action);
+    Map<String, String>? values,
+  }) => _nativeBridge.spaceIdentity(profile.id, action: action, values: values);
 
   /// Makes [count] more clones of this app.
   ///

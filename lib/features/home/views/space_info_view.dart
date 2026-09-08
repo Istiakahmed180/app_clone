@@ -9,6 +9,7 @@ import '../../../data/models/engine_result.dart';
 import '../../../data/models/space_identity.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../controllers/home_controller.dart';
+import 'space_identity_editor_view.dart';
 
 /// The device identifiers one space presents as its own.
 ///
@@ -248,8 +249,7 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
         SizedBox(width: 12.w),
         Expanded(
           child: OutlinedButton(
-            // Nothing to reset until the identity has been changed at least once.
-            onPressed: enabled && _identity!.isModified ? _reset : null,
+            onPressed: enabled ? _reset : null,
             child: const Text('Reset'),
           ),
         ),
@@ -257,22 +257,41 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
     );
   }
 
+  /// Opens the editor, where each identifier is typed by hand.
   Future<void> _modify() async {
+    final bool? saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => SpaceIdentityEditorView(
+          controller: widget.controller,
+          profile: widget.profile,
+          identity: _identity!,
+          spaceIndex: widget.instanceIndex,
+          isRunning: widget.state.running,
+        ),
+      ),
+    );
+    if (saved != true || !mounted) {
+      return;
+    }
+    await _load();
+    if (mounted) {
+      _say('This space\'s identifiers were changed.');
+    }
+  }
+
+  /// Replaces the whole set with new random values, after asking.
+  ///
+  /// Asked because it is irreversible: the previous values are overwritten and kept
+  /// nowhere, so "undo" is not a thing that can be offered afterwards.
+  Future<void> _reset() async {
+    if (!await showResetIdentityDialog(context) || !mounted) {
+      return;
+    }
     await _load(action: 'regenerate');
     if (!mounted) {
       return;
     }
-    _say(
-      'This space was given a new identity (revision ${_identity?.revision ?? 0}).',
-    );
-  }
-
-  Future<void> _reset() async {
-    await _load(action: 'reset');
-    if (!mounted) {
-      return;
-    }
-    _say('This space is back to the identity it started with.');
+    _say('This space was given a new set of identifiers.');
   }
 
   void _say(String message) {

@@ -91,18 +91,41 @@ the real IMEI or serial (`READ_PRIVILEGED_PHONE_STATE` is system-only) and since
 MAC addresses come back as `02:00:00:00:00:00`, so "show the device's identifiers" is not
 something an app can do at all.
 
-`SpaceIdentityStore` derives the whole set from `SHA-256("<profileId>#<revision>")`:
+`SpaceIdentityStore` owns the set. The **stored file is the source of truth**, not a
+derivation, because a value the user typed cannot be recomputed from anything:
 
-- **Deterministic**, so a lost or corrupt file rebuilds exactly the identity the space had,
-  two spaces never collide, and `Modify` is simply the next revision.
-- **Well-formed**: the device id carries a valid Luhn check digit, and both MAC addresses
-  have the multicast bit cleared and the locally-administered bit set, so neither can be
-  mistaken for a vendor's range.
-- **Persisted** to `filesDir/space_identity/<virtualUserId>.json`, rewritten whenever what
-  is on disk is not what the code derives. That file — not the Dart side — is what an engine
-  override would read from inside a guest process, where the profile id is not available.
+- **First set is derived** from `SHA-256("<profileId>#")`, so two spaces never collide and
+  a space that loses its file before anyone edits it comes back as itself.
+- **Well-formed** when generated: the device id carries a valid Luhn check digit, and both
+  MAC addresses have the multicast bit cleared and the locally-administered bit set, so
+  neither can be mistaken for a vendor's range.
+- **Persisted** to `filesDir/space_identity/<virtualUserId>.json`. That file — not the Dart
+  side — is what an engine override would read from inside a guest process, where the
+  profile id is not available.
 - **Forgotten** when the space is deleted, before its `virtualUserId` is released, because
   ids are reused as the lowest free integer.
+
+Two actions change it, and they do different things:
+
+| Action | Behaviour |
+| --- | --- |
+| **Modify** | Opens an editor. Every identifier is free text. |
+| **Reset** | Asks first, then replaces all five with a new **random** set. |
+
+`Reset` is irreversible by construction: the previous values are overwritten and kept
+nowhere, so there is no route back to the set a space started with.
+
+Editing validates in two places, and the split matters. **Structure is refused** — a MAC
+with four octets, an Android id that is not sixteen hex characters. **Implausibility is
+only reported** — an IMEI whose Luhn check digit does not add up, a MAC outside the
+locally-administered range. The user asked to type these values; refusing anything a real
+device would not have would make the field unusable, and a detectably fabricated identifier
+is worse than the device's own, so they are told and they decide.
+
+The rules exist in `SpaceIdentifierField` (so the editor can refuse a value while the user
+is still looking at it) and again in `SpaceIdentityStore.validate` (because the store is the
+only writer of a file a guest process will read, and a writer that trusts its caller is not
+a guard). Keep the two in step.
 
 ### What is not true yet
 

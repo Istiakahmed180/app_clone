@@ -333,13 +333,21 @@ class NativeBridge {
   ///
   /// One method for all three because they answer with the same shape: the caller always
   /// wants the resulting set, whichever way it got there.
+  /// Reads, replaces or regenerates a space's identifier set.
+  ///
+  /// [values] is only sent for `'update'`.
   Future<SpaceIdentity> spaceIdentity(
     String profileId, {
     String action = 'read',
+    Map<String, String>? values,
   }) async {
     final EngineResponse response = await _invokeEngine(
       'spaceIdentity',
-      <String, dynamic>{'profileId': profileId, 'action': action},
+      <String, dynamic>{
+        'profileId': profileId,
+        'action': action,
+        if (values != null) 'values': values,
+      },
     );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);

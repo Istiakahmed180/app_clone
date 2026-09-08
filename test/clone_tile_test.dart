@@ -343,11 +343,14 @@ void main() {
                   'revision': (identityData['revision']! as int) + 1,
                   'deviceId': '358240059999998',
                 };
-              } else if (action == 'reset') {
+              } else if (action == 'update') {
+                final Map<Object?, Object?> values =
+                    args['values']! as Map<Object?, Object?>;
                 identityData = <String, Object?>{
                   ...identityData,
-                  'revision': 0,
-                  'deviceId': '358240051111110',
+                  'revision': (identityData['revision']! as int) + 1,
+                  for (final MapEntry<Object?, Object?> entry in values.entries)
+                    entry.key! as String: entry.value,
                 };
               }
               return <Object?, Object?>{
@@ -450,42 +453,123 @@ void main() {
       expect(find.textContaining('private to this space'), findsNothing);
     });
 
-    testWidgets('Modify asks for a new identity and shows it', (
+    testWidgets('Modify opens the editor rather than randomising in place', (
+      WidgetTester tester,
+    ) async {
+      // Modify used to regenerate on the spot. The user sets these values, so it opens
+      // an editor and nothing is written until Save.
+      await open(tester);
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Space 1 identifiers'), findsOneWidget);
+      expect(identityActions, <String>[
+        'read',
+      ], reason: 'opening the editor changes nothing');
+      // The current values are what it opens with.
+      expect(find.widgetWithText(TextField, '358240051111110'), findsOneWidget);
+    });
+
+    testWidgets('a hand-typed identifier is saved as typed', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, '9774d56d682e549c'),
+        '1234567890abcdef',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(identityActions, <String>['read', 'update', 'read']);
+      expect(identityData['androidId'], '1234567890abcdef');
+      expect(find.text('1234567890abcdef'), findsOneWidget);
+    });
+
+    testWidgets('a malformed identifier is refused, not stored', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+
+      // An Android ID is sixteen hexadecimal characters and nothing else.
+      await tester.enterText(
+        find.widgetWithText(TextField, '9774d56d682e549c'),
+        'zzzz',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('An Android ID is 16 hexadecimal characters.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(identityActions, <String>[
+        'read',
+      ], reason: 'nothing reached the engine');
+    });
+
+    testWidgets('an implausible but well-formed value is warned, not blocked', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+
+      // Fifteen digits with a check digit that does not add up. A real IMEI would fail
+      // validation, which the user is told; it is still their value to set.
+      await tester.enterText(
+        find.widgetWithText(TextField, '358240051111110'),
+        '358240051111111',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('check digit does not add up'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(identityData['deviceId'], '358240051111111');
+    });
+
+    testWidgets('Reset asks first, then generates a new set', (
       WidgetTester tester,
     ) async {
       await open(tester);
 
-      await tester.tap(find.text('Modify'));
+      await tester.tap(find.text('Reset'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Generate new identifiers?'), findsOneWidget);
+      expect(
+        find.textContaining('cannot be recovered'),
+        findsOneWidget,
+        reason: 'the dialog says the old values are gone for good',
+      );
+      expect(identityActions, <String>['read']);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(identityActions, <String>[
+        'read',
+      ], reason: 'Cancel changes nothing');
+
+      await tester.tap(find.text('Reset'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Generate'));
       await tester.pumpAndSettle();
 
       expect(identityActions, <String>['read', 'regenerate']);
       expect(find.text('358240059999998'), findsOneWidget);
-      expect(find.text('358240051111110'), findsNothing);
-    });
-
-    testWidgets('Reset waits until there is something to reset', (
-      WidgetTester tester,
-    ) async {
-      await open(tester);
-
-      // Revision 0 is the identity the space was born with; resetting to it is a no-op
-      // dressed up as an action.
-      expect(
-        tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
-        isNull,
-      );
-
-      await tester.tap(find.text('Modify'));
-      await tester.pumpAndSettle();
-      expect(
-        tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
-        isNotNull,
-      );
-
-      await tester.tap(find.text('Reset'));
-      await tester.pumpAndSettle();
-      expect(identityActions, <String>['read', 'regenerate', 'reset']);
-      expect(find.text('358240051111110'), findsOneWidget);
     });
 
     testWidgets(

@@ -366,8 +366,16 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "spaceIdentity" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val action = call.argument<String>("action") ?: "read"
+                // Only strings are taken across, so a malformed argument map cannot put
+                // anything but text into the stored identity.
+                val values = call.argument<Map<String, Any?>>("values")
+                    .orEmpty()
+                    .mapNotNull { (key, value) ->
+                        if (value is String) key to value else null
+                    }
+                    .toMap()
                 async(result) {
-                    when (val identity = engine.spaceIdentity(profileId, action)) {
+                    when (val identity = engine.spaceIdentity(profileId, action, values)) {
                         is EngineResult.Success ->
                             success("SPACE_IDENTITY", "Space identity read.", identity.value)
                         is EngineResult.Failure -> failure(identity.code, identity.message)

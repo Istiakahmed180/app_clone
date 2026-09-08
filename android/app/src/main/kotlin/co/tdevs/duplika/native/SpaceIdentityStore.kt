@@ -18,8 +18,13 @@ import java.security.MessageDigest
  * claimed to show "this device's identifiers" would be showing four blanks.
  *
  * **A space's identity should not be the device's anyway.** The point of a per-space
- * identifier set is that it is the space's, so it is derived from the profile id and a
- * revision number: stable across restarts, different per space, and regenerable.
+ * identifier set is that it is the space's.
+ *
+ * The stored file is the source of truth, not a derivation: a space's first set comes
+ * from a hash of its profile id, but the user can hand-type any of the five afterwards,
+ * and a value someone typed cannot be recomputed from anything. Regenerating uses a
+ * random nonce rather than a counter, so a new set is genuinely new and the previous one
+ * is gone for good — there is no going back to it.
  *
  * Written to `filesDir/space_identity/<virtualUserId>.json`, which every Duplika process
  * can read — including the Bcore stub processes, which run under the same UID. That is
@@ -60,29 +65,75 @@ class SpaceIdentityStore(context: Context) {
      */
     @Synchronized
     fun identity(profileId: String, virtualUserId: Int): Identity {
-        val identity = derive(profileId, virtualUserId, readRevision(virtualUserId))
-        // A read writes too, whenever the file does not already say exactly this: a
-        // space nobody has modified has no file at all, and one written before a change
-        // to how a value is shaped holds values this screen no longer shows. The file is
-        // the only copy a guest process can read, so leaving it stale or absent would
-        // point the engine override at the wrong identity.
+        stored(virtualUserId)?.let { return it }
+
+        // No file yet: this space has never been looked at. Its first set is derived from
+        // the profile id so two spaces never collide and the same space always starts
+        // from the same place. Everything after that is stored, not derived.
+        val identity = derive(profileId, virtualUserId, nonce = "")
         persist(profileId, virtualUserId, identity)
         return identity
     }
 
-    /** Gives this space a new identity. Returns the new set. */
+    /**
+     * Replaces this space's identifiers with values the user typed.
+     *
+     * Validated here as well as in the UI: this is the only writer of the file a guest
+     * process will read, and a malformed identifier is worse than a real one — an IMEI
+     * with the wrong number of digits is detectably fake, where the device's own is
+     * merely shared.
+     */
+    @Synchronized
+    fun update(
+        profileId: String,
+        virtualUserId: Int,
+        values: Map<String, String>,
+    ): Result<Identity> {
+        val current = identity(profileId, virtualUserId)
+        val next = current.copy(
+            revision = current.revision + 1,
+            deviceId = values["deviceId"] ?: current.deviceId,
+            androidId = values["androidId"] ?: current.androidId,
+            serialNumber = values["serialNumber"] ?: current.serialNumber,
+            wifiMac = values["wifiMac"] ?: current.wifiMac,
+            bluetoothMac = values["bluetoothMac"] ?: current.bluetoothMac,
+        )
+
+        validate(next)?.let { return Result.failure(IllegalArgumentException(it)) }
+
+        persist(profileId, virtualUserId, next)
+        return Result.success(next)
+    }
+
+    /** The first structural problem with [identity], or null when it is well-formed. */
+    private fun validate(identity: Identity): String? = when {
+        !identity.deviceId.matches(DEVICE_ID) ->
+            "A device ID is 14 to 16 digits."
+        !identity.androidId.matches(ANDROID_ID) ->
+            "An Android ID is 16 hexadecimal characters."
+        !identity.serialNumber.matches(SERIAL) ->
+            "A serial number is 1 to 32 letters and digits."
+        !identity.wifiMac.matches(MAC) ->
+            "A Wi-Fi MAC looks like 02:1a:2b:3c:4d:5e."
+        !identity.bluetoothMac.matches(MAC) ->
+            "A Bluetooth MAC looks like 02:1a:2b:3c:4d:5e."
+        else -> null
+    }
+
+    /**
+     * Throws away this space's identifiers and gives it a new random set.
+     *
+     * Random, not the next value of a counter: the point is a set nobody can relate to
+     * the previous one. The old values are overwritten and not kept anywhere, so this
+     * cannot be undone — which is why the UI asks first.
+     */
     @Synchronized
     fun regenerate(profileId: String, virtualUserId: Int): Identity {
-        val next = readRevision(virtualUserId) + 1
-        val identity = derive(profileId, virtualUserId, next)
-        persist(profileId, virtualUserId, identity)
-        return identity
-    }
-
-    /** Returns this space to the identity it was first given. */
-    @Synchronized
-    fun reset(profileId: String, virtualUserId: Int): Identity {
-        val identity = derive(profileId, virtualUserId, 0)
+        val previous = readRevision(virtualUserId)
+        val nonce = ByteArray(16).also(random::nextBytes)
+            .joinToString("") { "%02x".format(it) }
+        val identity = derive(profileId, virtualUserId, nonce)
+            .copy(revision = previous + 1)
         persist(profileId, virtualUserId, identity)
         return identity
     }
@@ -94,6 +145,29 @@ class SpaceIdentityStore(context: Context) {
     }
 
     private fun fileFor(virtualUserId: Int) = File(directory, "$virtualUserId.json")
+
+    /** This space's stored set, or null when there is no readable file. */
+    private fun stored(virtualUserId: Int): Identity? = try {
+        val file = fileFor(virtualUserId)
+        if (!file.isFile) {
+            null
+        } else {
+            val json = JSONObject(file.readText())
+            Identity(
+                virtualUserId = virtualUserId,
+                revision = json.optInt("revision", 0),
+                deviceId = json.getString("deviceId"),
+                androidId = json.getString("androidId"),
+                serialNumber = json.getString("serialNumber"),
+                wifiMac = json.getString("wifiMac"),
+                bluetoothMac = json.getString("bluetoothMac"),
+            )
+        }
+    } catch (_: Throwable) {
+        // A truncated or half-written file is not a crash: the caller falls back to a
+        // fresh derived set, which is the same outcome as a space nobody has touched.
+        null
+    }
 
     private fun readRevision(virtualUserId: Int): Int = try {
         val file = fileFor(virtualUserId)
@@ -126,17 +200,18 @@ class SpaceIdentityStore(context: Context) {
     }
 
     /**
-     * Builds the set from a hash of the profile id and revision.
+     * Builds a well-formed set from a hash of the profile id and [nonce].
      *
-     * Deterministic on purpose: the same space always gets the same identifiers, two
-     * spaces never collide, and "Modify" is just the next revision.
+     * An empty nonce is a space's first identity, which is therefore the same every time
+     * for the same profile id — two spaces never collide, and a space that loses its file
+     * before anyone edits it comes back as itself.
      */
-    private fun derive(profileId: String, virtualUserId: Int, revision: Int): Identity {
-        val seed = digest("$profileId#$revision")
+    private fun derive(profileId: String, virtualUserId: Int, nonce: String): Identity {
+        val seed = digest("$profileId#$nonce")
 
         return Identity(
             virtualUserId = virtualUserId,
-            revision = revision,
+            revision = 0,
             deviceId = imei(seed),
             androidId = hex(seed, offset = 8, bytes = 8),
             serialNumber = alnum(seed, offset = 16, count = 12),
@@ -205,7 +280,14 @@ class SpaceIdentityStore(context: Context) {
             "%02x".format(octet)
         }
 
+    private val random = java.security.SecureRandom()
+
     private companion object {
+        val DEVICE_ID = Regex("^[0-9]{14,16}$")
+        val ANDROID_ID = Regex("^[0-9a-fA-F]{16}$")
+        val SERIAL = Regex("^[0-9A-Za-z]{1,32}$")
+        val MAC = Regex("^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$")
+
         const val DIRECTORY = "space_identity"
 
         /** No I, O, 0, 1: they are indistinguishable in most of the fonts this lands in. */

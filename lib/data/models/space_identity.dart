@@ -22,14 +22,14 @@ class SpaceIdentity {
   });
 
   factory SpaceIdentity.fromMap(Map<String, dynamic> map) => SpaceIdentity(
-        virtualUserId: map['virtualUserId'] as int? ?? 0,
-        revision: map['revision'] as int? ?? 0,
-        deviceId: map['deviceId'] as String? ?? '',
-        androidId: map['androidId'] as String? ?? '',
-        serialNumber: map['serialNumber'] as String? ?? '',
-        wifiMac: map['wifiMac'] as String? ?? '',
-        bluetoothMac: map['bluetoothMac'] as String? ?? '',
-      );
+    virtualUserId: map['virtualUserId'] as int? ?? 0,
+    revision: map['revision'] as int? ?? 0,
+    deviceId: map['deviceId'] as String? ?? '',
+    androidId: map['androidId'] as String? ?? '',
+    serialNumber: map['serialNumber'] as String? ?? '',
+    wifiMac: map['wifiMac'] as String? ?? '',
+    bluetoothMac: map['bluetoothMac'] as String? ?? '',
+  );
 
   final int virtualUserId;
 
@@ -56,4 +56,147 @@ class SpaceIdentity {
   static const bool isolatedFromGuests = false;
 
   bool get isModified => revision > 0;
+
+  /// The five identifiers, keyed the way the platform expects them.
+  Map<String, String> toValues() => <String, String>{
+    'deviceId': deviceId,
+    'androidId': androidId,
+    'serialNumber': serialNumber,
+    'wifiMac': wifiMac,
+    'bluetoothMac': bluetoothMac,
+  };
+}
+
+/// Which identifier a field holds, and what a valid value for it looks like.
+///
+/// The rules are duplicated in `SpaceIdentityStore.validate` on purpose. These exist so
+/// the editor can refuse a value while the user is still looking at it; the Kotlin ones
+/// exist because the store is the only writer of a file a guest process will read, and a
+/// writer that trusts its caller is not a guard.
+enum SpaceIdentifierField {
+  deviceId(
+    key: 'deviceId',
+    label: 'Device ID',
+    hint: '15 digits, e.g. 358240051111110',
+  ),
+  androidId(
+    key: 'androidId',
+    label: 'Android ID',
+    hint: '16 hexadecimal characters, e.g. 9774d56d682e549c',
+  ),
+  serialNumber(
+    key: 'serialNumber',
+    label: 'Serial number',
+    hint: 'Letters and digits, e.g. RQ62FRSY7WUJ',
+  ),
+  wifiMac(key: 'wifiMac', label: 'Wi-Fi MAC', hint: '02:1a:2b:3c:4d:5e'),
+  bluetoothMac(
+    key: 'bluetoothMac',
+    label: 'Bluetooth MAC',
+    hint: '02:1a:2b:3c:4d:5e',
+  );
+
+  const SpaceIdentifierField({
+    required this.key,
+    required this.label,
+    required this.hint,
+  });
+
+  final String key;
+  final String label;
+  final String hint;
+
+  /// Why [value] cannot be stored, or null when it can.
+  ///
+  /// Structure only. A value that is the right shape but implausible — an IMEI whose
+  /// check digit does not add up, a MAC in a vendor's range — is accepted and reported
+  /// by [warningFor] instead: the user asked to type these by hand, and refusing
+  /// anything a real device would not have would make the field unusable.
+  String? errorFor(String value) {
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return '$label cannot be empty.';
+    }
+    return switch (this) {
+      SpaceIdentifierField.deviceId =>
+        RegExp(r'^[0-9]{14,16}$').hasMatch(trimmed)
+            ? null
+            : 'A device ID is 14 to 16 digits.',
+      SpaceIdentifierField.androidId =>
+        RegExp(r'^[0-9a-fA-F]{16}$').hasMatch(trimmed)
+            ? null
+            : 'An Android ID is 16 hexadecimal characters.',
+      SpaceIdentifierField.serialNumber =>
+        RegExp(r'^[0-9A-Za-z]{1,32}$').hasMatch(trimmed)
+            ? null
+            : 'A serial number is 1 to 32 letters and digits.',
+      SpaceIdentifierField.wifiMac || SpaceIdentifierField.bluetoothMac =>
+        RegExp(r'^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$').hasMatch(trimmed)
+            ? null
+            : 'A MAC address looks like 02:1a:2b:3c:4d:5e.',
+    };
+  }
+
+  /// What is odd about a well-formed [value], or null when nothing is.
+  ///
+  /// Said rather than enforced. A detectably-wrong identifier is worse than the device's
+  /// own — an app that checks will know it is fabricated — so the user is told, and
+  /// decides.
+  String? warningFor(String value) {
+    final String trimmed = value.trim();
+    if (errorFor(trimmed) != null) {
+      return null;
+    }
+    return switch (this) {
+      SpaceIdentifierField.deviceId =>
+        trimmed.length == 15 && !_passesLuhn(trimmed)
+            ? 'The check digit does not add up. An app that validates the IMEI will '
+                  'see this as invalid.'
+            : null,
+      SpaceIdentifierField.wifiMac ||
+      SpaceIdentifierField.bluetoothMac => _macWarning(trimmed),
+      _ => null,
+    };
+  }
+
+  static String? _macWarning(String mac) {
+    final int first = int.parse(mac.substring(0, 2), radix: 16);
+    if (first & 0x01 != 0) {
+      return 'The first octet is odd, which marks this a multicast address. No device '
+          'has one.';
+    }
+    if (first & 0x02 == 0) {
+      return 'This is not in the locally-administered range, so it looks like a real '
+          "vendor's address.";
+    }
+    return null;
+  }
+
+  /// The Luhn check every real IMEI satisfies.
+  static bool _passesLuhn(String digits) {
+    int sum = 0;
+    for (int index = 0; index < digits.length - 1; index++) {
+      int digit = digits.codeUnitAt(index) - 0x30;
+      // Doubling every second digit from the right, which for a 14-digit body is the
+      // odd indices from the left.
+      if (index % 2 == 1) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+      sum += digit;
+    }
+    final int check = (10 - sum % 10) % 10;
+    return check == digits.codeUnitAt(digits.length - 1) - 0x30;
+  }
+
+  /// This field's current value out of [identity].
+  String read(SpaceIdentity identity) => switch (this) {
+    SpaceIdentifierField.deviceId => identity.deviceId,
+    SpaceIdentifierField.androidId => identity.androidId,
+    SpaceIdentifierField.serialNumber => identity.serialNumber,
+    SpaceIdentifierField.wifiMac => identity.wifiMac,
+    SpaceIdentifierField.bluetoothMac => identity.bluetoothMac,
+  };
 }

@@ -466,7 +466,17 @@ class RealVirtualizationEngine(
      * virtual user to key the set on, so it is allocated first — the same allocation a
      * launch would do, and it is what makes the identity stable from here on.
      */
-    fun spaceIdentity(profileId: String, action: String): EngineResult<Map<String, Any?>> {
+    /**
+     * Reads, replaces or regenerates one space's identifier set.
+     *
+     * [values] is only read for `"update"`, and only the five identifier keys are taken
+     * from it; anything else in the map is ignored rather than trusted.
+     */
+    fun spaceIdentity(
+        profileId: String,
+        action: String,
+        values: Map<String, String> = emptyMap(),
+    ): EngineResult<Map<String, Any?>> {
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.Failure(
                 EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
@@ -475,15 +485,21 @@ class RealVirtualizationEngine(
 
         val identity = when (action) {
             "regenerate" -> spaceIdentity.regenerate(profileId, virtualUserId)
-            "reset" -> spaceIdentity.reset(profileId, virtualUserId)
+            "update" -> spaceIdentity.update(profileId, virtualUserId, values)
+                .getOrElse { error ->
+                    return EngineResult.Failure(
+                        EngineErrorCodes.SPACE_IDENTITY_INVALID,
+                        error.message ?: "That identifier is not well-formed.",
+                    )
+                }
             else -> spaceIdentity.identity(profileId, virtualUserId)
         }
 
         if (action != "read") {
             phase(
-                if (action == "reset") "SPACE_IDENTITY_RESET" else "SPACE_IDENTITY_REGENERATED",
+                if (action == "update") "SPACE_IDENTITY_EDITED" else "SPACE_IDENTITY_REGENERATED",
                 DiagCategory.PROFILE,
-                "Space identity ${if (action == "reset") "reset" else "regenerated"} " +
+                "Space identity ${if (action == "update") "edited" else "regenerated"} " +
                     "for virtual user $virtualUserId (revision ${identity.revision})",
                 level = DiagLevel.SUCCESS,
                 profileId = profileId,
