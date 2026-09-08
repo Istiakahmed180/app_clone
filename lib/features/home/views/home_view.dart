@@ -131,6 +131,7 @@ class HomeView extends GetView<HomeController> {
             siblingCount: controller.siblingCount(profile),
             instanceIndex: controller.instanceIndex(profile),
             canLaunch: controller.providesRuntimeIsolation,
+            isRemoving: controller.removing.contains(profile.id),
             onTap: () => _launch(context, profile),
             onLongPress: () => _openActions(context, profile),
           ),
@@ -469,14 +470,19 @@ class HomeView extends GetView<HomeController> {
               'Confirm the shortcut on your home screen to finish adding it.',
         );
       case CloneAction.delete:
-        final bool confirmed = await showDeleteProfileDialog(
+        final bool confirmed = await showUninstallCloneDialog(
           context,
-          profileName: profile.profileName,
+          appName: profile.appName,
+          spaceIndex: controller.instanceIndex(profile),
+          spaceCount: controller.siblingCount(profile),
+          icon: controller.iconFor(profile),
         );
         if (!confirmed || !context.mounted) {
           return;
         }
-        final String? error = await controller.deleteProfile(profile);
+        // `uninstall` rather than `deleteProfile`: it lets the tile animate out first,
+        // so the clone that goes is the one the user watched go.
+        final String? error = await controller.uninstall(profile);
         if (error != null && context.mounted) {
           _showMessage(context, error);
         }

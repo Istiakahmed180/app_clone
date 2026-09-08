@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../widgets/app_icon.dart';
 
 /// Prompts for a new profile name. Returns `null` when the user cancels.
 Future<String?> showRenameProfileDialog(
@@ -9,7 +13,8 @@ Future<String?> showRenameProfileDialog(
 }) {
   return showDialog<String>(
     context: context,
-    builder: (BuildContext context) => _RenameProfileDialog(currentName: currentName),
+    builder: (BuildContext context) =>
+        _RenameProfileDialog(currentName: currentName),
   );
 }
 
@@ -28,8 +33,9 @@ class _RenameProfileDialog extends StatefulWidget {
 }
 
 class _RenameProfileDialogState extends State<_RenameProfileDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.currentName);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.currentName,
+  );
 
   @override
   void dispose() {
@@ -62,27 +68,66 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
   }
 }
 
-Future<bool> showDeleteProfileDialog(
+/// Confirms removing one clone.
+///
+/// Names and shows the instance it is about to remove. The generic wording alone was
+/// not enough: with several clones of the same app on the grid, "this clone" gave the
+/// user no way to check they had held the right tile before agreeing to lose its data.
+Future<bool> showUninstallCloneDialog(
   BuildContext context, {
-  required String profileName,
+  required String appName,
+  required int spaceIndex,
+  required int spaceCount,
+  Uint8List? icon,
 }) async {
   final bool? confirmed = await showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
+      final ThemeData theme = Theme.of(context);
+
       return AlertDialog(
-        title: Text('Delete $profileName?'),
-        content: const Text(
-          'This removes the virtual profile and its isolated application data. The '
-          'normally installed Virtual Test App and other profiles are not affected.',
+        title: const Text('Uninstall this clone?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                AppIcon(bytes: icon, size: 40.r, onPlate: true),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(appName, style: theme.textTheme.titleSmall),
+                      SizedBox(height: 2.h),
+                      Text(
+                        spaceCount > 1
+                            ? 'Space $spaceIndex of $spaceCount'
+                            : 'Space $spaceIndex',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            const Text(
+              'This will remove the selected app instance and its local data.',
+            ),
+          ],
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('Uninstall'),
           ),
         ],
       );

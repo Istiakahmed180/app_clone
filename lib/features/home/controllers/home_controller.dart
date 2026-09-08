@@ -260,11 +260,14 @@ class HomeController extends GetxController {
   /// name (a device can genuinely have two apps called "Notes"), so each package's
   /// clones stay contiguous, and [createdAt] then puts clone 1 before clone 2 — the
   /// same order [instanceIndex] numbers them in.
-  static List<VirtualProfileModel> _grouped(List<VirtualProfileModel> profiles) {
+  static List<VirtualProfileModel> _grouped(
+    List<VirtualProfileModel> profiles,
+  ) {
     return profiles.toList()
       ..sort((VirtualProfileModel a, VirtualProfileModel b) {
-        final int byApp =
-            a.appName.toLowerCase().compareTo(b.appName.toLowerCase());
+        final int byApp = a.appName.toLowerCase().compareTo(
+          b.appName.toLowerCase(),
+        );
         if (byApp != 0) {
           return byApp;
         }
@@ -360,8 +363,7 @@ class HomeController extends GetxController {
   Future<SpaceIdentity> spaceIdentity(
     VirtualProfileModel profile, {
     String action = 'read',
-  }) =>
-      _nativeBridge.spaceIdentity(profile.id, action: action);
+  }) => _nativeBridge.spaceIdentity(profile.id, action: action);
 
   /// Makes [count] more clones of this app.
   ///
@@ -471,5 +473,30 @@ class HomeController extends GetxController {
     } on AppException catch (error) {
       return error.message;
     }
+  }
+
+  /// How long a tile takes to fade out of the grid.
+  ///
+  /// Short: this is the gap between the user confirming and the clone being gone, and
+  /// an uninstall that feels slow feels broken.
+  static const Duration removalAnimation = Duration(milliseconds: 220);
+
+  /// Clones whose tiles are on their way out.
+  ///
+  /// Kept here rather than in the view so the grid keeps rendering the tile while it
+  /// animates: a profile removed from [profiles] first has nothing left to animate, and
+  /// the tile would simply blink out of existence.
+  final RxSet<String> removing = <String>{}.obs;
+
+  /// Removes the clone, letting its tile animate out first.
+  ///
+  /// Returns the error message if the engine refused, in which case the tile comes back
+  /// rather than staying half-faded on a grid it is still part of.
+  Future<String?> uninstall(VirtualProfileModel profile) async {
+    removing.add(profile.id);
+    await Future<void>.delayed(removalAnimation);
+    final String? error = await deleteProfile(profile);
+    removing.remove(profile.id);
+    return error;
   }
 }

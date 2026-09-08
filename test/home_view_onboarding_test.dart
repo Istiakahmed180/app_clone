@@ -9,6 +9,7 @@ import 'package:duplika/core/virtualization/virtualization_engine.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
 import 'package:duplika/features/home/views/home_view.dart';
+import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/widgets/virtualization_warning.dart';
 import 'package:duplika/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:duplika/features/onboarding/widgets/background_permission_banner.dart';
@@ -342,6 +343,110 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(calls, contains('clearProfileData'));
+    });
+  });
+
+  group('uninstall', () {
+    testWidgets('is confirmed before the clone is removed', (
+      WidgetTester tester,
+    ) async {
+      await openSheet(tester);
+
+      await tester.tap(find.text('Uninstall'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Uninstall this clone?'), findsOneWidget);
+      expect(
+        find.text(
+          'This will remove the selected app instance and its local data.',
+        ),
+        findsOneWidget,
+      );
+      // Which clone, not just that it is a clone: several tiles can carry the same
+      // name, so the dialog has to identify the instance being lost.
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Example'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Space 1'),
+        ),
+        findsOneWidget,
+      );
+      expect(calls, isNot(contains('uninstallAppFromProfile')));
+      expect(Get.find<HomeController>().profiles, hasLength(1));
+    });
+
+    testWidgets('Cancel keeps the clone', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Uninstall'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Uninstall this clone?'), findsNothing);
+      expect(Get.find<HomeController>().profiles, hasLength(1));
+    });
+
+    testWidgets('the tile fades out before the clone is deleted', (
+      WidgetTester tester,
+    ) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Uninstall'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Uninstall'),
+        ),
+      );
+
+      // Halfway through the animation the tile is still on the grid, part way gone.
+      await tester.pump();
+      await tester.pump(HomeController.removalAnimation ~/ 2);
+      expect(find.byType(CloneTile), findsOneWidget);
+      final double opacity = tester
+          .widget<FadeTransition>(
+            find
+                .descendant(
+                  of: find.byType(CloneTile),
+                  matching: find.byType(FadeTransition),
+                )
+                .first,
+          )
+          .opacity
+          .value;
+      expect(
+        opacity,
+        allOf(greaterThan(0.0), lessThan(1.0)),
+        reason: 'the tile fades rather than blinking out',
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byType(CloneTile), findsNothing);
+    });
+
+    testWidgets('confirming removes it', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Uninstall'));
+      await tester.pumpAndSettle();
+
+      // The dialog's own button, not the sheet's row of the same name.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Uninstall'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(Get.find<HomeController>().profiles, isEmpty);
     });
   });
 }

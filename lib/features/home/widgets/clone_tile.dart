@@ -8,6 +8,7 @@ import '../../../app/theme/status_colors.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/app_icon.dart';
+import '../controllers/home_controller.dart';
 
 /// One clone, as a launcher tile.
 ///
@@ -34,6 +35,7 @@ class CloneTile extends StatelessWidget {
     this.siblingCount = 1,
     this.instanceIndex = 1,
     this.canLaunch = true,
+    this.isRemoving = false,
     super.key,
   });
 
@@ -52,6 +54,10 @@ class CloneTile extends StatelessWidget {
   /// clone, and losing that because the engine is down would be worse than a dim tile.
   final bool canLaunch;
 
+  /// True while this clone is being uninstalled. The tile fades and shrinks out of the
+  /// grid rather than vanishing between two frames, so the user can see which one went.
+  final bool isRemoving;
+
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -60,6 +66,20 @@ class CloneTile extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final BorderRadius radius = BorderRadius.circular(AppTheme.tileRadius.r);
 
+    return AnimatedScale(
+      scale: isRemoving ? 0.8 : 1,
+      duration: HomeController.removalAnimation,
+      curve: Curves.easeIn,
+      child: AnimatedOpacity(
+        opacity: isRemoving ? 0 : 1,
+        duration: HomeController.removalAnimation,
+        curve: Curves.easeIn,
+        child: _tile(context, theme, radius),
+      ),
+    );
+  }
+
+  Widget _tile(BuildContext context, ThemeData theme, BorderRadius radius) {
     return Semantics(
       button: true,
       label: _semanticLabel(),
