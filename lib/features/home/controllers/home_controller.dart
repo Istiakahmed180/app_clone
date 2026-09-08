@@ -297,12 +297,26 @@ class HomeController extends GetxController {
   }
 
   /// Returns `null` on success, or a user-facing message on failure.
+  /// Clones whose guest process is being started.
+  ///
+  /// Kept here so the tile itself can say so. A launch takes a second or two — the
+  /// engine has to bring up a stub process and hand it the package — and a tile that
+  /// looked untouched for that long read as a tap that did not register.
+  final RxSet<String> launching = <String>{}.obs;
+
   Future<String?> launchProfile(VirtualProfileModel profile) async {
+    launching.add(profile.id);
     try {
       await _engine.launchProfile(profile.id);
       return null;
     } on AppException catch (error) {
       return error.message;
+    } finally {
+      // In `finally`, so a refused launch clears the tile rather than leaving it
+      // spinning on a guest that is never going to start.
+      launching.remove(profile.id);
+      // The guest is running now, which the tile's dot reports.
+      await _loadProfileStates();
     }
   }
 

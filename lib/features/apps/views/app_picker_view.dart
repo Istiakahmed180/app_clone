@@ -233,13 +233,16 @@ class AppPickerView extends GetView<AppPickerController> {
     );
   }
 
-  /// Clones a quick pick straight away, with no sheet in between.
+  /// Clones straight away, with no sheet in between.
   ///
-  /// The Popular row exists to make the common case one tap, so it does not ask. It
-  /// still refuses to start an install the engine has already said cannot work: a
-  /// blocking verdict is reported instead of being walked into. Non-blocking findings —
-  /// missing permissions, no virtualized Play services — are not raised here; the
-  /// clone's own Space Info is where those are dealt with afterwards.
+  /// Both routes into cloning an installed app come here — the Popular row and a list
+  /// row's Add clone — so neither asks anything.
+  ///
+  /// It still refuses to start an install the engine has already said cannot work: a
+  /// blocking verdict is reported instead of being walked into. Non-blocking findings
+  /// are not raised at all any more — missing host permissions and the Play services
+  /// option lived in the sheet this replaced, and there is no other route to either for
+  /// an installed app.
   Future<void> _quickClone(BuildContext context, InstalledAppModel app) async {
     final CompatibilityReport report = await controller.analyze(
       app.packageName,
@@ -290,11 +293,11 @@ class AppPickerView extends GetView<AppPickerController> {
 
     switch (action) {
       case InstalledAppAction.addClone:
-        // Through the compatibility flow, not the one-tap path the Popular row uses.
-        // This is the only route left to the permission grant and the Play services
-        // option, and dropping it would mean those could never be set for an app the
-        // user clones from the list.
-        await _clone(context, app);
+        // Straight to the clone, the same one-tap path the Popular row uses. Note the
+        // cost: nothing in this flow now offers the host permission grant or the Play
+        // services option — both lived in the sheet this replaced, and neither has
+        // another route for an installed app.
+        await _quickClone(context, app);
       case InstalledAppAction.shareApp:
         final String? error = await controller.shareInstalledApp(app);
         if (error != null && context.mounted) {
@@ -308,47 +311,6 @@ class AppPickerView extends GetView<AppPickerController> {
           ),
         );
     }
-  }
-
-  /// Shows what Duplika knows about the app, and lets the user clone from there.
-  ///
-  /// This is the compatibility sheet: the verdict, every finding, the permissions the
-  /// host is missing and whether the app wants Play services. It is the read-first
-  /// route, and it still ends in a clone if the user decides to.
-  Future<void> _clone(BuildContext context, InstalledAppModel app) async {
-    final int existing = await controller.instanceCount(app.packageName);
-    final CompatibilityReport report = await controller.analyze(
-      app.packageName,
-    );
-    if (!context.mounted) {
-      return;
-    }
-
-    // Always surface the compatibility verdict first: an app may be unsupported, need
-    // permissions the host does not hold, or already have clones.
-    final CloneDecision decision = await CompatibilitySheet.show(
-      context,
-      appName: app.appName,
-      report: report,
-      existingClones: existing,
-      onGrantPermissions: () => _grantPermissions(context, app.packageName),
-    );
-    if (!decision.proceed || !context.mounted) {
-      return;
-    }
-
-    final String? error = await controller.cloneInstalledApp(
-      app,
-      installGms: decision.installGms,
-    );
-    if (!context.mounted) {
-      return;
-    }
-    if (error != null) {
-      _showMessage(context, error);
-      return;
-    }
-    Get.back<bool>(result: true);
   }
 
   /// Opens the sort/filter sheet and acts on whichever way it was closed.

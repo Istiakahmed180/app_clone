@@ -9,6 +9,7 @@ import 'package:duplika/native/native_bridge.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
 import 'package:duplika/features/home/widgets/clone_count_dialog.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
+import 'package:duplika/widgets/app_icon.dart';
 import 'package:duplika/features/home/views/space_info_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -27,6 +28,12 @@ VirtualProfileModel _profile({String profileName = 'Example'}) =>
       createdAt: DateTime(2026),
     );
 
+const VirtualProfileState _running = VirtualProfileState(
+  installed: true,
+  running: true,
+  virtualUserId: 0,
+);
+
 const VirtualProfileState _ready = VirtualProfileState(
   installed: true,
   running: false,
@@ -36,6 +43,7 @@ const VirtualProfileState _ready = VirtualProfileState(
 Future<void> _pumpTile(
   WidgetTester tester, {
   String profileName = 'Example',
+  bool isLaunching = false,
   VirtualProfileState state = _ready,
   int siblingCount = 1,
   int instanceIndex = 1,
@@ -56,6 +64,7 @@ Future<void> _pumpTile(
               height: 110,
               child: CloneTile(
                 profile: _profile(profileName: profileName),
+                isLaunching: isLaunching,
                 state: state,
                 siblingCount: siblingCount,
                 instanceIndex: instanceIndex,
@@ -69,7 +78,13 @@ Future<void> _pumpTile(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  // A launching tile carries a progress indicator, which never stops animating, so
+  // there is nothing for `pumpAndSettle` to settle to.
+  if (isLaunching) {
+    await tester.pump();
+  } else {
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Pumps a screen whose only job is to open the sheet, so the sheet is tested through
@@ -119,6 +134,51 @@ void main() {
       await _pumpTile(tester);
 
       expect(find.text('Example'), findsOneWidget);
+    });
+
+    testWidgets('a starting clone shows the spinner on its own tile', (
+      WidgetTester tester,
+    ) async {
+      // On the tile, not only in a message at the bottom of the screen: which app is
+      // opening is the part the user needs to see.
+      await _pumpTile(tester, isLaunching: true);
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      // The icon stays behind it, dimmed — it is the only thing identifying the tile.
+      expect(find.byType(AppIcon), findsOneWidget);
+      expect(
+        tester
+            .widget<Opacity>(
+              find
+                  .ancestor(
+                    of: find.byType(AppIcon),
+                    matching: find.byType(Opacity),
+                  )
+                  .first,
+            )
+            .opacity,
+        lessThan(1.0),
+      );
+    });
+
+    testWidgets('a tile that is not starting has no spinner', (
+      WidgetTester tester,
+    ) async {
+      await _pumpTile(tester);
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('screen readers are told the clone is opening', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await _pumpTile(tester, isLaunching: true, state: _running);
+
+      // 'opening' rather than 'running': the guest is not up yet, and saying it is
+      // would be wrong for as long as the launch takes.
+      expect(find.bySemanticsLabel('Example, opening'), findsOneWidget);
+      handle.dispose();
     });
 
     testWidgets('a long name wraps to a second line instead of being cut', (

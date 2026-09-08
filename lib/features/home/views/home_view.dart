@@ -132,6 +132,7 @@ class HomeView extends GetView<HomeController> {
             instanceIndex: controller.instanceIndex(profile),
             canLaunch: controller.providesRuntimeIsolation,
             isRemoving: controller.removing.contains(profile.id),
+            isLaunching: controller.launching.contains(profile.id),
             onTap: () => _launch(context, profile),
             onLongPress: () => _openActions(context, profile),
           ),
@@ -183,10 +184,11 @@ class HomeView extends GetView<HomeController> {
     if (!context.mounted) {
       return;
     }
-    _showMessage(
-      context,
-      error ?? 'Launched ${profile.appName} in ${profile.profileName}.',
-    );
+    // Only failures are announced. A launch that worked brings the guest to the front,
+    // so a message about it lands on top of the app the user is now looking at.
+    if (error != null) {
+      _showMessage(context, error);
+    }
   }
 
   Future<void> _openActions(

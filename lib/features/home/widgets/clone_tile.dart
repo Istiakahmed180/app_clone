@@ -36,6 +36,7 @@ class CloneTile extends StatelessWidget {
     this.instanceIndex = 1,
     this.canLaunch = true,
     this.isRemoving = false,
+    this.isLaunching = false,
     super.key,
   });
 
@@ -57,6 +58,13 @@ class CloneTile extends StatelessWidget {
   /// True while this clone is being uninstalled. The tile fades and shrinks out of the
   /// grid rather than vanishing between two frames, so the user can see which one went.
   final bool isRemoving;
+
+  /// True while the engine is starting this clone's guest process.
+  ///
+  /// Shown on the tile the user tapped, not only as a message at the bottom of the
+  /// screen: which app is opening is the part they need to see, and a line of text
+  /// somewhere else does not say it.
+  final bool isLaunching;
 
   final VoidCallback onTap;
   final VoidCallback onLongPress;
@@ -150,9 +158,10 @@ class CloneTile extends StatelessWidget {
     );
   }
 
-  /// The icon, with a presence dot when the engine reports the guest as running.
+  /// The icon, with a presence dot when the engine reports the guest as running and a
+  /// spinner over it while one is being started.
   Widget _iconWithRunningDot(BuildContext context) {
-    final Widget appIcon = AppIcon(bytes: icon, size: 46.r, onPlate: true);
+    final Widget appIcon = _launchableIcon(context);
     if (!state.running) {
       return appIcon;
     }
@@ -183,6 +192,38 @@ class CloneTile extends StatelessWidget {
     );
   }
 
+  /// The icon, dimmed under a spinner while this clone is starting.
+  ///
+  /// The icon stays visible behind it rather than being replaced: the point is to show
+  /// *this* app opening, and swapping it for a spinner would remove the one thing that
+  /// identifies which tile is busy.
+  Widget _launchableIcon(BuildContext context) {
+    final Widget appIcon = AppIcon(bytes: icon, size: 46.r, onPlate: true);
+    if (!isLaunching) {
+      return appIcon;
+    }
+
+    final ThemeData theme = Theme.of(context);
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Opacity(opacity: 0.3, child: appIcon),
+        SizedBox(
+          width: 24.r,
+          height: 24.r,
+          // Indeterminate on purpose. The engine reports no progress for a launch — it
+          // starts a guest process and returns when the process accepts — so there is
+          // nothing to plot, and a bar filling against an assumed duration would be
+          // stating a percentage nothing measured.
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Screen readers get everything the tile encodes visually, since a badge and a
   /// coloured dot are invisible to them.
   String _semanticLabel() {
@@ -190,7 +231,9 @@ class CloneTile extends StatelessWidget {
     if (siblingCount > 1) {
       buffer.write(', clone $instanceIndex of $siblingCount');
     }
-    if (state.running) {
+    if (isLaunching) {
+      buffer.write(', opening');
+    } else if (state.running) {
       buffer.write(', running');
     }
     if (!canLaunch) {
