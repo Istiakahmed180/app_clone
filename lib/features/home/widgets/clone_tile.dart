@@ -94,16 +94,20 @@ class CloneTile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           _iconWithRunningDot(context),
-                          SizedBox(height: 8.h),
+                          SizedBox(height: 6.h),
                           Padding(
                             // Keeps a long name clear of the badge in the corner.
                             padding: EdgeInsets.symmetric(horizontal: 4.w),
                             child: Text(
                               profile.profileName,
-                              style: theme.textTheme.labelMedium
-                                  ?.copyWith(color: theme.colorScheme.onSurface),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                              ),
                               textAlign: TextAlign.center,
-                              maxLines: 1,
+                              // Two lines: a real app name is often too long for one at
+                              // a third of the screen's width, and 'CABEX-FXsa…' names
+                              // nothing. The icon gives up the height for it.
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -111,7 +115,11 @@ class CloneTile extends StatelessWidget {
                       ),
                     ),
                     if (siblingCount > 1)
-                      Positioned(top: 0, right: 0, child: _InstanceBadge(instanceIndex)),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: _InstanceBadge(instanceIndex),
+                      ),
                   ],
                 ),
               ),
@@ -124,7 +132,7 @@ class CloneTile extends StatelessWidget {
 
   /// The icon, with a presence dot when the engine reports the guest as running.
   Widget _iconWithRunningDot(BuildContext context) {
-    final Widget appIcon = AppIcon(bytes: icon, size: 52.r, onPlate: true);
+    final Widget appIcon = AppIcon(bytes: icon, size: 46.r, onPlate: true);
     if (!state.running) {
       return appIcon;
     }
@@ -144,7 +152,10 @@ class CloneTile extends StatelessWidget {
               shape: BoxShape.circle,
               // Ringed in the tile's own colour so the dot reads as an overlay on the
               // icon rather than as part of it.
-              border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.surface,
+                width: 2,
+              ),
             ),
           ),
         ),

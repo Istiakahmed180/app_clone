@@ -11,6 +11,7 @@ import 'package:duplika/features/home/widgets/clone_count_dialog.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/views/space_info_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +35,7 @@ const VirtualProfileState _ready = VirtualProfileState(
 
 Future<void> _pumpTile(
   WidgetTester tester, {
+  String profileName = 'Example',
   VirtualProfileState state = _ready,
   int siblingCount = 1,
   int instanceIndex = 1,
@@ -53,7 +55,7 @@ Future<void> _pumpTile(
               width: 110,
               height: 110,
               child: CloneTile(
-                profile: _profile(),
+                profile: _profile(profileName: profileName),
                 state: state,
                 siblingCount: siblingCount,
                 instanceIndex: instanceIndex,
@@ -117,6 +119,34 @@ void main() {
       await _pumpTile(tester);
 
       expect(find.text('Example'), findsOneWidget);
+    });
+
+    testWidgets('a long name wraps to a second line instead of being cut', (
+      WidgetTester tester,
+    ) async {
+      // A third of a phone's width is not enough for a real app name on one line, and
+      // 'CABEX-FXsa…' identifies nothing. The tile is pumped at its actual grid size,
+      // so this also catches the wrap overflowing the cell.
+      //
+      // Kept short because the test font is monospaced at the full font size, so a name
+      // that wraps to two lines on a device needs three here.
+      const String name = 'CABEX-FX';
+      await _pumpTile(tester, profileName: name);
+
+      expect(tester.takeException(), isNull);
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.text(name),
+      );
+      expect(
+        paragraph.size.height,
+        greaterThan(paragraph.preferredLineHeight * 1.5),
+        reason: 'the name should occupy two lines',
+      );
+      expect(
+        paragraph.didExceedMaxLines,
+        isFalse,
+        reason: 'two lines should be enough for a name of this length',
+      );
     });
 
     testWidgets('carries no compatibility marker, healthy or not', (
