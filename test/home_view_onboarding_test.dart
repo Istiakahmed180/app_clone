@@ -299,4 +299,49 @@ void main() {
       expect(calls, contains('clearProfileCache'));
     });
   });
+
+  group('clear storage', () {
+    testWidgets('spells out what is deleted before deleting it', (
+      WidgetTester tester,
+    ) async {
+      await openSheet(tester);
+
+      await tester.tap(find.text('Clear storage'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear app storage?'), findsOneWidget);
+      expect(
+        find.text(
+          'This will permanently delete this clone\'s accounts, settings, and local '
+          'data.',
+        ),
+        findsOneWidget,
+      );
+      expect(calls, isNot(contains('clearProfileData')));
+    });
+
+    testWidgets('Cancel keeps the data', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Clear storage'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear app storage?'), findsNothing);
+      expect(calls, isNot(contains('clearProfileData')));
+    });
+
+    testWidgets('confirming clears it', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Clear storage'));
+      await tester.pumpAndSettle();
+
+      // 'Clear Storage' in the dialog, distinct from the sheet's 'Clear storage'.
+      await tester.tap(find.text('Clear Storage'));
+      await tester.pumpAndSettle();
+
+      expect(calls, contains('clearProfileData'));
+    });
+  });
 }

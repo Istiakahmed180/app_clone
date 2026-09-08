@@ -361,27 +361,28 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Future<bool?> _confirmClearStorage(
-    BuildContext context,
-    VirtualProfileModel profile,
-  ) {
+  /// Confirms a storage clear.
+  ///
+  /// The one dialog here that has to be unambiguous: this is every account, message and
+  /// setting inside the clone, and there is no undo. It names what goes rather than
+  /// naming the clone.
+  Future<bool?> _confirmClearStorage(BuildContext context) {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text('Clear ${profile.profileName}?'),
+        title: const Text('Clear app storage?'),
         content: const Text(
-          'Everything this clone has stored \u2014 accounts, messages, settings, '
-          'downloads \u2014 is deleted. The clone itself stays, and its next launch '
-          'will be a first launch. This cannot be undone.',
+          'This will permanently delete this clone\'s accounts, settings, and local '
+          'data.',
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear'),
+            child: const Text('Clear Storage'),
           ),
         ],
       ),
@@ -422,8 +423,7 @@ class HomeView extends GetView<HomeController> {
       case CloneAction.clearStorage:
         // Confirmed: this is every login, message and setting inside the clone, and
         // there is no undo. Uninstall is the only other action that asks.
-        final bool confirmed =
-            await _confirmClearStorage(context, profile) ?? false;
+        final bool confirmed = await _confirmClearStorage(context) ?? false;
         if (!confirmed || !context.mounted) {
           return;
         }
