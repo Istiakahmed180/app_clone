@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/virtual_profile_model.dart';
+import '../../../widgets/empty_state.dart';
 import '../../onboarding/controllers/onboarding_controller.dart';
 import '../../onboarding/widgets/background_permission_banner.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
@@ -71,7 +72,7 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                   _grid(context),
-                  if (controller.profiles.isEmpty) _emptyHint(context),
+                  if (controller.profiles.isEmpty) _emptyState(),
                 ],
               ),
             );
@@ -138,17 +139,19 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  /// Shown only while there is nothing to launch. One line under the grid rather than a
-  /// panel: the "Add app" tile is already on screen saying what to do, and a full empty
-  /// state next to it would say it twice.
-  Widget _emptyHint(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+  /// Shown only while there is nothing to launch.
+  ///
+  /// A panel rather than a line of text: a first run where the grid holds one tinted
+  /// square and nothing else reads as a screen that failed to load. The panel says the
+  /// app got here on purpose and names the next step.
+  Widget _emptyState() {
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
-      child: Text(
-        'No clones yet. Tap Add app to copy an installed app, or import an APK.',
-        textAlign: TextAlign.center,
-        style: theme.textTheme.bodySmall,
+      child: EmptyState(
+        title: 'Your space is empty',
+        message: 'Add an app to create your first private instance.',
+        actionLabel: 'Add your first app',
+        onAction: _openAddProfile,
       ),
     );
   }
