@@ -193,11 +193,17 @@ class NativeBridge {
     required String profileId,
     required String packageName,
     required String label,
+    int spaceIndex = 1,
+    int spaceCount = 1,
   }) async {
     final EngineResponse response = await _invokeEngine('pinCloneShortcut', <String, dynamic>{
       'profileId': profileId,
       'packageName': packageName,
       'label': label,
+      // Which of the app's clones this is. The native side draws it onto the icon when
+      // there is more than one, since otherwise every clone's shortcut is the same tile.
+      'spaceIndex': spaceIndex,
+      'spaceCount': spaceCount,
     });
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);

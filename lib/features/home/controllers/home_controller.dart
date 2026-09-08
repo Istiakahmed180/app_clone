@@ -302,6 +302,24 @@ class HomeController extends GetxController {
     }
   }
 
+  /// What a pinned shortcut should be called.
+  ///
+  /// Every clone carries its app's own name, so three copies of one app would pin three
+  /// shortcuts all called "CABEX-FX" — and the launcher's answer to that is to append
+  /// "-1", "-2" itself, which says nothing about *which* clone. Appending the space
+  /// number instead makes the label say it.
+  ///
+  /// A clone the user renamed keeps that name untouched: they already chose something
+  /// distinctive, and numbering it would be second-guessing them.
+  String shortcutLabel(VirtualProfileModel profile) {
+    if (profile.profileName.trim() != profile.appName.trim()) {
+      return profile.profileName;
+    }
+    return siblingCount(profile) > 1
+        ? '${profile.profileName} ${instanceIndex(profile)}'
+        : profile.profileName;
+  }
+
   /// Asks the launcher to add this clone to the home screen.
   ///
   /// Returns null when the request was accepted, or a user-facing message otherwise.
@@ -310,7 +328,9 @@ class HomeController extends GetxController {
       await _nativeBridge.pinCloneShortcut(
         profileId: profile.id,
         packageName: profile.packageName,
-        label: profile.profileName,
+        label: shortcutLabel(profile),
+        spaceIndex: instanceIndex(profile),
+        spaceCount: siblingCount(profile),
       );
       return null;
     } on AppException catch (error) {

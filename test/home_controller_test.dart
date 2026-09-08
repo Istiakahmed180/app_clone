@@ -158,6 +158,47 @@ void main() {
     );
   });
 
+  group('shortcut labels', () {
+    Future<VirtualProfileModel> clone(String app, String package) =>
+        repository.createProfile(
+          packageName: package,
+          appName: app,
+          profileName: app,
+        );
+
+    test('a lone clone is called after its app, with no number', () async {
+      await clone('Camera', 'com.android.camera2');
+      await controller.refreshAll();
+
+      expect(controller.shortcutLabel(controller.profiles.single), 'Camera');
+    });
+
+    test('several clones of one app are numbered by space', () async {
+      // Otherwise every shortcut is called "Camera" and the launcher appends "-1", "-2"
+      // itself, which says nothing about which clone is which.
+      await clone('Camera', 'com.android.camera2');
+      await clone('Camera', 'com.android.camera2');
+      await clone('Camera', 'com.android.camera2');
+      await controller.refreshAll();
+
+      expect(
+        controller.profiles.map(controller.shortcutLabel),
+        <String>['Camera 1', 'Camera 2', 'Camera 3'],
+      );
+    });
+
+    test('a renamed clone keeps the name the user chose', () async {
+      await clone('Camera', 'com.android.camera2');
+      final VirtualProfileModel second = await clone('Camera', 'com.android.camera2');
+      await repository.updateProfile(second.id, profileName: 'Work camera');
+      await controller.refreshAll();
+
+      final VirtualProfileModel renamed = controller.profiles
+          .firstWhere((VirtualProfileModel p) => p.id == second.id);
+      expect(controller.shortcutLabel(renamed), 'Work camera');
+    });
+  });
+
   test('a real problem is surfaced on the clone', () async {
     final VirtualProfileModel profile = await seedClone();
     responses['analyzeApp'] = ok('APP_ANALYZED', reportWith(<Map<String, Object?>>[

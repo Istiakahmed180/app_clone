@@ -232,8 +232,13 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 val packageName = call.requiredPackage(result) ?: return
                 val label = call.argument<String>("label").orEmpty().ifBlank { packageName }
                 result.success(
-                    shortcuts.requestPin(profileId, packageName, label)
-                        .toEnvelope("SHORTCUT_REQUESTED", "Shortcut request sent to the launcher."),
+                    shortcuts.requestPin(
+                        profileId,
+                        packageName,
+                        label,
+                        spaceIndex = call.argument<Int>("spaceIndex") ?: 1,
+                        spaceCount = call.argument<Int>("spaceCount") ?: 1,
+                    ).toEnvelope("SHORTCUT_REQUESTED", "Shortcut request sent to the launcher."),
                 )
             }
 
