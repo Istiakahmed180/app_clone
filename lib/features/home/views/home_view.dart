@@ -54,7 +54,7 @@ class HomeView extends GetView<HomeController> {
                 children: <Widget>[
                   HomeHeader(
                     title: AppConstants.appTitle,
-                    subtitle: 'Your private copies',
+                    subtitle: 'Your private space',
                     trailing: _overflowMenu(context),
                   ),
                   VirtualizationWarning(
@@ -128,8 +128,6 @@ class HomeView extends GetView<HomeController> {
             icon: controller.iconFor(profile),
             siblingCount: controller.siblingCount(profile),
             instanceIndex: controller.instanceIndex(profile),
-            warnings: controller.warningsFor(profile),
-            needsPermissions: controller.needsPermissions(profile),
             canLaunch: controller.providesRuntimeIsolation,
             onTap: () => _launch(context, profile),
             onLongPress: () => _openActions(context, profile),

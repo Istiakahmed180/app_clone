@@ -37,10 +37,8 @@ const CompatibilityFinding _blockingFinding = CompatibilityFinding(
 Future<void> _pumpTile(
   WidgetTester tester, {
   VirtualProfileState state = _ready,
-  List<CompatibilityFinding> warnings = const <CompatibilityFinding>[],
   int siblingCount = 1,
   int instanceIndex = 1,
-  bool needsPermissions = false,
   bool canLaunch = true,
   VoidCallback? onTap,
   VoidCallback? onLongPress,
@@ -59,10 +57,8 @@ Future<void> _pumpTile(
               child: CloneTile(
                 profile: _profile(),
                 state: state,
-                warnings: warnings,
                 siblingCount: siblingCount,
                 instanceIndex: instanceIndex,
-                needsPermissions: needsPermissions,
                 canLaunch: canLaunch,
                 onTap: onTap ?? () {},
                 onLongPress: onLongPress ?? () {},
@@ -122,12 +118,21 @@ Future<CloneAction?> _openSheet(
 
 void main() {
   group('CloneTile', () {
-    testWidgets('shows the clone name and no marker when healthy',
-        (WidgetTester tester) async {
+    testWidgets('shows the clone name', (WidgetTester tester) async {
       await _pumpTile(tester);
 
       expect(find.text('Example'), findsOneWidget);
+    });
+
+    testWidgets('carries no compatibility marker, healthy or not',
+        (WidgetTester tester) async {
+      // The grid is meant to read as a home screen. A warning badge on every tile made
+      // it read as a list of faults, so problems live in the long-press sheet only —
+      // see the showCloneActionSheet group below.
+      await _pumpTile(tester);
+
       expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+      expect(find.byIcon(Icons.warning_amber_outlined), findsNothing);
       expect(find.byIcon(Icons.block), findsNothing);
     });
 
@@ -138,36 +143,6 @@ void main() {
 
       await _pumpTile(tester, siblingCount: 3, instanceIndex: 2);
       expect(find.text('2'), findsOneWidget);
-    });
-
-    testWidgets('marks a non-blocking problem with a warning',
-        (WidgetTester tester) async {
-      await _pumpTile(
-        tester,
-        warnings: const <CompatibilityFinding>[_permissionsWarning],
-      );
-
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.block), findsNothing);
-    });
-
-    testWidgets('a blocking problem wins over a lesser one', (WidgetTester tester) async {
-      await _pumpTile(
-        tester,
-        warnings: const <CompatibilityFinding>[_permissionsWarning, _blockingFinding],
-      );
-
-      // The serious one decides the marker: it is the difference between "works, with a
-      // caveat" and "will not run".
-      expect(find.byIcon(Icons.block), findsOneWidget);
-      expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
-    });
-
-    testWidgets('a clone needing permissions is marked even with no findings',
-        (WidgetTester tester) async {
-      await _pumpTile(tester, needsPermissions: true);
-
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
     });
 
     testWidgets('tapping launches, holding opens the actions',
@@ -215,11 +190,10 @@ void main() {
         ),
         siblingCount: 2,
         instanceIndex: 2,
-        warnings: const <CompatibilityFinding>[_blockingFinding],
       );
 
       expect(
-        find.bySemanticsLabel('Example, clone 2 of 2, running, will not run'),
+        find.bySemanticsLabel('Example, clone 2 of 2, running'),
         findsOneWidget,
       );
       semantics.dispose();
