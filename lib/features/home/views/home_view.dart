@@ -329,10 +329,32 @@ class HomeView extends GetView<HomeController> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
             child: const Text('Force stop'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Confirms a cache clear.
+  ///
+  /// Not destructive — logins and settings survive — but it is worth a question all the
+  /// same, because it sits next to Clear storage in the same grid and the two names read
+  /// alike. A confirmation that names what goes is what keeps a mis-tap harmless.
+  Future<bool?> _confirmClearCache(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Clear app cache?'),
+        content: const Text('This will remove temporary files for this clone.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear cache'),
           ),
         ],
       ),
@@ -385,6 +407,10 @@ class HomeView extends GetView<HomeController> {
         }
         _showMessage(context, error ?? 'Stopped ${profile.profileName}.');
       case CloneAction.clearCache:
+        final bool confirmed = await _confirmClearCache(context) ?? false;
+        if (!confirmed || !context.mounted) {
+          return;
+        }
         final String? error = await controller.clearCache(profile);
         if (!context.mounted) {
           return;

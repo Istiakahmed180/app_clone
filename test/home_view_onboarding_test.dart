@@ -186,22 +186,22 @@ void main() {
     expect(find.byType(BackgroundPermissionBanner), findsNothing);
   });
 
+  /// Puts one running clone on the grid and opens its action sheet.
+  Future<void> openSheet(WidgetTester tester) async {
+    await repository.createProfile(
+      packageName: 'com.example.app',
+      appName: 'Example',
+      profileName: 'Example',
+    );
+    await Get.find<HomeController>().refreshAll();
+    await pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.text('Example'));
+    await tester.pumpAndSettle();
+  }
+
   group('force stop', () {
-    /// Puts one running clone on the grid and opens its action sheet.
-    Future<void> openSheet(WidgetTester tester) async {
-      await repository.createProfile(
-        packageName: 'com.example.app',
-        appName: 'Example',
-        profileName: 'Example',
-      );
-      await Get.find<HomeController>().refreshAll();
-      await pumpHome(tester);
-      await tester.pumpAndSettle();
-
-      await tester.longPress(find.text('Example'));
-      await tester.pumpAndSettle();
-    }
-
     testWidgets('is confirmed before the guest is stopped', (
       WidgetTester tester,
     ) async {
@@ -250,6 +250,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(calls, contains('stopProfile'));
+    });
+  });
+
+  group('clear cache', () {
+    testWidgets('is confirmed before anything is deleted', (
+      WidgetTester tester,
+    ) async {
+      await openSheet(tester);
+
+      await tester.tap(find.text('Clear cache'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear app cache?'), findsOneWidget);
+      expect(
+        find.text('This will remove temporary files for this clone.'),
+        findsOneWidget,
+      );
+      expect(calls, isNot(contains('clearProfileCache')));
+    });
+
+    testWidgets('Cancel keeps the cache', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Clear cache'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear app cache?'), findsNothing);
+      expect(calls, isNot(contains('clearProfileCache')));
+    });
+
+    testWidgets('confirming clears it', (WidgetTester tester) async {
+      await openSheet(tester);
+      await tester.tap(find.text('Clear cache'));
+      await tester.pumpAndSettle();
+
+      // The dialog's own button, not the sheet's tile of the same name.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Clear cache'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(calls, contains('clearProfileCache'));
     });
   });
 }
