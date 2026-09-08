@@ -309,6 +309,36 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  /// Confirms a force stop.
+  ///
+  /// Stopping a guest is not destructive, but it is abrupt: whatever the clone was
+  /// doing — an upload, a call, a form half filled in — ends there, and the tile gives
+  /// no warning of that. One tap of confirmation is cheaper than losing the work.
+  Future<bool?> _confirmForceStop(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Force stop this app?'),
+        content: const Text(
+          'The app will stop running until you open it again.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Force stop'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<bool?> _confirmClearStorage(
     BuildContext context,
     VirtualProfileModel profile,
@@ -345,6 +375,10 @@ class HomeView extends GetView<HomeController> {
       case CloneAction.spaceInfo:
         await _openSpaceInfo(context, profile);
       case CloneAction.forceStop:
+        final bool confirmed = await _confirmForceStop(context) ?? false;
+        if (!confirmed || !context.mounted) {
+          return;
+        }
         final String? error = await controller.forceStop(profile);
         if (!context.mounted) {
           return;
