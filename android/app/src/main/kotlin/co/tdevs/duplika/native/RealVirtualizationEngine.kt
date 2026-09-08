@@ -500,6 +500,16 @@ class RealVirtualizationEngine(
         label: String,
     ): EngineResult<Unit> = AppSharer(context).share(profileId, packageName, label)
 
+    /**
+     * Shares a host-installed app's own APK, with no profile involved.
+     *
+     * The empty profile id is deliberate: [AppSharer] looks for an imported archive
+     * retained for a clone first, and there is no clone here, so it falls through to the
+     * host's own `sourceDir`.
+     */
+    fun shareInstalledApk(packageName: String, label: String): EngineResult<Unit> =
+        AppSharer(context).share(profileId = "", packageName = packageName, label = label)
+
     fun uninstallAppFromProfile(profileId: String, packageName: String): EngineResult<Unit> {
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.Failure(

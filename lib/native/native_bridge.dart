@@ -7,6 +7,7 @@ import '../core/diagnostics/channel_diagnostics.dart';
 import '../core/diagnostics/diagnostic_operation.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
+import '../data/models/app_details.dart';
 import '../data/models/battery_prompt_screen.dart';
 import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
@@ -21,7 +22,7 @@ import '../data/models/test_app_model.dart';
 /// maps never escape this class.
 class NativeBridge {
   NativeBridge({MethodChannel? channel})
-      : _channel = channel ?? const MethodChannel(channelName);
+    : _channel = channel ?? const MethodChannel(channelName);
 
   static const String channelName = 'duplika/native_bridge';
 
@@ -35,11 +36,15 @@ class NativeBridge {
 
   Future<bool> isTestAppInstalled() async {
     try {
-      final bool? installed = await _channel.invokeMethod<bool>('isTestAppInstalled');
+      final bool? installed = await _channel.invokeMethod<bool>(
+        'isTestAppInstalled',
+      );
       return installed ?? false;
     } on PlatformException catch (error, stackTrace) {
       _logger.error('isTestAppInstalled failed', error, stackTrace);
-      throw NativeBridgeException('Could not check whether the test app is installed.');
+      throw NativeBridgeException(
+        'Could not check whether the test app is installed.',
+      );
     } on MissingPluginException {
       // The host platform has no native bridge (unit tests, desktop, web).
       return false;
@@ -73,7 +78,9 @@ class NativeBridge {
   // ---------------------------------------------------------------------------
 
   Future<VirtualizationAvailability> isVirtualizationAvailable() async {
-    final Map<String, dynamic> result = await _invokeMap('isVirtualizationAvailable');
+    final Map<String, dynamic> result = await _invokeMap(
+      'isVirtualizationAvailable',
+    );
     return VirtualizationAvailability.fromMap(result);
   }
 
@@ -81,8 +88,10 @@ class NativeBridge {
       _invokeEngine('initializeVirtualization');
 
   Future<bool> isAppSupported(String packageName) async {
-    final EngineResponse response =
-        await _invokeEngine('isAppSupported', <String, dynamic>{'packageName': packageName});
+    final EngineResponse response = await _invokeEngine(
+      'isAppSupported',
+      <String, dynamic>{'packageName': packageName},
+    );
     return response.data['supported'] as bool? ?? false;
   }
 
@@ -98,18 +107,19 @@ class NativeBridge {
     String profileId,
     String packageName, {
     bool installGms = false,
-  }) =>
-      _invokeEngine('installAppToProfile', <String, dynamic>{
-        ..._profileArgs(profileId, packageName),
-        'installGms': installGms,
-      });
+  }) => _invokeEngine('installAppToProfile', <String, dynamic>{
+    ..._profileArgs(profileId, packageName),
+    'installGms': installGms,
+  });
 
   /// Launchable apps on the device, for the clone picker.
   ///
   /// Raises on failure rather than returning an empty list: the picker renders an empty
   /// result as "No matching apps", which would tell the user they have no apps when in
   /// fact the call failed. The caller already has an error path for this.
-  Future<List<InstalledAppModel>> listInstalledApps({bool includeIcons = true}) async {
+  Future<List<InstalledAppModel>> listInstalledApps({
+    bool includeIcons = true,
+  }) async {
     final EngineResponse response = await _invokeEngine(
       'listInstalledApps',
       <String, dynamic>{'includeIcons': includeIcons},
@@ -127,16 +137,22 @@ class NativeBridge {
     // A single malformed entry must not lose the whole list.
     return apps
         .whereType<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> app) => InstalledAppModel.fromMap(
-              app.map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
-            ))
+        .map(
+          (Map<Object?, Object?> app) => InstalledAppModel.fromMap(
+            app.map(
+              (Object? k, Object? v) => MapEntry<String, dynamic>('$k', v),
+            ),
+          ),
+        )
         .toList(growable: false);
   }
 
   /// What will and will not work if this app is cloned.
   Future<CompatibilityReport> analyzeApp(String packageName) async {
-    final EngineResponse response =
-        await _invokeEngine('analyzeApp', <String, dynamic>{'packageName': packageName});
+    final EngineResponse response = await _invokeEngine(
+      'analyzeApp',
+      <String, dynamic>{'packageName': packageName},
+    );
     return _reportOf(response, packageName);
   }
 
@@ -144,7 +160,10 @@ class NativeBridge {
   ///
   /// Unlike [analyzeApp] this needs no installed package, so an imported APK can be judged
   /// before anything is installed.
-  Future<CompatibilityReport> analyzeApk(String apkPath, String packageName) async {
+  Future<CompatibilityReport> analyzeApk(
+    String apkPath,
+    String packageName,
+  ) async {
     final EngineResponse response = await _invokeEngine(
       'analyzeApk',
       <String, dynamic>{'apkPath': apkPath, 'packageName': packageName},
@@ -159,7 +178,9 @@ class NativeBridge {
   /// plainly that it was not analysed instead.
   CompatibilityReport _reportOf(EngineResponse response, String packageName) {
     if (!response.success || response.data.isEmpty) {
-      _logger.error('Compatibility analysis unavailable for $packageName: ${response.code}');
+      _logger.error(
+        'Compatibility analysis unavailable for $packageName: ${response.code}',
+      );
       return CompatibilityReport.unknown;
     }
     return CompatibilityReport.fromMap(response.data);
@@ -169,7 +190,9 @@ class NativeBridge {
   ///
   /// Guests run under the host's identity, so Android checks the host's grants; this is
   /// the ordinary system dialog and a denial is respected.
-  Future<PermissionRequestResult> requestGuestPermissions(String packageName) async {
+  Future<PermissionRequestResult> requestGuestPermissions(
+    String packageName,
+  ) async {
     final EngineResponse response = await _invokeEngine(
       'requestGuestPermissions',
       <String, dynamic>{'packageName': packageName},
@@ -182,7 +205,9 @@ class NativeBridge {
 
   /// Whether the current launcher can pin shortcuts at all.
   Future<bool> areShortcutsSupported() async {
-    final EngineResponse response = await _invokeEngine('areShortcutsSupported');
+    final EngineResponse response = await _invokeEngine(
+      'areShortcutsSupported',
+    );
     return response.data['supported'] as bool? ?? false;
   }
 
@@ -197,7 +222,8 @@ class NativeBridge {
     int spaceIndex = 1,
     int spaceCount = 1,
   }) async {
-    final EngineResponse response = await _invokeEngine('pinCloneShortcut', <String, dynamic>{
+    final EngineResponse
+    response = await _invokeEngine('pinCloneShortcut', <String, dynamic>{
       'profileId': profileId,
       'packageName': packageName,
       'label': label,
@@ -215,7 +241,9 @@ class NativeBridge {
   ///
   /// Prefer this over [listInstalledApps] when the caller already knows which packages it
   /// needs — decoding every launchable app's icon is expensive.
-  Future<Map<String, Uint8List>> getAppIcons(Iterable<String> packageNames) async {
+  Future<Map<String, Uint8List>> getAppIcons(
+    Iterable<String> packageNames,
+  ) async {
     final List<String> packages = packageNames.toSet().toList(growable: false);
     if (packages.isEmpty) {
       return <String, Uint8List>{};
@@ -242,8 +270,10 @@ class NativeBridge {
 
   /// Reads an imported APK's identity. Throws [VirtualizationException] if unreadable.
   Future<ApkCandidate> inspectApk(List<String> apkPaths) async {
-    final EngineResponse response =
-        await _invokeEngine('inspectApk', <String, dynamic>{'apkPaths': apkPaths});
+    final EngineResponse response = await _invokeEngine(
+      'inspectApk',
+      <String, dynamic>{'apkPaths': apkPaths},
+    );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
@@ -255,18 +285,25 @@ class NativeBridge {
     List<String> apkPaths,
     String packageName, {
     bool installGms = false,
-  }) =>
-      _invokeEngine('installApkToProfile', <String, dynamic>{
-        'profileId': profileId,
-        'packageName': packageName,
-        'apkPaths': apkPaths,
-        'installGms': installGms,
-      });
+  }) => _invokeEngine('installApkToProfile', <String, dynamic>{
+    'profileId': profileId,
+    'packageName': packageName,
+    'apkPaths': apkPaths,
+    'installGms': installGms,
+  });
 
-  Future<EngineResponse> uninstallAppFromProfile(String profileId, String packageName) =>
-      _invokeEngine('uninstallAppFromProfile', _profileArgs(profileId, packageName));
+  Future<EngineResponse> uninstallAppFromProfile(
+    String profileId,
+    String packageName,
+  ) => _invokeEngine(
+    'uninstallAppFromProfile',
+    _profileArgs(profileId, packageName),
+  );
 
-  Future<VirtualProfileState> profileState(String profileId, String packageName) async {
+  Future<VirtualProfileState> profileState(
+    String profileId,
+    String packageName,
+  ) async {
     final EngineResponse response = await _invokeEngine(
       'isAppInstalledInProfile',
       _profileArgs(profileId, packageName),
@@ -281,12 +318,16 @@ class NativeBridge {
       _invokeEngine('stopProfile', _profileArgs(profileId, packageName));
 
   /// Empties this clone's container. The package stays installed.
-  Future<EngineResponse> clearProfileData(String profileId, String packageName) =>
-      _invokeEngine('clearProfileData', _profileArgs(profileId, packageName));
+  Future<EngineResponse> clearProfileData(
+    String profileId,
+    String packageName,
+  ) => _invokeEngine('clearProfileData', _profileArgs(profileId, packageName));
 
   /// Empties only this clone's caches.
-  Future<EngineResponse> clearProfileCache(String profileId, String packageName) =>
-      _invokeEngine('clearProfileCache', _profileArgs(profileId, packageName));
+  Future<EngineResponse> clearProfileCache(
+    String profileId,
+    String packageName,
+  ) => _invokeEngine('clearProfileCache', _profileArgs(profileId, packageName));
 
   /// Reads, regenerates or resets the identifiers one space presents as its own.
   ///
@@ -296,10 +337,10 @@ class NativeBridge {
     String profileId, {
     String action = 'read',
   }) async {
-    final EngineResponse response = await _invokeEngine('spaceIdentity', <String, dynamic>{
-      'profileId': profileId,
-      'action': action,
-    });
+    final EngineResponse response = await _invokeEngine(
+      'spaceIdentity',
+      <String, dynamic>{'profileId': profileId, 'action': action},
+    );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
@@ -315,17 +356,50 @@ class NativeBridge {
     required String packageName,
     required String label,
   }) async {
-    final EngineResponse response = await _invokeEngine('shareProfileApk', <String, dynamic>{
-      ..._profileArgs(profileId, packageName),
-      'label': label,
-    });
+    final EngineResponse response = await _invokeEngine(
+      'shareProfileApk',
+      <String, dynamic>{
+        ..._profileArgs(profileId, packageName),
+        'label': label,
+      },
+    );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
   }
 
-  Future<EngineResponse> deleteVirtualProfile(String profileId, String packageName) =>
-      _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
+  /// Everything Duplika can say about one installed package's archive.
+  Future<AppDetails> appDetails(String packageName) async {
+    final EngineResponse response = await _invokeEngine(
+      'getAppDetails',
+      <String, dynamic>{'packageName': packageName},
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return AppDetails.fromMap(response.data);
+  }
+
+  /// Offers a host-installed app's own APK to the share sheet.
+  ///
+  /// The picker's rows have no clone yet, so there is no profile to name.
+  Future<void> shareInstalledApk({
+    required String packageName,
+    required String label,
+  }) async {
+    final EngineResponse response = await _invokeEngine(
+      'shareInstalledApk',
+      <String, dynamic>{'packageName': packageName, 'label': label},
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+  }
+
+  Future<EngineResponse> deleteVirtualProfile(
+    String profileId,
+    String packageName,
+  ) => _invokeEngine('deleteProfile', _profileArgs(profileId, packageName));
 
   // ---------------------------------------------------------------------------
   // Onboarding: Doze exemption
@@ -338,10 +412,16 @@ class NativeBridge {
   /// smaller harm than a crash on a device that has no power manager.
   Future<bool> isIgnoringBatteryOptimizations() async {
     try {
-      final EngineResponse response = await _invokeEngine('isIgnoringBatteryOptimizations');
+      final EngineResponse response = await _invokeEngine(
+        'isIgnoringBatteryOptimizations',
+      );
       return response.data['ignoring'] as bool? ?? false;
     } on NativeBridgeException catch (error, stackTrace) {
-      _logger.error('Battery optimisation state unavailable', error, stackTrace);
+      _logger.error(
+        'Battery optimisation state unavailable',
+        error,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -351,7 +431,9 @@ class NativeBridge {
   /// Success means a screen opened, not that the exemption was granted -- Android owns
   /// the answer. Re-read [isIgnoringBatteryOptimizations] after the user returns.
   Future<BatteryPromptScreen> requestIgnoreBatteryOptimizations() async {
-    final EngineResponse response = await _invokeEngine('requestIgnoreBatteryOptimizations');
+    final EngineResponse response = await _invokeEngine(
+      'requestIgnoreBatteryOptimizations',
+    );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
@@ -394,12 +476,17 @@ class NativeBridge {
     Map<String, dynamic>? arguments,
   ) async {
     try {
-      final Map<Object?, Object?>? raw =
-          await _channel.invokeMethod<Map<Object?, Object?>>(method, arguments);
+      final Map<Object?, Object?>? raw = await _channel
+          .invokeMethod<Map<Object?, Object?>>(method, arguments);
       if (raw == null) {
-        throw NativeBridgeException('The native bridge returned no data for $method.');
+        throw NativeBridgeException(
+          'The native bridge returned no data for $method.',
+        );
       }
-      return raw.map((Object? key, Object? value) => MapEntry<String, dynamic>('$key', value));
+      return raw.map(
+        (Object? key, Object? value) =>
+            MapEntry<String, dynamic>('$key', value),
+      );
     } on PlatformException catch (error, stackTrace) {
       _logger.error('$method failed', error, stackTrace);
       throw NativeBridgeException('The native bridge call "$method" failed.');

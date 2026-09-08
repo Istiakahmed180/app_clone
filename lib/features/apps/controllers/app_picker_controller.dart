@@ -10,6 +10,7 @@ import '../../../core/diagnostics/diagnostic_operation.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
+import '../../../data/models/app_details.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
@@ -234,6 +235,28 @@ class AppPickerController extends GetxController {
       errorMessage.value = error.message;
     }
     isLoading.value = false;
+  }
+
+  /// Reads the full archive detail for one app.
+  ///
+  /// Not cached: it is asked for once per visit to the details screen, and a stale size
+  /// or certificate after an app update would be worse than the read.
+  Future<AppDetails> appDetails(String packageName) =>
+      _bridge.appDetails(packageName);
+
+  /// Shares the host's copy of this app's APK.
+  ///
+  /// Returns the error message, or `null` when the chooser opened.
+  Future<String?> shareInstalledApp(InstalledAppModel app) async {
+    try {
+      await _bridge.shareInstalledApk(
+        packageName: app.packageName,
+        label: app.appName,
+      );
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
   }
 
   Future<int> instanceCount(String packageName) =>

@@ -29,6 +29,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val shortcuts = CloneShortcutManager(appContext)
     private val permissionBridge = PermissionBridge()
     private val battery = BatteryOptimization(appContext)
+    private val appDetails = AppDetailsReader(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
 
@@ -381,6 +382,34 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 // Copying a whole APK belongs off the platform thread.
                 async(result) {
                     engine.shareProfileApk(profileId, packageName, label)
+                        .toEnvelope("APK_SHARED", "Share sheet opened.")
+                }
+            }
+
+            // Shares an app that is installed on the host and has no clone yet, which is
+            // every row in the picker. Separate from `shareProfileApk` because there is no
+            // profile to name: the archive comes straight from the host package manager.
+            // Everything Duplika can say about one package's archive. Opens every APK
+            // in the set and hashes its certificate, so it stays off the platform thread
+            // and is asked for one app at a time rather than for the whole picker.
+            "getAppDetails" -> {
+                val packageName = call.requiredPackage(result) ?: return
+                async(result) {
+                    when (val details = appDetails.read(packageName)) {
+                        null -> failure(
+                            EngineErrorCodes.APP_NOT_FOUND,
+                            "This app is no longer installed on this device.",
+                        )
+                        else -> success("APP_DETAILS", "App details read.", details)
+                    }
+                }
+            }
+
+            "shareInstalledApk" -> {
+                val packageName = call.requiredPackage(result) ?: return
+                val label = call.argument<String>("label").orEmpty().ifBlank { packageName }
+                async(result) {
+                    engine.shareInstalledApk(packageName, label)
                         .toEnvelope("APK_SHARED", "Share sheet opened.")
                 }
             }

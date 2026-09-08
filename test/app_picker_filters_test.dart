@@ -1,9 +1,13 @@
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/data/models/installed_app_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
+import 'package:duplika/app/theme/app_theme.dart';
 import 'package:duplika/features/apps/controllers/app_picker_controller.dart';
+import 'package:duplika/features/apps/widgets/installed_app_sheet.dart';
 import 'package:duplika/native/native_bridge.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 // `assignAll` is a GetX extension on List, so this import is what makes it visible.
 import 'package:get/get.dart';
@@ -233,6 +237,111 @@ void main() {
       ]);
 
       expect(controller.quickPicks, isEmpty);
+    });
+  });
+
+  group('showInstalledAppSheet', () {
+    InstalledAppAction? chosen;
+
+    setUp(() => chosen = null);
+
+    Future<void> open(WidgetTester tester, {int existingClones = 0}) async {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => TextButton(
+                  onPressed: () async {
+                    chosen = await showInstalledAppSheet(
+                      context,
+                      app: _app(
+                        name: 'Skill Track',
+                        package: 'com.tdevs.skilltrack',
+                      ),
+                      existingClones: existingClones,
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('identifies the app it is about, not just its name', (
+      WidgetTester tester,
+    ) async {
+      // The sheet covers the row it came from, so the two facts the row showed have to
+      // be here too or there is nothing left to check against.
+      await open(tester);
+
+      expect(find.text('Skill Track'), findsOneWidget);
+      expect(find.text('com.tdevs.skilltrack'), findsOneWidget);
+      expect(find.text('ARM64 · 64-bit'), findsOneWidget);
+      expect(find.text('Single APK'), findsOneWidget);
+    });
+
+    testWidgets('offers exactly the three actions', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('Add clone'), findsOneWidget);
+      expect(find.text('Share app'), findsOneWidget);
+      expect(find.text('App details'), findsOneWidget);
+      // Nothing else: the row used to be a one-way trip into cloning, and the point of
+      // the sheet is that those three are the whole set.
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          // The bordered container each action row draws; the close button has none.
+          matching: find.byType(Ink),
+        ),
+        findsNWidgets(3),
+      );
+    });
+
+    testWidgets('says "another" only when there is already one', (
+      WidgetTester tester,
+    ) async {
+      await open(tester, existingClones: 2);
+      expect(find.text('Add another'), findsOneWidget);
+      expect(find.text('Add clone'), findsNothing);
+    });
+
+    testWidgets('each row answers with its own action', (
+      WidgetTester tester,
+    ) async {
+      // One per row, so a mis-wired row cannot pass by borrowing its neighbour.
+      for (final (String label, InstalledAppAction expected)
+          in <(String, InstalledAppAction)>[
+            ('Add clone', InstalledAppAction.addClone),
+            ('Share app', InstalledAppAction.shareApp),
+            ('App details', InstalledAppAction.appDetails),
+          ]) {
+        chosen = null;
+        await open(tester);
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(chosen, expected, reason: label);
+      }
+    });
+
+    testWidgets('closing answers nothing', (WidgetTester tester) async {
+      await open(tester);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(chosen, isNull);
+      expect(find.text('Add clone'), findsNothing);
     });
   });
 }

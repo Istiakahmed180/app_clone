@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/theme/app_theme.dart';
-import '../../../app/theme/status_colors.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../../../widgets/app_icon.dart';
@@ -13,6 +12,8 @@ import '../../../widgets/empty_state.dart';
 import '../controllers/app_picker_controller.dart';
 import '../widgets/app_filter_sheet.dart';
 import '../widgets/compatibility_sheet.dart';
+import 'app_details_view.dart';
+import '../widgets/installed_app_sheet.dart';
 
 /// Lets the user clone an installed app, or import an APK that is not installed.
 class AppPickerView extends GetView<AppPickerController> {
@@ -76,8 +77,7 @@ class AppPickerView extends GetView<AppPickerController> {
                     return _SectionGroup(
                       section: section,
                       clonedPackages: controller.clonedPackages,
-                      analyze: controller.analyze,
-                      onTap: (InstalledAppModel app) => _clone(context, app),
+                      onTap: (InstalledAppModel app) => _openApp(context, app),
                     );
                   },
                 );
@@ -269,6 +269,52 @@ class AppPickerView extends GetView<AppPickerController> {
     Get.back<bool>(result: true);
   }
 
+  /// What a picker row does when tapped.
+  ///
+  /// A row used to clone on tap. That made a row's only action its most consequential
+  /// one, with no way to look at an app or pass it on without cloning it first.
+  Future<void> _openApp(BuildContext context, InstalledAppModel app) async {
+    final int existing = await controller.instanceCount(app.packageName);
+    if (!context.mounted) {
+      return;
+    }
+
+    final InstalledAppAction? action = await showInstalledAppSheet(
+      context,
+      app: app,
+      existingClones: existing,
+    );
+    if (action == null || !context.mounted) {
+      return;
+    }
+
+    switch (action) {
+      case InstalledAppAction.addClone:
+        // Through the compatibility flow, not the one-tap path the Popular row uses.
+        // This is the only route left to the permission grant and the Play services
+        // option, and dropping it would mean those could never be set for an app the
+        // user clones from the list.
+        await _clone(context, app);
+      case InstalledAppAction.shareApp:
+        final String? error = await controller.shareInstalledApp(app);
+        if (error != null && context.mounted) {
+          _showMessage(context, error);
+        }
+      case InstalledAppAction.appDetails:
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) =>
+                AppDetailsView(controller: controller, app: app),
+          ),
+        );
+    }
+  }
+
+  /// Shows what Duplika knows about the app, and lets the user clone from there.
+  ///
+  /// This is the compatibility sheet: the verdict, every finding, the permissions the
+  /// host is missing and whether the app wants Play services. It is the read-first
+  /// route, and it still ends in a clone if the user decides to.
   Future<void> _clone(BuildContext context, InstalledAppModel app) async {
     final int existing = await controller.instanceCount(app.packageName);
     final CompatibilityReport report = await controller.analyze(
@@ -424,13 +470,11 @@ class _SectionGroup extends StatelessWidget {
   const _SectionGroup({
     required this.section,
     required this.clonedPackages,
-    required this.analyze,
     required this.onTap,
   });
 
   final AppSection section;
   final Set<String> clonedPackages;
-  final Future<CompatibilityReport> Function(String packageName) analyze;
   final ValueChanged<InstalledAppModel> onTap;
 
   @override
@@ -467,9 +511,6 @@ class _SectionGroup extends StatelessWidget {
                     isCloned: clonedPackages.contains(
                       section.apps[i].packageName,
                     ),
-                    // Analysis is per-app and cached, so the badge resolves lazily as
-                    // rows scroll into view rather than stalling the whole list.
-                    analyze: () => analyze(section.apps[i].packageName),
                     onTap: () => onTap(section.apps[i]),
                   ),
                 ],
@@ -486,7 +527,6 @@ class _AppRow extends StatelessWidget {
   const _AppRow({
     required this.app,
     required this.isCloned,
-    required this.analyze,
     required this.onTap,
   });
 
@@ -496,7 +536,6 @@ class _AppRow extends StatelessWidget {
   /// user scanning two hundred rows for "did I already do this one" should not have to
   /// read anything.
   final bool isCloned;
-  final Future<CompatibilityReport> Function() analyze;
   final VoidCallback onTap;
 
   @override
@@ -548,7 +587,7 @@ class _AppRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            _Trailing(analyze: analyze),
+            const _AddMark(),
           ],
         ),
       ),
@@ -556,44 +595,28 @@ class _AppRow extends StatelessWidget {
   }
 }
 
-/// The row's right-hand affordance: the compatibility verdict when there is one to
-/// report, and otherwise the plain "this row adds a clone" mark.
-class _Trailing extends StatelessWidget {
-  const _Trailing({required this.analyze});
-
-  final Future<CompatibilityReport> Function() analyze;
+/// The row's right-hand affordance.
+///
+/// Always the same mark, because every row does the same thing. It used to show the
+/// compatibility verdict instead — a block or an info glyph — which meant the icon on
+/// the right answered a question the user had not asked yet and never showed the one
+/// action the row actually performs. The verdict is reported where it can be acted on:
+/// in the clone flow, and on the app's details screen.
+class _AddMark extends StatelessWidget {
+  const _AddMark();
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
-    return FutureBuilder<CompatibilityReport>(
-      future: analyze(),
-      builder:
-          (BuildContext context, AsyncSnapshot<CompatibilityReport> snapshot) {
-            final CompatibilityReport? report = snapshot.data;
-            if (report != null &&
-                report.verdict != CompatibilityVerdict.supported) {
-              final bool blocked =
-                  report.verdict == CompatibilityVerdict.unsupported;
-              return Icon(
-                blocked ? Icons.block : Icons.info_outline,
-                size: 22.r,
-                color: blocked
-                    ? scheme.error
-                    : StatusColors.of(context).warning,
-              );
-            }
-            return Container(
-              width: 28.r,
-              height: 28.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: scheme.primary, width: 1.5),
-              ),
-              child: Icon(Icons.add, size: 18.r, color: scheme.primary),
-            );
-          },
+    return Container(
+      width: 28.r,
+      height: 28.r,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: scheme.primary, width: 1.5),
+      ),
+      child: Icon(Icons.add, size: 18.r, color: scheme.primary),
     );
   }
 }
