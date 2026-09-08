@@ -8,6 +8,7 @@ import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
+import '../../../data/models/space_identity.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
@@ -351,6 +352,16 @@ class HomeController extends GetxController {
       return error.message;
     }
   }
+
+  /// The identifiers this space presents as its own.
+  ///
+  /// [action] is `read`, `regenerate` or `reset`. Not cached: Modify and Reset change
+  /// the answer, and a stale set on this screen would be a set the user cannot trust.
+  Future<SpaceIdentity> spaceIdentity(
+    VirtualProfileModel profile, {
+    String action = 'read',
+  }) =>
+      _nativeBridge.spaceIdentity(profile.id, action: action);
 
   /// Makes [count] more clones of this app.
   ///

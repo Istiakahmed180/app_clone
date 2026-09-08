@@ -28,6 +28,7 @@ class RealVirtualizationEngine(
     private val launcher = VirtualAppLauncher(adapter)
     private val installedApps = InstalledAppsProvider(context)
     private val apkImporter = ApkImporter(context)
+    private val spaceIdentity = SpaceIdentityStore(context)
 
     val backendName: String get() = adapter.backendName
 
@@ -458,6 +459,40 @@ class RealVirtualizationEngine(
         return result
     }
 
+    /**
+     * The identifiers this space presents as its own.
+     *
+     * [action] is `read`, `regenerate` or `reset`. A space with no container yet has no
+     * virtual user to key the set on, so it is allocated first — the same allocation a
+     * launch would do, and it is what makes the identity stable from here on.
+     */
+    fun spaceIdentity(profileId: String, action: String): EngineResult<Map<String, Any?>> {
+        val virtualUserId = profileManager.virtualUserIdFor(profileId)
+            ?: return EngineResult.Failure(
+                EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
+                "This profile has no virtual environment yet.",
+            )
+
+        val identity = when (action) {
+            "regenerate" -> spaceIdentity.regenerate(profileId, virtualUserId)
+            "reset" -> spaceIdentity.reset(profileId, virtualUserId)
+            else -> spaceIdentity.identity(profileId, virtualUserId)
+        }
+
+        if (action != "read") {
+            phase(
+                if (action == "reset") "SPACE_IDENTITY_RESET" else "SPACE_IDENTITY_REGENERATED",
+                DiagCategory.PROFILE,
+                "Space identity ${if (action == "reset") "reset" else "regenerated"} " +
+                    "for virtual user $virtualUserId (revision ${identity.revision})",
+                level = DiagLevel.SUCCESS,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+            )
+        }
+        return EngineResult.Success(identity.toMap())
+    }
+
     /** Offers this clone's APK to the share sheet. */
     fun shareProfileApk(
         profileId: String,
@@ -679,6 +714,9 @@ class RealVirtualizationEngine(
 
         launcher.stop(packageName, virtualUserId)
         installer.uninstall(packageName, virtualUserId)
+        // Before the id is released: VirtualProfileManager allocates the lowest free
+        // integer, so a later clone would otherwise inherit this space's identifiers.
+        spaceIdentity.forget(virtualUserId)
         val deletion = adapter.deleteVirtualUser(virtualUserId)
         releaseProfileArtifacts(profileId)
         phase(

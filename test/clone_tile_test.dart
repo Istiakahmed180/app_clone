@@ -1,14 +1,21 @@
 import 'package:duplika/app/theme/app_theme.dart';
-import 'package:duplika/data/models/compatibility_report.dart';
 import 'package:duplika/data/models/engine_result.dart';
+import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
+import 'package:duplika/data/models/space_identity.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
+import 'package:duplika/data/repositories/virtual_profile_repository.dart';
+import 'package:duplika/features/home/controllers/home_controller.dart';
+import 'package:duplika/native/native_bridge.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
 import 'package:duplika/features/home/widgets/clone_count_dialog.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
-import 'package:duplika/features/home/widgets/space_info_sheet.dart';
+import 'package:duplika/features/home/views/space_info_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'fakes/in_memory_profile_storage.dart';
 
 VirtualProfileModel _profile({String profileName = 'Example'}) =>
     VirtualProfileModel(
@@ -23,18 +30,6 @@ const VirtualProfileState _ready = VirtualProfileState(
   installed: true,
   running: false,
   virtualUserId: 0,
-);
-
-const CompatibilityFinding _permissionsWarning = CompatibilityFinding(
-  code: 'PERMISSIONS_REQUIRED',
-  message: 'The clone needs 2 permission(s).',
-  blocking: false,
-);
-
-const CompatibilityFinding _blockingFinding = CompatibilityFinding(
-  code: 'SECURE_ENV_REQUIRED',
-  message: 'This application requires a secure environment.',
-  blocking: true,
 );
 
 Future<void> _pumpTile(
@@ -278,45 +273,109 @@ void main() {
     });
   });
 
-  group('showSpaceInfoSheet', () {
-    Future<bool> open(
+  group('SpaceInfoView', () {
+    const MethodChannel channel = MethodChannel(NativeBridge.channelName);
+    late Map<String, Object?> identityData;
+    late List<String> identityActions;
+    late bool identityFails;
+
+    setUp(() {
+      identityActions = <String>[];
+      identityFails = false;
+      identityData = <String, Object?>{
+        'virtualUserId': 0,
+        'revision': 0,
+        'deviceId': '358240051111110',
+        'androidId': '9774d56d682e549c',
+        'serialNumber': '1234567890123456',
+        'wifiMac': '02:1a:2b:3c:4d:5e',
+        'bluetoothMac': '02:aa:bb:cc:dd:ee',
+      };
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+            if (call.method == 'spaceIdentity') {
+              final Map<Object?, Object?> args =
+                  call.arguments as Map<Object?, Object?>;
+              final String action = args['action']! as String;
+              identityActions.add(action);
+              if (identityFails) {
+                return <Object?, Object?>{
+                  'success': false,
+                  'code': 'NO_CONTAINER',
+                  'message': 'This space has no container yet.',
+                  'data': <Object?, Object?>{},
+                };
+              }
+              if (action == 'regenerate') {
+                identityData = <String, Object?>{
+                  ...identityData,
+                  'revision': (identityData['revision']! as int) + 1,
+                  'deviceId': '358240059999998',
+                };
+              } else if (action == 'reset') {
+                identityData = <String, Object?>{
+                  ...identityData,
+                  'revision': 0,
+                  'deviceId': '358240051111110',
+                };
+              }
+              return <Object?, Object?>{
+                'success': true,
+                'code': 'SPACE_IDENTITY',
+                'message': 'ok',
+                'data': identityData,
+              };
+            }
+            return null;
+          });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    Future<void> open(
       WidgetTester tester, {
       VirtualProfileState state = _ready,
-      List<CompatibilityFinding> warnings = const <CompatibilityFinding>[],
-      bool needsPermissions = false,
       bool engineActive = true,
     }) async {
-      bool granted = false;
+      // The page is taller than a phone, so on a phone-sized test surface a ListView
+      // never builds its lower half and nothing down there can be found or tapped.
+      tester.view.physicalSize = const Size(390 * 3, 2200 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      final VirtualProfileRepository repository = VirtualProfileRepository(
+        storage: InMemoryProfileStorage(),
+      );
+      final NativeBridge bridge = NativeBridge(channel: channel);
+      final HomeController controller = HomeController(
+        engine: RealVirtualizationEngine(
+          repository: repository,
+          nativeBridge: bridge,
+        ),
+        nativeBridge: bridge,
+        repository: repository,
+      );
+
       await tester.pumpWidget(
         ScreenUtilInit(
           designSize: const Size(390, 844),
           builder: (BuildContext context, Widget? child) => MaterialApp(
             theme: AppTheme.light(),
-            home: Scaffold(
-              body: Builder(
-                builder: (BuildContext context) => TextButton(
-                  onPressed: () async {
-                    granted = await showSpaceInfoSheet(
-                      context,
-                      profile: _profile(),
-                      state: state,
-                      warnings: warnings,
-                      needsPermissions: needsPermissions,
-                      engineActive: engineActive,
-                      siblingCount: 2,
-                      instanceIndex: 1,
-                    );
-                  },
-                  child: const Text('open'),
-                ),
-              ),
+            home: SpaceInfoView(
+              controller: controller,
+              profile: _profile(),
+              state: state,
+              engineActive: engineActive,
+              instanceIndex: 1,
             ),
           ),
         ),
       );
-      await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      return granted;
     }
 
     testWidgets('reports the engine status and the container', (
@@ -324,11 +383,95 @@ void main() {
     ) async {
       await open(tester);
 
-      expect(find.text('Ready'), findsOneWidget);
-      expect(find.text('virtual user 0'), findsOneWidget);
-      expect(find.text('org.example'), findsOneWidget);
-      expect(find.text('1 of 2'), findsOneWidget);
+      expect(find.text('Space 1'), findsOneWidget);
+      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('ID 1'), findsOneWidget);
     });
+
+    testWidgets('shows every identifier the space presents as its own', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      for (final String label in <String>[
+        'Device ID',
+        'Android ID',
+        'Serial number',
+        'Wi-Fi MAC',
+        'Bluetooth MAC',
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(find.text('358240051111110'), findsOneWidget);
+      expect(find.text('02:1a:2b:3c:4d:5e'), findsOneWidget);
+      expect(identityActions, <String>['read']);
+    });
+
+    testWidgets('makes no claim that the identifiers reach guest apps', (
+      WidgetTester tester,
+    ) async {
+      // A guest still reads the device's own values, so the screen shows the set and
+      // says nothing about it. Asserted rather than assumed: a reassurance the engine
+      // cannot back would be worse than none.
+      await open(tester);
+
+      expect(SpaceIdentity.isolatedFromGuests, isFalse);
+      expect(find.textContaining('isolated'), findsNothing);
+      expect(find.textContaining('private to this space'), findsNothing);
+    });
+
+    testWidgets('Modify asks for a new identity and shows it', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+
+      expect(identityActions, <String>['read', 'regenerate']);
+      expect(find.text('358240059999998'), findsOneWidget);
+      expect(find.text('358240051111110'), findsNothing);
+    });
+
+    testWidgets('Reset waits until there is something to reset', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      // Revision 0 is the identity the space was born with; resetting to it is a no-op
+      // dressed up as an action.
+      expect(
+        tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+        isNull,
+      );
+
+      await tester.tap(find.text('Modify'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+        isNotNull,
+      );
+
+      await tester.tap(find.text('Reset'));
+      await tester.pumpAndSettle();
+      expect(identityActions, <String>['read', 'regenerate', 'reset']);
+      expect(find.text('358240051111110'), findsOneWidget);
+    });
+
+    testWidgets(
+      'a space with no container explains itself instead of failing',
+      (WidgetTester tester) async {
+        identityFails = true;
+        await open(tester);
+
+        expect(find.text('This space has no container yet.'), findsOneWidget);
+        // Nothing to modify, so nothing offers to.
+        expect(
+          tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+          isNull,
+        );
+      },
+    );
 
     testWidgets(
       'a container the engine has lost says it rebuilds, not that it failed',
@@ -339,7 +482,8 @@ void main() {
         );
 
         expect(find.text('Rebuilds on launch'), findsOneWidget);
-        expect(find.text('not allocated yet'), findsOneWidget);
+        // The pill counts spaces, so it stays put; the status line is what changes.
+        expect(find.text('ID 1'), findsOneWidget);
       },
     );
 
@@ -349,52 +493,7 @@ void main() {
       await open(tester, engineActive: false);
 
       expect(find.text('Engine unavailable'), findsOneWidget);
-      expect(find.text('Ready'), findsNothing);
-    });
-
-    testWidgets('shows every finding, blocking first', (
-      WidgetTester tester,
-    ) async {
-      await open(
-        tester,
-        warnings: const <CompatibilityFinding>[
-          _permissionsWarning,
-          _blockingFinding,
-        ],
-      );
-
-      final double blockingY = tester
-          .getTopLeft(find.text(_blockingFinding.message))
-          .dy;
-      final double lesserY = tester
-          .getTopLeft(find.text(_permissionsWarning.message))
-          .dy;
-      expect(blockingY, lessThan(lesserY));
-    });
-
-    testWidgets('a clone missing permissions offers a way to grant them', (
-      WidgetTester tester,
-    ) async {
-      // The tile carries no marker and the action sheet no status line, so this is the
-      // only place the fix is reachable. Losing it would leave the warning a dead end.
-      await open(tester, needsPermissions: true);
-
-      expect(find.text('Grant permissions'), findsOneWidget);
-      await tester.tap(find.text('Grant permissions'));
-      await tester.pumpAndSettle();
-      expect(
-        find.text('Grant permissions'),
-        findsNothing,
-        reason: 'the sheet closes',
-      );
-    });
-
-    testWidgets('a clone that needs nothing does not offer the grant action', (
-      WidgetTester tester,
-    ) async {
-      await open(tester);
-
-      expect(find.text('Grant permissions'), findsNothing);
+      expect(find.text('Active'), findsNothing);
     });
   });
 

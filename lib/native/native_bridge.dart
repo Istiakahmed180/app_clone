@@ -12,6 +12,7 @@ import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
+import '../data/models/space_identity.dart';
 import '../data/models/test_app_model.dart';
 
 /// The only place in the Dart codebase that talks to the platform channel.
@@ -286,6 +287,24 @@ class NativeBridge {
   /// Empties only this clone's caches.
   Future<EngineResponse> clearProfileCache(String profileId, String packageName) =>
       _invokeEngine('clearProfileCache', _profileArgs(profileId, packageName));
+
+  /// Reads, regenerates or resets the identifiers one space presents as its own.
+  ///
+  /// One method for all three because they answer with the same shape: the caller always
+  /// wants the resulting set, whichever way it got there.
+  Future<SpaceIdentity> spaceIdentity(
+    String profileId, {
+    String action = 'read',
+  }) async {
+    final EngineResponse response = await _invokeEngine('spaceIdentity', <String, dynamic>{
+      'profileId': profileId,
+      'action': action,
+    });
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return SpaceIdentity.fromMap(response.data);
+  }
 
   /// Offers this clone's APK to the Android share sheet.
   ///

@@ -362,6 +362,18 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "spaceIdentity" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val action = call.argument<String>("action") ?: "read"
+                async(result) {
+                    when (val identity = engine.spaceIdentity(profileId, action)) {
+                        is EngineResult.Success ->
+                            success("SPACE_IDENTITY", "Space identity read.", identity.value)
+                        is EngineResult.Failure -> failure(identity.code, identity.message)
+                    }
+                }
+            }
+
             "shareProfileApk" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return

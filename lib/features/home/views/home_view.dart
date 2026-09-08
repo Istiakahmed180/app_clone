@@ -16,8 +16,8 @@ import '../widgets/clone_action_sheet.dart';
 import '../widgets/clone_count_dialog.dart';
 import '../widgets/clone_tile.dart';
 import '../widgets/home_header.dart';
-import '../widgets/space_info_sheet.dart';
 import '../widgets/virtualization_warning.dart';
+import 'space_info_view.dart';
 
 /// The clone launcher.
 ///
@@ -288,36 +288,24 @@ class HomeView extends GetView<HomeController> {
   }
 
   /// Opens the facts about one clone, and applies the one fix it offers.
+  /// Opens the space's own page.
+  ///
+  /// A page and not a sheet: it carries the space's identifiers, which are there to be
+  /// read and copied, and a sheet that tall is worse than a screen at both.
   Future<void> _openSpaceInfo(
     BuildContext context,
     VirtualProfileModel profile,
   ) async {
-    final bool grant = await showSpaceInfoSheet(
-      context,
-      profile: profile,
-      state: controller.stateFor(profile),
-      icon: controller.iconFor(profile),
-      siblingCount: controller.siblingCount(profile),
-      instanceIndex: controller.instanceIndex(profile),
-      warnings: controller.warningsFor(profile),
-      needsPermissions: controller.needsPermissions(profile),
-      engineActive: controller.providesRuntimeIsolation,
-    );
-    if (!grant || !context.mounted) {
-      return;
-    }
-
-    final String? error = await controller.grantPermissions(profile);
-    if (!context.mounted) {
-      return;
-    }
-    _showMessage(
-      context,
-      error ??
-          (controller.needsPermissions(profile)
-              ? 'Some permissions are still missing. The clone will keep working '
-                    'without them, but features that need them will not.'
-              : 'Permissions granted. Relaunch the clone to pick them up.'),
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => SpaceInfoView(
+          controller: controller,
+          profile: profile,
+          state: controller.stateFor(profile),
+          instanceIndex: controller.instanceIndex(profile),
+          engineActive: controller.providesRuntimeIsolation,
+        ),
+      ),
     );
   }
 
