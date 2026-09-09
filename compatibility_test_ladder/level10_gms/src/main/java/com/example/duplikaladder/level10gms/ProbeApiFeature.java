@@ -48,12 +48,26 @@ import java.util.concurrent.TimeUnit;
  */
 final class ProbeApiFeature {
 
-    /** Service actions the two client libraries resolve against Play services. */
+    /**
+     * Service actions the client libraries actually bind.
+     *
+     * Corrected in Phase 8. The first version of this list guessed
+     * {@code com.google.android.gms.location.service.START} and friends, which returned
+     * zero matches <em>on the host as well</em> while LocationServices worked there -- so
+     * they were simply the wrong names and the arm measured nothing. These are the real
+     * ones: LocationServices binds the legacy
+     * {@code com.google.android.location.internal.GoogleLocationManagerService.START}
+     * action, and the two known-good controls come from the Level 9 Test C evidence, which
+     * observed them resolving inside a guest.
+     */
     private static final String[][] ACTIONS = {
+            { "LocationServices (P3, fails) - REAL action",
+              "com.google.android.location.internal.GoogleLocationManagerService.START" },
             { "AppSet (P2, works)", "com.google.android.gms.appset.service.START" },
-            { "LocationServices (P3, fails)", "com.google.android.gms.location.service.START" },
-            { "LocationServices settings", "com.google.android.gms.location.settings.START" },
-            { "FusedLocationProvider", "com.google.android.gms.location.places.START" },
+            { "Auth sign-in (Level 9 control, resolved in guest)",
+              "com.google.android.gms.auth.api.signin.service.START" },
+            { "GMS common (Level 9 control, resolved in guest)",
+              "com.google.android.gms.common.service.START" },
     };
 
     private ProbeApiFeature() {
@@ -100,7 +114,7 @@ final class ProbeApiFeature {
             if (action.contains(".appset.") && matches > 0) {
                 appSetResolves = true;
             }
-            if (action.contains(".location.") && matches > 0) {
+            if (action.toLowerCase(java.util.Locale.US).contains("location") && matches > 0) {
                 locationResolves = true;
             }
             DiagLog.line(DiagLog.TAG_INTENT, "queryIntentServices action=" + action

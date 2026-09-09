@@ -1,0 +1,68 @@
+2026-09-09 12:30:13.552 Duplika.GMS10: ================ LEVEL 10 GMS API REACH RUN ================
+2026-09-09 12:30:13.552 Duplika.GMS10.UID: guestPackage=com.example.duplikaladder.level10gms
+2026-09-09 12:30:13.552 Duplika.GMS10.UID: hostUid=10008 pid=23701
+2026-09-09 12:30:13.552 Duplika.GMS10.UID: processName=com.example.duplikaladder.level10gms
+2026-09-09 12:30:13.552 Duplika.GMS10.UID: dataDir=/data/user/0/co.tdevs.duplika/blackbox/data/user/12/com.example.duplikaladder.level10gms
+2026-09-09 12:30:13.552 Duplika.GMS10.UID: virtualized=true virtualUserId=12
+2026-09-09 12:30:13.552 Duplika.GMS10: device=OnePlus CPH2605 android=15 api=35 abi=arm64-v8a
+2026-09-09 12:30:13.552 Duplika.GMS10: buildType=release minified=true
+2026-09-09 12:30:13.553 Duplika.GMS10: ================ P0 — package visibility + Play services availability (Level 10 baseline) ================
+2026-09-09 12:30:13.555 Duplika.GMS10.Package: com.google.android.gms getPackageInfo OK versionName=26.32.34 (260400-968093310) versionCode=263234035
+2026-09-09 12:30:13.557 Duplika.GMS10.Package: com.google.android.gms getApplicationInfo OK enabled=true uidOfPackage=10113
+2026-09-09 12:30:13.558 Duplika.GMS10.Package: com.google.android.gms enabledSetting=0
+2026-09-09 12:30:13.558 Duplika.GMS10.Package: com.google.android.gms consistency packageInfo=true applicationInfo=true enabled=true consistent=true
+2026-09-09 12:30:13.563 Duplika.GMS10.Package: com.android.vending getPackageInfo OK versionName=53.0.27-34 [0] [PR] 973951861 versionCode=85302740
+2026-09-09 12:30:13.564 Duplika.GMS10.Package: com.android.vending getApplicationInfo OK enabled=true uidOfPackage=10108
+2026-09-09 12:30:13.565 Duplika.GMS10.Package: com.android.vending enabledSetting=1
+2026-09-09 12:30:13.565 Duplika.GMS10.Package: com.android.vending consistency packageInfo=true applicationInfo=true enabled=true consistent=true
+2026-09-09 12:30:13.572 Duplika.GMS10.Package: getInstalledPackages count=1
+2026-09-09 12:30:13.585 Duplika.GMS10: isGooglePlayServicesAvailable=0 name=SUCCESS
+2026-09-09 12:30:13.586 Duplika.GMS10: P0 verdict=PASS (consistent package metadata and SUCCESS(0) availability)
+2026-09-09 12:30:13.587 Duplika.GMS10: ================ P1 — direct AIDL GMS service (AdvertisingIdClient, no framework) ================
+2026-09-09 12:30:13.693 Duplika.GMS10: AdvertisingIdClient OK in 105 ms idPresent=true idLength=36 limitAdTrackingEnabled=false
+2026-09-09 12:30:13.693 Duplika.GMS10: P1 verdict=PASS (direct-AIDL GMS service call completed in the guest)
+2026-09-09 12:30:13.694 Duplika.GMS10: ================ P2 — GoogleApi framework client (AppSet ID, no credentials) ================
+2026-09-09 12:30:13.700 Duplika.GMS10: AppSetIdClient constructed
+2026-09-09 12:30:13.702 Duplika.GMS10: getAppSetIdInfo task submitted
+2026-09-09 12:30:13.772 Duplika.GMS10: AppSet ID OK idPresent=true idLength=36 scope=1
+2026-09-09 12:30:13.772 Duplika.GMS10: P2 verdict=PASS (GoogleApi-framework call completed in the guest)
+2026-09-09 12:30:13.773 Duplika.GMS10: ================ P3 — Level 9 control (SettingsClient.checkLocationSettings) ================
+2026-09-09 12:30:13.773 Duplika.GMS10: checkLocationSettings task submitted
+2026-09-09 12:30:13.793 Duplika.GMS10: checkLocationSettings ApiException statusCode=17 | exceptionClass=com.google.android.gms.common.api.e | exceptionMessage=17: API: LocationServices.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+com.google.android.gms.common.api.e: 17: API: LocationServices.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+	at z.u.i(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:13)
+	at y.l0.a(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:8)
+	at y.x.f(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:47)
+	at y.x.e(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:10)
+	at y.x.p(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:194)
+	at j0.d.run(r8-map-id-0828f0a1e395d3bdece0e2cb0b8bf419111e9785205920586438cf3055a6afac:64)
+	at android.os.Handler.handleCallback(Handler.java:973)
+	at android.os.Handler.dispatchMessage(Handler.java:100)
+	at android.os.Looper.loopOnce(Looper.java:282)
+	at android.os.Looper.loop(Looper.java:387)
+	at android.os.HandlerThread.run(HandlerThread.java:85)
+
+2026-09-09 12:30:13.794 Duplika.GMS10: P3 verdict=FAIL (client never reached Play services (status 17))
+2026-09-09 12:30:13.794 Duplika.GMS10: ================ P4 — caller identity trace (diagnosis only, nothing is modified) ================
+2026-09-09 12:30:13.795 Duplika.GMS10.UID: claimedPackage=com.example.duplikaladder.level10gms uid=10008 pid=23701
+2026-09-09 12:30:13.796 Duplika.GMS10.UID: getPackagesForUid(10008)=[com.example.duplikaladder.level10gms] (answered by the VIRTUALIZED PackageManager)
+2026-09-09 12:30:13.800 Duplika.GMS10.UID: declaredUidForOwnPackage=10008 matchesProcessUid=true
+2026-09-09 12:30:13.800 Duplika.GMS10.UID: NOTE the kernel Binder calling uid is not observable from inside the guest; see Level 9 host-side capture
+2026-09-09 12:30:13.800 Duplika.GMS10: P4 verdict=PASS (self-consistent INSIDE the guest (says nothing about the host's view))
+2026-09-09 12:30:13.800 Duplika.GMS10: ================ P5 — account-bound APIs (observed read-only, never attempted) ================
+2026-09-09 12:30:13.803 Duplika.GMS10.UID: accountsByType(com.google) count=0 fabricatedAccountObserved=false
+2026-09-09 12:30:13.808 Duplika.GMS10: getLastSignedInAccount present=false (local read, no network, no authentication)
+2026-09-09 12:30:13.809 Duplika.GMS10: P5 verdict=UNSUPPORTED (no account; boundary not crossed)
+2026-09-09 12:30:13.809 Duplika.GMS10: ================ P6 — per-API availability and service resolution (why P2 works and P3 does not) ================
+2026-09-09 12:30:13.818 Duplika.GMS10.Package: GMS declared services visible to guest=370
+2026-09-09 12:30:13.819 Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.appset.service.START matches=0 component=none
+2026-09-09 12:30:13.821 Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.location.service.START matches=0 component=none
+2026-09-09 12:30:13.822 Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.location.settings.START matches=0 component=none
+2026-09-09 12:30:13.824 Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.location.places.START matches=0 component=none
+2026-09-09 12:30:13.837 Duplika.GMS10: checkApiAvailability(LocationServices/Settings) = f: None of the queried APIs are available. LocationServices.API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+2026-09-09 12:30:13.837 Duplika.GMS10: P6 verdict=PARTIAL (inconclusive component resolution pattern)
+2026-09-09 12:30:13.861 Duplika.GMS10: ================ BOUNDARY LOCATION (from the P1 vs P2 comparison) ================
+2026-09-09 12:30:13.862 Duplika.GMS10: P1 direct-AIDL=PASS  P2 GoogleApi-framework=PASS  P3 Level9-control=FAIL
+2026-09-09 12:30:13.862 Duplika.GMS10: CONCLUSION: both client layers work; Level 9's DEVELOPER_ERROR is specific to that one API rather than to the framework.
+2026-09-09 12:30:13.862 Duplika.GMS10: ================ RUN COMPLETE ================
+2026-09-09 12:30:13.864 Duplika.GMS10: report written to /data/user/0/co.tdevs.duplika/blackbox/data/user/12/com.example.duplikaladder.level10gms/files/level10-gms-report.txt
