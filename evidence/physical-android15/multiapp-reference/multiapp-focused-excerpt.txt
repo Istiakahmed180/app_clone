@@ -1,0 +1,187 @@
+# MultiApp Ultra (com.waxmoon.ma.nova.gp v1.3.1) — focused excerpt, Chrome guest run 17:49:36–17:56:13
+
+## Container guest process creation (ALL of them)
+09-09 17:50:12.139  1874  1954 I ActivityManager: Start proc 11049:com.waxmoon.ma.nova.gp:proxy.p0/u0a967 for next-top-activity {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.AssistActivity$P0}
+09-09 17:50:38.772  1874  1954 I ActivityManager: Start proc 11891:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:50:39.757  1874  1954 I ActivityManager: Start proc 11967:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:50:40.106  1874  1954 I ActivityManager: Start proc 12045:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:50:42.166  1874  1954 I ActivityManager: Start proc 12238:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:50:42.634  1874  1954 I ActivityManager: Start proc 12286:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:50:43.133  1874  1954 I ActivityManager: Start proc 12321:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:50:43.589  1874  1954 I ActivityManager: Start proc 12362:com.waxmoon.ma.nova.gp:proxy.p4/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P4}
+09-09 17:50:44.303  1874  1954 I ActivityManager: Start proc 12435:com.waxmoon.ma.nova.gp:proxy.p5/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P5}
+09-09 17:51:27.417  1874  1954 I ActivityManager: Start proc 13679:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:51:32.410  1874  1954 I ActivityManager: Start proc 13769:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:51:33.782  1874  1954 I ActivityManager: Start proc 13830:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:51:44.934  1874  1954 I ActivityManager: Start proc 13984:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:51:46.835  1874  1954 I ActivityManager: Start proc 14053:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:52:01.402  1874  1954 I ActivityManager: Start proc 14643:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:52:10.865  1874  1954 I ActivityManager: Start proc 14821:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:52:13.117  1874  1954 I ActivityManager: Start proc 14985:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:52:14.498  1874  1954 I ActivityManager: Start proc 15116:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:52:18.982  1874  1954 I ActivityManager: Start proc 15430:com.waxmoon.ma.nova.gp:proxy.p4/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P4}
+09-09 17:52:19.423  1874  1954 I ActivityManager: Start proc 15468:com.waxmoon.ma.nova.gp:proxy.p5/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P5}
+09-09 17:52:38.914  1874  1954 I ActivityManager: Start proc 15873:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:52:40.689  1874  1954 I ActivityManager: Start proc 16012:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:53:04.253  1874  1954 I ActivityManager: Start proc 17266:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:53:31.770  1874  1954 I ActivityManager: Start proc 17776:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:53:33.937  1874  1954 I ActivityManager: Start proc 17914:com.waxmoon.ma.nova.gp:proxy.p4/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P4}
+09-09 17:53:50.021  1874  1954 I ActivityManager: Start proc 18328:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:54:05.224  1874  1954 I ActivityManager: Start proc 18750:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:54:08.316  1874  1954 I ActivityManager: Start proc 18837:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:54:11.869  1874  1954 I ActivityManager: Start proc 19074:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:54:13.488  1874  1954 I ActivityManager: Start proc 19126:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:54:22.445  1874  1954 I ActivityManager: Start proc 19593:com.waxmoon.ma.nova.gp/u0a967 for next-top-activity {com.waxmoon.ma.nova.gp/org.waxmoon.play.market.LauncherActivity}
+09-09 17:54:23.660  1874  1954 I ActivityManager: Start proc 19727:com.waxmoon.ma.nova.gp:admin/u0a967 for next-top-activity {com.waxmoon.ma.nova.gp/org.waxmoon.play.ui.StartAdminActivity}
+09-09 17:55:36.446  1874  1954 I ActivityManager: Start proc 22068:com.waxmoon.ma.nova.gp:proxy.p0/u0a967 for next-top-activity {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.AssistActivity$P0}
+09-09 17:55:45.129  1874  1954 I ActivityManager: Start proc 22530:com.waxmoon.ma.nova.gp:proxy.p1/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P1}
+09-09 17:55:46.798  1874  1954 I ActivityManager: Start proc 22655:com.waxmoon.ma.nova.gp:proxy.p2/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P2}
+09-09 17:55:51.265  1874  1954 I ActivityManager: Start proc 22864:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:55:52.051  1874  1954 I ActivityManager: Start proc 22895:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for restart com.waxmoon.ma.nova.gp:proxy.p3
+09-09 17:56:49.000  1874  1954 I ActivityManager: Start proc 24290:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:56:51.099  1874  1954 I ActivityManager: Start proc 24362:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:56:52.862  1874  1954 I ActivityManager: Start proc 24427:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:56:56.105  1874  1954 I ActivityManager: Start proc 24497:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:56:57.756  1874  1954 I ActivityManager: Start proc 24564:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:57:00.821  1874  1954 I ActivityManager: Start proc 24654:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+09-09 17:57:02.352  1874  1954 I ActivityManager: Start proc 24718:com.waxmoon.ma.nova.gp:proxy.p3/u0a967 for content provider {com.waxmoon.ma.nova.gp/org.waxmoon.play.proxy.ProxyProvider$P3}
+
+## Guest Chrome process self-report (cr_SplitCompatApp)
+09-09 17:50:15.668 11049 11049 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:40.778 11891 11891 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:41.264 11967 11967 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:1 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:41.528 12045 12045 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:2 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:44.152 12238 12238 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:3 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:44.730 12286 12286 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:4 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:44.738 12321 12321 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:5 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:45.139 12362 12362 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:6 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:50:45.516 12435 12435 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:7 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:29.215 13679 13679 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:8 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:33.641 13769 13769 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:9 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:34.876 13830 13830 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:10 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:46.192 13984 13984 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:11 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:47.429 14082 14082 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:47.899 14053 14053 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:12 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:47.911 14141 14141 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:51:48.621 14214 14214 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:03.269 14643 14643 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:13 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:14.766 14821 14821 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:14 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:16.233 14985 14985 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:17.219 15116 15116 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:15 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:20.388 15430 15430 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:16 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:20.783 15468 15468 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:17 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:30.584 15659 15659 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:31.112 15704 15704 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:31.847 15778 15778 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:40.476 15873 15873 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:18 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:41.607 16214 16214 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:42.050 16012 16012 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:19 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:42.681 16411 16411 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:52:43.335 16503 16503 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:06.385 17266 17266 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:20 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:33.146 17832 17832 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:33.763 17776 17776 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:21 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:33.915 17890 17890 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:34.802 17993 17993 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:35.369 17914 17914 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:22 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:53:51.777 18328 18328 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process2 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:06.506 18750 18750 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:23 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:08.562 18854 18854 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:09.148 18930 18930 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:09.401 18837 18837 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:24 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:09.829 19008 19008 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:13.312 19074 19074 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:25 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:14.653 19126 19126 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:26 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:54:39.921 20650 20650 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:55:40.634 22068 22068 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:55:49.316 22530 22530 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:55:49.676 22655 22655 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:55:53.489 22895 22895 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:1 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:00.864 23059 23059 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:01.439 23105 23105 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:01.980 23177 23177 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 isIsolatedProcess=true splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:41.808 24088 24088 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:42.480 24143 24143 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:50.874 24290 24290 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:2 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:52.334 24362 24362 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:3 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:53.947 24427 24427 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:4 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:57.239 24497 24497 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:5 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:56:58.866 24564 24564 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:6 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:57:01.917 24654 24654 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:7 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-09 17:57:03.514 24718 24718 I cr_SplitCompatApp: version=152.0.7977.75 (797707504) minSdkVersion=29 processName=com.android.chrome:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:8 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+
+## ChildProcessService creation
+09-09 17:48:23.702  8862  8862 I cr_ChildProcessService: Creating new ChildProcessService pid=8862
+09-09 17:48:44.903  9493  9493 I cr_ChildProcessService: Creating new ChildProcessService pid=9493
+09-09 17:49:26.811 10031 10031 I cr_ChildProcessService: Creating new ChildProcessService pid=10031
+09-09 17:49:27.603 10104 10104 I cr_ChildProcessService: Creating new ChildProcessService pid=10104
+09-09 17:50:40.852 11891 11891 I cr_ChildProcessService: Creating new ChildProcessService pid=11891
+09-09 17:50:41.342 11967 11967 I cr_ChildProcessService: Creating new ChildProcessService pid=11967
+09-09 17:50:41.569 12045 12045 I cr_ChildProcessService: Creating new ChildProcessService pid=12045
+09-09 17:50:44.242 12238 12238 I cr_ChildProcessService: Creating new ChildProcessService pid=12238
+09-09 17:50:44.779 12286 12286 I cr_ChildProcessService: Creating new ChildProcessService pid=12286
+09-09 17:50:44.788 12321 12321 I cr_ChildProcessService: Creating new ChildProcessService pid=12321
+09-09 17:50:45.193 12362 12362 I cr_ChildProcessService: Creating new ChildProcessService pid=12362
+09-09 17:50:45.550 12435 12435 I cr_ChildProcessService: Creating new ChildProcessService pid=12435
+09-09 17:51:06.458 13006 13006 I cr_ChildProcessService: Creating new ChildProcessService pid=13006
+09-09 17:51:07.219 13103 13103 I cr_ChildProcessService: Creating new ChildProcessService pid=13103
+09-09 17:51:07.290 13103 13103 I cr_ChildProcessService: Destroying ChildProcessService pid=13103
+09-09 17:51:29.297 13679 13679 I cr_ChildProcessService: Creating new ChildProcessService pid=13679
+09-09 17:51:33.670 13769 13769 I cr_ChildProcessService: Creating new ChildProcessService pid=13769
+09-09 17:51:34.924 13830 13830 I cr_ChildProcessService: Creating new ChildProcessService pid=13830
+09-09 17:51:46.228 13984 13984 I cr_ChildProcessService: Creating new ChildProcessService pid=13984
+09-09 17:51:47.925 14141 14141 I cr_ChildProcessService: Creating new ChildProcessService pid=14141
+09-09 17:51:47.925 14053 14053 I cr_ChildProcessService: Creating new ChildProcessService pid=14053
+09-09 17:51:48.630 14214 14214 I cr_ChildProcessService: Creating new ChildProcessService pid=14214
+09-09 17:52:03.329 14643 14643 I cr_ChildProcessService: Creating new ChildProcessService pid=14643
+09-09 17:52:14.889 14821 14821 I cr_ChildProcessService: Creating new ChildProcessService pid=14821
+09-09 17:52:16.509 14985 14985 I cr_ChildProcessService: Creating new ChildProcessService pid=14985
+09-09 17:52:17.277 15116 15116 I cr_ChildProcessService: Creating new ChildProcessService pid=15116
+09-09 17:52:20.437 15430 15430 I cr_ChildProcessService: Creating new ChildProcessService pid=15430
+09-09 17:52:20.818 15468 15468 I cr_ChildProcessService: Creating new ChildProcessService pid=15468
+09-09 17:52:31.131 15704 15704 I cr_ChildProcessService: Creating new ChildProcessService pid=15704
+09-09 17:52:31.859 15778 15778 I cr_ChildProcessService: Creating new ChildProcessService pid=15778
+09-09 17:52:32.258 15778 15778 I cr_ChildProcessService: Destroying ChildProcessService pid=15778
+09-09 17:52:40.514 15873 15873 I cr_ChildProcessService: Creating new ChildProcessService pid=15873
+09-09 17:52:41.344 16185 16185 I cr_ChildProcessService: Creating new ChildProcessService pid=16185
+09-09 17:52:42.110 16012 16012 I cr_ChildProcessService: Creating new ChildProcessService pid=16012
+09-09 17:52:42.697 16411 16411 I cr_ChildProcessService: Creating new ChildProcessService pid=16411
+09-09 17:52:43.347 16503 16503 I cr_ChildProcessService: Creating new ChildProcessService pid=16503
+09-09 17:53:06.450 17266 17266 I cr_ChildProcessService: Creating new ChildProcessService pid=17266
+09-09 17:53:33.816 17776 17776 I cr_ChildProcessService: Creating new ChildProcessService pid=17776
+09-09 17:53:33.928 17890 17890 I cr_ChildProcessService: Creating new ChildProcessService pid=17890
+09-09 17:53:34.813 17993 17993 I cr_ChildProcessService: Creating new ChildProcessService pid=17993
+09-09 17:53:35.424 17914 17914 I cr_ChildProcessService: Creating new ChildProcessService pid=17914
+09-09 17:53:51.841 18328 18328 I cr_ChildProcessService: Creating new ChildProcessService pid=18328
+09-09 17:54:06.536 18750 18750 I cr_ChildProcessService: Creating new ChildProcessService pid=18750
+09-09 17:54:09.161 18930 18930 I cr_ChildProcessService: Creating new ChildProcessService pid=18930
+09-09 17:54:09.433 18837 18837 I cr_ChildProcessService: Creating new ChildProcessService pid=18837
+09-09 17:54:09.841 19008 19008 I cr_ChildProcessService: Creating new ChildProcessService pid=19008
+09-09 17:54:13.367 19074 19074 I cr_ChildProcessService: Creating new ChildProcessService pid=19074
+09-09 17:54:14.679 19126 19126 I cr_ChildProcessService: Creating new ChildProcessService pid=19126
+09-09 17:54:18.993  5555  5555 I cr_ChildProcessService: Destroying ChildProcessService pid=5555
+09-09 17:54:32.615 20288 20288 I cr_ChildProcessService: Creating new ChildProcessService pid=20288
+09-09 17:55:49.403 22530 22530 I cr_ChildProcessService: Creating new ChildProcessService pid=22530
+09-09 17:55:49.729 22655 22655 I cr_ChildProcessService: Creating new ChildProcessService pid=22655
+09-09 17:55:53.547 22895 22895 I cr_ChildProcessService: Creating new ChildProcessService pid=22895
+09-09 17:56:01.454 23105 23105 I cr_ChildProcessService: Creating new ChildProcessService pid=23105
+09-09 17:56:01.992 23177 23177 I cr_ChildProcessService: Creating new ChildProcessService pid=23177
+09-09 17:56:42.491 24143 24143 I cr_ChildProcessService: Creating new ChildProcessService pid=24143
+09-09 17:56:50.954 24290 24290 I cr_ChildProcessService: Creating new ChildProcessService pid=24290
+09-09 17:56:52.390 24362 24362 I cr_ChildProcessService: Creating new ChildProcessService pid=24362
+09-09 17:56:53.984 24427 24427 I cr_ChildProcessService: Creating new ChildProcessService pid=24427
+09-09 17:56:57.304 24497 24497 I cr_ChildProcessService: Creating new ChildProcessService pid=24497
+09-09 17:56:58.909 24564 24564 I cr_ChildProcessService: Creating new ChildProcessService pid=24564
+09-09 17:57:01.942 24654 24654 I cr_ChildProcessService: Creating new ChildProcessService pid=24654
+09-09 17:57:03.568 24718 24718 I cr_ChildProcessService: Creating new ChildProcessService pid=24718
+
+## ProxyService occurrences (expect none)
+0
+
+## GMS observations
+09-09 17:50:23.822 11049 11287 W GoogleApiManager: The service for por is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+09-09 17:50:23.841 11049 11287 W GoogleApiManager: The service for por is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+09-09 17:50:34.964 11049 11287 W GoogleApiManager: The service for n8k is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+09-09 17:52:16.879 11049 11287 W GoogleApiManager: The service for rx4 is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+09-09 17:55:48.773 22068 22393 W GoogleApiManager: The service for i7e is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+09-09 17:55:56.982 22068 22393 W GoogleApiManager: The service for n8k is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}

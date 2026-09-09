@@ -1,0 +1,9 @@
+DUP_ADD_CLONE host=17:59:07
+DUP_STEP_A_LAUNCH_TAP host=2026-09-09 17:59:28 device=17:59:27
+DUP_BROWSER_DIED host=~18:00:09-18:00:14 (launch 17:59:27 => ~42-47s lifetime)
+=== ATTEMPT 2 (fresh clone 2 of 2) ===
+DUP2_STEP_A_LAUNCH host=18:04:28
+DUP2_STEP_B_FRE_VISIBLE host=18:04:42 id=signin_fre_continue_button
+DUP2_STEP_D_BUTTON_TAP host=18:04:44 id=signin_fre_continue_button bounds=[61,2103][1019,2225]
+DUP2_60S_HOLD_END host=18:06:17
+DUP2_STEP_I_RELAUNCH host=18:07:15
