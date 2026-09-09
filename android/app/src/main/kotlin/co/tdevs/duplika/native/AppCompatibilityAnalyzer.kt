@@ -90,8 +90,10 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (requiresGms) {
             findings += Finding(
                 CODE_REQUIRES_GMS,
-                "This app relies on Google Play Services, which is not virtualized in this build. " +
-                    "Sign-in, push notifications and maps are likely to fail.",
+                "Google Play services is available inside a clone, but Google features that " +
+                    "must verify this app's own identity are not supported — including " +
+                    "sign-in and identity-bound APIs such as location and SMS verification. " +
+                    "Other Google features are unaffected.",
                 blocking = false,
             )
         }
@@ -160,8 +162,10 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (requiresGms) {
             findings += Finding(
                 CODE_REQUIRES_GMS,
-                "This app relies on Google Play Services, which is not virtualized in this build. " +
-                    "Sign-in, push notifications and maps are likely to fail.",
+                "Google Play services is available inside a clone, but Google features that " +
+                    "must verify this app's own identity are not supported — including " +
+                    "sign-in and identity-bound APIs such as location and SMS verification. " +
+                    "Other Google features are unaffected.",
                 blocking = false,
             )
         }

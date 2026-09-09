@@ -201,15 +201,22 @@ Guest App -> Duplika virtual environment -> Host Android GMS -> Google Play Serv
   only signal that an app depends on Google Play services; a test now guards this.
 - **microG architecture** — entirely independent of this phase and unchanged.
 
-## Known imprecision left in place
+## Known imprecision — RESOLVED after Level 10
 
-`AppCompatibilityAnalyzer.kt`'s REQUIRES_GMS message still reads "…which is not virtualized
-in this build. Sign-in, push notifications and maps are likely to fail." The second
-sentence remains accurate (sign-in is a security boundary, `LocationServices` fails, push is
-untested), but "not virtualized in this build" is now imprecise — availability returns
-`SUCCESS(0)` and some Google APIs work. It was **not** changed here: the audit lists that
-file as not-to-change, and rewording a user-facing compatibility warning is a separate
-decision from retiring a provisioning path. Recorded as a follow-up.
+`AppCompatibilityAnalyzer.kt`'s REQUIRES_GMS message used to read "…which is not virtualized
+in this build. Sign-in, push notifications and maps are likely to fail." That was left
+untouched during this phase, because rewording a user-facing warning is a separate decision
+from retiring a provisioning path, and it was recorded here as a follow-up.
+
+It has since been **corrected**, once Level 10 had the evidence to state the boundary
+precisely. "Not virtualized in this build" was measurably wrong: availability returns
+`SUCCESS(0)` in a guest and non-identity-scoped Google APIs work (Advertising ID, AppSet ID).
+The message now says that Play services *is* available in a clone but that Google features
+requiring the app's own identity are not supported — naming sign-in, and location and SMS
+verification as identity-bound examples — and that other Google features are unaffected.
+
+Evidence: `evidence/physical-android15/level10-gms/cross-artifact-probe/` and
+`docs/level10-cross-artifact-gms-probe.md`. Message only; detection logic unchanged.
 
 ## Verification
 
