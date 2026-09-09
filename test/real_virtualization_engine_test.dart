@@ -107,7 +107,10 @@ void main() {
     expect(args['installGms'], isFalse);
   });
 
-  test('opting in forwards installGms to the engine', () async {
+  // Provisioning is retired and no UI can request it, but the parameter is retained so
+  // the native CONTAINER_GMS_PROVISIONING capability stays reachable for diagnostics.
+  // This guards that the retained path still forwards correctly if called directly.
+  test('the retained installGms parameter still forwards to the engine', () async {
     await engine.createProfile(
       packageName: AppConstants.testAppPackage,
       appName: AppConstants.testAppFallbackName,
@@ -277,7 +280,7 @@ void main() {
       },
     );
 
-    test('opting in forwards installGms on the APK path too', () async {
+    test('the retained installGms parameter still forwards on the APK path', () async {
       responses['installApkToProfile'] = ok('APP_INSTALLED');
 
       await engine.createProfileFromApk(

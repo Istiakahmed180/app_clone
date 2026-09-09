@@ -3,17 +3,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../data/models/compatibility_report.dart';
 
-/// The user's answer from [CompatibilitySheet]: whether to create the clone, and whether
-/// to opt this clone into Google Play services provisioning.
+/// The user's answer from [CompatibilitySheet]: whether to create the clone.
+///
+/// Previously also carried an `installGms` opt-in for per-container Google Play services
+/// provisioning. That option was retired: the container copy it created could not
+/// bootstrap its Chimera modules, and — once host GMS passthrough landed — it actively
+/// *shadowed* the path that works, because the engine's PackageManager hooks answer from
+/// the container before falling back to the host. Opting in therefore made a clone worse.
+/// See `docs/level10-gms-provider-migration.md`.
 class CloneDecision {
-  const CloneDecision({required this.proceed, this.installGms = false});
+  const CloneDecision({required this.proceed});
 
-  const CloneDecision.cancelled()
-      : proceed = false,
-        installGms = false;
+  const CloneDecision.cancelled() : proceed = false;
 
   final bool proceed;
-  final bool installGms;
 }
 
 /// Shows what will and will not work before a clone is created.
@@ -86,7 +89,6 @@ class _SheetBody extends StatefulWidget {
 class _SheetBodyState extends State<_SheetBody> {
   late CompatibilityReport _report = widget.initialReport;
   bool _requesting = false;
-  bool _installGms = false;
 
   Future<void> _grant() async {
     setState(() => _requesting = true);
@@ -182,27 +184,10 @@ class _SheetBodyState extends State<_SheetBody> {
               ),
             ],
 
-            if (_report.requiresGms) ...<Widget>[
-              SizedBox(height: 8.h),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _installGms,
-                onChanged: (bool? value) =>
-                    setState(() => _installGms = value ?? false),
-                title: Text(
-                  'Install Google Play services in this clone',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                subtitle: Text(
-                  'Experimental. Off by default: it makes the clone slower and heavier, '
-                  'and Google sign-in may still fail. Only turn it on for an app that '
-                  'needs Google login.',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ),
-            ],
+            // No Google Play services opt-in here any more. A GMS-dependent app still
+            // gets its REQUIRES_GMS warning through the findings list above; what is gone
+            // is the checkbox that provisioned a container-local copy of Play services,
+            // which degraded the clone rather than helping it.
 
             SizedBox(height: 20.h),
             Row(
@@ -219,7 +204,7 @@ class _SheetBodyState extends State<_SheetBody> {
                   child: FilledButton(
                     onPressed: _report.canClone
                         ? () => Navigator.of(context).pop(
-                              CloneDecision(proceed: true, installGms: _installGms),
+                              const CloneDecision(proceed: true),
                             )
                         : null,
                     child: Text(_report.canClone ? 'Add clone' : 'Cannot clone'),

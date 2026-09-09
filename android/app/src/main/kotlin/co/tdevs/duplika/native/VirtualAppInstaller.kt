@@ -61,28 +61,44 @@ class VirtualAppInstaller(
     }
 
     /**
-     * Gives this container its own copy of the Google packages when its app needs them.
+     * Resolves which Google-service provider is active, and -- only if still asked --
+     * provisions a container-local copy of the Google packages.
      *
-     * A guest cannot see the host's Google Play services -- measured, not assumed: inside a
-     * container `isGooglePlayServicesAvailable` returns SERVICE_MISSING and
-     * `com.google.android.gms` is not visible to the guest at all, so Google sign-in, push
-     * and maps fail at their first call. Provisioning puts those packages inside the
-     * container so there is something for the guest to find.
+     * ## Provisioning is RETIRED. [wanted] is false on every production path.
      *
-     * Opt-in per clone, and off by default. Provisioning is not free: it installs a set of
-     * Google packages (a few seconds), makes the container heavier, and -- because the guest
-     * runs under the host UID and cannot present Google's signing certificate -- still leaves
-     * Google Play services reporting SERVICE_INVALID, so sign-in and push do not actually
-     * work yet (see docs/PHASE_4_COMPATIBILITY.md). Real apps that need no GMS (Telegram,
-     * WhatsApp) run fine without it, so the default cost/benefit is negative. The user asks
-     * for it per clone when they want to try a Google-login app and accept the trade.
+     * There is no longer any UI that can request it: the compatibility sheet's
+     * "Install Google Play services in this clone" checkbox was removed, and both clone
+     * routes (installed app and imported APK) now leave it off. Two measured reasons:
      *
-     * [wanted] is already the AND of the user's opt-in and the app actually declaring a GMS
-     * dependency, so this method only decides device support and carries out the install.
+     * - **It shadows the path that works.** Every hook in the engine's
+     *   `IPackageManagerProxy` answers from the container first and only falls back to the
+     *   host. A provisioned container therefore answers GMS queries from its own copy, and
+     *   the host's genuine, Google-signed Play services is never consulted -- so opting in
+     *   *removed* working host passthrough from that clone.
+     * - **The copy cannot start.** It fails its Chimera module bootstrap
+     *   (`app_chimera/current_config.fb: ENOENT`, then
+     *   `GmsProxy: Failed to get gms service binder`), because Play services resolves its
+     *   real implementation from its own data directory and expects to be the platform's
+     *   singleton. Availability came back `SERVICE_INVALID(9)`.
      *
-     * Failure is deliberately not fatal. A clone whose GMS provisioning failed is exactly the
-     * clone the compatibility warning already describes, so the app is still installed and the
-     * user still gets it -- degraded rather than absent. The reason is logged.
+     * For the record, the earlier explanation in this comment -- that provisioning failed
+     * because the container "cannot present Google's signing certificate" -- was
+     * **falsified**: the container reports Google's genuine certificate history
+     * byte-identically to the host and was still rejected. Host passthrough now returns
+     * `SUCCESS(0)` in a guest with no certificate work at all. See
+     * `evidence/physical-android15/level9-gms/host-passthrough-investigation/`.
+     *
+     * The call is kept, isolated and disabled, rather than deleted: it is the only
+     * implementation of [GmsCapability.CONTAINER_GMS_PROVISIONING], which the provider
+     * abstraction models honestly so a provider can *decline* it instead of silently
+     * attempting it, and a future provider may have a legitimate reason to provision.
+     *
+     * The provider is resolved before the early return so the selection diagnostic is
+     * emitted for every clone, not just the (now unreachable) opt-in path.
+     *
+     * Failure is deliberately not fatal. A clone whose provisioning failed is exactly the
+     * clone the compatibility warning already describes, so the app is still installed --
+     * degraded rather than absent. The reason is logged.
      */
     private fun provisionGmsIfRequested(virtualUserId: Int, wanted: Boolean) {
         // Logged unconditionally: whether a container gets GMS decides whether Google sign-in

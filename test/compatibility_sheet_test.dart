@@ -84,33 +84,31 @@ void main() {
   );
 
   testWidgets(
-    'the GMS opt-in appears when the app needs Google Play services',
+    'the retired GMS provisioning opt-in is gone, even for a GMS-dependent app',
     (WidgetTester tester) async {
+      // Regression guard for Level 10 Phase 7. The checkbox provisioned a container-local
+      // copy of Play services, which shadowed the host passthrough that actually works and
+      // could not bootstrap its own Chimera modules. If it ever reappears, this fails.
       await _pump(tester, _gmsReport);
-      expect(find.text('Install Google Play services in this clone'), findsOneWidget);
-    },
-  );
 
-  testWidgets(
-    'the GMS opt-in is hidden for an app that does not need it',
-    (WidgetTester tester) async {
-      await _pump(
-        tester,
-        const CompatibilityReport(
-          packageName: 'org.example',
-          verdict: CompatibilityVerdict.supported,
-          findings: <CompatibilityFinding>[],
-          bridgeablePermissions: <String>[],
-          missingPermissions: <String>[],
-          requiresGms: false,
-        ),
-      );
       expect(find.text('Install Google Play services in this clone'), findsNothing);
+      expect(find.byType(CheckboxListTile), findsNothing);
     },
   );
 
   testWidgets(
-    'GMS provisioning is off unless the user ticks the box',
+    'a GMS-dependent app still gets its compatibility warning',
+    (WidgetTester tester) async {
+      // The opt-in went; the warning must not. Removing the checkbox must not quietly
+      // remove the user's only signal that the app depends on Google Play services.
+      await _pump(tester, _gmsReport);
+
+      expect(find.text('This app relies on Google Play Services.'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a GMS-dependent app can still be cloned',
     (WidgetTester tester) async {
       late CloneDecision decision;
       await tester.pumpWidget(
@@ -139,53 +137,10 @@ void main() {
 
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      // Add clone without touching the checkbox.
       await tester.tap(find.widgetWithText(FilledButton, 'Add clone'));
       await tester.pumpAndSettle();
 
       expect(decision.proceed, isTrue);
-      expect(decision.installGms, isFalse,
-          reason: 'provisioning must default off even for a GMS app');
-    },
-  );
-
-  testWidgets(
-    'ticking the box opts this clone into GMS provisioning',
-    (WidgetTester tester) async {
-      late CloneDecision decision;
-      await tester.pumpWidget(
-        ScreenUtilInit(
-          designSize: const Size(390, 844),
-          builder: (BuildContext context, Widget? child) => MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (BuildContext context) => ElevatedButton(
-                  onPressed: () async {
-                    decision = await CompatibilitySheet.show(
-                      context,
-                      appName: 'Example',
-                      report: _gmsReport,
-                      existingClones: 0,
-                      onGrantPermissions: () async => _gmsReport,
-                    );
-                  },
-                  child: const Text('open'),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Install Google Play services in this clone'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Add clone'));
-      await tester.pumpAndSettle();
-
-      expect(decision.proceed, isTrue);
-      expect(decision.installGms, isTrue);
     },
   );
 }

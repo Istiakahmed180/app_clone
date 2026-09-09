@@ -390,10 +390,9 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
 
-    final String? error = await controller.cloneApk(
-      candidate,
-      installGms: decision.installGms,
-    );
+    // No GMS argument: provisioning is retired, so both clone routes -- installed app and
+    // imported APK -- now behave identically and leave it off.
+    final String? error = await controller.cloneApk(candidate);
     if (!context.mounted) {
       return;
     }

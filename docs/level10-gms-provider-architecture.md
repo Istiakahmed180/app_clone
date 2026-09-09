@@ -6,8 +6,11 @@ Companion to `level10-gms-provider-audit.md` (what existed before) and
 ## Why this exists
 
 To let a second Google-service backend be added later without touching the Real GMS path
-that works. It is an abstraction phase only: no microG is implemented, and no behaviour of
-the existing path changed.
+that works. No microG is implemented.
+
+**Updated by Phase 7 (provisioning retirement).** The abstraction phase itself changed no
+behaviour. Phase 7 then retired the legacy container-GMS-provisioning opt-in that this
+abstraction had made safe to reason about — see `level10-gms-provider-migration.md`.
 
 ## The one constraint that shaped everything
 
@@ -26,13 +29,13 @@ caller invites a future provider to implement a contract nobody verified.
 ## Architecture
 
 ```
-Flutter (Dart, GetX — unchanged)
-  compatibility_sheet  ->  CloneDecision.installGms : bool
-        |
-        v  MethodChannel arg "installGms"
+Flutter (Dart, GetX)
+  compatibility_sheet  ->  CloneDecision { proceed }
+        |                  (no GMS opt-in: retired in Phase 7)
+        v  MethodChannel arg "installGms"  -- always false from production flows
   NativeBridge.kt  ->  RealVirtualizationEngine.kt  ->  VirtualAppInstaller.kt
         |
-        |  provisionGmsIfRequested(virtualUserId, wanted)
+        |  provisionGmsIfRequested(virtualUserId, wanted = false)
         v
   GoogleServiceProviderResolver.resolve(GmsProviderMode)      <-- the only decision point
         |
@@ -45,14 +48,36 @@ Flutter (Dart, GetX — unchanged)
 ```
 
 The abstraction sits **below** the Flutter boundary, in Kotlin, next to the engine calls it
-adapts. No Android implementation detail is exposed to Flutter, and no Dart changed.
+adapts. No Android implementation detail is exposed to Flutter.
+
+The Dart layer retains an `installGms` parameter through the engine interface, bridge and
+controllers, but **no production flow sets it** — it is documented as retired/diagnostics
+only, so the native capability stays reachable without a user-facing path to it.
 
 ## Capability model
 
-| Capability | Meaning | Backed by |
-| --- | --- | --- |
-| `HOST_GMS_PRESENCE` | Does the **host** have legitimate Google Play services | `adapter.isGmsSupported()` |
-| `CONTAINER_GMS_PROVISIONING` | Provision Google packages **into a container** | `adapter.installGms(userId)` |
+| Capability | Meaning | Backed by | Status |
+| --- | --- | --- | --- |
+| `HOST_GMS_PRESENCE` | Does the **host** have legitimate Google Play services | `adapter.isGmsSupported()` | **Supported** — this is how host GMS passthrough is gated |
+| `CONTAINER_GMS_PROVISIONING` | Provision Google packages **into a container** | `adapter.installGms(userId)` | **RETIRED (Phase 7)** — no production flow requests it; modelled so a provider can decline it explicitly |
+
+### Why `CONTAINER_GMS_PROVISIONING` is retired but still modelled
+
+Phase 7 removed the only way to request it (the compatibility sheet checkbox). It stays in
+the capability enum deliberately: the honest answer to "can you provision a container?" is
+better than the capability silently not existing, and it is the hook a future provider would
+use if it ever had a legitimate reason to provision. Retired means *unreachable from
+production*, not *deleted*.
+
+Two measured reasons it was retired:
+
+- **It shadowed the path that works.** Every hook in the engine's `IPackageManagerProxy`
+  answers from the container first and only falls back to the host. A provisioned container
+  therefore answered GMS queries from its own copy, and the host's genuine Play services was
+  never consulted — so opting in *removed* working host passthrough from that clone.
+- **The copy could not start.** It failed its Chimera module bootstrap
+  (`app_chimera/current_config.fb: ENOENT`, then `GmsProxy: Failed to get gms service
+  binder`); availability came back `SERVICE_INVALID(9)`.
 
 `capabilities()` is **environment-dependent**, not a static declaration: `RealGmsProvider`
 on a device without Play services reports an *empty* set rather than claiming a capability

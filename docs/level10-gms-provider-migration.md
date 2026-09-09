@@ -2,6 +2,10 @@
 
 What changed, what did not, and how to extend it safely.
 
+> This file covers two phases. The sections up to the divider describe the **provider
+> abstraction** phase; **Phase 7 — Legacy GMS provisioning retirement** is at the end and
+> supersedes the abstraction phase's "no Dart changed" statement.
+
 ## What changed
 
 ### New: `android/app/src/main/kotlin/co/tdevs/duplika/native/gms/` (8 files)
@@ -84,8 +88,9 @@ than buried.
 - `AppCompatibilityAnalyzer.kt` — untouched; detecting a guest APK's declared dependency is
   not a Google API call and is not provider-dependent
 - `NativeBridge.kt`, `RealVirtualizationEngine.kt` — untouched; they only thread a boolean
-- **All Dart** (`lib/**`) — untouched. GetX intact, no second state-management system, no
-  new method channel
+- **All Dart** (`lib/**`) — untouched *in the abstraction phase*. Phase 7 below does change
+  Dart (the sheet, its call site, and doc comments). GetX stays intact throughout, with no
+  second state-management system and no new method channel.
 - UID mapping, PackageManager identity, signatures, certificates, account identity, Play
   Integrity, SafetyNet, OAuth, WebView isolation, storage virtualization — untouched
 - `compatibility_test_ladder/**` — untouched in this phase
@@ -126,3 +131,96 @@ VirtualAppInstaller(context, adapter, securityChecker, analyzer,
   because the host has it"`
 - Level 10 GMS diagnostic in a fresh clone post-refactor: every probe verdict identical to
   the pre-refactor run
+
+---
+
+# Phase 7 — Legacy GMS provisioning retirement (2026-09-09)
+
+## Why it was retired
+
+Two measured reasons, both from `evidence/physical-android15/level9-gms/`:
+
+1. **It shadowed the mechanism that works.** Every hook in the engine's
+   `IPackageManagerProxy` answers from the container first and only then falls back to the
+   host. A provisioned container therefore answered GMS queries from its own copy, and the
+   host's genuine, Google-signed Play services was never consulted. Ticking the box
+   *removed* working host passthrough from that clone — it made the clone worse.
+2. **The copy could not start.** It failed its Chimera module bootstrap
+   (`app_chimera/current_config.fb: ENOENT`, then `GmsProxy: Failed to get gms service
+   binder`), because Play services resolves its real implementation from its own data
+   directory and expects to be the platform's singleton. Availability came back
+   `SERVICE_INVALID(9)` — versus `SUCCESS(0)` for an unprovisioned container using
+   passthrough.
+
+It also cost roughly 10 s per clone and a heavier container.
+
+## Reachability, verified before removing anything
+
+| Route | Before Phase 7 | After |
+| --- | --- | --- |
+| Installed app (`_quickClone` → `cloneNow` → `cloneInstalledApp`) | `installGms` never set; always `false` | unchanged, `false` |
+| **APK import** (`_importApk` → `CompatibilitySheet` → `cloneApk`) | **checkbox could set `true`** — genuinely reachable | checkbox removed; `false` |
+
+So the opt-in was *not* dead code: it was live on one of the two routes. That is why the UI
+had to be removed rather than merely defaulted off.
+
+## What replaced it
+
+Nothing new. Host GMS passthrough — already shipped in
+`engine-patches/0002-host-platform-package-visibility.patch` — is the mechanism, and it was
+already the default for every clone. Phase 7 removed the only way to *opt out* of it.
+
+```
+Guest App -> Duplika virtual environment -> Host Android GMS -> Google Play Services
+```
+
+## What changed
+
+| File | Change |
+| --- | --- |
+| `lib/features/apps/widgets/compatibility_sheet.dart` | Removed the `CheckboxListTile`, the `_installGms` state, and `CloneDecision.installGms`. `CloneDecision` is now just `proceed`. |
+| `lib/features/apps/views/app_picker_view.dart` | `cloneApk(candidate)` — no GMS argument. Both routes now behave identically. |
+| `lib/core/virtualization/virtualization_engine.dart` | Doc comments marking the retained `installGms` parameters as retired / diagnostics-only. |
+| `android/.../native/VirtualAppInstaller.kt` | Rewrote the `provisionGmsIfRequested` doc comment: states that provisioning is retired and `wanted` is false on every production path, and **corrects** the old claim that provisioning failed because the container "cannot present Google's signing certificate" — that was falsified. |
+| `test/compatibility_sheet_test.dart` | Four obsolete checkbox tests replaced by three guards: the opt-in is gone, the REQUIRES_GMS warning is still shown, a GMS app can still be cloned. |
+| `test/real_virtualization_engine_test.dart` | Renamed two tests so they describe the retained diagnostics path rather than a UI opt-in. |
+
+## What was intentionally NOT removed
+
+- **`RealGmsProvider`** and **host GMS availability detection** (`isGmsSupported`) — this is
+  how passthrough is gated.
+- **`GmsCapability.CONTAINER_GMS_PROVISIONING`** and
+  `RealGmsProvider.provisionContainerGms` — retired means unreachable from production, not
+  deleted. Modelling it lets a provider *decline* it explicitly, and it is the hook a future
+  provider would use if it ever had a legitimate reason to provision.
+- **`adapter.installGms` / `BlackBoxCore.installGms`** — engine capability untouched. No
+  Bcore change was needed or made.
+- **The `installGms` parameter** through the Dart engine interface, bridge, controllers and
+  the `NativeBridge` channel argument — retained, defaulting false, documented as retired.
+- **The REQUIRES_GMS compatibility warning.** Removing the opt-in must not remove the user's
+  only signal that an app depends on Google Play services; a test now guards this.
+- **microG architecture** — entirely independent of this phase and unchanged.
+
+## Known imprecision left in place
+
+`AppCompatibilityAnalyzer.kt`'s REQUIRES_GMS message still reads "…which is not virtualized
+in this build. Sign-in, push notifications and maps are likely to fail." The second
+sentence remains accurate (sign-in is a security boundary, `LocationServices` fails, push is
+untested), but "not virtualized in this build" is now imprecise — availability returns
+`SUCCESS(0)` and some Google APIs work. It was **not** changed here: the audit lists that
+file as not-to-change, and rewording a user-facing compatibility warning is a separate
+decision from retiring a provisioning path. Recorded as a follow-up.
+
+## Verification
+
+- `flutter analyze` 4 pre-existing info lints, 0 errors · `flutter test` 245/245 ·
+  22 Kotlin unit tests · Debug + Release builds (minification on)
+- Physical, OnePlus CPH2605 / Android 15 / API 35, release build:
+  - installed-app route (user 11): `requested=false`, `selectedProvider=REAL_GMS`
+  - **APK-import route with a GMS-dependent app** (user 12): `requested=false`,
+    `selectedProvider=REAL_GMS`, sheet shows the warning and **no checkbox**
+  - provisioning actually executed on either route: **0**
+  - GMS diagnostic post-retirement: every probe verdict identical to pre-retirement
+  - Level 6: job `result=0`, notification posted, `SQLite value=1` (fresh container), 0
+    crashes/ANRs
+- Evidence: `evidence/physical-android15/level10-gms/provisioning-retirement/`
