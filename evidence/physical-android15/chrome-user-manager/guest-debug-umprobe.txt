@@ -1,0 +1,25 @@
+================ USERMANAGER PROBE ================
+package=com.example.duplikaladder.umprobe
+virtualized=true virtualUserId=1
+device=OnePlus CPH2605 android=15 api=35
+buildType=debug minified=false
+
+---- P1: getApplicationRestrictions(OWN package) ----
+this is Chrome's exact call shape: an app asking about itself
+RESULT: THREW after 2 ms
+  exceptionClass=java.lang.SecurityException
+  exceptionMessage=Only system may: get application restrictions for other user/app com.example.duplikaladder.umprobe
+  at android.os.Parcel.createExceptionOrNull(Parcel.java:3271)
+  at android.os.Parcel.createException(Parcel.java:3255)
+  at android.os.Parcel.readException(Parcel.java:3238)
+  at android.os.Parcel.readException(Parcel.java:3180)
+
+---- P2 control: getUserRestrictions() (own user, no package argument) ----
+RESULT: SUCCESS — keyCount=1
+
+---- P3 control: UserManager.isSystemUser() ----
+RESULT: SUCCESS — isSystemUser=true
+================ RUN COMPLETE ================
+report written to /data/user/0/co.tdevs.duplika/blackbox/data/user/1/com.example.duplikaladder.umprobe/files/um-probe-report.txt
+
+--- captured from the in-app report view; transcribed verbatim from the device screen ---

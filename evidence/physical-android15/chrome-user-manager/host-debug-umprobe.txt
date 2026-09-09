@@ -1,0 +1,20 @@
+================ USERMANAGER PROBE ================
+package=com.example.duplikaladder.umprobe
+uid=10965 pid=19641
+processName=com.example.duplikaladder.umprobe
+dataDir=/data/user/0/com.example.duplikaladder.umprobe
+virtualized=false virtualUserId=n/a (host installation)
+device=OnePlus CPH2605 android=15 api=35
+buildType=debug minified=false
+
+---- P1: getApplicationRestrictions(OWN package) ----
+this is Chrome's exact call shape: an app asking about itself
+RESULT: SUCCESS in 1 ms — bundleNull=false keyCount=0
+(restriction values are deliberately not recorded)
+
+---- P2 control: getUserRestrictions() (own user, no package argument) ----
+RESULT: SUCCESS — keyCount=1
+
+---- P3 control: UserManager.isSystemUser() ----
+RESULT: SUCCESS — isSystemUser=true
+================ RUN COMPLETE ================

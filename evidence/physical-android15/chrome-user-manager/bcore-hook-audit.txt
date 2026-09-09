@@ -1,0 +1,42 @@
+# Bcore UserManager hook audit — from the vendored android/app/libs/bcore.aar
+# Method: unzip classes.jar, then javap on the proxy classes.
+
+## The IUserManager binder IS hooked
+top.niunaijun.blackbox.fake.service.IUserManagerProxy extends BinderInvocationStub
+  getWho() -> black.android.os.IUserManagerStubStatic, service name "user"
+Confirmed live in the guest process:
+  D HookManager: hook: top.niunaijun.blackbox.fake.service.IUserManagerProxy@f6019d
+
+## Hooks registered on it — three, all SHORT names
+IUserManagerProxy$GetApplicationRestrictions   @ProxyMethod("getApplicationRestrictions")
+IUserManagerProxy$getUsers                     @ProxyMethod("getUsers")
+IUserManagerProxy$GetProfileParent             @ProxyMethod("getProfileParent")
+
+## No hook registers getApplicationRestrictionsForUser
+Searched every IUserManagerProxy* class constant pool. The string
+"getApplicationRestrictionsForUser" does not appear anywhere in Bcore.
+
+## What the existing hook would have done (decompiled)
+IUserManagerProxy$GetApplicationRestrictions.hook(who, method, args):
+    args[0] = BlackBoxCore.getHostPkg();     // rewrite packageName to the HOST package
+    return method.invoke(who, args);
+
+That is exactly the right fix intent: the guest asks about itself, and the hook rewrites the
+package argument to the container owner's package -- which the calling UID genuinely owns --
+so the platform's ownership check passes. No spoofing: the caller asks about a package it
+really does own.
+
+## Dispatch is by method NAME
+top.niunaijun.blackbox.fake.hook.MethodHook exposes getMethodName(); hooks are registered
+into a name-keyed map from the @ProxyMethod / @ProxyMethods annotation value.
+
+## The project's established multi-name pattern
+top.niunaijun.blackbox.fake.hook.ProxyMethods  ->  public abstract String[] value();
+Precedent in use:
+  IAccessibilityManagerProxy$ReplaceUserId
+    @ProxyMethods({"interrupt","sendAccessibilityEvent","addClient",
+                   "getInstalledAccessibilityServiceList",
+                   "getEnabledAccessibilityServiceList",
+                   "addAccessibilityInteractionConnection","getWindowToken"})
+So one MethodHook covering several Binder method names is an existing, used Bcore idiom --
+not a new architecture.

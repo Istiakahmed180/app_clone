@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "compatibility_test_ladder"
-include(":level2", ":level3", ":level4", ":level6", ":level7fixture", ":level9_gms", ":level10_gms", ":storageprobe")
+include(":level2", ":level3", ":level4", ":level6", ":level7fixture", ":level9_gms", ":level10_gms", ":storageprobe", ":usermanagerprobe")
