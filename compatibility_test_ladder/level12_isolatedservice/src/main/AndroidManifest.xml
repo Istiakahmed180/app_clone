@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:label="Duplika IsoService Probe">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          The subject of the probe: an isolated service, declared exactly the way Chrome
+          declares its 40 SandboxedProcessService0..39 entries — isolatedProcess, a private
+          process name, not exported. Chrome adds useAppZygote; this probe leaves it off so
+          that the app-zygote path is not a second variable.
+        -->
+        <service
+            android:name=".IsoService"
+            android:exported="false"
+            android:process=":iso"
+            android:isolatedProcess="true" />
+
+        <!-- Control: identical, but NOT isolated. Binding this with an instance name is the
+             thing Android refuses, so it tells us what the platform itself does. -->
+        <service
+            android:name=".PlainService"
+            android:exported="false"
+            android:process=":plain" />
+    </application>
+
+</manifest>

@@ -1,0 +1,82 @@
+2026-09-09 17:32:15 data_app_native_crash (text, 5943 bytes)
+SystemUptimeMs: 223865311
+Process: co.tdevs.duplika:p0
+PID: 20263
+UID: 10971
+Frozen: false
+Flags: 0x2888be44
+Package: co.tdevs.duplika v1 (1.0.0)
+PID: 20263
+Foreground: Yes
+Process-Runtime: 43174
+Build: OnePlus/CPH2605/OP5955L1:15/AP3A.240617.008/T.R4T2.25418da-1:user/release-keys
+Loading-Progress: 1.0
+Dropped-Count: 0
+
+Process name is com.android.chrome, uid is 10971, not key_process
+keyProcess: 0
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+Build fingerprint: 'OnePlus/CPH2605/OP5955L1:15/AP3A.240617.008/T.R4T2.25418da-1:user/release-keys'
+Revision: '0'
+ABI: 'arm64'
+Timestamp: 2026-09-09 17:32:14.644911799+0600
+Process uptime: 44s
+Cmdline: com.android.chrome
+pid: 20263, tid: 21044, name: Chrome_ProcessL  >>> com.android.chrome <<<
+uid: 10971
+tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+signal 5 (SIGTRAP), code 1 (TRAP_BRKPT), fault addr 0x000000721ffbbe88
+Abort message: '[FATAL:base/android/jni_android.cc:203] Uncaught Java exception in native code and the Java uncaught exception handler did not terminate the process. Please include the Java exception stack from the Android log in your crash report.'
+    x0  0000000000000002  x1  00000072273484a1  x2  000000000fffffff  x3  0000000000000000
+    x4  0000000000000000  x5  2d63686e71636d60  x6  2d63686e71636d60  x7  7f7f7f7f7f7f7f7f
+    x8  0000000000000000  x9  0000000000000000  x10 00000000000000ea  x11 00000000000000ea
+    x12 00000000000000e8  x13 000000000000000a  x14 0000006e012a48e8  x15 000000002e74726f
+    x16 0000000000000001  x17 000000735b1060d0  x18 00000072c6f94000  x19 00000072cac561b0
+    x20 00000000000000e8  x21 00000072cac560f0  x22 00000072273484b8  x23 00000072cac57a40
+    x24 00000000000000e9  x25 0000000000000000  x26 0000000000000058  x27 0000007227348000
+    x28 0000000000000028  x29 00000072cac56090
+    lr  000000721ffbbd3c  sp  00000072cac55c60  pc  000000721ffbbe88  pst 0000000060001000
+23 total frames
+backtrace:
+      #00 pc 0000000004a6ae88  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #01 pc 00000000062fd3d4  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #02 pc 000000000840eb08  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #03 pc 0000000006268a68  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #04 pc 000000000770c754  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #05 pc 00000000071e9c6c  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #06 pc 0000000007c7e324  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #07 pc 000000000752ce40  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #08 pc 000000000752cdc0  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #09 pc 0000000007dd1348  /data/app/~~pYYFDyKhYDMfhXMuZvZ0Lw==/com.android.chrome-4UzxABhI-kUBLmA5AXLGkQ==/base.apk!libchrome.so (offset 0xf68000) (BuildId: 18cabf310a758228af3c1a92e641defed1f8e1b8)
+      #10 pc 00000000000142e0  /system/lib64/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+368) (BuildId: 8f22b7ae8fbe3a65f7aef142dd70ab90)
+      #11 pc 0000000000194b1c  /system/lib64/libandroid_runtime.so (android::android_os_MessageQueue_nativePollOnce(_JNIEnv*, _jobject*, long, int)+44) (BuildId: c4fb9f1870f6c2347780ec913d28dbef)
+      #12 pc 00000000012b678c  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (art_jni_trampoline+108)
+      #13 pc 0000000000b74018  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (android.os.MessageQueue.next+136)
+      #14 pc 0000000000b70348  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (android.os.Looper.loopOnce+88)
+      #15 pc 0000000000b70250  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (android.os.Looper.loop+592)
+      #16 pc 0000000000b6c6b4  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (android.os.HandlerThread.run+772)
+      #17 pc 00000000002aaf94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+      #18 pc 00000000002a9268  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+148) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+      #19 pc 00000000004e1a68  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallback(void*)+1384) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+      #20 pc 00000000004e14ec  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallbackWithUffdGc(void*)+12) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+      #21 pc 00000000000a6524  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+196) (BuildId: 5144907d23fac121cc594696acde97e0)
+      #22 pc 00000000000978a0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64) (BuildId: 5144907d23fac121cc594696acde97e0)
+
+========================================
+2026-09-09 17:32:15 SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS (compressed data, 89457 bytes)
+/data/system/dropbox/SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS@1788953535292.dat.gz
+
+========================================
+2026-09-09 17:32:15 SYSTEM_TOMBSTONE (compressed text, 89793 bytes)
+isPrevious: true
+Build: OnePlus/CPH2605/OP5955L1:15/AP3A.240617.008/T.R4T2.25418da-1:user/release-keys
+Hardware: k6833v1_64
+Revision: 0
+Bootloader: unknown
+Radio: M_V3_P10,M_V3_P10
+Kernel: Linux version 6.6.118-android15-8-o-g23e2f650760e-4k (kleaf@build-host) (Android (11368308, +pgo, +bolt, +lto, +mlgo, based on r510928) clang version 18.0.0 (https://android.googlesource.com/toolchain/llvm-project 477610d4d0d988e69dbc3fae4fe86bff3f07f2b5), LLD 18.0.0) #1 SMP PREEMPT Wed Aug 12 16:22:04 UTC 2026
+
+Dropped-Count: 0
+Process name is com.android.chrome, uid is 10971, not key_process
+keyProcess: 0
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***

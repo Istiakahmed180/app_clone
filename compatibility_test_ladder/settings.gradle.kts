@@ -18,4 +18,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "compatibility_test_ladder"
 include(":level2", ":level3", ":level4", ":level6", ":level7fixture", ":level9_gms", ":level10_gms", ":storageprobe", ":usermanagerprobe",
-    ":level11_isosplit", ":level11_isosplit_feature")
+    ":level11_isosplit", ":level11_isosplit_feature",
+    ":level12_isolatedservice")
