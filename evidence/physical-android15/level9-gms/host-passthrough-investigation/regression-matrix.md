@@ -41,27 +41,49 @@ Evidence: `regression-level6-launch.log`, `regression-level6-actions.log`,
 
 ## Level 7 — split APK / ABI split / native library loading
 
-**PHYSICALLY VERIFIED (2026-09-08). NOT RE-RUN this session.**
+**PHYSICALLY VERIFIED (2026-09-09), release host build, virtual user 6.**
 
-The imported split-APK fixture launched in a container
-(`ComponentInfo{com.example.duplikaladder.level7fixture/.MainActivity}`, window created,
-no crash). The two `Failed trying to add dependency on non-existing package` and
-`Invalid dex load report` lines are the engine's ordinary host-PM warnings for a
-container-only package, present before this change.
+Re-run in full through the real APK-import flow (picker → "Import by the file manager" →
+multi-select), not inherited. Three release splits were imported:
+`level7fixture-base-release.apk` + `config.en` + `config.arm64_v8a`.
 
-Evidence: `regression-level7.log`. Re-running needs the APK-import flow; not repeated.
+| Surface | Result | Observation |
+| --- | --- | --- |
+| Split APK import | **PASS** | `Parsed com.example.duplikaladder.level7fixture 1.0 (2 split(s))` → `APK set accepted` → `Installed an imported APK set` |
+| All splits loaded at runtime | **PASS** | `openDexFileNative` for all three: `base.apk`, `1_1_…config.en-release.apk`, `2_2_…config.arm64_v8a-release.apk` |
+| Split resource resolution | **PASS** | In-app: `split resource loaded marker=split_marker` |
+| ABI split native library loading | **PASS** | In-app: `native=abi-native-loaded` |
+| Relaunch persistence | **PASS** | `launches=1` → `am force-stop` → **verified 0 remaining `level7fixture` processes** → relaunch → `launches=2`, marker and native still loaded |
+| Crashes / ANRs | **PASS** | 0 |
+| GMS provisioning | off | The compatibility sheet showed no GMS checkbox (fixture declares no GMS dependency); `GMS provisioning for user 6: requested=false` |
+
+The `Failed trying to add dependency on non-existing package` / `Invalid dex load report`
+lines are the engine's ordinary host-PM warnings for a container-only package, present
+before this change.
+
+Evidence: `regression-level7-0909.log`, `regression-level7-guest.png`. Prior run:
+`regression-level7.log` (2026-09-08).
 
 ## Level 8 — real third-party apps
 
-**PHYSICALLY VERIFIED (2026-09-08). NOT RE-RUN this session.**
+All three apps are vendored in `compatibility_test_ladder/real_apps/`; nothing new was
+downloaded. Clones were made through the ordinary installed-app flow (provisioning off,
+`GMS provisioning for user N: requested=false`), on the **release** host build.
 
-| App | Result | Observation |
-| --- | --- | --- |
-| Markor (embedded WebView) | **PASS** | `net.gsantner.markor/.MainActivity` → `IntroActivity` drew to `HAS_DRAWN`; WebView sandbox process started for the container (`com.google.android.webview:sandboxed_process0 … for {co.tdevs.duplika/…SandboxedProcessService0}`); 0 fatals, 0 ANRs |
-| Fossify Notes persistence | **NOT RE-RUN** | |
-| AntennaPod networking | **NOT RE-RUN** | |
+| App | Result | Class | Observation |
+| --- | --- | --- | --- |
+| **Fossify Notes** — persistence | **PASS** | **PHYSICALLY VERIFIED (2026-09-09)** | Launched in virtual user 3, editor rendered. Typed `L9passthrough-persist-0909`, backed out, `am force-stop`, **verified 0 remaining `fossify` processes**, relaunched — the note was still present (confirmed by `uiautomator` dump, not just visually). Also exercises multi-ABI selection: the APK declares ARM64 + ARMv7 + x86_64 + x86. 0 fatals, 0 ANRs. |
+| **AntennaPod** — networking | **PASS** | **PHYSICALLY VERIFIED (2026-09-09)** | Launched in virtual user 4 to "Welcome to AntennaPod!". Online podcast search for "Linux" returned live results attributed *"Results by Apple, Podcast Index"* with cover art fetched over the network — so HTTPS and image loading both work from inside the container (`notifyNetdUID 10963` shows traffic attributed to the host UID, as expected). 0 fatals, 0 ANRs. |
+| **Markor** — launch / embedded WebView | **PASS** | **PHYSICALLY VERIFIED (2026-09-09)** | Re-run: cloned into virtual user 5, `net.gsantner.markor/.MainActivity` → `IntroActivity` reached `HAS_DRAWN`, intro UI rendered with its file-browser preview. 0 fatals, 0 ANRs. Prior run (2026-09-08) additionally captured the WebView sandbox process starting for the container (`com.google.android.webview:sandboxed_process0 … for {co.tdevs.duplika/…SandboxedProcessService0}`). |
 
-Evidence: `regression-level8-markor.log`.
+Evidence: `regression-level8-fossify.log`, `regression-level8-fossify-guest.png`,
+`regression-level8-antennapod.log`, `regression-level8-antennapod-guest.png`,
+`regression-level8-markor-0909.log`, `regression-level8-markor-guest.png`,
+`regression-level8-markor.log` (2026-09-08).
+
+**Every Level 6/7/8 surface named in the regression brief is now physically verified on
+2026-09-09.** Nothing in the regression set is inherited or inferred, with the single
+exception noted for the Level 6 in-app permission label.
 
 ## Level 9 — the change under test
 
@@ -78,6 +100,20 @@ Evidence: `regression-level8-markor.log`.
 Relaunch after a full `force-stop` reproduced the same verdicts on both host builds, so
 results are deterministic and not first-run artefacts. Minification was never disabled to
 obtain any result.
+
+## Documentation correction (2026-09-09)
+
+`docs/PHASE_4_COMPATIBILITY.md` explained the GMS failure as a **"signature wall"** —
+`SERVICE_INVALID` supposedly caused by the container being unable to present Google Play
+services' signing certificate, concluding that working GMS needed a signature bypass and was
+"not fixable at the engine level". That explanation is **falsified** and has been corrected in
+place: a document-level banner at the top, a correction block at the `SERVICE_INVALID`
+section (original text struck through, not deleted), and inline markers at the four
+downstream inferences that inherited the error.
+
+Falsified because (a) a provisioned container reports GMS certificates byte-identical to the
+host and *still* returned `SERVICE_INVALID(9)`, and (b) an unprovisioned container with the
+package-visibility patch returns `SUCCESS(0)` with no certificate change whatsoever.
 
 ## Net assessment
 

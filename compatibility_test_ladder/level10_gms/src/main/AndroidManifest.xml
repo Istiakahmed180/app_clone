@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The Google client libraries talk to Play services over the network stack. No
+         account, no location, no storage permission is requested anywhere in Level 10. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Android 11+ package filtering would hide these from this app even on an ordinary
+         installation, so declaring them removes filtering as an explanation for any
+         "not visible" result inside a guest. Ordinary declared visibility, not a bypass. -->
+    <queries>
+        <package android:name="com.google.android.gms" />
+        <package android:name="com.android.vending" />
+        <package android:name="com.google.android.gsf" />
+    </queries>
+
+    <application
+        android:label="Ladder L10 GMS"
+        android:allowBackup="false"
+        android:theme="@style/Level10Theme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

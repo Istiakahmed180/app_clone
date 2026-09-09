@@ -1,5 +1,41 @@
 # Phase 4 — App Compatibility Layer
 
+> ## ⚠️ Document-level correction (2026-09-09): the "GMS signature wall" does not exist
+>
+> This document repeatedly explains the GMS failure as a **signature wall** — the claim that
+> `SERVICE_INVALID` came from the container being unable to present Google Play services'
+> signing certificate, and that working GMS would therefore require a signature bypass and was
+> "not fixable at the engine level". **That explanation is wrong.** It was falsified by
+> measurement on the device of record. Every phrase "signature wall" / "GMS signature issue"
+> in this file (lines ~516, 533, 617, 649, 668, 679) inherits the error.
+>
+> **What was measured instead:**
+>
+> - A provisioned container reports GMS versionCode `263234035` and signing certs
+>   `f0fd6c5b…`, `7ce83c1b…`, `5f239127…` — **byte-identical to the host** — and still returned
+>   `SERVICE_INVALID(9)`. Certificate presentation was never the blocker.
+> - `SERVICE_INVALID` was the container's *own copy* of Play services failing its Chimera
+>   module bootstrap (`current_config.fb: ENOENT` → `GmsProxy: Failed to get gms service
+>   binder`), because GMS resolves its implementation from its own data directory and expects
+>   to be the platform singleton.
+> - The real defect was **PackageManager incoherence**: an unprovisioned guest got
+>   `NameNotFoundException` from `getPackageInfo`/`getApplicationInfo` for
+>   `com.google.android.gms` while `getApplicationEnabledSetting` answered `0` (enabled) in the
+>   same process, and `com.android.vending` was reported at a *fabricated* version
+>   (`33.8.16-21`) from a hardcoded stub in upstream Bcore.
+> - Fixing that — `engine-patches/0002-host-platform-package-visibility.patch` — makes an
+>   unprovisioned guest return **`SUCCESS(0)`**, in both debug and minified release, with **no**
+>   certificate, signature, UID, permission, account or device-property change.
+>
+> **Still true and unchanged:** Google sign-in has never been tested and is not claimed to
+> work; Play Integrity would still correctly fail for a virtualized caller and nothing here
+> targets it. The current residual failure is the `GoogleApi` client connection
+> (`DEVELOPER_ERROR`), caused by **caller identity** — the GMS process sees the guest's real
+> Binder UID (the Duplika host UID) paired with the guest's own package name — which no
+> PackageManager change can alter and which is deliberately left unfixed.
+>
+> Current evidence: `evidence/physical-android15/level9-gms/host-passthrough-investigation/`.
+
 > **Note on the captured output below.** These runs predate the rename from *Virtual Space*
 > to **Duplika**, so device transcripts here still show the old host package
 > `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
@@ -405,20 +441,62 @@ version. The failure moved from "absent" to "present but rejected".
 
 ### Where it stops: SERVICE_INVALID
 
-`SERVICE_INVALID` is `GoogleApiAvailability` reporting that the Google Play services it found is
+> ## ⚠️ CORRECTION (2026-09-09) — the explanation below is WRONG
+>
+> The "signature wall" reading in this section was **falsified by measurement** in Level 9. It
+> is kept here only because later sections reason from it; every such inference is marked.
+>
+> **Falsified twice over:**
+>
+> 1. **The container does present Google's genuine certificate, and is still rejected.**
+>    Measured inside a provisioned container: `com.google.android.gms` versionCode
+>    `263234035` and signing-certificate history sha256 `f0fd6c5b…`, `7ce83c1b…`,
+>    `5f239127…` — **byte-identical to the host control** — and
+>    `isGooglePlayServicesAvailable` still returned `SERVICE_INVALID(9)`. So certificate
+>    presentation was never the blocker.
+> 2. **It WAS fixable at the engine level, with no security bypass.** An *unprovisioned*
+>    container with host-platform package visibility
+>    (`engine-patches/0002-host-platform-package-visibility.patch`) returns
+>    **`SUCCESS(0)`** on the same device, in both debug and minified release. No
+>    certificate, signature, UID, account or device property was altered.
+>
+> **What `SERVICE_INVALID` actually was:** provisioning makes the container run *its own copy*
+> of Play services, and that copy cannot bootstrap its Chimera module set —
+> `ChimeraCfgMgr: Failed to read module config … app_chimera/current_config.fb (ENOENT)`,
+> then `GmsProxy: Failed to get gms service binder`. Play services resolves its real
+> implementation from dynamically loaded modules in its own data directory and expects to be
+> the platform's singleton GMS; a per-container copy starts with empty Chimera state. The
+> correct move is therefore **not to copy GMS into the container at all**, but to let the
+> guest see and use the host's genuine installation.
+>
+> The claim "the clean fix requires presenting Google's signing certificate" was wrong, and
+> the conclusion "not fixable at the engine level" was wrong. See
+> `evidence/physical-android15/level9-gms/root-cause-analysis.md` (Finding 4) and
+> `evidence/physical-android15/level9-gms/host-passthrough-investigation/`.
+>
+> **What is still true:** Google *sign-in* has never been tested and no claim is made about
+> it, and Play Integrity would still correctly fail for a virtualized caller — that remains a
+> boundary this project does not cross. The residual Level 9 failure is the `GoogleApi`
+> client connection (`DEVELOPER_ERROR`), whose cause is **caller identity**, not signatures:
+> the GMS process sees the guest's real Binder UID (the Duplika host UID) paired with the
+> guest's own package name.
+
+The original (incorrect) text follows.
+
+~~`SERVICE_INVALID` is `GoogleApiAvailability` reporting that the Google Play services it found is
 not authentic — an APK signature check, made by the client library before any Google API is
 used. Provisioning cannot satisfy it by installing more packages: the container would have to
-present the signing certificate of the real Google Play services.
+present the signing certificate of the real Google Play services.~~
 
-That is a deliberate stopping point, not an oversight. **It has not been attempted, and should
+~~That is a deliberate stopping point, not an oversight. **It has not been attempted, and should
 not be without an explicit decision**, because "make an authenticity check pass" is the same
 shape as the security constraints this project holds to in `docs/SECURITY.md`. The narrow,
 arguable case — that the host genuinely does have authentic GMS installed and the container is
 only failing to report its real certificate — is a judgement for the project owner, not
-something to slip in as a bug fix.
+something to slip in as a bug fix.~~
 
-So: sign-in, push and maps still fail. They fail one step later, and for a reason that is now
-named rather than guessed.
+~~So: sign-in, push and maps still fail. They fail one step later, and for a reason that is now
+named rather than guessed.~~
 
 ### Two defects this uncovered
 
@@ -472,6 +550,11 @@ These are the provisioned Google processes failing, not the guest app: Telegram 
 both launched and ran to their onboarding regardless, and while idle nothing crash-loops.
 
 This sharpens the earlier finding. Because the signature wall (SERVICE_INVALID) means
+[⚠️ *"signature wall" is a falsified label — see the 2026-09-09 correction above. The
+cost/benefit conclusion in this paragraph still holds, and provisioning is now known to be
+worse than that: it **shadows** the working host-passthrough path, because each
+PackageManager hook consults the container first. See
+`evidence/.../host-passthrough-investigation/provisioning-review.md`.*]
 provisioning still delivers no working Google sign-in or push, and Telegram and WhatsApp both
 run without GMS anyway, provisioning currently pays a cost (extra background crashes, ~3 s per
 clone, a heavier container) for no functional gain on these apps. A reasonable next step is to
@@ -629,8 +712,17 @@ java.lang.IllegalArgumentException: com.facebook.katana: Targeting S+ requires F
 ```
 
 This is Facebook's bundled Firebase InstanceID **legacy** path, taken only because Google Play
-services is not reachable (the SERVICE_INVALID signature wall). It is not fixable at the engine
-level within our constraints:
+services is not reachable (the SERVICE_INVALID signature wall).
+
+> ⚠️ **CORRECTION (2026-09-09).** The premise is falsified. Play services *is* now reachable
+> from an unprovisioned guest — `isGooglePlayServicesAvailable` returns `SUCCESS(0)` with the
+> host-platform package-visibility patch, so a client library should no longer select its
+> legacy Firebase-IID fallback for want of GMS. Whether that actually stops this specific
+> Facebook crash is **NOT TESTED** — Facebook was not re-run, and no claim is made. The
+> "requires presenting Google's signing certificate" bullet below is wrong; see the
+> correction earlier in this document.
+
+It was believed not fixable at the engine level within our constraints:
 
 - `checkPendingIntent` throws **client-side**, before the `getIntentSender` binder call, so the
   engine's existing `getIntentSender` hook cannot intercept it.
@@ -638,8 +730,13 @@ level within our constraints:
   making the guest report targetSdk < 31 process-wide — a hammer that changes runtime
   permission, storage and notification behaviour for every guest, risking the four apps that
   currently work.
-- The clean fix is working GMS, which requires presenting Google's signing certificate — the
-  security bypass ruled out in `docs/SECURITY.md`.
+- ~~The clean fix is working GMS, which requires presenting Google's signing certificate — the
+  security bypass ruled out in `docs/SECURITY.md`.~~
+  ⚠️ **WRONG (corrected 2026-09-09).** Working GMS *availability* required no certificate work
+  at all — only making the virtualized PackageManager answer by-name queries about the host's
+  genuine Play services consistently instead of throwing `NameNotFoundException`. Delivered by
+  `engine-patches/0002-host-platform-package-visibility.patch` with no signature, certificate,
+  UID, permission or account change.
 
 So Facebook is blocked by the same wall as GMS sign-in: it is a policy limit, not an
 undiscovered defect. Fixing it means either shipping a real GMS (a lawyer-and-licence question)
