@@ -18,3 +18,8 @@
 -keep class com.google.android.gms.appset.AppSet { *; }
 -keep class com.google.android.gms.appset.AppSetIdClient { *; }
 -keep class com.google.android.gms.auth.api.signin.GoogleSignIn { *; }
+
+# Phase 9 cross-API discriminator. Reached through the GoogleApi framework and named in the
+# report, so keep the entry points to stop a Release "failure" that is really just shrinking.
+-keep class com.google.android.gms.location.ActivityRecognition { *; }
+-keep class com.google.android.gms.location.ActivityRecognitionClient { *; }

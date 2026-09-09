@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Phase 9: the gate on the cross-API discriminator (ActivityRecognition). Declared
+         because a real app using that API would declare it, and because the probe records
+         its grant state. Runtime permission on API 29+, so declaring it grants nothing.
+         checkApiAvailability, which is the actual measurement, needs it neither declared
+         nor granted. Deliberately NOT a location permission. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
     <!-- Android 11+ package filtering would hide these from this app even on an ordinary
          installation, so declaring them removes filtering as an explanation for any
          "not visible" result inside a guest. Ordinary declared visibility, not a bypass. -->

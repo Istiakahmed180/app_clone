@@ -60,6 +60,7 @@ public class MainActivity extends Activity {
         results.put("P4", TestResult.notTested("P4", "Caller identity trace"));
         results.put("P5", TestResult.notTested("P5", "Account-bound APIs"));
         results.put("P6", TestResult.notTested("P6", "Per-API availability & resolution"));
+        results.put("P7", TestResult.notTested("P7", "Cross-API discriminator"));
         setContentView(buildUi());
 
         // Self-running, so a host installation and a clone both need nothing but
@@ -126,6 +127,7 @@ public class MainActivity extends Activity {
             post(ProbeCallerIdentity.run(this));
             post(ProbeAccountBoundary.run(this));
             post(ProbeApiFeature.run(this));
+            post(ProbeActivityRecognition.run(this));
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 logComparison();
