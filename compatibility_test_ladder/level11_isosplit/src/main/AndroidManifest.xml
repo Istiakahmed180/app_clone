@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Case B of the split-compatibility test: an isolated feature-split app.
+
+      isolatedSplits makes each split carry its own manifest and its own resource/asset
+      namespace, exactly as Chrome does. The base below declares NO activity at all, so the
+      launcher component exists only in level11_isosplit_feature's manifest. An engine that
+      parses base.apk only will therefore find no launchable activity and refuse to start it.
+
+      Compare with level7fixture, which is case A: configuration (ABI) splits, one manifest,
+      launcher compiled into the base.
+    -->
+    <application
+        android:isolatedSplits="true"
+        android:label="Duplika IsoSplit Fixture"
+        android:extractNativeLibs="false" />
+
+</manifest>

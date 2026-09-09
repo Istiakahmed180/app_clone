@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    split="isosplitfeature">
+
+    <dist:module
+        dist:instant="false"
+        dist:title="@string/feature_title">
+        <!--
+          On-demand delivery keeps AGP's manifest merger from folding this split's
+          components into the base manifest. That fold is exactly what would invalidate the
+          fixture: the launcher must exist ONLY here, as it does in Chrome's split_chrome.apk.
+        -->
+        <dist:delivery>
+            <dist:on-demand />
+        </dist:delivery>
+        <dist:fusing dist:include="false" />
+    </dist:module>
+
+    <application>
+        <!--
+          The launcher activity, declared ONLY here. With isolatedSplits="true" on the base,
+          this component is present in this split's manifest and nowhere else. Any engine that
+          registers components from base.apk alone cannot resolve MAIN/LAUNCHER for this
+          package, which is precisely the Chrome failure reduced to a 20 KB test app.
+        -->
+        <activity
+            android:name="com.example.duplikaladder.isosplit.feature.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

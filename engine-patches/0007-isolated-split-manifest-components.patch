@@ -1,0 +1,150 @@
+Register components declared in split manifests, not just base.apk
+
+An app built with android:isolatedSplits="true" declares its components in a split
+APK's manifest rather than in the base's. Chrome is one: base.apk declares three
+Play Core / GMS helper activities and no launcher at all, while the launcher
+activity com.google.android.apps.chrome.Main lives in split_chrome.apk together
+with 54 others.
+
+Bcore parsed only base.apk, so such a package reached the component resolver with
+no launchable activity. queryIntentActivities(MAIN/LAUNCHER) then returned empty,
+getLaunchIntentForPackage() returned null, launchApk() returned false, and the app
+could never be started.
+
+Patches 0003 and 0004 already give a split install its runtime paths -- the guest's
+ClassLoader sees splitSourceDirs and native libraries are extracted from the ABI
+split -- but neither reaches manifest parsing, which happens earlier and separately.
+
+The fix hands the framework parser the install's directory instead of its base APK.
+The parser then takes its own cluster path, parsing the base plus every split and
+merging the components into one Package. That is the same code the platform runs to
+install the app, so component identity, de-duplication and isolated-split resource
+namespacing are handled there rather than re-implemented here, and BPackage converts
+the merged result exactly as it already converted a monolithic one.
+
+The directory is only ever derived from what the host PackageManager reports for the
+package being installed, and the APK we were asked to install must be that same base
+APK path, with every split required to sit in that one directory. A guest-supplied or
+imported path therefore never qualifies, so this cannot be used to register unrelated
+components under a package. Anything unexpected falls back to the previous behaviour
+of parsing the single file.
+
+No change to launchApk, getLaunchIntentForPackage, queryIntentActivities, UID
+handling, package identity, signatures or certificates.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/BPackageManagerService.java
+@@ -705,7 +705,7 @@
+                 return result.installError(packageArchiveInfo.packageName,
+                         msg + "\n" + (BlackBoxCore.is64Bit() ? "The box does not support 32-bit Application" : "The box does not support 64-bit Application"));
+             }
+-            PackageParser.Package aPackage = parserApk(apkFile.getAbsolutePath());
++            PackageParser.Package aPackage = parserApk(apkFile.getAbsolutePath(), packageName);
+             if (aPackage == null) {
+                 return result.installError("parser apk error.");
+             }
+@@ -746,6 +746,103 @@
+         return result;
+     }
+ 
++    /**
++     * Parses the package being installed, including the manifests of its split APKs.
++     *
++     * <p>Apps built with {@code android:isolatedSplits="true"} declare components in a split's
++     * manifest instead of the base's. Chrome is one: its launcher activity
++     * {@code com.google.android.apps.chrome.Main} lives in split_chrome.apk, and base.apk
++     * declares no launchable activity at all. Parsing base.apk alone therefore registers no
++     * launcher, {@code queryIntentActivities} finds nothing, and the app can never be started.
++     *
++     * <p>The fix is to hand the framework parser the install's directory rather than its base
++     * APK. The parser then takes its own cluster path, which parses the base plus every split
++     * and merges the components into a single Package -- the same code the platform runs when
++     * it installs the app. Component identity, de-duplication and isolated-split resource
++     * namespacing are all handled there rather than re-implemented here, and
++     * {@link BPackage#BPackage(PackageParser.Package)} converts the merged result exactly as it
++     * already converts a monolithic one.
++     *
++     * <p>Anything unexpected about the cluster falls back to parsing {@code file} on its own,
++     * which is the previous behaviour, so this can only ever add components that the host
++     * platform itself associates with this package.
++     */
++    private PackageParser.Package parserApk(String file, String expectedPackageName) {
++        File clusterDir = hostSplitClusterDir(file, expectedPackageName);
++        if (clusterDir == null) {
++            return parserApk(file);
++        }
++        try {
++            PackageParser parser = PackageParserCompat.createParser(clusterDir);
++            PackageParser.Package aPackage = PackageParserCompat.parsePackage(parser, clusterDir, 0);
++            if (aPackage == null || !expectedPackageName.equals(aPackage.packageName)) {
++                Slog.w(TAG, "cluster parse of " + clusterDir + " gave "
++                        + (aPackage == null ? "null" : aPackage.packageName)
++                        + ", expected " + expectedPackageName + "; parsing base APK only");
++                return parserApk(file);
++            }
++            PackageParserCompat.collectCertificates(parser, aPackage, 0);
++            Slog.i(TAG, "parsed split cluster " + expectedPackageName
++                    + " splits=" + (aPackage.splitCodePaths == null
++                            ? 0 : aPackage.splitCodePaths.length)
++                    + " activities=" + aPackage.activities.size()
++                    + " services=" + aPackage.services.size()
++                    + " receivers=" + aPackage.receivers.size()
++                    + " providers=" + aPackage.providers.size());
++            return aPackage;
++        } catch (Throwable t) {
++            Slog.w(TAG, "cluster parse failed for " + expectedPackageName
++                    + ", parsing base APK only", t);
++            return parserApk(file);
++        }
++    }
++
++    /**
++     * The directory of the host's install of {@code packageName} -- but only when
++     * {@code baseApkPath} really is that install's own base APK and it genuinely has splits.
++     * Returns null otherwise, meaning "parse the single file as before".
++     *
++     * <p>This method is the security boundary for cluster parsing, and it is why the change
++     * cannot become a component-injection mechanism. The directory is never taken from the
++     * caller; it is derived from what the host PackageManager reports for this package, and the
++     * APK we were asked to install must be byte-for-byte that same path. An imported APK, a
++     * copied URI, or any other guest-supplied path therefore never matches, so nothing can aim
++     * the parser at a directory of its choosing and have unrelated components registered under
++     * this package. Every split is additionally required to sit in that one directory.
++     */
++    private File hostSplitClusterDir(String baseApkPath, String packageName) {
++        if (baseApkPath == null || packageName == null) {
++            return null;
++        }
++        try {
++            ApplicationInfo hostInfo =
++                    BlackBoxCore.getPackageManager().getApplicationInfo(packageName, 0);
++            if (hostInfo == null || !baseApkPath.equals(hostInfo.sourceDir)) {
++                // Not the host's install of this package (an imported APK, say).
++                return null;
++            }
++            String[] splits = hostInfo.splitSourceDirs;
++            if (splits == null || splits.length == 0) {
++                // No splits, so nothing a cluster parse could add.
++                return null;
++            }
++            File dir = new File(hostInfo.sourceDir).getParentFile();
++            if (dir == null || !dir.isDirectory()) {
++                return null;
++            }
++            for (String split : splits) {
++                if (split == null || !dir.equals(new File(split).getParentFile())) {
++                    Slog.w(TAG, "split outside the base APK directory for " + packageName
++                            + "; parsing base APK only");
++                    return null;
++                }
++            }
++            return dir;
++        } catch (Throwable t) {
++            return null;
++        }
++    }
++
+     private PackageParser.Package parserApk(String file) {
+         try {
+             PackageParser parser = PackageParserCompat.createParser(new File(file));
