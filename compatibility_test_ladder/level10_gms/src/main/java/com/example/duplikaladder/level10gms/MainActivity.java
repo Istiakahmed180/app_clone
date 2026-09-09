@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
         results.put("P5", TestResult.notTested("P5", "Account-bound APIs"));
         results.put("P6", TestResult.notTested("P6", "Per-API availability & resolution"));
         results.put("P7", TestResult.notTested("P7", "Cross-API discriminator"));
+        results.put("P8", TestResult.notTested("P8", "Cross-artifact discriminator"));
         setContentView(buildUi());
 
         // Self-running, so a host installation and a clone both need nothing but
@@ -128,6 +129,7 @@ public class MainActivity extends Activity {
             post(ProbeAccountBoundary.run(this));
             post(ProbeApiFeature.run(this));
             post(ProbeActivityRecognition.run(this));
+            post(ProbeSmsRetriever.run(this));
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 logComparison();

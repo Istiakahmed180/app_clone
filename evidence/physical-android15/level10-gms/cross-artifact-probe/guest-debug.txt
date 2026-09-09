@@ -1,0 +1,14 @@
+NOT MEASURED — Level 10 Phase 10, cell: guest-debug
+
+The OnePlus CPH2605 (KNOJORMFV4GERKHM) disconnected from ADB before the host control could
+be run, and did not return across three adb kill-server/start-server recovery cycles with
+waits. Only emulator-5554 remained attached.
+
+No result is recorded here because none was obtained. This file exists so the gap is
+explicit rather than looking like an oversight.
+
+Reproduce with the already-built APKs (no code change needed):
+  compatibility_test_ladder/level10_gms/build/outputs/apk/debug/level10_gms-debug.apk
+  compatibility_test_ladder/level10_gms/build/outputs/apk/release/level10_gms-release.apk
+
+Read the P8 card, or tap "DUMP FULL LOG TO LOGCAT" and filter Duplika.GMS10.

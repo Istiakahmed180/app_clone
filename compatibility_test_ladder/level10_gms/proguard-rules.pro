@@ -23,3 +23,9 @@
 # report, so keep the entry points to stop a Release "failure" that is really just shrinking.
 -keep class com.google.android.gms.location.ActivityRecognition { *; }
 -keep class com.google.android.gms.location.ActivityRecognitionClient { *; }
+
+# Phase 10 cross-artifact discriminator. Same reason as the Phase 9 keeps: reached through
+# the GoogleApi framework and named in the report, so a Release "failure" must not be R8
+# shrinking an entry point the probe reaches reflectively through the framework.
+-keep class com.google.android.gms.auth.api.phone.SmsRetriever { *; }
+-keep class com.google.android.gms.auth.api.phone.SmsRetrieverClient { *; }
