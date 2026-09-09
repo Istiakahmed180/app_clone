@@ -1,6 +1,11 @@
 package co.tdevs.duplika.native
 
 import android.content.Context
+import co.tdevs.duplika.native.gms.GmsProviderLog
+import co.tdevs.duplika.native.gms.GmsProviderMode
+import co.tdevs.duplika.native.gms.GoogleServiceProviderResolver
+import co.tdevs.duplika.native.gms.ProviderResult
+import co.tdevs.duplika.native.gms.RealGmsProvider
 
 /**
  * Installs the controlled application into a virtual profile.
@@ -14,6 +19,21 @@ class VirtualAppInstaller(
     private val adapter: VirtualizationEngineAdapter,
     private val securityChecker: AppSecurityChecker,
     private val analyzer: AppCompatibilityAnalyzer,
+    /**
+     * How Google-service capability is resolved. Defaults to Real GMS over the same engine
+     * adapter this class already holds, so the default behaviour is byte-for-byte the
+     * behaviour that was here before the provider abstraction: the same two engine calls,
+     * in the same order.
+     *
+     * Injectable so the selection logic can be unit-tested without a device.
+     */
+    private val providerResolver: GoogleServiceProviderResolver =
+        GoogleServiceProviderResolver(
+            realGms = RealGmsProvider(adapter),
+            log = GmsProviderLog { line -> Slog.i(Slog.INSTALL, line) },
+        ),
+    /** Requested provider mode. AUTO reproduces the pre-abstraction behaviour. */
+    private val providerMode: GmsProviderMode = GmsProviderMode.DEFAULT,
 ) {
 
     fun install(
@@ -69,22 +89,49 @@ class VirtualAppInstaller(
         // and push work inside it, and silently skipping was previously indistinguishable from
         // provisioning that ran and did nothing.
         Slog.i(Slog.INSTALL, "GMS provisioning for user $virtualUserId: requested=$wanted")
+
+        // Resolved -- and therefore logged -- before the early return, so "which provider is
+        // active, and why" is answerable for every clone rather than only for the rare one
+        // that opted into provisioning. That is the whole point of the selection diagnostic;
+        // emitting it only on the opt-in path would leave the normal path silent.
+        //
+        // The cost is one extra read-only engine query (isGmsSupported) per clone install.
+        // It changes no outcome: nothing is provisioned unless `wanted`, exactly as before.
+        val provider = providerResolver.resolve(providerMode)
+
         if (!wanted) {
             return
         }
-        if (!adapter.isGmsSupported()) {
-            Slog.w(Slog.INSTALL, "App needs GMS but this device has none; skipping provisioning")
-            return
-        }
+        // The provider decides, rather than this method asking the engine directly. With the
+        // default AUTO mode and Real GMS available the calls made are exactly the two that
+        // were made before -- isGmsSupported() then installGms() -- so behaviour is
+        // unchanged; the difference is that "no host GMS" and "engine refused" are now
+        // distinguishable outcomes instead of a boolean and an EngineResult read here.
+        //
         // No "already provisioned?" short-circuit, for the same reason install() has none:
         // the engine answers that question with isInstalled, which falls back to the *host*
         // package manager. The host has Google Play services, so it reports every container
         // as already provisioned and the real work is skipped -- measured, after this check
         // silently suppressed provisioning entirely. Re-provisioning is idempotent.
-        when (val result = adapter.installGms(virtualUserId)) {
-            is EngineResult.Success -> Unit
-            is EngineResult.Failure ->
-                Slog.e(Slog.INSTALL, "GMS provisioning failed (${result.code}): ${result.message}")
+        when (val result = provider.provisionContainerGms(virtualUserId)) {
+            is ProviderResult.Success -> Unit
+            // Preserves the previous behaviour for the no-host-GMS case: a warning and a
+            // skip, never a failed install. A clone whose GMS provisioning was skipped is
+            // exactly the clone the compatibility warning already describes.
+            is ProviderResult.Unavailable -> Slog.w(
+                Slog.INSTALL,
+                "GMS provisioning skipped by ${result.provider}: ${result.reason}",
+            )
+            is ProviderResult.NotImplemented, is ProviderResult.Unsupported -> Slog.w(
+                Slog.INSTALL,
+                "GMS provisioning not served by ${result.provider} " +
+                    "(${result.outcome}): ${result.reasonOrEmpty}",
+            )
+            else -> Slog.e(
+                Slog.INSTALL,
+                "GMS provisioning failed via ${result.provider} " +
+                    "(${result.outcome}): ${result.reasonOrEmpty}",
+            )
         }
     }
 
