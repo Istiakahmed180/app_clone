@@ -1,7 +1,11 @@
 # Level 10 Phase 10 — cross-artifact permission/caller-scoped GMS probe
 
-**Outcome: BLOCKED — the physical device disconnected before any cell could be measured.
-No conclusion is drawn. H9/H10 status is unchanged from Phase 9.**
+**Outcome: Case A — H9 CONFIRMED, H10 REJECTED as the primary explanation. The GMS
+limitation is classified UNSUPPORTED / SECURITY-BOUNDARY. Investigation line STOPS.**
+
+*(Earlier revision of this document recorded BLOCKED: the device disconnected before the
+first cell. It was reattached and all four cells were then measured with the same
+already-built APKs, no code change.)*
 
 ## 1. Objective
 
@@ -67,27 +71,50 @@ that constrains the reading.
 
 ## 6. Host control
 
-**NOT MEASURED.** The CPH2605 dropped off ADB immediately before the host Debug run
-(`adb: device 'KNOJORMFV4GERKHM' not found`) and did not return across three
-`kill-server`/`start-server` cycles with waits. Only `emulator-5554` remained attached.
+**Both host cells PASS**, so the API is a valid discriminator (Step 5 satisfied).
 
-Step 5 requires both host cells to succeed before proceeding; neither could be attempted.
+| Cell | SmsRetriever | ActivityRecognition | LocationServices | P8 |
+| --- | --- | --- | --- | --- |
+| Host Debug | **available** | available | available | PASS |
+| Host Release (minified) | **available** | available | available | PASS |
+
+`startSmsRetriever()` completed on both — the listener actually registered (950 ms Debug,
+1733 ms Release), so the call genuinely reached Play services.
 
 ## 7. Guest result
 
-**NOT MEASURED** — blocked by the same cause.
+**Both guest cells FAIL**, identically.
+
+| Cell | SmsRetriever | ActivityRecognition | LocationServices | P8 |
+| --- | --- | --- | --- | --- |
+| Guest Debug (user 23) | **DEVELOPER_ERROR** | DEVELOPER_ERROR | DEVELOPER_ERROR | UNSUPPORTED |
+| Guest Release (user 24) | **DEVELOPER_ERROR** | DEVELOPER_ERROR | DEVELOPER_ERROR | UNSUPPORTED |
+
+`startSmsRetriever()` → `ApiException statusCode=17`, *SmsRetriever.API is not available on
+this device*.
 
 ## 8. Timing
 
-**NOT MEASURED.**
+| Cell | `startSmsRetriever` | Elapsed |
+| --- | --- | --- |
+| Host Debug | completed | 950 ms |
+| Host Release | completed | 1733 ms |
+| Guest Debug | refused, status 17 | **6 ms** |
+| Guest Release | refused, status 17 | **10 ms** |
+
+Host ~1–1.7 s (real round trip) versus guest 6–10 ms (local refusal). The same pre-IPC
+signature as LocationServices (~20 ms) and ActivityRecognition (8–9 ms).
 
 ## 9. IPC / broker observations
 
-**NOT MEASURED.**
+No broker bind in either guest cell — the API is refused before any IPC, exactly as in
+Phases 8 and 9. On the host the call reached Play services and registered a listener.
 
 ## 10. Caller attribution observations
 
-**NOT MEASURED** in this phase. Phase 9's observations stand unchanged.
+Unchanged and re-observed: guests run under the host app's UID, Play services resolves the
+caller to `co.tdevs.duplika`, and the client names the guest package. Nothing was modified;
+the probe only records.
 
 ## 11. Cross-artifact comparison
 
@@ -97,23 +124,28 @@ Step 5 requires both host cells to succeed before proceeding; neither could be a
 | AppSet ID | appset | PASS | PASS | PASS | PASS |
 | LocationServices | **play-services-location** | PASS | PASS | FAIL | FAIL |
 | ActivityRecognition | **play-services-location** | PASS | PASS | FAIL | FAIL |
-| **SmsRetriever** | **auth-api-phone** | **NOT MEASURED** | **NOT MEASURED** | **NOT MEASURED** | **NOT MEASURED** |
+| **SmsRetriever** | **auth-api-phone 18.0.2** | **PASS** | **PASS** | **FAIL** | **FAIL** |
 
-Only measured results are entered. The bottom row is the point of the phase and it is empty.
+All cells measured. Three attribution-sensitive GoogleApis across **two** artifacts, gated
+by **two different mechanisms** (runtime permission and caller signature), all refused in a
+container. Two non-attribution-sensitive APIs, both served.
 
 ## 12. H9 update
 
-**UNCHANGED — STRONGLY SUPPORTED, not confirmed.** No new evidence was produced.
+**CONFIRMED.** An attribution-sensitive GoogleApi from a different artifact, gated by a
+different mechanism, is refused identically. The boundary is general to containerised
+callers, not tied to one library.
 
 ## 13. H10 update
 
-**UNCHANGED — reduced likelihood, not eliminated.** The artifact confound this phase exists
-to remove is still present.
+**REJECTED as the primary explanation.** `SmsRetriever` is outside
+`play-services-location` and fails the same way, so "specific to that library" no longer
+fits the data.
 
-### Interpretation caveat that will apply when the phase is re-run
+### The pre-registered caveat, and why it is now closed
 
-Recorded now so the conclusion cannot be over-fitted after the fact. `SmsRetriever` is
-signature-scoped, **not** permission-gated, so the two branches are not symmetric:
+Phase 10 recorded, before running, that the two branches were not symmetric because
+`SmsRetriever` is signature-scoped rather than permission-gated:
 
 - **Guest FAIL** → confound eliminated cleanly. An attribution-sensitive GoogleApi in a
   different artifact is also refused → **H9 confirmed, H10 rejected** as primary
@@ -122,14 +154,25 @@ signature-scoped, **not** permission-gated, so the two branches are not symmetri
   refinement this probe cannot exclude: "APIs requiring **runtime-permission** attribution
   are refused; APIs requiring only **signature** scoping are served." Under that reading
   H10 would **not** be strongly supported, because the discriminating property would be the
-  kind of attribution, not the library. So Case B's mapping applies only with that
-  qualification — which is why `ProbeSmsRetriever` returns `PARTIAL` rather than `PASS` in
-  that branch, and says so in its own verdict text.
+  kind of attribution, not the library.
+
+**The measured result is FAIL, so that open question is closed rather than inherited.** The
+signature-scoped API fails alongside the permission-gated ones, which means the boundary is
+not "permission-attributed APIs" but the broader "identity-scoped APIs" — and both
+attribution mechanisms are now covered by evidence rather than one of them being assumed.
 
 ## 14. Security-boundary assessment
 
-No change. Phase 9's assessment stands: **likely UNSUPPORTED / SECURITY-BOUNDARY**, not yet
-certain. This phase produced no evidence either way.
+**UNSUPPORTED / SECURITY-BOUNDARY — now the classification, not a suspicion.**
+
+The refusal turns on the calling package not corresponding to the calling UID from the GMS
+process's view. Duplika runs guests under the host app's UID — that is what virtualization
+is — and Play services is correctly declining to attribute an identity-scoped capability to
+a caller it cannot verify. This is Google behaving properly, not a Duplika defect.
+
+Making these APIs pass would require UID, package-identity, signature, certificate or Binder
+caller-identity spoofing, a fake GMS identity, or a Play Integrity / SafetyNet / GMS-response
+bypass. **All forbidden; none attempted.** The line stops here.
 
 Nothing here attempted or required a bypass: no UID, package-identity, signature or
 certificate spoofing; no Binder caller-identity manipulation; no Play Integrity or SafetyNet
@@ -156,37 +199,44 @@ in this phase and are not claimed.
 
 ## 16. Limitations
 
-1. **The experiment did not run.** Everything below is capability, not result.
-2. The artifact confound remains, so Level 10's overall conclusion is still Phase 9's.
-3. When re-run, the signature-vs-permission asymmetry in §13 limits what a guest PASS can
-   establish.
-4. `emulator-5554` was deliberately **not** substituted: a different Android image with a
-   different GMS build and no existing clone set would not be comparable with the Phase 8/9
-   baselines this phase depends on.
+1. **n=3** attribution-sensitive APIs across 2 artifacts. Strong, but a sample — "every
+   identity-scoped GMS API fails in a container" is an extrapolation, not an enumeration.
+2. The client library's internal decision was never instrumented; the mechanism is inferred
+   from timing plus the absence of a bind, not observed directly.
+3. Google account sign-in and OAuth-bound APIs were never tested; they remain separately
+   classified UNSUPPORTED / SECURITY-BOUNDARY.
+4. `emulator-5554` was deliberately **not** used at any point — a different Android image
+   with a different GMS build and no clone set would not be comparable with the Phase 8/9
+   baselines.
 
 ## 17. Final classification
 
-**BLOCKED (device unavailable).**
+**Case A — H9 CONFIRMED, H10 REJECTED as primary explanation.
+GMS limitation = UNSUPPORTED / SECURITY-BOUNDARY. Investigation line STOPS.**
 
-Not Case A, B or C — all three presuppose measured results. Not PARTIAL/INCONCLUSIVE
-either, since that describes an API that failed to give a usable signal, whereas this API
-was never exercised.
+Verified:
 
-Ready and verified without the device:
-
-- API validated against the resolved graph; no dependency change
-- `GoogleApi` inheritance confirmed by `javap`, so the measurement is symmetric
-- P8 probe written and wired; checks all three APIs in one run
-- Debug + Release APKs built, minification retained, `ProbeSmsRetriever` verified present in
-  the minified release dex
+- API validated against the resolved graph; **no dependency added or changed**
+- `GoogleApi` inheritance confirmed by `javap`, so the measurement is symmetric with
+  Phases 8/9
+- All four cells measured on the device of record, Debug and Release agreeing
 - `flutter analyze` 0 errors (4 pre-existing info lints); `flutter test` **245/245**
+- Production behaviour changed: **NO**
 
 ## 18. Recommended next step
 
-Reattach the OnePlus CPH2605 and run the four cells with the **already-built** APKs — host
-Debug, host Release, then clone and run guest Debug, guest Release. No code change is
-required; the probe reports the discrimination itself.
+**Not another experiment on this question — it is answered.**
 
-Until then: **no engine change, no Bcore change, no microG, no attempt to make a failing API
-pass.** Level 10's standing position remains Phase 9's — H9 strongly supported, likely a
-security boundary, artifact confound outstanding.
+The right follow-up is a *product* decision, not an engineering one: record the boundary
+where users and future contributors will meet it. Concretely, Duplika's REQUIRES_GMS
+compatibility warning (`AppCompatibilityAnalyzer.kt`) still says Play services "is not
+virtualized in this build", which is now measurably wrong — availability is `SUCCESS(0)` and
+non-identity-scoped Google APIs work. The accurate statement is narrower and more useful:
+Google APIs that must be tied to the calling app's identity — sign-in, and anything
+permission- or signature-scoped such as location and SMS retrieval — cannot work in a
+clone, while other Google APIs can.
+
+That was already flagged as a follow-up in Phase 7 and is now fully evidenced.
+
+**Do not** modify Bcore, identity handling or the engine on the basis of this line of
+investigation. There is nothing left to fix here — only something to state honestly.
