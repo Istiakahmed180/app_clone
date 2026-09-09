@@ -3,7 +3,12 @@
 **Root cause: CONFIRMED.** Duplika is missing virtualization for one Binder method name.
 The hook that should handle it already exists in Bcore, is installed in the guest process,
 and has the correct body — it is simply registered under the method name Android used
-*before* the platform renamed it. **No production code was changed in this phase.**
+*before* the platform renamed it.
+
+> **Status: FIXED.** The investigation below was written before any change and is preserved
+> as-is — including §8, which still reads "not applied", because that was true when written.
+> The patch has since been applied, rebuilt and validated on device; see
+> **Fix Applied / Validation** at the end of this document.
 
 Device: OnePlus CPH2605, Android 15 / API 35 / arm64-v8a, `KNOJORMFV4GERKHM`.
 
@@ -245,3 +250,122 @@ No production code changed, so nothing to regress. Verified anyway:
 4. Whether Android 15 *changed* anything here is UNKNOWN and not needed — hypothesis 7
    explains the failure without it.
 5. `getUsers` and `getProfileParent` may have the same short-vs-long exposure; not tested.
+
+---
+
+# Fix Applied / Validation
+
+Added after the investigation above; **nothing in the original findings has been rewritten.**
+
+## What changed
+
+| File | Change |
+| --- | --- |
+| `engine-patches/0006-usermanager-application-restrictions-api35.patch` | **new** — the numbered engine patch |
+| `android/app/libs/bcore.aar` | **rebuilt** with all six patches |
+| `android/app/libs/BCORE_SOURCE_COMMIT.txt` | provenance updated to describe patch 0006 |
+
+Bcore source change — one annotation plus its import, in
+`Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IUserManagerProxy.java`:
+
+```java
+-   @ProxyMethod("getApplicationRestrictions")
++   @ProxyMethods({"getApplicationRestrictions", "getApplicationRestrictionsForUser"})
+    public static class GetApplicationRestrictions extends MethodHook {
+```
+
+`@ProxyMethods` syntax was taken from the version's own precedent
+(`IAccessibilityManagerProxy$ReplaceUserId`, seven names) and the annotation was read from
+source before editing: `@Target(TYPE) @Retention(RUNTIME) String[] value() default {}`.
+
+**Hook body unchanged.** `userId` handling unchanged. No UID, package, signature or
+certificate handling touched. No `SecurityException` suppressed. GMS/microG untouched. No
+Chrome code and no Duplika Flutter behaviour changed.
+
+### Why registering the second name is sufficient — verified in source, not assumed
+
+`ClassInvocationStub#initAnnotation` reads **both** annotations and registers each name:
+
+```java
+ProxyMethods proxyMethods = clazz.getAnnotation(ProxyMethods.class);
+if (proxyMethods != null) {
+    for (String name : proxyMethods.value()) {
+        addMethodHook(name, (MethodHook) clazz.newInstance());   // mMethodHookMap.put(name, hook)
+    }
+}
+```
+
+and `BinderInvocationStub extends ClassInvocationStub`, so `IUserManagerProxy` inherits it.
+Had `@ProxyMethods` not been honoured, the change would have compiled and done nothing —
+which is why this was checked before building.
+
+## Build
+
+`engine-patches/build-engine.sh`, upstream `89b59836c66f173756a4ae258cf379a957649820`,
+NDK 29.0.13846066, JDK 17. `BUILD SUCCESSFUL`. No unrelated dependency changed.
+
+| Artifact | sha256 | bytes |
+| --- | --- | --- |
+| before | `0178aa0b0fe23aec77fb1ef13bab04f981f4d146297c211ccc151a7f45076770` | 2 102 254 |
+| **after** | **`d9b7f36b094eab00c514ecb002371eec6af70154fd3f4cb6a50ce0be328f8175`** | 2 093 182 |
+
+Post-build binary verification: annotation now carries both names; hook body byte-identical
+(`getHostPkg` → `aastore` → `Method.invoke` → return); both ABIs present. The previous AAR
+was backed up to `/tmp/bcore.aar.pre0006.bak` before replacement.
+
+## Validation matrix — all four cells PASS
+
+| Cell | P1 own-package restrictions | P2 `getUserRestrictions()` | P3 `isSystemUser()` |
+| --- | --- | --- | --- |
+| Host Debug | **SUCCESS**, keyCount=0 | SUCCESS | SUCCESS |
+| Host Release (minified) | **SUCCESS**, keyCount=0 | SUCCESS | SUCCESS |
+| **Guest Debug** (fresh virtual user 3) | **SUCCESS**, keyCount=0 | SUCCESS | SUCCESS |
+| **Guest Release** (fresh virtual user 4, minified) | **SUCCESS**, keyCount=0 | SUCCESS | SUCCESS |
+
+Before → after in a guest:
+
+```
+before: SecurityException: Only system may: get application restrictions for other
+        user/app com.example.duplikaladder.umprobe
+after:  SUCCESS — bundleNull=false keyCount=0
+```
+
+Security checks: no other Android user accessed (`userId` never touched); no cross-app data
+exposed (the Bundle is **empty**, identical to the host's answer, and the rewritten package
+is the container owner's, which the calling UID owns); both controls still succeed.
+
+## Project validation
+
+`flutter analyze` 0 errors (4 pre-existing info lints) · `flutter test` **245/245** ·
+Duplika Debug and Release both built, Release minification retained.
+
+**Level 6/7/8 regression: NOT executed** in this phase and not claimed. The engine artifact
+did change, so those levels are worth re-running before shipping.
+
+## Chrome — NOT fixed, and not claimed to be
+
+Attempted only after the probe matrix passed, on a fresh clone (virtual user 5) with the
+patched engine:
+
+```
+Starting com.android.chrome in virtual user 5
+Rebuilding the container for com.android.chrome before a second launch attempt
+Launch of com.android.chrome failed after a rebuild:
+    The engine refused to launch the virtual application.
+```
+
+Zero occurrences of `"Only system may: get application restrictions"` in that run — but
+Chrome never reaches the call, so this says nothing about whether the fix helps Chrome.
+Chrome remains blocked by issue **(B)**, the 6-way split-APK launch refusal, which this
+patch does not address.
+
+The three issues stay separate:
+
+| | Issue | Status |
+| --- | --- | --- |
+| **A** | UserManager API 35 application-restrictions registration | **FIXED and validated** |
+| **B** | Chrome 6-way split-APK launch refusal | **OPEN** — unchanged |
+| **C** | `BActivityManagerService cannot be cast to ActivityStack` | **OPEN** — still present in logs, still swallowed by `runCatching` |
+
+Whether A was ever Chrome's *only* UserManager problem cannot be known until B is fixed and
+Chrome actually runs.

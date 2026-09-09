@@ -1,0 +1,129 @@
+Android 15 / API 35: register the application-restrictions hook under the Binder
+method name the platform actually invokes.
+
+SYMPTOM
+    A cloned app crashes when it asks for its own managed-configuration restrictions.
+    Chrome does this during startup on a CrAsyncTask worker and dies:
+
+        java.lang.SecurityException: Only system may: get application restrictions for
+            other user/app com.android.chrome
+          at android.os.IUserManager$Stub$Proxy.getApplicationRestrictionsForUser
+          at android.os.UserManager.getApplicationRestrictions
+
+ANDROID 15 / API 35 BINDER METHOD NAME
+    UserManager.getApplicationRestrictions(String packageName)      <- public SDK
+        invokes
+    IUserManager.getApplicationRestrictionsForUser(String packageName, int userId)
+                                                                    <- @hide Binder method
+
+    The SDK name and the Binder name differ. Reading the SDK signature alone hides this;
+    the stack trace above is where it is visible.
+
+OLD BCORE REGISTRATION
+    @ProxyMethod("getApplicationRestrictions")
+    public static class GetApplicationRestrictions extends MethodHook { ... }
+
+NEW REGISTRATION
+    @ProxyMethods({"getApplicationRestrictions", "getApplicationRestrictionsForUser"})
+    public static class GetApplicationRestrictions extends MethodHook { ... }
+
+WHY THE OLD REGISTRATION NEVER FIRES ON API 35
+    ClassInvocationStub#initAnnotation registers a hook by *name*:
+
+        mMethodHookMap.put(name, methodHook);
+
+    and it reads both @ProxyMethod (one name) and @ProxyMethods (several). The invoked
+    Binder name on API 35 is getApplicationRestrictionsForUser, which was not in the map,
+    so the call was never intercepted and went to the real IUserManager unchanged. The
+    platform then refused it, because the Binder calling UID is the host app's while the
+    package argument was the guest's -- two identities that do not correspond.
+
+    @ProxyMethods is not new API for this fix: IAccessibilityManagerProxy$ReplaceUserId
+    already registers seven names this way. This patch uses the existing idiom.
+
+WHY THE HOOK BODY IS UNCHANGED
+    The body was already correct:
+
+        args[0] = BlackBoxCore.getHostPkg();
+        return method.invoke(who, args);
+
+    args[0] is the packageName in BOTH signatures -- getApplicationRestrictions(pkg) and
+    getApplicationRestrictionsForUser(pkg, userId) -- so rewriting index 0 is right for
+    each. Only the registration was wrong. userId (index 1 on the long form) is left
+    untouched, so no other Android user is ever addressed.
+
+SECURITY RATIONALE
+    This is not a bypass, and the distinction is the point of the patch:
+
+    - No UID, package, signature or certificate is spoofed. The guest app is not made to
+      look like a system app and no SecurityException is suppressed.
+    - The platform rule is "the caller must own the package it asks about". Inside a
+      container the caller genuinely IS the host app, so asking about the host package is
+      the truthful request, not a forged one. The platform check still runs and still
+      passes on its own terms.
+    - A virtual user is not an Android user, so a guest has no separate restrictions object
+      at the platform level. The container owner's restrictions are the correct and only
+      legitimate answer.
+    - userId is not modified, so this cannot reach another real Android user's data.
+    - A guest cannot use this to read a third-party app's restrictions: the package
+      argument is replaced with the host package, never with an arbitrary one.
+    - Play Integrity, SafetyNet, GMS and account/OAuth paths are untouched.
+
+    On a device with no managed profile the host itself returns an empty Bundle, so the
+    practical effect is that a clone receives the same empty Bundle the host receives,
+    instead of crashing.
+
+VALIDATION METHOD
+    compatibility_test_ladder/usermanagerprobe -- a diagnostic with no dependencies at all,
+    so the identical APK runs on the host and inside a container and any difference is
+    attributable to the virtualization layer. It calls
+    getApplicationRestrictions(getPackageName()) -- always its OWN package -- and records
+    only success/failure, the returned Bundle's key count and the exception. It never
+    queries another app, never another Android user, and never records a restriction value.
+
+    Two controls run in the same process: getUserRestrictions() and isSystemUser(), which
+    must keep succeeding. They show UserManager is reachable in the container, so a failure
+    of the package-scoped call is specific rather than a dead service.
+
+    Before this patch:  host PASS, guest SecurityException naming the guest package.
+    Expected after:     host PASS, guest PASS with an empty Bundle, controls still PASS.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IUserManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IUserManagerProxy.java
+index ccb30dd..b201f63 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IUserManagerProxy.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IUserManagerProxy.java
+@@ -13,6 +13,7 @@ import top.niunaijun.blackbox.app.BActivityThread;
+ import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
+ import top.niunaijun.blackbox.fake.hook.MethodHook;
+ import top.niunaijun.blackbox.fake.hook.ProxyMethod;
++import top.niunaijun.blackbox.fake.hook.ProxyMethods;
+ 
+ 
+ public class IUserManagerProxy extends BinderInvocationStub {
+@@ -35,7 +36,25 @@ public class IUserManagerProxy extends BinderInvocationStub {
+         return false;
+     }
+ 
+-    @ProxyMethod("getApplicationRestrictions")
++    /**
++     * Registered under both names on purpose.
++     *
++     * {@code UserManager.getApplicationRestrictions(String)} does not invoke a Binder method
++     * of the same name: on API 35 it calls
++     * {@code IUserManager.getApplicationRestrictionsForUser(packageName, userId)}. Older
++     * platforms reached the short name. Hooks here are dispatched by method name
++     * (ClassInvocationStub#initAnnotation keys mMethodHookMap by the annotation value), so a
++     * registration that lists only the short name is never matched on API 35 -- the call
++     * falls through to the real service, which then refuses it because the Binder calling UID
++     * is the host app's while the package argument is the guest's.
++     *
++     * Measured on a OnePlus CPH2605 / Android 15 before this change: an app in a container
++     * asking for its OWN restrictions got
++     * "SecurityException: Only system may: get application restrictions for other user/app
++     * <guest package>". The exception naming the guest package is what proves the hook never
++     * ran -- had it run, args[0] would already have been the host package.
++     */
++    @ProxyMethods({"getApplicationRestrictions", "getApplicationRestrictionsForUser"})
+     public static class GetApplicationRestrictions extends MethodHook {
+         @Override
+         protected Object hook(Object who, Method method, Object[] args) throws Throwable {

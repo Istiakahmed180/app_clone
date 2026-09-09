@@ -4,12 +4,23 @@ https://github.com/ALEX5402/NewBlackbox
 PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the source at
 the commit above with the numbered patches in engine-patches applied. These include the
 Android 15 AppOps return-type fix, host-platform package visibility, split APK installation
-support, and the permission-gated public-media path bridge. The media bridge exposes existing public media directories to a
+support, the permission-gated public-media path bridge, and the Android 15 UserManager
+application-restrictions method registration. The media bridge exposes existing public media directories to a
 guest only when the host's user-granted android:manage_external_storage app-op is allowed;
 it does not grant or bypass that permission. The package-visibility patch lets a guest's
 by-name PackageManager query for Google Play services, GSF and the Play Store be answered by
 the host PackageManager verbatim, and removes an upstream hardcoded fabricated PackageInfo
-for com.android.vending; it changes no signature, permission, UID or identity. To reproduce: clone the repo at that commit,
+for com.android.vending; it changes no signature, permission, UID or identity.
+
+The UserManager patch (0006) registers the existing application-restrictions hook under the
+Binder method name API 35 actually invokes, getApplicationRestrictionsForUser, in addition to
+the short getApplicationRestrictions it was registered under before. The hook body is
+unchanged; only the registration was wrong, so on API 35 the call was never intercepted and
+the platform refused a guest asking for its own restrictions. It rewrites the package
+argument to the host package -- which the Binder calling UID genuinely owns -- and leaves
+userId untouched, so no other Android user is addressed and no identity is spoofed.
+
+To reproduce: clone the repo at that commit,
 apply every engine-patches/*.patch, lower Bcore's compileOptions from JavaVersion.VERSION_21
 to VERSION_17 (local JDK is 17), and run `./gradlew :Bcore:assembleRelease` (NDK
 29.0.13846066). See engine-patches/README.md.
