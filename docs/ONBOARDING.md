@@ -1,27 +1,30 @@
 # First-launch onboarding
 
-Two things happen before the home screen is usable, in this order:
+One thing happens on first launch, and it does not block the home screen:
 
 | Step | Blocks the app? | Owned by |
 | --- | --- | --- |
-| Terms and data-collection disclosure | **Yes** | `TermsDialog` |
 | Doze exemption offer | No | `BatteryOptimization.kt` |
 
 `OnboardingController` owns the order and `OnboardingHost` owns how each step appears, so
 the sequence is testable without pumping a single widget.
 
-## Only one step is allowed to block
-
-The terms are a genuine gate: declining closes the app, because nothing in Duplika is
-usable without them, and parking someone on a screen that refuses to work is worse than
-letting them leave.
+## Nothing is allowed to block
 
 The Doze exemption is not a gate, deliberately. It is a convenience: clones work without
 it; they just get dozed along with the host. It is offered once, from a dismissible
 banner, and a dismissal is permanent — re-asking every launch is the pattern this app is
 trying not to be.
 
-## No consent form, and no AdMob id
+## No terms dialog, no consent form, and no AdMob id
+
+The first-launch terms and data-collection disclosure (`TermsDialog`) has been removed,
+along with the stored acceptance version. Nothing gates the app at launch any more.
+
+**Before this ships**, the disclosure that dialog carried has to live somewhere: what
+Duplika reads from the device is unchanged — the installed-app list and crash logs — and
+Play requires a prominent disclosure for it. The Privacy Policy row in Settings is the
+only surviving legal surface, and a policy the user is never shown is not a disclosure.
 
 Earlier builds ran Google's User Messaging Platform (UMP) consent form at first launch.
 It is gone, along with the `com.google.android.ump` dependency, the
@@ -62,12 +65,11 @@ system screen, outside this app.
 ## Before this ships
 
 - [ ] Publish the Privacy Policy and Terms of Service, put their URLs in
-      `LegalConstants`, and set `policiesArePlaceholders = false`. Until then the terms
-      dialog renders a development warning instead of dead links — presenting an
-      unpublished `example.com` link as "our Privacy Policy" would be a lie in the one
-      dialog that must not contain any.
-- [ ] Re-read the disclosure text in `TermsDialog` against what the app actually collects.
-      It is the text the user agrees to, so it has to stay true as the app changes.
+      `LegalConstants`, and set `policiesArePlaceholders = false`. Until then Settings
+      hides the rows rather than pointing them at dead `example.com` links.
+- [ ] Decide where the data-collection disclosure lives now that the terms dialog is
+      gone. Duplika still reads the installed-app list and writes crash logs, and Play
+      wants that disclosed prominently, not only inside a linked policy.
 - [ ] Justify `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` in the Play listing, alongside
       `QUERY_ALL_PACKAGES` and `MANAGE_EXTERNAL_STORAGE`. See `docs/SECURITY.md`.
 

@@ -71,12 +71,9 @@ void main() {
     final NativeBridge bridge = NativeBridge(channel: channel);
     repository = VirtualProfileRepository(storage: InMemoryProfileStorage());
 
-    // The terms are already settled here. This test is about the banner, and an
-    // unanswered terms dialog would sit over the whole screen absorbing taps.
     final OnboardingStore store = OnboardingStore(
       storage: InMemoryProfileStorage(),
     );
-    await store.acceptTerms();
     onboarding = OnboardingController(nativeBridge: bridge, store: store);
 
     Get.put<NativeBridge>(bridge);

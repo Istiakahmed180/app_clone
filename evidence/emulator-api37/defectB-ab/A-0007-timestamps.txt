@@ -1,0 +1,53 @@
+[A-0007 11:24:40] === VARIANT A-0007 (profile=emu) ===
+  install: Success
+[A-0007 11:24:43] STEP0 onboarding + add Chrome clone
+[A-0007 11:25:58]   duplika uid=u0_a280
+[A-0007 11:25:58] --- RUN 1 ---
+[A-0007 11:25:58] RUN1 STEP1 tapped Chrome tile
+[A-0007 11:26:09] RUN1 STEP2 guest_browser_procs=1  STEP3 fre_or_ntp=yes
+[A-0007 11:26:13] RUN1 STEP4 tapped Stay signed out
+RUN1 procs:
+    17776   435 u0_a280      co.tdevs.duplika
+    17853   435 u0_a280      com.android.chrome
+    18039   435 u0_a280      co.tdevs.duplika:black
+    32339   435 u0_a162      com.android.chrome
+[A-0007 11:26:43] RUN1 STEP8 renderer=0 STEP9 gpu=0
+[A-0007 11:26:45] RUN1 STEP10 newtab=no
+[A-0007 11:26:48] --- RUN 2 ---
+[A-0007 11:27:04] RUN2 STEP1 tapped Chrome tile
+[A-0007 11:28:47] RUN2 STEP2 guest_browser_procs=0  STEP3 fre_or_ntp=no
+[A-0007 11:28:49] RUN2 STEP4 no FRE dismiss button
+RUN2 procs:
+    18125   435 u0_a280      co.tdevs.duplika
+    18142   435 u0_a280      co.tdevs.duplika:black
+    32339   435 u0_a162      com.android.chrome
+[A-0007 11:29:19] RUN2 STEP8 renderer=0 STEP9 gpu=0
+[A-0007 11:29:22] RUN2 STEP10 newtab=no
+[A-0007 11:29:22] --- RUN 3 ---
+[A-0007 11:29:37] RUN3 STEP1 tapped Chrome tile
+[A-0007 11:31:20] RUN3 STEP2 guest_browser_procs=0  STEP3 fre_or_ntp=no
+[A-0007 11:31:22] RUN3 STEP4 no FRE dismiss button
+RUN3 procs:
+    18750   435 u0_a280      co.tdevs.duplika
+    18766   435 u0_a280      co.tdevs.duplika:black
+    32339   435 u0_a162      com.android.chrome
+[A-0007 11:31:53] RUN3 STEP8 renderer=0 STEP9 gpu=0
+[A-0007 11:31:55] RUN3 STEP10 newtab=no
+[A-0007 11:31:55] --- RUN 4 ---
+[A-0007 11:32:10] RUN4 STEP1 tapped Chrome tile
+[A-0007 11:33:53] RUN4 STEP2 guest_browser_procs=0  STEP3 fre_or_ntp=no
+[A-0007 11:33:55] RUN4 STEP4 no FRE dismiss button
+RUN4 procs:
+    19371   435 u0_a280      co.tdevs.duplika
+    19387   435 u0_a280      co.tdevs.duplika:black
+    32339   435 u0_a162      com.android.chrome
+[A-0007 11:34:25] RUN4 STEP8 renderer=0 STEP9 gpu=0
+[A-0007 11:34:28] RUN4 STEP10 newtab=no
+[A-0007 11:34:28] === markers ===
+  Can't use instance name                                  0
+  cr_JniAndroid: Handling uncaught                         3
+  Unable to makeApplication                                0
+  ContextImpl cannot be cast to android.app.Application    0
+  exited due to signal 5                                   3
+[A-0007 11:34:28]   guest child procs seen: 
+[A-0007 11:34:28] done

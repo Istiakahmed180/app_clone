@@ -30,7 +30,6 @@ class AppLogger {
     'HomeController': (DiagnosticSource.flutter, DiagnosticCategory.appLifecycle),
     'AppPickerController': (DiagnosticSource.flutter, DiagnosticCategory.import),
     'OnboardingController': (DiagnosticSource.flutter, DiagnosticCategory.appLifecycle),
-    'TermsDialog': (DiagnosticSource.flutter, DiagnosticCategory.appLifecycle),
     'VirtualProfileRepository': (DiagnosticSource.dart, DiagnosticCategory.profile),
   };
 

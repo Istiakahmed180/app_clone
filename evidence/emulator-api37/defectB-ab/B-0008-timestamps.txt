@@ -1,0 +1,23 @@
+[B-0008 11:35:07] === VARIANT B-0008 (profile=emu) ===
+  install: Success
+[B-0008 11:35:11] STEP0 onboarding + add Chrome clone
+[B-0008 11:36:27]   duplika uid=u0_a281
+[B-0008 11:36:27] --- RUN 1 ---
+[B-0008 11:36:27] RUN1 STEP1 tapped Chrome tile
+[B-0008 11:36:37] RUN1 STEP2 guest_browser_procs=1  STEP3 fre_or_ntp=yes
+[B-0008 11:36:42] RUN1 STEP4 tapped Stay signed out
+RUN1 procs:
+    20412   435 u0_a281      co.tdevs.duplika
+    20678   435 u0_a281      co.tdevs.duplika:black
+    20699   435 u0_a281      com.android.chrome:sandboxed_process0
+    32339   435 u0_a162      com.android.chrome
+[B-0008 11:37:12] RUN1 STEP8 renderer=1 STEP9 gpu=0
+[B-0008 11:37:14] RUN1 STEP10 newtab=no
+[B-0008 11:37:16] --- RUN 2 ---
+[B-0008 11:37:32] RUN2 STEP1 tapped Chrome tile
+[B-0008 11:39:25] RUN2 STEP2 guest_browser_procs=0  STEP3 fre_or_ntp=no
+[B-0008 11:39:25] RUN2 STEP4 no FRE dismiss button
+RUN2 procs:
+[B-0008 11:39:55] RUN2 STEP8 renderer=0 STEP9 gpu=0
+[B-0008 11:40:01] RUN2 STEP10 newtab=no
+[B-0008 11:40:02] --- RUN 3 ---

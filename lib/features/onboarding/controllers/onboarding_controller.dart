@@ -16,17 +16,14 @@ enum OnboardingStep {
   /// Nothing has been asked yet.
   idle,
 
-  /// The terms dialog is waiting on the user.
-  terms,
-
   /// Everything blocking is done; the app is usable.
   ready,
 }
 
-/// Runs the first-launch sequence: the terms, then the Doze offer.
+/// Runs the first-launch sequence: the Doze offer.
 ///
-/// Only the terms step can actually block. The Doze exemption is a convenience the user
-/// is free to ignore, so it cannot strand someone on a screen they cannot leave.
+/// Nothing here blocks. The Doze exemption is a convenience the user is free to ignore,
+/// so it cannot strand someone on a screen they cannot leave.
 class OnboardingController extends GetxController {
   OnboardingController({
     required NativeBridge nativeBridge,
@@ -40,47 +37,20 @@ class OnboardingController extends GetxController {
 
   final Rx<OnboardingStep> step = OnboardingStep.idle.obs;
 
-  /// Set when the user declines the terms. The view closes the app on this.
-  final RxBool declined = false.obs;
-
   /// Whether to offer the Doze exemption. False once granted or dismissed.
   final RxBool showBackgroundPrompt = false.obs;
 
   @override
   void onReady() {
     super.onReady();
-    // Deferred to onReady so the first frame is on screen before a dialog covers it: a
-    // dialog over a blank window looks broken.
+    // Deferred to onReady so the first frame is on screen before anything can cover it.
     unawaited(start());
   }
 
   /// Runs the sequence from wherever the user left off.
   Future<void> start() async {
-    if (await _store.hasAcceptedCurrentTerms()) {
-      step.value = OnboardingStep.ready;
-      await _evaluateBackgroundPrompt();
-      return;
-    }
-    step.value = OnboardingStep.terms;
-  }
-
-  /// The user accepted the terms. Records the version and moves on.
-  Future<void> acceptTerms() async {
-    try {
-      await _store.acceptTerms();
-    } on Object catch (error, stackTrace) {
-      // Failing to persist means we ask again next launch. Annoying, not broken, and far
-      // better than treating an unrecorded acceptance as recorded.
-      _logger.error('Could not record terms acceptance', error, stackTrace);
-    }
     step.value = OnboardingStep.ready;
     await _evaluateBackgroundPrompt();
-  }
-
-  /// The user declined. The app cannot be used without the terms, so the view exits.
-  void declineTerms() {
-    _logger.info('Terms declined; closing');
-    declined.value = true;
   }
 
   /// Opens the Doze exemption prompt.

@@ -14,7 +14,6 @@ void main() {
   late OnboardingStore store;
   late OnboardingController controller;
   late Map<String, Map<Object?, Object?>> responses;
-  late List<String> calls;
 
   Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
         'success': true,
@@ -31,7 +30,6 @@ void main() {
   setUp(() {
     storage = InMemoryProfileStorage();
     store = OnboardingStore(storage: storage);
-    calls = <String>[];
     responses = <String, Map<Object?, Object?>>{
       'isIgnoringBatteryOptimizations': ok(<String, Object?>{'ignoring': false}),
       'requestIgnoreBatteryOptimizations': ok(<String, Object?>{'screen': 'dialog'}),
@@ -39,7 +37,6 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
-      calls.add(call.method);
       return responses[call.method];
     });
     build();
@@ -50,64 +47,33 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  test('a first launch stops on the terms, and asks nothing else first', () async {
+  test('a first launch is usable straight away, and offers the Doze exemption', () async {
     await controller.start();
-
-    expect(controller.step.value, OnboardingStep.terms);
-    // Nothing may be asked ahead of the terms -- they are the only gate.
-    expect(calls, isEmpty);
-    // The Doze offer must wait until the terms are settled.
-    expect(controller.showBackgroundPrompt.value, isFalse);
-  });
-
-  test('accepting the terms records the version and offers the Doze exemption', () async {
-    await controller.start();
-    await controller.acceptTerms();
 
     expect(controller.step.value, OnboardingStep.ready);
-    expect(await store.hasAcceptedCurrentTerms(), isTrue);
     expect(controller.showBackgroundPrompt.value, isTrue);
   });
 
-  test('a returning user is not asked for the terms again', () async {
-    await store.acceptTerms();
-
-    await controller.start();
-
-    expect(controller.step.value, OnboardingStep.ready);
-  });
-
-  test('declining raises the flag the view exits on', () async {
-    await controller.start();
-    controller.declineTerms();
-
-    expect(controller.declined.value, isTrue);
-    // Declining must not be recorded as acceptance.
-    expect(await store.hasAcceptedCurrentTerms(), isFalse);
-  });
-
-  test('a native bridge with no handler at all still reaches the terms', () async {
+  test('a native bridge with no handler at all still reaches ready', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
     build();
 
     await controller.start();
 
-    expect(controller.step.value, OnboardingStep.terms);
+    expect(controller.step.value, OnboardingStep.ready);
   });
 
   test('an already-exempt device is never offered the prompt', () async {
     responses['isIgnoringBatteryOptimizations'] = ok(<String, Object?>{'ignoring': true});
 
     await controller.start();
-    await controller.acceptTerms();
 
     expect(controller.showBackgroundPrompt.value, isFalse);
   });
 
   test('a dismissed prompt stays dismissed on the next launch', () async {
     await controller.start();
-    await controller.acceptTerms();
     await controller.dismissBackgroundPrompt();
 
     build();
@@ -127,7 +93,6 @@ void main() {
 
   test('the one-tap dialog needs no explanation, and the offer stays up', () async {
     await controller.start();
-    await controller.acceptTerms();
 
     final String? message = await controller.requestBackgroundPermission();
 

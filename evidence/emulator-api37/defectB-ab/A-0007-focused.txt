@@ -1,0 +1,219 @@
+09-10 11:24:43.183   656   687 I ActivityManager: Start proc 17573:co.tdevs.duplika/u0a280 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 11:24:43.219 17573 17573 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:24:43.219 17573 17573 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:24:43.239   656   687 I ActivityManager: Start proc 17588:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:24:43.263 17588 17588 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:24:43.263 17588 17588 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:24:43.279 17588 17588 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:24:43.279 17588 17588 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:06.064   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+09-10 11:25:09.613   656  5747 D ActivityManager: sync unfroze 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+09-10 11:25:09.622   656  5747 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BFgs #16694} whose proc state 4 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (109 skipped)
+09-10 11:25:23.775   656   680 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BFgs #16710} whose proc state 4 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (49 skipped)
+09-10 11:25:23.893   435   435 I Zygote  : Process 17588 exited due to signal 9 (Killed)
+09-10 11:25:26.050   656   687 I ActivityManager: Start proc 17732:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:25:26.101 17732 17732 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:26.101 17732 17732 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:26.117 17732 17732 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:26.117 17732 17732 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:43.831   435   435 I Zygote  : Process 17573 exited due to signal 9 (Killed)
+09-10 11:25:43.831   435   435 I Zygote  : Process 17732 exited due to signal 9 (Killed)
+09-10 11:25:48.063   656   687 I ActivityManager: Start proc 17776:co.tdevs.duplika/u0a280 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 11:25:48.115 17776 17776 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:48.115 17776 17776 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:48.125   656   687 I ActivityManager: Start proc 17792:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:25:48.152 17792 17792 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:48.152 17792 17792 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:48.167 17792 17792 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:48.167 17792 17792 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:48.951   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+09-10 11:25:58.425 17792 17800 D BProcessManager: initProcess: com.android.chrome
+09-10 11:25:58.439   656   687 I ActivityManager: Start proc 17853:co.tdevs.duplika:p0/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 11:25:58.465 17853 17853 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:58.465 17853 17853 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:58.480 17853 17853 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:25:58.480 17853 17853 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:25:58.818   656  1231 D ActivityManager: sync unfroze 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+09-10 11:25:58.833   656  5747 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BTop #16772} whose proc state 2 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (49 skipped)
+09-10 11:26:21.258   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+09-10 11:26:36.455   435   435 I Zygote  : Process 17792 exited due to signal 9 (Killed)
+09-10 11:26:36.480   656   687 I ActivityManager: Start proc 18039:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:26:36.546 18039 18039 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:26:36.546 18039 18039 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:26:36.569 18039 18039 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:26:36.569 18039 18039 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:26:48.167   435   435 I Zygote  : Process 17776 exited due to signal 9 (Killed)
+09-10 11:26:48.167   435   435 I Zygote  : Process 18039 exited due to signal 9 (Killed)
+09-10 11:26:48.183   435   435 I Zygote  : Process 17853 exited due to signal 9 (Killed)
+09-10 11:26:53.597   656   687 I ActivityManager: Start proc 18125:co.tdevs.duplika/u0a280 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 11:26:53.684 18125 18125 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:26:53.684 18125 18125 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:26:53.706   656   687 I ActivityManager: Start proc 18142:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:26:53.756 18142 18142 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:26:53.756 18142 18142 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:26:53.782 18142 18142 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:26:53.782 18142 18142 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:27:03.836 18142 18150 D BProcessManager: initProcess: com.android.chrome
+09-10 11:27:04.021   656   687 I ActivityManager: Start proc 18201:co.tdevs.duplika:p0/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 11:27:04.124 18201 18201 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:27:04.124 18201 18201 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:27:04.155 18201 18201 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:27:04.155 18201 18201 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:27:04.498   656  1232 D ActivityManager: sync unfroze 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+09-10 11:27:04.562   656  1781 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BTop #16848} whose proc state 2 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (49 skipped)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: Handling uncaught Java exception
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: java.lang.SecurityException: Package com.android.chrome does not belong to 10280
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3392)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Parcel.createException(Parcel.java:3376)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3359)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3301)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser(IRoleManager.java:698)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.app.role.RoleManager.isRoleHeld(RoleManager.java:425)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at rc7.f(chromium-Chrome.aab-stable-797707504:30)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at j9a.getAsBoolean(chromium-Chrome.aab-stable-797707504:37)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.m2(chromium-Chrome.aab-stable-797707504:39)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.o2(chromium-Chrome.aab-stable-797707504:286)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at h9a.run(chromium-Chrome.aab-stable-797707504:28)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at org.chromium.components.search_engines.TemplateUrlService.j(chromium-Chrome.aab-stable-797707504:7)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.finishNativeInitialization(chromium-Chrome.aab-stable-797707504:27)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at si3.c0(chromium-Chrome.aab-stable-797707504:1)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at ih4.run(chromium-Chrome.aab-stable-797707504:60)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at u44.run(chromium-Chrome.aab-stable-797707504:10)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at t44.run(chromium-Chrome.aab-stable-797707504:23)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at org.chromium.base.task.TaskRunnerImpl.runTask(chromium-Chrome.aab-stable-797707504:31)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.MessageQueue.nextLegacy(MessageQueue.java:871)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.MessageQueue.next(MessageQueue.java:773)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Looper.loopOnce(Looper.java:232)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Looper.loop(Looper.java:397)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.app.ActivityThread.main(ActivityThread.java:9523)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: Caused by: android.os.RemoteException: Remote stack trace:
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.app.AppOpsManager.checkPackage(AppOpsManager.java:10505)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at com.android.role.RoleService$Stub.isRoleHeldAsUser(RoleService.java:631)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub.onTransact(IRoleManager.java:319)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Binder.execTransactInternal(Binder.java:1364)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 	at android.os.Binder.execTransact(Binder.java:1323)
+09-10 11:27:09.773 18201 18201 E cr_JniAndroid: 
+09-10 11:27:09.894 18201 18201 E cr_JniAndroid: Global uncaught exception handler did not terminate the process.
+09-10 11:27:10.312   656  1003 I ActivityManager: Process co.tdevs.duplika:p0 (pid 18201) has died: fg  TOP 
+09-10 11:27:10.313   435   435 I Zygote  : Process 18201 exited due to signal 5 (Trap)
+09-10 11:27:35.921   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+09-10 11:29:22.046   435   435 I Zygote  : Process 18142 exited due to signal 9 (Killed)
+09-10 11:29:22.054   435   435 I Zygote  : Process 18125 exited due to signal 9 (Killed)
+09-10 11:29:27.298   656   687 I ActivityManager: Start proc 18750:co.tdevs.duplika/u0a280 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 11:29:27.403 18750 18750 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:29:27.403 18750 18750 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:29:27.424   656   687 I ActivityManager: Start proc 18766:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:29:27.467 18766 18766 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:29:27.467 18766 18766 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:29:27.492 18766 18766 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:29:27.492 18766 18766 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:29:37.495 18766 18776 D BProcessManager: initProcess: com.android.chrome
+09-10 11:29:37.588   656   687 I ActivityManager: Start proc 18818:co.tdevs.duplika:p0/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 11:29:37.656 18818 18818 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:29:37.656 18818 18818 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:29:37.691 18818 18818 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:29:37.691 18818 18818 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:29:37.978   656  1779 D ActivityManager: sync unfroze 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+09-10 11:29:38.004   656   728 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BTop #16949} whose proc state 2 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (49 skipped)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: Handling uncaught Java exception
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: java.lang.SecurityException: Package com.android.chrome does not belong to 10280
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3392)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Parcel.createException(Parcel.java:3376)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3359)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3301)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser(IRoleManager.java:698)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.app.role.RoleManager.isRoleHeld(RoleManager.java:425)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at rc7.f(chromium-Chrome.aab-stable-797707504:30)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at j9a.getAsBoolean(chromium-Chrome.aab-stable-797707504:37)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.m2(chromium-Chrome.aab-stable-797707504:39)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.o2(chromium-Chrome.aab-stable-797707504:286)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at h9a.run(chromium-Chrome.aab-stable-797707504:28)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at org.chromium.components.search_engines.TemplateUrlService.j(chromium-Chrome.aab-stable-797707504:7)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.finishNativeInitialization(chromium-Chrome.aab-stable-797707504:27)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at si3.c0(chromium-Chrome.aab-stable-797707504:1)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at ih4.run(chromium-Chrome.aab-stable-797707504:60)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at u44.run(chromium-Chrome.aab-stable-797707504:10)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at t44.run(chromium-Chrome.aab-stable-797707504:23)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at org.chromium.base.task.TaskRunnerImpl.runTask(chromium-Chrome.aab-stable-797707504:31)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.MessageQueue.nextLegacy(MessageQueue.java:871)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.MessageQueue.next(MessageQueue.java:773)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Looper.loopOnce(Looper.java:232)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Looper.loop(Looper.java:397)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.app.ActivityThread.main(ActivityThread.java:9523)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: Caused by: android.os.RemoteException: Remote stack trace:
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.app.AppOpsManager.checkPackage(AppOpsManager.java:10505)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at com.android.role.RoleService$Stub.isRoleHeldAsUser(RoleService.java:631)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub.onTransact(IRoleManager.java:319)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Binder.execTransactInternal(Binder.java:1364)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 	at android.os.Binder.execTransact(Binder.java:1323)
+09-10 11:29:43.212 18818 18818 E cr_JniAndroid: 
+09-10 11:29:43.337 18818 18818 E cr_JniAndroid: Global uncaught exception handler did not terminate the process.
+09-10 11:29:43.660   656  1781 I ActivityManager: Process co.tdevs.duplika:p0 (pid 18818) has died: fg  TOP 
+09-10 11:29:43.663   435   435 I Zygote  : Process 18818 exited due to signal 5 (Trap)
+09-10 11:29:53.735   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+09-10 11:31:55.227   435   435 I Zygote  : Process 18766 exited due to signal 9 (Killed)
+09-10 11:31:55.234   435   435 I Zygote  : Process 18750 exited due to signal 9 (Killed)
+09-10 11:32:00.436   656   687 I ActivityManager: Start proc 19371:co.tdevs.duplika/u0a280 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 11:32:00.504 19371 19371 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:32:00.504 19371 19371 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:32:00.542   656   687 I ActivityManager: Start proc 19387:co.tdevs.duplika:black/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 11:32:00.606 19387 19387 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:32:00.606 19387 19387 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:32:00.629 19387 19387 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:32:00.629 19387 19387 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:32:10.591 19387 19395 D BProcessManager: initProcess: com.android.chrome
+09-10 11:32:10.626   656   687 I ActivityManager: Start proc 19440:co.tdevs.duplika:p0/u0a280 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 11:32:10.754 19440 19440 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:32:10.754 19440 19440 W BootstrapClass: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:32:10.776 19440 19440 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1658)
+09-10 11:32:10.776 19440 19440 W WorkManagerProxy: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1590)
+09-10 11:32:11.050   656   671 D ActivityManager: sync unfroze 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+09-10 11:32:11.076   656   728 W ProcessStats: Tracking association SourceState{a2381a com.google.android.gms/10210 BTop #17028} whose proc state 2 is better than process ProcessState{97290aa com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/10210 pkg=com.google.android.gms} proc state 14 (49 skipped)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: Handling uncaught Java exception
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: java.lang.SecurityException: Package com.android.chrome does not belong to 10280
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3392)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Parcel.createException(Parcel.java:3376)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3359)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3301)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser(IRoleManager.java:698)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.app.role.RoleManager.isRoleHeld(RoleManager.java:425)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at rc7.f(chromium-Chrome.aab-stable-797707504:30)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at j9a.getAsBoolean(chromium-Chrome.aab-stable-797707504:37)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.m2(chromium-Chrome.aab-stable-797707504:39)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.o2(chromium-Chrome.aab-stable-797707504:286)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at h9a.run(chromium-Chrome.aab-stable-797707504:28)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at org.chromium.components.search_engines.TemplateUrlService.j(chromium-Chrome.aab-stable-797707504:7)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at org.chromium.chrome.browser.firstrun.FirstRunActivity.finishNativeInitialization(chromium-Chrome.aab-stable-797707504:27)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at si3.c0(chromium-Chrome.aab-stable-797707504:1)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at ih4.run(chromium-Chrome.aab-stable-797707504:60)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at u44.run(chromium-Chrome.aab-stable-797707504:10)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at t44.run(chromium-Chrome.aab-stable-797707504:23)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at org.chromium.base.task.TaskRunnerImpl.runTask(chromium-Chrome.aab-stable-797707504:31)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.MessageQueue.nextLegacy(MessageQueue.java:871)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.MessageQueue.next(MessageQueue.java:773)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Looper.loopOnce(Looper.java:232)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Looper.loop(Looper.java:397)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.app.ActivityThread.main(ActivityThread.java:9523)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: Caused by: android.os.RemoteException: Remote stack trace:
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.app.AppOpsManager.checkPackage(AppOpsManager.java:10505)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at com.android.role.RoleService$Stub.isRoleHeldAsUser(RoleService.java:631)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.app.role.IRoleManager$Stub.onTransact(IRoleManager.java:319)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Binder.execTransactInternal(Binder.java:1364)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 	at android.os.Binder.execTransact(Binder.java:1323)
+09-10 11:32:16.324 19440 19440 E cr_JniAndroid: 
+09-10 11:32:16.458 19440 19440 E cr_JniAndroid: Global uncaught exception handler did not terminate the process.
+09-10 11:32:16.756   435   435 I Zygote  : Process 19440 exited due to signal 5 (Trap)
+09-10 11:32:16.756   656   957 I ActivityManager: Process co.tdevs.duplika:p0 (pid 19440) has died: fg  TOP 
+09-10 11:32:26.803   656   756 D ActivityManager: freezing 12411 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
