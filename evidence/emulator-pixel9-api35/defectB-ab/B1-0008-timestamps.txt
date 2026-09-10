@@ -1,0 +1,52 @@
+[B1-0008 12:45:30] === VARIANT B1-0008 ===
+[B1-0008 12:45:30] apk sha256 1497c9e66a336f06125c5bea927ca953d34f01661cf3d924ebec134ade87afd6
+  install: Success
+[B1-0008 12:45:31] STEP0 launch host + add Chrome clone
+[B1-0008 12:46:03]   duplika uid=u0_a212
+[B1-0008 12:46:03] --- RUN 1 ---
+[B1-0008 12:46:11] RUN1 t=0 tapped Chrome tile
+[B1-0008 12:46:14] RUN1 t=5s browser process up
+[B1-0008 12:46:22] RUN1 t=10s FRE visible (sign-in page)
+[B1-0008 12:46:23] RUN1 t=10s tapped Stay signed out
+RUN1 processes at end:
+    18517 u0_a212      co.tdevs.duplika
+    18533 u0_a212      co.tdevs.duplika:black
+    18571 u0_a212      logcat
+    18763 u0_a212      com.android.chrome
+RUN1 pids: browser=18763, gpu= renderer= host=18517
+RUN1 summary: browser=5 gpu=none renderer=none fre=10 staySignedOut=10 newtab=none death=none observed=240s
+[B1-0008 12:50:10] RUN1 HTTPS skipped (no New Tab)
+[B1-0008 12:50:15] --- RUN 2 ---
+[B1-0008 12:50:23] RUN2 t=0 tapped Chrome tile
+[B1-0008 12:50:26] RUN2 t=5s browser process up
+[B1-0008 12:50:31] RUN2 t=10s browser process GONE (lifetime 10s)
+RUN2 processes at end:
+    20050 u0_a212      co.tdevs.duplika
+    20065 u0_a212      co.tdevs.duplika:black
+    20092 u0_a212      logcat
+RUN2 pids: browser= gpu= renderer= host=20050
+RUN2 summary: browser=5 gpu=none renderer=none fre=none staySignedOut=none newtab=none death=10 observed=240s
+[B1-0008 12:50:32] RUN2 HTTPS skipped (no New Tab)
+[B1-0008 12:50:37] --- RUN 3 ---
+[B1-0008 12:50:45] RUN3 t=0 tapped Chrome tile
+[B1-0008 12:50:48] RUN3 t=5s browser process up
+[B1-0008 12:50:53] RUN3 t=10s browser process GONE (lifetime 10s)
+RUN3 processes at end:
+    20305 u0_a212      co.tdevs.duplika
+    20320 u0_a212      co.tdevs.duplika:black
+    20348 u0_a212      logcat
+RUN3 pids: browser= gpu= renderer= host=20305
+RUN3 summary: browser=5 gpu=none renderer=none fre=none staySignedOut=none newtab=none death=10 observed=240s
+[B1-0008 12:50:54] RUN3 HTTPS skipped (no New Tab)
+[B1-0008 12:50:59] === marker counts ===
+  Can't use instance name                                  0
+  cr_JniAndroid: Handling uncaught                         2
+  Unable to makeApplication                                0
+  ContextImpl cannot be cast to android.app.Application    0
+  exited due to signal 5                                   2
+  bindServiceInstance                                      0
+  SecurityException                                        41
+  IRoleManager                                             6
+  does not belong to                                       3
+[B1-0008 12:50:59] guest child procs seen: com.android.chrome:id 
+[B1-0008 12:50:59] done

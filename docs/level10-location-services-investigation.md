@@ -1,8 +1,27 @@
 # Level 10 Phase 8 — LocationServices root-cause investigation
 
-Status: **PARTIAL.** Two concrete hypotheses were tested and **rejected** with device
-evidence. The boundary is substantially narrowed but the root cause is **not confirmed**,
-so no code was changed.
+> **SUPERSEDED — the root cause is now CONFIRMED.** See
+> [`level10-gms-caller-identity-boundary.md`](level10-gms-caller-identity-boundary.md).
+>
+> Hypothesis 9 (§11) is **confirmed**: Play services throws
+> `SecurityException: Unknown calling package name '<guest package>'` from
+> `IGmsServiceBroker.getService`, which the client library converts to `DEVELOPER_ERROR`.
+> Classification is **UNSUPPORTED / SECURITY BOUNDARY** — §13's "if hypothesis 9 is ever
+> confirmed" branch.
+>
+> One conclusion below is **wrong** and is kept for the record rather than edited away:
+> §4/§12's "the refusal is a local, pre-IPC decision inside the client library". The call
+> does reach Play services. `Parcel.createException` in the captured stack proves the
+> exception was unparceled from another process. The two observations that supported the
+> old reading (fast failure; no `BoundBrokerSvc` bind) are both consistent with a refused
+> `getService` on an established connection.
+>
+> §19's recommended next step was carried out and is also superseded: the cross-API and
+> cross-artifact probes (P7/P8) confirmed the pattern, and P9-P12 identified the mechanism.
+
+Status: **PARTIAL** *(at the time of writing; now superseded — see above).* Two concrete
+hypotheses were tested and **rejected** with device evidence. The boundary is substantially
+narrowed but the root cause is **not confirmed**, so no code was changed.
 
 ## 1. Problem statement
 

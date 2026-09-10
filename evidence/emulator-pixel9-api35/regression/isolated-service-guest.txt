@@ -1,0 +1,28 @@
+Duplika.IsoSvc: ========== ISOLATED SERVICE BIND PROBE ==========
+Duplika.IsoSvc: package=com.example.duplikaladder.isosvc
+Duplika.IsoSvc: uid=10009 pid=28115
+Duplika.IsoSvc: virtualized=true virtualUserId=3
+Duplika.IsoSvc: device=Google sdk_gphone64_arm64 android=15 api=35
+Duplika.IsoSvc: buildType=debug
+Duplika.IsoSvc: 
+Duplika.IsoSvc: ---- P1: bindIsolatedService(IsoService, instanceName="0") ----
+Duplika.IsoSvc:      isolated service + instance name (CHROME'S SHAPE)
+Duplika.IsoSvc: IsoService.onBind reached, uid=10009 pid=28133
+Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.IsoService} in 163 ms
+Duplika.IsoSvc: 
+Duplika.IsoSvc: ---- P2: bindService(IsoService) ----
+Duplika.IsoSvc:      isolated service, no instance name
+Duplika.IsoSvc: IsoService.onBind reached, uid=10009 pid=28133
+Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.IsoService} in 7 ms
+Duplika.IsoSvc: 
+Duplika.IsoSvc: ---- P3: bindIsolatedService(PlainService, instanceName="0") ----
+Duplika.IsoSvc:      NON-isolated service + instance name (platform refuses this)
+Duplika.IsoSvc: PlainService.onBind reached, uid=10009 pid=28147
+Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.PlainService} in 81 ms
+Duplika.IsoSvc: 
+Duplika.IsoSvc: ---- P4: bindService(PlainService) ----
+Duplika.IsoSvc:      non-isolated service, no instance name (control)
+Duplika.IsoSvc: PlainService.onBind reached, uid=10009 pid=28147
+Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.PlainService} in 4 ms
+Duplika.IsoSvc: 
+Duplika.IsoSvc: =============== RUN COMPLETE ===============

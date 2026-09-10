@@ -72,10 +72,17 @@ final class ProbeLocationSettings {
                         .append(" message=").append(cause.getMessage()).append('\n');
                 // Same rule as Level 9 Test D: a documented API reply means the binder
                 // round-trip completed, which is what this probe measures. Only the codes
-                // that say the service was never reached count as a failure.
+                // that say the API could not be connected count as a failure.
+                //
+                // The summary deliberately no longer says "never reached Play services".
+                // That reading held until P10/P11, and it was wrong: the client does bind
+                // the broker and does call getService, and Play services answers by
+                // throwing `SecurityException: Unknown calling package name` because the
+                // claimed package does not belong to the Binder calling UID. See
+                // evidence/emulator-pixel9-api35/level10-gms/root-cause/.
                 if (isConnectionFailure(statusCode)) {
                     return finish(Verdict.FAIL,
-                            "client never reached Play services (status " + statusCode + ")", detail);
+                            "API refused at connection (status " + statusCode + ")", detail);
                 }
                 return finish(Verdict.PASS,
                         "Play services replied (status " + statusCode + ")", detail);

@@ -1,0 +1,7 @@
+================ P10 — direct service bind (is the bind itself refused?) ================
+P10 com.google.android.location.internal.GoogleLocationManagerService.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+P10 com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+P10 com.google.android.gms.common.service.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+P10 com.google.android.gms.ads.identifier.service.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.ads.identifier.internal.IAdvertisingIdService exception=none
+P10 CONCLUSION: the service behind a FAILING GoogleApi binds successfully from this process. Service routing, package visibility and Binder forwarding are excluded; the refusal is the client library's own local decision, not a blocked bind.
+P10 verdict=PASS (failing API's service binds; bind refusal excluded)

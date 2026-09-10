@@ -62,6 +62,10 @@ public class MainActivity extends Activity {
         results.put("P6", TestResult.notTested("P6", "Per-API availability & resolution"));
         results.put("P7", TestResult.notTested("P7", "Cross-API discriminator"));
         results.put("P8", TestResult.notTested("P8", "Cross-artifact discriminator"));
+        results.put("P9", TestResult.notTested("P9", "Local-input differential"));
+        results.put("P10", TestResult.notTested("P10", "Direct service bind"));
+        results.put("P11", TestResult.notTested("P11", "Attribution context experiment"));
+        results.put("P12", TestResult.notTested("P12", "Sign-In / Play Integrity capability"));
         setContentView(buildUi());
 
         // Self-running, so a host installation and a clone both need nothing but
@@ -130,6 +134,10 @@ public class MainActivity extends Activity {
             post(ProbeApiFeature.run(this));
             post(ProbeActivityRecognition.run(this));
             post(ProbeSmsRetriever.run(this));
+            post(ProbeLocalInputs.run(this));
+            post(ProbeServiceBind.run(this));
+            post(ProbeAttributionContext.run(this));
+            post(ProbeCapabilityChecks.run(this));
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 logComparison();

@@ -1,0 +1,30 @@
+09-10 13:13:38.711 24689 24712 I Duplika.GMS10: ================ P9 — local-input differential (what the client can read without IPC) ================
+P9 caller.packageName = com.example.duplikaladder.level10gms
+P9 caller.opPackageName = co.tdevs.duplika
+P9 caller.attributionTag = null
+P9 caller.uid = 10001
+P9 caller.applicationInfo.uid = 10001
+P9 sig.self.sha256 = 69df23f34bf3fde41c741f7277f52246d5a023d5c57fa7c0dc82f06c85dfc6f5 (count=1)
+P9 sig.gms.sha256 = f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83 (count=1)
+P9 sig.vending.sha256 = f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83 (count=1)
+P9 sig.checkSignatures(self,gms) = NO_MATCH(-3)
+P9 sig.checkSignatures(gms,vending) = MATCH(0)
+P9 gms.uid = 10144
+P9 gms.enabled = true
+P9 gms.sourceDir = /data/app/~~Cs5M3EUvvsQnC-Bqt6E1tQ==/com.google.android.gms-BgY1Vbtbd4VwmwQKuiNEpQ==/base.apk
+P9 gms.metaData[com.google.android.gms.version] = 263332000
+P9 gms.getPackagesForUid = [com.example.duplikaladder.level10gms]
+P9 provider.resolve[com.google.android.chimera.router.remapping1] = com.google.android.gms/com.google.android.gms.chimera.container.router.RemappingComponentRouterProvider exported=false   (Chimera component router)
+P9 provider.acquire[com.google.android.chimera.router.remapping1] = NULL (could not acquire)
+P9 provider.resolve[com.google.android.gms.settings.gms] = com.google.android.gms/com.google.android.gms.chimera.GmsBrokerContentProvider exported=true   (GMS settings/broker)
+P9 provider.acquire[com.google.android.gms.settings.gms] = acquired
+P9 provider.resolve[com.google.android.gms.phenotype] = com.google.android.gms/com.google.android.gms.phenotype.provider.ConfigurationProvider exported=true   (GMS phenotype (flags))
+P9 provider.acquire[com.google.android.gms.phenotype] = acquired
+P9 provider.resolve[com.google.android.gms.chimera] = com.google.android.gms/com.google.android.gms.chimera.container.GmsModuleProvider exported=true   (GMS chimera modules)
+P9 provider.acquire[com.google.android.gms.chimera] = acquired
+P9 service[com.google.android.location.internal.GoogleLocationManagerService.START] = matches=1 component=com.google.android.location.internal.GoogleLocationManagerService metaDataKeys=2   (LocationServices (FAILS in guest))
+P9 service[com.google.android.gms.location.ACTIVITY_RECOGNITION] = matches=0   (ActivityRecognition (FAILS in guest))
+P9 service[com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START] = matches=1 component=com.google.android.gms.chimera.GmsApiService metaDataKeys=1   (SmsRetriever (FAILS in guest))
+P9 service[com.google.android.gms.appset.service.START] = matches=0   (AppSet (WORKS in guest))
+P9 service[com.google.android.gms.ads.identifier.service.START] = matches=1 component=com.google.android.gms.ads.identifier.service.AdvertisingIdService metaDataKeys=1   (AdvertisingId (WORKS in guest, direct AIDL))
+09-10 13:13:38.735 24689 24712 I Duplika.GMS10: P9 verdict=PARTIAL (differential recorded; interpretation requires the paired host run)

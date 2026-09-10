@@ -1,0 +1,5 @@
+================ P12 — capability checks (Google Sign-In, Play Integrity — never exercised) ================
+P12 checkApiAvailability(GoogleSignIn) = AvailabilityException: None of the queried APIs are available. Auth.GOOGLE_SIGN_IN_API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+P12 PlayIntegrity apiOnClasspath=false
+P12 Google Sign-In is refused at CONNECTION time with the same DEVELOPER_ERROR as the other attribution-sensitive APIs — the refusal precedes authentication entirely.
+P12 verdict=UNSUPPORTED (sign-in refused at connection; integrity NOT TESTED by design)

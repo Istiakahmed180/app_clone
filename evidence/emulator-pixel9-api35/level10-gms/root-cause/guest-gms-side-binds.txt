@@ -1,0 +1,18 @@
+09-10 13:21:24.796  9633  9633 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.appset.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+09-10 13:21:24.796  9633  9633 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.appset.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+09-10 13:21:24.913  9633  9633 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START pkg=com.google.android.gms }
+09-10 13:21:24.913  9633  9633 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START pkg=com.google.android.gms }
+09-10 13:21:25.004  9633  9633 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.service.START pkg=com.google.android.gms }
+09-10 13:21:25.004  9633  9633 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.service.START pkg=com.google.android.gms }
+09-10 13:21:25.017  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.service.START pkg=com.google.android.gms }
+09-10 13:21:29.824  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.appset.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+09-10 13:21:29.849  9633  9633 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+09-10 13:21:29.925  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START pkg=com.google.android.gms }
+09-10 13:21:34.537  9633  9633 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.auth.api.phone.service.InternalService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsInternalApiService }
+09-10 13:21:34.537  9633  9633 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.auth.api.phone.service.InternalService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsInternalApiService }
+09-10 13:21:34.862  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+09-10 13:21:39.893  9633  9633 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+09-10 13:21:40.900  9633  9633 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+09-10 13:21:49.592  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.api.phone.service.InternalService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsInternalApiService }
+09-10 13:21:54.927  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+09-10 13:21:55.916  9633  9633 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }

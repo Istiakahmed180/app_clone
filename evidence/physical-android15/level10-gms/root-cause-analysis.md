@@ -1,5 +1,26 @@
 # Level 10 — root-cause analysis
 
+> **Findings 3 and 4 are SUPERSEDED.** See
+> [`docs/level10-gms-caller-identity-boundary.md`](../../../docs/level10-gms-caller-identity-boundary.md)
+> and `evidence/emulator-pixel9-api35/level10-gms/`.
+>
+> - **Finding 4 ("what the local decision is made from is NOT yet identified") is answered.**
+>   Play services throws `SecurityException: Unknown calling package name '<guest package>'`
+>   from `IGmsServiceBroker.getService`; the client library converts it to
+>   `DEVELOPER_ERROR`. Of the two candidates listed there, the `ClientSettings`
+>   calling-package one is right and the Chimera/Feature-metadata one is wrong.
+>   Classification: **UNSUPPORTED / SECURITY BOUNDARY**.
+> - **Finding 3 ("the boundary is decided client-side, before any IPC") is falsified.** The
+>   call reaches Play services. `Parcel.createException` in the captured stack proves the
+>   exception was unparceled from another process. Both supporting observations still hold
+>   and simply do not imply a local decision: a rejected Binder call is fast, and
+>   `BoundBrokerSvc` logs new bindings rather than `getService` transactions.
+> - Finding 5's classification of account-bound APIs is **confirmed by measurement** rather
+>   than by reasoning: Google Sign-In is refused at connection time with the same
+>   `DEVELOPER_ERROR`, before any authentication question is posed.
+>
+> Findings 1 and 2 stand unchanged.
+
 Confidence uses the project's four levels: **confirmed fact** (directly measured on the
 device), **strong evidence** (measured, one inference), **hypothesis**, **unknown**.
 

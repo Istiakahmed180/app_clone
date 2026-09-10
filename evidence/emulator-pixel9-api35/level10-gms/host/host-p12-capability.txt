@@ -1,0 +1,4 @@
+================ P12 — capability checks (Google Sign-In, Play Integrity — never exercised) ================
+P12 checkApiAvailability(GoogleSignIn) = available
+P12 PlayIntegrity apiOnClasspath=false
+P12 verdict=PASS (sign-in API available (host); integrity NOT TESTED by design)

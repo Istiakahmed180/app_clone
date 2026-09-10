@@ -1,0 +1,7 @@
+================ P11 — attribution context experiment (is getOpPackageName the input?) ================
+P11 getPackageName=com.example.duplikaladder.level10gms getOpPackageName=com.example.duplikaladder.level10gms differ=false
+P11 checkApiAvailability(LocationServices baseline) = available
+P11 checkApiAvailability(SmsRetriever baseline) = available
+P11 checkApiAvailability(LocationServices corrected) = available
+P11 checkApiAvailability(SmsRetriever corrected) = available
+P11 verdict=PASS (host control: available before and after; wrapper is inert)

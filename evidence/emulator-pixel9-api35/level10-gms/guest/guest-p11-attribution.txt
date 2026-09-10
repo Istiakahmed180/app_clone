@@ -1,0 +1,8 @@
+================ P11 — attribution context experiment (is getOpPackageName the input?) ================
+P11 getPackageName=com.example.duplikaladder.level10gms getOpPackageName=co.tdevs.duplika differ=true
+P11 checkApiAvailability(LocationServices baseline) = AvailabilityException: None of the queried APIs are available. LocationServices.API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+P11 checkApiAvailability(SmsRetriever baseline) = AvailabilityException: None of the queried APIs are available. SmsRetriever.API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+P11 checkApiAvailability(LocationServices corrected) = AvailabilityException: None of the queried APIs are available. LocationServices.API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+P11 checkApiAvailability(SmsRetriever corrected) = AvailabilityException: None of the queried APIs are available. SmsRetriever.API: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+P11 REJECTED: correcting getOpPackageName does not restore availability. The attribution package name is not the input, and the cause remains unidentified.
+P11 verdict=FAIL (REJECTED — attribution package name is not the input)

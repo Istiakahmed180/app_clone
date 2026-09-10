@@ -1,0 +1,34 @@
+[A-0007 12:50:59] === VARIANT A-0007 ===
+[A-0007 12:50:59] apk sha256 5057aad80648d5d1043c1039f5241d678b6080d3c39a97a57478925cde103d09
+  install: Success
+[A-0007 12:51:00] STEP0 launch host + add Chrome clone
+[A-0007 12:51:32]   duplika uid=u0_a213
+[A-0007 12:51:32] --- RUN 1 ---
+[A-0007 12:51:40] RUN1 t=0 tapped Chrome tile
+[A-0007 12:51:43] RUN1 t=5s browser process up
+[A-0007 12:51:50] RUN1 t=10s FRE visible (sign-in page)
+[A-0007 12:51:52] RUN1 t=10s tapped Stay signed out
+[A-0007 12:52:21] RUN1 t=43s browser process GONE (lifetime 43s)
+RUN1 processes at end:
+    20653 u0_a213      co.tdevs.duplika
+    20668 u0_a213      co.tdevs.duplika:black
+    20709 u0_a213      logcat
+    21163 u0_a213      co.tdevs.duplika:p1
+RUN1 pids: browser= gpu= renderer= host=20653
+RUN1 summary: browser=5 gpu=none renderer=none fre=10 staySignedOut=10 newtab=none death=43 observed=240s
+[A-0007 12:52:21] RUN1 HTTPS skipped (no New Tab)
+[A-0007 12:52:26] --- RUN 2 ---
+[A-0007 12:52:34] RUN2 t=0 tapped Chrome tile
+[A-0007 12:52:38] RUN2 t=5s browser process up
+RUN2 processes at end:
+    21233 u0_a213      co.tdevs.duplika
+    21248 u0_a213      co.tdevs.duplika:black
+    21270 u0_a213      logcat
+    21339 u0_a213      com.android.chrome
+    21374 u0_a213      co.tdevs.duplika:p1
+RUN2 pids: browser=21339, gpu= renderer= host=21233
+RUN2 summary: browser=5 gpu=none renderer=none fre=none staySignedOut=none newtab=none death=none observed=240s
+[A-0007 12:56:34] RUN2 HTTPS skipped (no New Tab)
+[A-0007 12:56:39] --- RUN 3 ---
+[A-0007 12:56:47] RUN3 t=0 tapped Chrome tile
+[A-0007 12:56:50] RUN3 t=5s browser process up
