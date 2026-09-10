@@ -9,6 +9,62 @@ The release build minifies. The virtualization engine does not survive
 minification without help, and the way it fails is silent and total, so this is
 worth understanding before changing anything here.
 
+## Signing
+
+`android/app/build.gradle.kts` reads `android/key.properties` if it exists and signs the
+release build with the keystore it names. If that file is absent the build **falls back to
+the debug key and says so**:
+
+```
+Duplika: android/key.properties not found -- signing the release build with the DEBUG key.
+Fine for local testing; Play Console will reject this artefact.
+```
+
+The fallback exists so `flutter run --release` and `flutter build appbundle` keep working on
+a fresh checkout, which is how the minification behaviour below gets tested. It is announced
+because a debug-signed artefact and a release-signed one are indistinguishable until Play
+rejects the upload.
+
+### Setting it up
+
+```bash
+keytool -genkey -v -keystore ~/duplika-upload.jks \
+        -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+cp android/key.properties.example android/key.properties   # then fill it in
+```
+
+`key.properties`, `*.keystore` and `*.jks` are all in `android/.gitignore`, and the keystore
+belongs outside the repository entirely.
+
+**Do not lose the keystore.** Play identifies an app by its signing key. An app signed with a
+different key cannot update one already published — it can only be published as a new app,
+under a new package name, with no existing installs.
+
+### A consequence worth knowing before it bites
+
+Once release builds are signed with a real key, a release build and a debug build no longer
+share a signature. Installing one over the other fails with
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE`, and the only way through is to uninstall first — **which
+deletes every clone and every container on that device.** Expect it when switching between
+build types on a test device, and do not keep clones there that are expensive to recreate.
+
+### Artefacts
+
+| Command | Output | For |
+| --- | --- | --- |
+| `flutter build appbundle` | `build/app/outputs/bundle/release/app-release.aab` | Play Console — required for new apps |
+| `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` | direct distribution and device testing |
+
+`versionCode` and `versionName` come from `version:` in `pubspec.yaml` (`1.0.0+1` means
+versionName 1.0.0, versionCode 1). Play rejects an upload whose versionCode is not higher
+than the last one, so the `+n` must be incremented for every upload.
+
+### Not settled by any of this
+
+The engine provenance question in `docs/DEPENDENCY_LICENSE_AUDIT.md` findings 2 and 5 is
+unaffected by having a signing key. A correctly signed build of an artefact that cannot
+legally be distributed is still an artefact that cannot legally be distributed.
+
 ## What went wrong
 
 AGP 9 enables R8 for release builds by default. Nothing in `build.gradle.kts`

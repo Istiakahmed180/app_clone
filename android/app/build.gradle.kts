@@ -1,8 +1,28 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+/**
+ * Release signing material, read from `android/key.properties` if it is present.
+ *
+ * The file is gitignored, along with `*.keystore` and `*.jks`, so the keystore and its
+ * passwords never enter the repository. See `docs/RELEASE_BUILD.md` for how to create it.
+ *
+ * Absent on a fresh checkout, and that is the normal case: the build then falls back to the
+ * debug key so `flutter run --release` still works for local testing. The fallback is
+ * announced rather than silent — a release-signed build and a debug-signed one look
+ * identical until Play rejects the upload.
+ */
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use(::load)
+}
+
+val hasReleaseKeystore = keystoreProperties.getProperty("storeFile") != null
 
 android {
     namespace = "co.tdevs.duplika"
@@ -32,11 +52,33 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Declared only when the material exists. Creating it unconditionally would give a
+        // fresh checkout a signing config pointing at a keystore that is not there, and the
+        // failure would surface as an opaque Gradle error rather than the plain statement
+        // below.
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                logger.warn(
+                    "\n  Duplika: android/key.properties not found -- signing the release " +
+                        "build with the DEBUG key.\n  Fine for local testing; Play Console " +
+                        "will reject this artefact. See docs/RELEASE_BUILD.md.\n"
+                )
+                signingConfigs.getByName("debug")
+            }
 
             // Pinned rather than inherited. AGP 9 turns release minification on by
             // default, which silently broke the virtualization engine: R8 deleted the
