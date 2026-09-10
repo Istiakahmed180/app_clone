@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../controllers/settings_controller.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../widgets/appearance_labels.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/theme_preview.dart';
@@ -20,9 +22,10 @@ class AppearanceView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsController controller = Get.find<SettingsController>();
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Appearance')),
+      appBar: AppBar(title: Text(l10n.appearanceTitle)),
       body: Obx(() {
         final ThemeMode mode = controller.themeMode.value;
         final Brightness effective = effectiveBrightness(mode, context);
@@ -33,7 +36,7 @@ class AppearanceView extends StatelessWidget {
             _previewCard(context, effective),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'Choose a theme',
+              title: l10n.appearanceChooseTheme,
               children: <Widget>[
                 for (final ThemeMode option in ThemeMode.values)
                   _ThemeOption(
@@ -53,6 +56,7 @@ class AppearanceView extends StatelessWidget {
 
   Widget _previewCard(BuildContext context, Brightness effective) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -61,7 +65,7 @@ class AppearanceView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('Preview', style: theme.textTheme.titleMedium),
+            Text(l10n.appearancePreview, style: theme.textTheme.titleMedium),
             SizedBox(height: 14.h),
             // Centred as a pair, so the two mockups stay side by side and equally
             // weighted rather than one being pinned to an edge.
@@ -87,6 +91,7 @@ class AppearanceView extends StatelessWidget {
 
   Widget _instantNote(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Row(
       children: <Widget>[
@@ -106,7 +111,7 @@ class AppearanceView extends StatelessWidget {
         SizedBox(width: 12.w),
         Expanded(
           child: Text(
-            'Theme changes apply instantly across ${AppConstants.appTitle}.',
+            l10n.appearanceInstantNote(AppConstants.appTitle),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -157,10 +162,13 @@ class _ThemeOption extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(appearanceLabel(mode), style: theme.textTheme.titleSmall),
+                  Text(
+                    appearanceLabel(context.l10n, mode),
+                    style: theme.textTheme.titleSmall,
+                  ),
                   SizedBox(height: 2.h),
                   Text(
-                    appearanceDescription(mode),
+                    appearanceDescription(context.l10n, mode),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

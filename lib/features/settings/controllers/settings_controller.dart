@@ -13,6 +13,20 @@ import '../../../core/services/settings_store.dart';
 import '../../../data/models/app_language.dart';
 import '../../../core/utils/app_logger.dart';
 
+/// Something a settings action could not do.
+///
+/// Typed rather than a ready-made sentence: the controller has no BuildContext and
+/// therefore no locale, so it names what failed and the view says it in the user's
+/// language.
+enum SettingsStatus {
+  mailAppMissing,
+  whatsAppFailed,
+  telegramFailed,
+  playStoreFailed,
+  privacyPolicyFailed,
+  termsOfServiceFailed,
+}
+
 /// App-level preferences, and the build facts the About section reports.
 ///
 /// Registered permanently rather than with the Settings route, and read by
@@ -42,7 +56,7 @@ class SettingsController extends GetxController {
   final Rxn<SystemInfoSnapshot> systemInfo = Rxn<SystemInfoSnapshot>();
 
   /// Set when an action could not be carried out. The view reports and clears it.
-  final Rxn<String> statusMessage = Rxn<String>();
+  final Rxn<SettingsStatus> status = Rxn<SettingsStatus>();
 
   @override
   void onInit() {
@@ -93,10 +107,6 @@ class SettingsController extends GetxController {
     }
   }
 
-  /// What the Settings row shows. The language's own name, because that is how its
-  /// speaker recognises it.
-  String get languageLabel => language.value?.nativeName ?? 'System default';
-
   Future<void> loadSystemInfo() async {
     try {
       systemInfo.value = await _diagnostics.systemInfo();
@@ -120,15 +130,19 @@ class SettingsController extends GetxController {
     return code == null ? name : '$name ($code)';
   }
 
-  /// `64-bit · arm64-v8a`, or null until the ABI is known.
-  String? get architectureLabel {
+  /// The ABI the device runs as, and whether it is a 64-bit one. Null until known.
+  ///
+  /// Returned as parts rather than as a finished string: 'It is 64-bit' is a phrase in
+  /// every language ('64 位', '64ビット'), so composing it needs a locale and that
+  /// belongs to the view.
+  ({String abi, bool is64Bit})? get architecture {
     final SystemInfoSnapshot? info = systemInfo.value;
     final String? abi = info?.primaryAbi;
     final bool? is64Bit = info?.is64Bit;
     if (abi == null || is64Bit == null) {
       return null;
     }
-    return '${is64Bit ? '64-bit' : '32-bit'} · $abi';
+    return (abi: abi, is64Bit: is64Bit);
   }
 
   String? get supportedAbisLabel {
@@ -156,7 +170,7 @@ class SettingsController extends GetxController {
     }
     await _open(
       Uri.parse(SupportConstants.whatsAppUrl),
-      'WhatsApp could not be opened.',
+      SettingsStatus.whatsAppFailed,
     );
   }
 
@@ -166,7 +180,7 @@ class SettingsController extends GetxController {
     }
     await _open(
       Uri.parse(SupportConstants.telegramUrl),
-      'Telegram could not be opened.',
+      SettingsStatus.telegramFailed,
     );
   }
 
@@ -178,8 +192,7 @@ class SettingsController extends GetxController {
         'subject': '${AppConstants.appTitle} ${versionLabel ?? ''}'.trim(),
       },
     );
-    await _open(mail, 'No mail app could be opened. Write to '
-        '${SupportConstants.supportEmail} instead.');
+    await _open(mail, SettingsStatus.mailAppMissing);
   }
 
   /// Opens the Play listing, falling back to the web URL when the Play app is absent.
@@ -192,24 +205,28 @@ class SettingsController extends GetxController {
     }
     await _open(
       Uri.parse(SupportConstants.playStoreWebUrl),
-      'The Play Store could not be opened.',
+      SettingsStatus.playStoreFailed,
     );
   }
 
-  Future<void> openPrivacyPolicy() =>
-      _openLegal(LegalConstants.privacyPolicyUrl, 'Privacy Policy');
+  Future<void> openPrivacyPolicy() => _openLegal(
+        LegalConstants.privacyPolicyUrl,
+        SettingsStatus.privacyPolicyFailed,
+      );
 
-  Future<void> openTermsOfService() =>
-      _openLegal(LegalConstants.termsOfServiceUrl, 'Terms of Service');
+  Future<void> openTermsOfService() => _openLegal(
+        LegalConstants.termsOfServiceUrl,
+        SettingsStatus.termsOfServiceFailed,
+      );
 
-  Future<void> _openLegal(String url, String what) async {
+  Future<void> _openLegal(String url, SettingsStatus onFailure) async {
     if (!legalLinksArePublished) {
       return;
     }
-    await _open(Uri.parse(url), 'The $what could not be opened.');
+    await _open(Uri.parse(url), onFailure);
   }
 
-  Future<void> _open(Uri url, String failureMessage) async {
+  Future<void> _open(Uri url, SettingsStatus onFailure) async {
     try {
       if (await _openUrl(url)) {
         return;
@@ -217,7 +234,7 @@ class SettingsController extends GetxController {
     } on Object catch (error, stackTrace) {
       _logger.error('Could not open $url', error, stackTrace);
     }
-    statusMessage.value = failureMessage;
+    status.value = onFailure;
   }
 
   static Future<bool> _launch(Uri url) =>

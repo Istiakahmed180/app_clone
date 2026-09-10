@@ -3,10 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/app_constants.dart';
 import '../controllers/settings_controller.dart';
+import '../../../l10n/l10n_context.dart';
 import '../widgets/appearance_labels.dart';
 import '../widgets/settings_row.dart';
+import '../widgets/settings_status.dart';
 import '../widgets/settings_section.dart';
 
 /// App-level settings.
@@ -24,11 +27,12 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsController controller = Get.find<SettingsController>();
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: Obx(() {
-        _reportStatus(context, controller);
+        reportSettingsStatus(context, controller);
 
         return ListView(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
@@ -37,119 +41,117 @@ class SettingsView extends StatelessWidget {
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.language,
-                  title: 'Language',
-                  value: controller.languageLabel,
+                  title: l10n.settingsLanguage,
+                  value: controller.language.value?.nativeName ?? l10n.languageSystem,
                   onTap: () => Get.toNamed<void>(AppRoutes.language),
                 ),
                 SettingsRow(
                   icon: Icons.contrast_outlined,
-                  title: 'Appearance',
-                  value: appearanceLabel(controller.themeMode.value),
+                  title: l10n.settingsAppearance,
+                  value: appearanceLabel(l10n, controller.themeMode.value),
                   onTap: () => Get.toNamed<void>(AppRoutes.appearance),
                 ),
               ],
             ),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'Support',
+              title: l10n.settingsSectionSupport,
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.mail_outline,
-                  title: 'Contact us',
-                  subtitle: 'Questions or feedback',
+                  title: l10n.settingsContact,
+                  subtitle: l10n.settingsContactSubtitle,
                   onTap: () => Get.toNamed<void>(AppRoutes.contact),
                 ),
                 SettingsRow(
                   icon: Icons.star_border,
-                  title: 'Rate us',
-                  subtitle: 'Enjoying ${AppConstants.appTitle}? Leave a review',
+                  title: l10n.settingsRate,
+                  subtitle: l10n.settingsRateSubtitle(AppConstants.appTitle),
                   enabled: controller.reviewLinkIsPublished,
-                  value: controller.reviewLinkIsPublished ? null : 'Not listed yet',
+                  value: controller.reviewLinkIsPublished ? null : l10n.settingsNotListedYet,
                   onTap: controller.openReview,
                 ),
               ],
             ),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'Legal',
+              title: l10n.settingsSectionLegal,
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.shield_outlined,
-                  title: 'Privacy Policy',
+                  title: l10n.settingsPrivacyPolicy,
                   enabled: controller.legalLinksArePublished,
-                  value:
-                      controller.legalLinksArePublished ? null : 'Not published yet',
+                  value: controller.legalLinksArePublished
+                      ? null
+                      : l10n.settingsNotPublishedYet,
                   onTap: controller.openPrivacyPolicy,
                 ),
                 SettingsRow(
                   icon: Icons.description_outlined,
-                  title: 'Terms of Service',
+                  title: l10n.settingsTermsOfService,
                   enabled: controller.legalLinksArePublished,
-                  value:
-                      controller.legalLinksArePublished ? null : 'Not published yet',
+                  value: controller.legalLinksArePublished
+                      ? null
+                      : l10n.settingsNotPublishedYet,
                   onTap: controller.openTermsOfService,
                 ),
               ],
             ),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'About',
+              title: l10n.settingsSectionAbout,
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.info_outline,
-                  title: 'Version',
-                  value: controller.versionLabel ?? 'unavailable',
+                  title: l10n.settingsVersion,
+                  value: controller.versionLabel ?? l10n.commonUnavailable,
                 ),
                 SettingsRow(
                   icon: Icons.memory_outlined,
-                  title: 'Device architecture',
-                  subtitle: 'App compatibility',
-                  value: controller.architectureLabel ?? 'unavailable',
+                  title: l10n.settingsArchitecture,
+                  subtitle: l10n.settingsArchitectureSubtitle,
+                  value: _architecture(l10n, controller) ?? l10n.commonUnavailable,
                 ),
                 SettingsRow(
                   icon: Icons.code,
-                  title: 'Supported ABIs',
-                  value: controller.supportedAbisLabel ?? 'unavailable',
+                  title: l10n.settingsSupportedAbis,
+                  value: controller.supportedAbisLabel ?? l10n.commonUnavailable,
                 ),
               ],
             ),
             SizedBox(height: 24.h),
-            _copyright(context, controller),
+            _copyright(context, l10n, controller),
           ],
         );
       }),
     );
   }
 
-  Widget _copyright(BuildContext context, SettingsController controller) {
+  /// `64-bit · arm64-v8a`, said in the user's language.
+  String? _architecture(AppLocalizations l10n, SettingsController controller) {
+    final ({String abi, bool is64Bit})? architecture = controller.architecture;
+    if (architecture == null) {
+      return null;
+    }
+    return l10n.settingsArchitectureValue(
+      architecture.is64Bit ? l10n.settingsBits64 : l10n.settingsBits32,
+      architecture.abi,
+    );
+  }
+
+  Widget _copyright(
+    BuildContext context,
+    AppLocalizations l10n,
+    SettingsController controller,
+  ) {
     final ThemeData theme = Theme.of(context);
 
     return Text(
-      '© ${controller.copyrightYear} ${AppConstants.appTitle}',
+      l10n.settingsCopyright(controller.copyrightYear, AppConstants.appTitle),
       textAlign: TextAlign.center,
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
     );
-  }
-
-  /// Failures are reported once, as a snack bar, rather than parked in the list: "no
-  /// mail app" is news about a tap, not a property of the screen.
-  void _reportStatus(BuildContext context, SettingsController controller) {
-    final String? message = controller.statusMessage.value;
-    if (message == null) {
-      return;
-    }
-    controller.statusMessage.value = null;
-    // After this frame: showing a snack bar from inside a build is what triggers the
-    // "setState during build" assertion.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
-    });
   }
 }

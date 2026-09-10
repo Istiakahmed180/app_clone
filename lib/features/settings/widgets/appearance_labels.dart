@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// How [ThemeMode] is named to the user.
 ///
 /// 'System default' rather than 'System': the Settings row shows this string as its
 /// current value, and 'System' there reads like a place rather than a choice.
-String appearanceLabel(ThemeMode mode) {
+String appearanceLabel(AppLocalizations l10n, ThemeMode mode) {
   switch (mode) {
     case ThemeMode.system:
-      return 'System default';
+      return l10n.appearanceSystem;
     case ThemeMode.light:
-      return 'Light';
+      return l10n.appearanceLight;
     case ThemeMode.dark:
-      return 'Dark';
+      return l10n.appearanceDark;
   }
 }
 
 /// The line under the name on the Appearance screen — what the mode actually does.
-String appearanceDescription(ThemeMode mode) {
+String appearanceDescription(AppLocalizations l10n, ThemeMode mode) {
   switch (mode) {
     case ThemeMode.system:
-      return 'Match your device settings';
+      return l10n.appearanceSystemSubtitle;
     case ThemeMode.light:
-      return 'Always use light theme';
+      return l10n.appearanceLightSubtitle;
     case ThemeMode.dark:
-      return 'Always use dark theme';
+      return l10n.appearanceDarkSubtitle;
   }
 }
 

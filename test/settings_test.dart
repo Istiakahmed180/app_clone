@@ -4,6 +4,7 @@ import 'package:duplika/core/diagnostics/native_diagnostics.dart';
 import 'package:duplika/core/diagnostics/system_info.dart';
 import 'package:duplika/core/services/settings_store.dart';
 import 'package:duplika/data/models/app_language.dart';
+import 'package:duplika/l10n/app_localizations.dart';
 import 'package:duplika/features/settings/views/language_view.dart';
 import 'package:duplika/features/settings/controllers/settings_controller.dart';
 import 'package:duplika/features/settings/views/appearance_view.dart';
@@ -136,7 +137,6 @@ void main() {
 
       // Null is what the app root reads as 'follow the device'.
       expect(controller.language.value, isNull);
-      expect(controller.languageLabel, 'System default');
     });
 
     test('restores a stored language and applies it', () async {
@@ -148,7 +148,7 @@ void main() {
 
       expect(controller.language.value?.tag, 'ja');
       expect(controller.language.value?.locale, japanese.locale);
-      expect(controller.languageLabel, '日本語');
+      expect(controller.language.value?.nativeName, '日本語');
     });
 
     test('choosing a language applies it and stores its tag', () async {
@@ -200,7 +200,8 @@ void main() {
       await controller.loadSystemInfo();
 
       expect(controller.versionLabel, '1.0.0 (1)');
-      expect(controller.architectureLabel, '64-bit · arm64-v8a');
+      expect(controller.architecture?.abi, 'arm64-v8a');
+      expect(controller.architecture?.is64Bit, isTrue);
       expect(controller.supportedAbisLabel, 'arm64-v8a, armeabi-v7a');
     });
 
@@ -214,7 +215,8 @@ void main() {
 
       await controller.loadSystemInfo();
 
-      expect(controller.architectureLabel, '32-bit · armeabi-v7a');
+      expect(controller.architecture?.abi, 'armeabi-v7a');
+      expect(controller.architecture?.is64Bit, isFalse);
     });
 
     test('a failed lookup leaves the About rows empty rather than wrong', () async {
@@ -224,9 +226,9 @@ void main() {
       await controller.loadSystemInfo();
 
       expect(controller.versionLabel, isNull);
-      expect(controller.architectureLabel, isNull);
+      expect(controller.architecture, isNull);
       expect(controller.supportedAbisLabel, isNull);
-      expect(controller.statusMessage.value, isNull, reason: 'logged, not shouted');
+      expect(controller.status.value, isNull, reason: 'logged, not shouted');
     });
 
     test('Contact us opens a mail composer naming the build', () async {
@@ -241,13 +243,13 @@ void main() {
       expect(opened.single.queryParameters['subject'], 'Duplika 1.0.0 (1)');
     });
 
-    test('a device with no mail app is told where to write instead', () async {
+    test('a device with no mail app reports that it could not open one', () async {
       openSucceeds = false;
       final SettingsController controller = build();
 
       await controller.emailSupport();
 
-      expect(controller.statusMessage.value, contains('support@tdevs.co'));
+      expect(controller.status.value, SettingsStatus.mailAppMissing);
     });
 
     test('an unpublished policy is not opened', () async {
@@ -296,6 +298,8 @@ void main() {
           designSize: const Size(390, 844),
           builder: (BuildContext context, Widget? child) => MaterialApp(
             theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: const SettingsView(),
           ),
         ),
@@ -325,6 +329,8 @@ void main() {
           designSize: const Size(390, 844),
           builder: (BuildContext context, Widget? child) => GetMaterialApp(
             theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             initialRoute: AppRoutes.settings,
             getPages: AppRoutes.pages(),
           ),
@@ -477,6 +483,8 @@ void main() {
             data: const MediaQueryData(textScaler: TextScaler.linear(1.3)),
             child: MaterialApp(
               theme: AppTheme.light(),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               home: const SettingsView(),
             ),
           ),
@@ -517,6 +525,8 @@ void main() {
             data: MediaQueryData(platformBrightness: platform),
             child: MaterialApp(
               theme: AppTheme.light(),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               home: const AppearanceView(),
             ),
           ),
@@ -645,6 +655,8 @@ void main() {
           designSize: const Size(390, 844),
           builder: (BuildContext context, Widget? child) => MaterialApp(
             theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: const ContactView(),
           ),
         ),
@@ -777,6 +789,8 @@ void main() {
           designSize: const Size(390, 844),
           builder: (BuildContext context, Widget? child) => MaterialApp(
             theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: const LanguageView(),
           ),
         ),

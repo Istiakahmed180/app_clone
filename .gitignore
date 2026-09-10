@@ -46,3 +46,4 @@ app.*.map.json
 
 # macOS
 .DS_Store
+l10n-untranslated.txt

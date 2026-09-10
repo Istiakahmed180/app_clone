@@ -6,6 +6,8 @@ import 'package:duplika/core/diagnostics/native_diagnostics.dart';
 import 'package:duplika/core/diagnostics/system_info.dart';
 import 'package:duplika/core/services/settings_store.dart';
 import 'package:duplika/data/models/app_language.dart';
+import 'package:duplika/features/settings/views/language_view.dart';
+import 'package:duplika/l10n/app_localizations.dart';
 import 'package:duplika/features/settings/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,27 +51,48 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    String cancelLabel(WidgetTester tester) {
-      final BuildContext context = tester.element(find.text('System default'));
-      return MaterialLocalizations.of(context).cancelButtonLabel;
-    }
+    /// Anchored on the screen rather than on any of its text: every string on it is
+    /// translated now, so a text finder would stop resolving the moment the feature
+    /// started working.
+    BuildContext screen(WidgetTester tester) =>
+        tester.element(find.byType(LanguageView));
 
-    testWidgets('really changes the language the framework speaks', (
+    String cancelLabel(WidgetTester tester) =>
+        MaterialLocalizations.of(screen(tester)).cancelButtonLabel;
+
+    AppLocalizations l10n(WidgetTester tester) =>
+        AppLocalizations.of(screen(tester));
+
+    testWidgets('really changes the language, in Duplika and in the framework', (
       WidgetTester tester,
     ) async {
-      // The proof that the picker does something. Duplika's own strings are still
-      // English-only, but the framework's are not, so a locale that actually took
-      // effect is visible in what Material calls its Cancel button.
+      // Both halves matter: Duplika's own strings come from its ARB files, the
+      // framework's from flutter_localizations, and a locale that only moved one of
+      // them is half-applied.
       await pumpApp(tester);
+      expect(l10n(tester).languageTitle, 'Language');
       expect(cancelLabel(tester), 'Cancel');
+      expect(find.text('Search languages'), findsOneWidget);
 
+      // Tapped by native name, which is deliberately never translated -- it is how a
+      // speaker finds their own language whatever the interface is currently in.
       await tester.tap(find.text('Deutsch'));
       await tester.pumpAndSettle();
+      expect(l10n(tester).languageTitle, 'Sprache');
       expect(cancelLabel(tester), 'Abbrechen');
+      expect(find.text('Sprachen suchen'), findsOneWidget);
+      expect(find.text('Systemstandard'), findsOneWidget);
 
       await tester.tap(find.text('Русский'));
       await tester.pumpAndSettle();
+      expect(l10n(tester).languageTitle, 'Язык');
       expect(cancelLabel(tester), 'Отмена');
+      expect(find.text('Поиск языков'), findsOneWidget);
+
+      await tester.tap(find.text('日本語'));
+      await tester.pumpAndSettle();
+      expect(l10n(tester).languageTitle, '言語');
+      expect(find.text('言語を検索'), findsOneWidget);
     });
 
     testWidgets('every offered language resolves to a real translation', (
@@ -83,7 +106,7 @@ void main() {
         await controller.setLanguage(language);
         await tester.pumpAndSettle();
 
-        final BuildContext context = tester.element(find.text('System default'));
+        final BuildContext context = screen(tester);
         expect(
           Localizations.localeOf(context).languageCode,
           language.locale.languageCode,
@@ -93,7 +116,12 @@ void main() {
           expect(
             MaterialLocalizations.of(context).cancelButtonLabel,
             isNot('Cancel'),
-            reason: '${language.tag} fell back to English',
+            reason: '${language.tag} has no framework translation',
+          );
+          expect(
+            AppLocalizations.of(context).languageTitle,
+            isNot('Language'),
+            reason: '${language.tag} has no Duplika translation',
           );
         }
       }
@@ -111,6 +139,7 @@ void main() {
 
       expect(controller.language.value, isNull);
       expect(cancelLabel(tester), isNotEmpty);
+      expect(l10n(tester).languageTitle, isNotEmpty);
     });
   });
 }

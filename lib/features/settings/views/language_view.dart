@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/app_language.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/settings_section.dart';
 
@@ -34,23 +36,25 @@ class _LanguageViewState extends State<LanguageView> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     final List<AppLanguage> matches = AppLanguages.all
         .where((AppLanguage language) => language.matches(_query))
         .toList(growable: false);
     // 'System default' is a row in the list, so it has to answer the search too --
-    // otherwise typing 'sys' empties a list that does contain a match.
+    // otherwise typing 'sys' empties a list that does contain a match. Searched in the
+    // current language, not in English, so the row is findable by what it actually says.
     final bool showSystem = _query.trim().isEmpty ||
-        'system default use your device language'.contains(
-          _query.trim().toLowerCase(),
-        );
+        '${l10n.languageSystem} ${l10n.languageSystemSubtitle}'
+            .toLowerCase()
+            .contains(_query.trim().toLowerCase());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Language')),
+      appBar: AppBar(title: Text(l10n.languageTitle)),
       body: Column(
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
-            child: _searchField(context),
+            child: _searchField(context, l10n),
           ),
           Expanded(
             child: Obx(() {
@@ -59,19 +63,19 @@ class _LanguageViewState extends State<LanguageView> {
               return ListView(
                 padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
                 children: <Widget>[
-                  _note(context),
+                  _note(context, l10n),
                   SizedBox(height: 18.h),
                   if (!showSystem && matches.isEmpty)
-                    _noMatches(context)
+                    _noMatches(context, l10n)
                   else
                     SettingsSection(
-                      title: 'Language',
+                      title: l10n.languageSectionHeader,
                       children: <Widget>[
                         if (showSystem)
                           _LanguageRow(
                             badge: null,
-                            title: 'System default',
-                            subtitle: 'Use your device language',
+                            title: l10n.languageSystem,
+                            subtitle: l10n.languageSystemSubtitle,
                             selected: chosen == null,
                             onSelect: () => _controller.setLanguage(null),
                           ),
@@ -92,7 +96,7 @@ class _LanguageViewState extends State<LanguageView> {
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
             child: Text(
-              'Language changes apply immediately.',
+              l10n.languageInstantNote,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -104,18 +108,18 @@ class _LanguageViewState extends State<LanguageView> {
     );
   }
 
-  Widget _searchField(BuildContext context) {
+  Widget _searchField(BuildContext context, AppLocalizations l10n) {
     return TextField(
       controller: _search,
       onChanged: (String value) => setState(() => _query = value),
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: 'Search languages',
+        hintText: l10n.languageSearchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: _query.isEmpty
             ? null
             : IconButton(
-                tooltip: 'Clear search',
+                tooltip: l10n.languageClearSearch,
                 icon: const Icon(Icons.close),
                 onPressed: () {
                   _search.clear();
@@ -128,7 +132,7 @@ class _LanguageViewState extends State<LanguageView> {
 
   /// Says what the choice governs. 'Language' alone leaves it ambiguous whether this is
   /// the app's language or the language of the apps it clones.
-  Widget _note(BuildContext context) {
+  Widget _note(BuildContext context, AppLocalizations l10n) {
     final ThemeData theme = Theme.of(context);
 
     return Row(
@@ -137,7 +141,7 @@ class _LanguageViewState extends State<LanguageView> {
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
-            'Choose the language used in ${AppConstants.appTitle}.',
+            l10n.languageNote(AppConstants.appTitle),
             style: theme.textTheme.bodySmall,
           ),
         ),
@@ -145,7 +149,7 @@ class _LanguageViewState extends State<LanguageView> {
     );
   }
 
-  Widget _noMatches(BuildContext context) {
+  Widget _noMatches(BuildContext context, AppLocalizations l10n) {
     final ThemeData theme = Theme.of(context);
 
     return Card(
@@ -153,7 +157,7 @@ class _LanguageViewState extends State<LanguageView> {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 28.h),
         child: Text(
-          'No language matches "${_search.text.trim()}".',
+          l10n.languageNoMatches(_search.text.trim()),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,

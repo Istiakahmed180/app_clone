@@ -1,0 +1,143 @@
+{
+  "@@locale": "en",
+  "settingsTitle": "Settings",
+  "settingsSectionSupport": "Support",
+  "settingsSectionLegal": "Legal",
+  "settingsSectionAbout": "About",
+  "settingsLanguage": "Language",
+  "settingsAppearance": "Appearance",
+  "settingsContact": "Contact us",
+  "settingsContactSubtitle": "Questions or feedback",
+  "settingsRate": "Rate us",
+  "settingsRateSubtitle": "Enjoying {appName}? Leave a review",
+  "@settingsRateSubtitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "settingsTermsOfService": "Terms of Service",
+  "settingsVersion": "Version",
+  "settingsArchitecture": "Device architecture",
+  "settingsArchitectureSubtitle": "App compatibility",
+  "settingsBits64": "64-bit",
+  "settingsBits32": "32-bit",
+  "settingsArchitectureValue": "{width} · {abi}",
+  "@settingsArchitectureValue": {
+    "description": "Word size and primary ABI, e.g. 64-bit · arm64-v8a.",
+    "placeholders": {
+      "width": {
+        "type": "String"
+      },
+      "abi": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSupportedAbis": "Supported ABIs",
+  "settingsCopyright": "© {year} {appName}",
+  "@settingsCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsNotPublishedYet": "Not published yet",
+  "settingsNotListedYet": "Not listed yet",
+  "settingsNotSetUpYet": "Not set up yet",
+  "commonUnavailable": "unavailable",
+  "appearanceTitle": "Appearance",
+  "appearancePreview": "Preview",
+  "appearanceChooseTheme": "Choose a theme",
+  "appearanceSystem": "System default",
+  "appearanceSystemSubtitle": "Match your device settings",
+  "appearanceLight": "Light",
+  "appearanceLightSubtitle": "Always use light theme",
+  "appearanceDark": "Dark",
+  "appearanceDarkSubtitle": "Always use dark theme",
+  "appearanceInstantNote": "Theme changes apply instantly across {appName}.",
+  "@appearanceInstantNote": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appearancePreviewLabel": "{theme} theme preview",
+  "@appearancePreviewLabel": {
+    "description": "Screen-reader label for one of the two palette mockups.",
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      }
+    }
+  },
+  "languageTitle": "Language",
+  "languageSearchHint": "Search languages",
+  "languageClearSearch": "Clear search",
+  "languageNote": "Choose the language used in {appName}.",
+  "@languageNote": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "languageSectionHeader": "Language",
+  "languageSystem": "System default",
+  "languageSystemSubtitle": "Use your device language",
+  "languageInstantNote": "Language changes apply immediately.",
+  "languageNoMatches": "No language matches \"{query}\".",
+  "@languageNoMatches": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "contactTitle": "Contact us",
+  "contactHeroTitle": "How can we help?",
+  "contactHeroSubtitle": "Choose your preferred way to contact the {appName} team.",
+  "@contactHeroSubtitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSectionOptions": "Contact options",
+  "contactWhatsApp": "WhatsApp",
+  "contactWhatsAppSubtitle": "Chat with our support team",
+  "contactTelegram": "Telegram",
+  "contactTelegramSubtitle": "Message us on Telegram",
+  "contactEmail": "Email",
+  "contactEmailSubtitle": "Send us an email",
+  "contactResponseTime": "Response time",
+  "contactResponseTimeValue": "We usually reply within 1–2 business days.",
+  "contactPrivacyNote": "We'll only use your message to provide support.",
+  "contactNoMailApp": "No mail app could be opened. Write to {email} instead.",
+  "@contactNoMailApp": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactWhatsAppFailed": "WhatsApp could not be opened.",
+  "contactTelegramFailed": "Telegram could not be opened.",
+  "contactPlayStoreFailed": "The Play Store could not be opened.",
+  "contactLegalOpenFailed": "The {document} could not be opened.",
+  "@contactLegalOpenFailed": {
+    "placeholders": {
+      "document": {
+        "type": "String"
+      }
+    }
+  }
+}

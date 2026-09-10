@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../core/constants/app_constants.dart';
 import '../data/models/app_language.dart';
 import '../features/settings/controllers/settings_controller.dart';
+import '../l10n/app_localizations.dart';
 import 'routes/app_bindings.dart';
 import 'routes/app_routes.dart';
 import 'theme/app_theme.dart';
@@ -72,13 +72,9 @@ class DuplikaAppRoot extends StatelessWidget {
             locale: settings.language.value?.locale,
             fallbackLocale: const Locale('en'),
             supportedLocales: AppLanguages.locales,
-            // The framework's own strings, date formats and number formats. Duplika's
-            // own strings are not translated yet.
-            localizationsDelegates: const <LocalizationsDelegate<Object>>[
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
+            // Duplika's own strings plus the framework's, which brings the Material and
+            // Cupertino translations and each locale's date and number formats with it.
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: initialRoute,
             getPages: AppRoutes.pages(),
           ),

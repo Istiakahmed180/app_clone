@@ -1,0 +1,12 @@
+# Duplika's own translated strings.
+#
+# Template is English: it is the language the code is written in, so a missing key
+# elsewhere falls back to something readable rather than to a key name.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+# A locale missing a key uses the English one rather than failing the build, so adding a
+# string does not have to land in eighteen files at once.
+untranslated-messages-file: l10n-untranslated.txt

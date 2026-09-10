@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/constants/support_constants.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/settings_row.dart';
+import '../widgets/settings_status.dart';
 import '../widgets/settings_section.dart';
 
 /// How to reach a human.
@@ -28,11 +30,12 @@ class ContactView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsController controller = Get.find<SettingsController>();
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contact us')),
+      appBar: AppBar(title: Text(l10n.contactTitle)),
       body: Obx(() {
-        _reportStatus(context, controller);
+        reportSettingsStatus(context, controller);
 
         return ListView(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
@@ -40,32 +43,32 @@ class ContactView extends StatelessWidget {
             _hero(context),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'Contact options',
+              title: l10n.contactSectionOptions,
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.chat,
                   iconColor: _whatsAppGreen,
-                  title: 'WhatsApp',
-                  subtitle: 'Chat with our support team',
+                  title: l10n.contactWhatsApp,
+                  subtitle: l10n.contactWhatsAppSubtitle,
                   trailingIcon: Icons.open_in_new,
                   enabled: controller.hasWhatsApp,
-                  value: controller.hasWhatsApp ? null : 'Not set up yet',
+                  value: controller.hasWhatsApp ? null : l10n.settingsNotSetUpYet,
                   onTap: controller.openWhatsApp,
                 ),
                 SettingsRow(
                   icon: Icons.send,
                   iconColor: _telegramBlue,
-                  title: 'Telegram',
-                  subtitle: 'Message us on Telegram',
+                  title: l10n.contactTelegram,
+                  subtitle: l10n.contactTelegramSubtitle,
                   trailingIcon: Icons.open_in_new,
                   enabled: controller.hasTelegram,
-                  value: controller.hasTelegram ? null : 'Not set up yet',
+                  value: controller.hasTelegram ? null : l10n.settingsNotSetUpYet,
                   onTap: controller.openTelegram,
                 ),
                 SettingsRow(
                   icon: Icons.mail_outline,
-                  title: 'Email',
-                  subtitle: 'Send us an email',
+                  title: l10n.contactEmail,
+                  subtitle: l10n.contactEmailSubtitle,
                   trailingIcon: Icons.open_in_new,
                   onTap: controller.emailSupport,
                 ),
@@ -76,8 +79,8 @@ class ContactView extends StatelessWidget {
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.schedule,
-                  title: 'Response time',
-                  subtitle: SupportConstants.responseTime,
+                  title: l10n.contactResponseTime,
+                  subtitle: l10n.contactResponseTimeValue,
                 ),
               ],
             ),
@@ -93,6 +96,7 @@ class ContactView extends StatelessWidget {
   /// so three near-identical rows do not have to carry the explanation themselves.
   Widget _hero(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
     final Color onAccent = theme.colorScheme.onPrimary;
 
     return Container(
@@ -118,13 +122,12 @@ class ContactView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'How can we help?',
+                  l10n.contactHeroTitle,
                   style: theme.textTheme.titleLarge?.copyWith(color: onAccent),
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'Choose your preferred way to contact the '
-                  '${AppConstants.appTitle} team.',
+                  l10n.contactHeroSubtitle(AppConstants.appTitle),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: onAccent.withValues(alpha: 0.9),
                   ),
@@ -143,29 +146,11 @@ class ContactView extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Text(
-      'We\'ll only use your message to provide support.',
+      context.l10n.contactPrivacyNote,
       textAlign: TextAlign.center,
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
     );
-  }
-
-  /// Failures are reported once, as a snack bar: "WhatsApp is not installed" is news
-  /// about a tap, not a property of the screen.
-  void _reportStatus(BuildContext context, SettingsController controller) {
-    final String? message = controller.statusMessage.value;
-    if (message == null) {
-      return;
-    }
-    controller.statusMessage.value = null;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
-    });
   }
 }

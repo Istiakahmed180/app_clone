@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 
 /// A miniature of the clone launcher, drawn in one palette.
 ///
@@ -24,8 +26,12 @@ class ThemePreview extends StatelessWidget {
         brightness == Brightness.light ? AppTheme.light() : AppTheme.dark();
     final ColorScheme scheme = theme.colorScheme;
 
+    final AppLocalizations l10n = context.l10n;
+
     return Semantics(
-      label: '${brightness == Brightness.light ? 'Light' : 'Dark'} theme preview',
+      label: l10n.appearancePreviewLabel(
+        brightness == Brightness.light ? l10n.appearanceLight : l10n.appearanceDark,
+      ),
       selected: selected,
       child: Container(
         width: 140.w,
