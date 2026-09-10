@@ -4,6 +4,8 @@ import '../../features/apps/views/app_picker_view.dart';
 import '../../features/diagnostics/views/developer_console_view.dart';
 import '../../features/home/views/home_view.dart';
 import '../../features/settings/views/appearance_view.dart';
+import '../../features/settings/views/contact_view.dart';
+import '../../features/settings/views/language_view.dart';
 import '../../features/settings/views/settings_view.dart';
 import 'app_bindings.dart';
 
@@ -25,6 +27,13 @@ class AppRoutes {
   /// The appearance picker. Its own route rather than a dialog: the palette preview is
   /// what makes the choice readable, and it does not fit in one.
   static const String appearance = '/settings/appearance';
+
+  /// The support channels. Its own route rather than opening a mail composer straight
+  /// from the Settings row: mail is one of several ways to reach us, not the only one.
+  static const String contact = '/settings/contact';
+
+  /// The language picker.
+  static const String language = '/settings/language';
 
   static List<GetPage<dynamic>> pages() => <GetPage<dynamic>>[
         GetPage<dynamic>(
@@ -49,6 +58,14 @@ class AppRoutes {
         GetPage<dynamic>(
           name: appearance,
           page: () => const AppearanceView(),
+        ),
+        GetPage<dynamic>(
+          name: contact,
+          page: () => const ContactView(),
+        ),
+        GetPage<dynamic>(
+          name: language,
+          page: () => const LanguageView(),
         ),
       ];
 }

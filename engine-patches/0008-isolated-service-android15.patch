@@ -1,0 +1,145 @@
+Android 15 / API 35: do not forward a guest instance name to a non-isolated proxy service.
+
+SYMPTOM
+    A cloned Chrome renders its first-run UI, then aborts roughly 44 s after launch,
+    before any renderer exists. On the CPH2605 (Android 15), from the browser process:
+
+        E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException:
+            Can't use instance name '0' with non-isolated non-sdk sandbox service
+            'top.niunaijun.blackbox.proxy.ProxyService$P1'
+          at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+          at com.android.server.am.ActivityManagerService.bindServiceInstance(ActivityManagerService.java:15388)
+
+        E chromium: [ERROR:jni_android.cc:142] Crashing due to uncaught Java exception
+        E cr_JniAndroid: Handling uncaught Java exception
+          at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart
+        F chromium: [FATAL:jni_android.cc:203] Uncaught Java exception in native code ...
+        F libc: Fatal signal 5 (SIGTRAP) ... tid (Chrome_ProcessL)
+
+    Chrome does not catch this. The browser process dies with SIGTRAP, so the guest
+    never reaches a New Tab page. Measured across four attempts: 42-47 s lifetime,
+    zero renderer processes, zero GPU processes.
+
+WHAT CHROME ASKS FOR
+    Chrome declares 40 sandboxed child services in base.apk, each isolated:
+
+        <service android:name="org.chromium.content.app.SandboxedProcessService0"
+                 android:process=":sandboxed_process0"
+                 android:isolatedProcess="true"
+                 android:useAppZygote="true"
+                 android:exported="false"
+                 android:permission="com.android.chrome.permission.CHILD_SERVICE" />
+
+    It starts each one with Context.bindIsolatedService(..., instanceName), passing the
+    slot number ("0", "1", ...). Against Chrome's own isolated service that is legal:
+    the platform names such a process <processName>:<instanceName> and gives it a uid in
+    the isolated 99000+ range. Observed on this device from host WebView:
+
+        com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+        at uid 99017
+
+WHAT BCORE SUBSTITUTES
+    Bcore resolves the guest service and rewrites the bind to one of its own proxy
+    services. Those are declared in Bcore's manifest as ordinary services:
+
+        <service android:name=".proxy.ProxyService$P1"
+                 android:exported="true"
+                 android:process=":p1" />
+
+    There is no android:isolatedProcess anywhere in that manifest. So the component that
+    actually reaches ActivityManagerService is not isolated, while the instance name from
+    the guest is still attached to the call. ActivityManagerService rejects exactly that
+    combination, and it is right to: an instance name only has meaning for an isolated or
+    SDK-sandbox service.
+
+ANDROID 15 / API 35 BINDER METHOD NAME
+    Context.bindIsolatedService(...)                                <- public SDK
+        invokes
+    IActivityManager.bindServiceInstance(...)                       <- @hide Binder method
+
+    There is no IActivityManager.bindIsolatedService on API 35. Read from the device's own
+    /system/framework/framework.jar, bindIsolatedService is declared only on the caller
+    side -- android.content.Context, android.app.ContextImpl, android.content.ContextWrapper
+    and android.app.ReceiverRestrictedContext -- and not on android.app.IActivityManager.
+    The observed crash stack agrees:
+
+        at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+        at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+        at $Proxy27.bindServiceInstance(Unknown Source)
+
+OLD BCORE REGISTRATION
+    Two sibling hooks. Only one of them strips the instance name:
+
+        @ProxyMethod("bindServiceInstance")
+        public static class bindServiceInstance extends MethodHook {
+            protected Object hook(...) { return BindServiceCommon(who,method,args,7); }
+        }
+
+        @ProxyMethod("bindIsolatedService")
+        public static class BindIsolatedService extends MethodHook {
+            protected Object hook(...) { args[6] = null;
+                                         return BindServiceCommon(who,method,args,7); }
+        }
+
+WHY THE STRIPPING HOOK NEVER FIRES ON API 35
+    ClassInvocationStub#initAnnotation registers a hook by *name* against the methods of
+    the interface being proxied. IActivityManager has no bindIsolatedService on API 35, so
+    @ProxyMethod("bindIsolatedService") binds to nothing and BindIsolatedService is dead
+    code. Every isolated bind arrives at the bindServiceInstance hook instead, which
+    forwards args[6] untouched.
+
+ARGUMENT INDEX
+    Confirmed against the device's framework.jar rather than assumed. The dex descriptor
+    for IActivityManager.bindServiceInstance on this build is:
+
+        (Landroid/app/IApplicationThread;   0 caller
+         Landroid/os/IBinder;               1 token
+         Landroid/content/Intent;           2 service
+         Ljava/lang/String;                 3 resolvedType
+         Landroid/app/IServiceConnection;   4 connection
+         J                                  5 flags
+         Ljava/lang/String;                 6 instanceName
+         Ljava/lang/String;                 7 callingPackage
+         I)I                                8 userId
+
+    args[6] is the instance name and args[7] the calling package, which is the index
+    BindServiceCommon already rewrites. Both sibling hooks pass callingPackageIndex 7, so
+    both were written for this same layout.
+
+FIX
+    Clear args[6] in the hook that actually runs, exactly as the dead sibling already does.
+    The bind then presents no instance name, and ActivityManagerService accepts it.
+
+SCOPE AND LIMITS
+    Ordinary Context.bindService() on API 31+ also reaches AMS through bindServiceInstance,
+    always with a null instance name, so clearing an already-null field is a no-op on that
+    path. Only isolated binds change behaviour.
+
+    This does NOT provide real isolated processes, and does not reproduce the multiple
+    concurrent renderers a mature container achieves. ActiveServices#bindService picks a
+    proxy slot from serviceInfo.processName alone, so every instance of
+    SandboxedProcessService0 collapses into the single :p1 slot. Instance-aware slot
+    allocation is a separate, larger change and is deliberately not attempted here.
+
+    No uid, package name, signature, permission or caller identity is altered. The change
+    only removes a parameter from a request the guest makes of the host, which narrows
+    rather than widens what the guest can ask for. AMS continues to apply its own checks
+    to the proxy component.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
+index 4f571d1..5b17d68 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
+@@ -426,6 +426,12 @@ public class IActivityManagerProxy extends ClassInvocationStub {
+     public static class bindServiceInstance extends MethodHook {
+         @Override
+         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
++            // args[6] is instanceName. Context.bindIsolatedService() reaches
++            // IActivityManager through this method -- IActivityManager itself declares no
++            // bindIsolatedService, so the sibling hook below never runs -- and the guest's
++            // instance name would then be applied to a ProxyService$PN, which is not an
++            // isolated service. ActivityManagerService rejects that combination.
++            args[6] = null;
+             return BindServiceCommon(who,method,args,7);
+         }
+ 

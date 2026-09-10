@@ -1,0 +1,8 @@
+09-10 10:25:12.558  3965  4066 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s9r_001] Launch requested for com.example.duplikaladder.isosplit
+09-10 10:25:12.559  3965  4066 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s9r_001] Starting com.example.duplikaladder.isosplit in virtual user 3
+09-10 10:25:12.562  3965  4066 W BlackBoxCore: All files access not granted for launching: com.example.duplikaladder.isosplit
+09-10 10:25:12.594  3990  4007 D ActivityStack: startActivityLocked : ActivityInfo{a40c527 com.example.duplikaladder.isosplit.feature.MainActivity}
+09-10 10:25:12.609  3990  4007 D BProcessManager: initProcess: com.example.duplikaladder.isosplit
+09-10 10:25:12.977  3990  4007 D ActivityStack: ActivityInfo{a40c527 com.example.duplikaladder.isosplit.feature.MainActivity}, windowIsTranslucent: false
+09-10 10:25:13.008  3965  4066 I Duplika.Launch: Launched com.example.duplikaladder.isosplit in user 3
+09-10 10:25:13.009  3965  4066 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s9r_001] Guest process accepted the launch of com.example.duplikaladder.isosplit

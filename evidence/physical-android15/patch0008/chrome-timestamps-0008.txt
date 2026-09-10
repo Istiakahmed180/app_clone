@@ -1,0 +1,22 @@
+C0008_STEP_A_LAUNCH host=2026-09-10 10:03:44 device=10:03:44
+C0008_STEP_B_FRE_VISIBLE host=10:04:19
+C0008_STEP_C_ALIVE host=10:04:30 2 chrome procs
+C0008_STEP_D_STAY_SIGNED_OUT_TAP host=10:04:30
+C0008_STEP_D_TAP2 host=10:04:59
+t+10s 10:05:09  14069 com.android.chrome;
+t+20s 10:05:19  14069 com.android.chrome;
+t+30s 10:05:30  14069 com.android.chrome;
+t+40s 10:05:40  14069 com.android.chrome;
+t+50s 10:05:50  14069 com.android.chrome;
+t+60s 10:06:00  14069 com.android.chrome;
+t+70s 10:06:10  14069 com.android.chrome;
+t+80s 10:06:21  14069 com.android.chrome;
+t+90s 10:06:31  14069 com.android.chrome;
+C0008_ALIVE_AT host=10:08:22
+C0008_STEP_I_RELAUNCH host=10:08:48
+C0008_RELAUNCH_CHECK host=10:09:43
+C0008_RELAUNCH_ATTEMPT2 host=10:10:17
+C0008_NEWTAB_REACHED host=10:12:11
+C0008_HTTPS_NAV host=10:12:42 url=example.com
+C0008_HTTPS_NAV2 host=10:13:27
+C0008_HTTPS_RUN_START host=10:15:20

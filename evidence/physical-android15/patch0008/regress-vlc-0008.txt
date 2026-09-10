@@ -1,0 +1,10 @@
+09-10 10:32:18.213 10669 10754 I Duplika.VIRTUAL_ENGINE: [launch_20260910_slk_001] Launch requested for org.videolan.vlc
+09-10 10:32:18.213 10669 10754 I Duplika.VIRTUAL_ENGINE: [launch_20260910_slk_001] Starting org.videolan.vlc in virtual user 5
+09-10 10:32:18.266 10689 10700 D BProcessManager: initProcess: org.videolan.vlc
+09-10 10:32:19.102 10689 10700 D ActivityStack: onActivityResumed : ComponentInfo{org.videolan.vlc/org.videolan.vlc.StartActivity}
+09-10 10:32:19.247 10689 10697 D ActivityStack: onActivityResumed : ComponentInfo{org.videolan.vlc/org.videolan.vlc.gui.onboarding.OnboardingActivity}
+09-10 10:32:19.355 10823 10851 D nativeloader: Load /data/app/~~Nhy_ipcoLSl1p1FViek1Aw==/org.videolan.vlc-MbwJnGUawq2256e7ZAcAeA==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libvlc.so using class loader ns clns-8 (caller=/data/app/~~Nhy_ipcoLSl1p1FViek1Aw==/org.videolan.vlc-MbwJnGUawq2256e7ZAcAeA==/base.apk!classes5.dex): ok
+09-10 10:32:19.362 10823 10856 D libMEOW : applied 1 plugins for [org.videolan.vlc]:
+09-10 10:32:19.374 10823 10851 D nativeloader: Load /data/app/~~Nhy_ipcoLSl1p1FViek1Aw==/org.videolan.vlc-MbwJnGUawq2256e7ZAcAeA==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libvlcjni.so using class loader ns clns-8 (caller=/data/app/~~Nhy_ipcoLSl1p1FViek1Aw==/org.videolan.vlc-MbwJnGUawq2256e7ZAcAeA==/base.apk!classes5.dex): ok
+09-10 10:32:19.408 10823 10851 D VLC     : [b40000738ee3f290/0] libvlc libvlc: VLC media player - 3.0.23 Vetinari
+09-10 10:32:19.409 10823 10851 D VLC     : [b40000738ee3f290/0] libvlc libvlc: Copyright © 1996-2025 the VideoLAN team

@@ -1,0 +1,20 @@
+09-10 10:23:59.336 32761   786 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s74_001] Launch requested for com.example.duplikaladder.umprobe
+09-10 10:23:59.337 32761   786 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s74_001] Starting com.example.duplikaladder.umprobe in virtual user 2
+09-10 10:23:59.351 32761   786 W BlackBoxCore: All files access not granted for launching: com.example.duplikaladder.umprobe
+09-10 10:23:59.407   346   367 D ActivityStack: startActivityLocked : ActivityInfo{a40c527 com.example.duplikaladder.umprobe.MainActivity}
+09-10 10:23:59.418   346   367 D BProcessManager: initProcess: com.example.duplikaladder.umprobe
+09-10 10:23:59.875   346   367 D ActivityStack: ActivityInfo{a40c527 com.example.duplikaladder.umprobe.MainActivity}, windowIsTranslucent: false
+09-10 10:23:59.935 32761   786 I Duplika.Launch: Launched com.example.duplikaladder.umprobe in user 2
+09-10 10:23:59.937 32761   786 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s74_001] Guest process accepted the launch of com.example.duplikaladder.umprobe
+09-10 10:23:59.938 32761   786 I Duplika.VIRTUAL_ENGINE: [launch_20260910_s74_001] Launched com.example.duplikaladder.umprobe
+09-10 10:24:00.089  3187  3187 D NativeCore: openDexFileNative: /data/app/~~sEtAQ_u7L0aVDmL3g_3I1w==/com.example.duplikaladder.umprobe-Zf2sdEEV7nW6MpIjMPB7mQ==/base.apk
+09-10 10:24:00.097  3187  3187 I devs.duplika:p0: Failed to open image dex files: Failed to find OatDexFile for DexFile /data/app/~~jyRDA9tugwUrIz3R30aLdw==/co.tdevs.duplika-BE7FmjAe6K_XjVbyaOirRQ==/base.apk (canonical path /data/app/~~jyRDA9tugwUrIz3R30aLdw==/co.tdevs.duplika-BE7FmjAe6K_XjVbyaOirRQ==/base.apk) in OatFile /data/app/~~sEtAQ_u7L0aVDmL3g_3I1w==/com.example.duplikaladder.umprobe-Zf2sdEEV7nW6MpIjMPB7mQ==/oat/arm64/base.odex
+09-10 10:24:00.098  3187  3187 D nativeloader: Configuring clns-8 for other apk /data/app/~~sEtAQ_u7L0aVDmL3g_3I1w==/com.example.duplikaladder.umprobe-Zf2sdEEV7nW6MpIjMPB7mQ==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~sEtAQ_u7L0aVDmL3g_3I1w==/com.example.duplikaladder.umprobe-Zf2sdEEV7nW6MpIjMPB7mQ==/lib/arm64:/data/app/~~sEtAQ_u7L0aVDmL3g_3I1w==/com.example.duplikaladder.umprobe-Zf2sdEEV7nW6MpIjMPB7mQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/co.tdevs.duplika/blackbox/data/user/2/com.example.duplikaladder.umprobe
+09-10 10:24:00.098  1865  2994 W PackageManager: Invalid dex load report. loadingPackageName=com.example.duplikaladder.umprobe, uid=10977
+09-10 10:24:00.113   346   367 D ActivityStack: onActivityCreated : ComponentInfo{com.example.duplikaladder.umprobe/com.example.duplikaladder.umprobe.MainActivity}
+09-10 10:24:00.133  3187  3187 D AppInstrumentation: callActivityOnCreate: com.example.duplikaladder.umprobe.MainActivity
+09-10 10:24:00.221  1865  2019 E ScrollOptim [OplusPerfService]: isScrollOptimEnable: pkgName = com.example.duplikaladder.umprobe, output = Bundle[{pre_anim_enable=true, frame_insert_list=null, frame_insert_default_num=1, scroll_changed_enable_list=null}]
+09-10 10:24:00.229  1086  1225 I SurfaceFlinger: [SF client] NEW(0xb400007086979c80) for (3187:com.example.duplikaladder.umprobe)
+09-10 10:24:00.244  1865  3603 I WindowManager: addWindow: New client android.os.BinderProxy@86ff8a5 : window=Window{a0d547a u0 com.example.duplikaladder.umprobe/com.example.duplikaladder.umprobe.MainActivity}
+09-10 10:24:00.247   346   366 D ActivityStack: onActivityResumed : ComponentInfo{com.example.duplikaladder.umprobe/com.example.duplikaladder.umprobe.MainActivity}
+09-10 10:24:00.251  1865  2994 D CoreBackPreview: Window{a0d547a u0 com.example.duplikaladder.umprobe/com.example.duplikaladder.umprobe.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@c0c7a21, mPriority=0, mIsAnimationCallback=false}

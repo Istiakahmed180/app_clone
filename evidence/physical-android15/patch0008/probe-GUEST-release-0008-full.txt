@@ -1,0 +1,47 @@
+--------- beginning of main
+09-10 09:55:09.044  6865  6865 I Duplika.IsoSvc: RESULT: accepted=true connected=false in 6188 ms
+09-10 09:55:09.044  6865  6865 I Duplika.IsoSvc:   NOTE: request accepted but the service never connected within 6000 ms — a silent failure, not an exception.
+09-10 09:55:09.058  6865  6865 I Duplika.IsoSvc: 
+09-10 09:55:09.058  6865  6865 I Duplika.IsoSvc: ---- P2: bindService(IsoService) ----
+09-10 09:55:09.058  6865  6865 I Duplika.IsoSvc:      isolated service, no instance name
+09-10 09:55:15.077  6865  6865 I Duplika.IsoSvc: RESULT: accepted=true connected=false in 6019 ms
+09-10 09:55:15.077  6865  6865 I Duplika.IsoSvc:   NOTE: request accepted but the service never connected within 6000 ms — a silent failure, not an exception.
+09-10 09:55:15.085  6865  6865 I Duplika.IsoSvc: 
+09-10 09:55:15.085  6865  6865 I Duplika.IsoSvc: ---- P3: bindIsolatedService(PlainService, instanceName="0") ----
+09-10 09:55:15.085  6865  6865 I Duplika.IsoSvc:      NON-isolated service + instance name (platform refuses this)
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc: RESULT: THREW after 44 ms
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   java.lang.SecurityException: Not allowed to bind to service Intent { cmp=com.example.duplikaladder.isosvc/.PlainService }
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2209)
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   at com.example.duplikaladder.isosvc.MainActivity.bindIsolated(MainActivity.java:116)
+09-10 09:55:15.129  6865  6865 I Duplika.IsoSvc:   at com.example.duplikaladder.isosvc.MainActivity.onCreate(MainActivity.java:74)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: P3 threw
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: java.lang.SecurityException: Not allowed to bind to service Intent { cmp=com.example.duplikaladder.isosvc/.PlainService }
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2209)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at com.example.duplikaladder.isosvc.MainActivity.bindIsolated(MainActivity.java:116)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at com.example.duplikaladder.isosvc.MainActivity.onCreate(MainActivity.java:74)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.Activity.performCreate(Activity.java:9196)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.Activity.performCreate(Activity.java:9168)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1544)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at top.niunaijun.blackbox.fake.delegate.BaseInstrumentationDelegate.callActivityOnCreate(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:3)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at top.niunaijun.blackbox.fake.delegate.AppInstrumentation.callActivityOnCreate(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:9)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4346)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4569)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:126)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:179)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:114)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:86)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2902)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.os.Looper.loopOnce(Looper.java:282)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at android.app.ActivityThread.main(ActivityThread.java:9500)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:600)
+09-10 09:55:15.130  6865  6865 E Duplika.IsoSvc: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1005)
+09-10 09:55:15.132  6865  6865 I Duplika.IsoSvc: 
+09-10 09:55:15.132  6865  6865 I Duplika.IsoSvc: ---- P4: bindService(PlainService) ----
+09-10 09:55:15.132  6865  6865 I Duplika.IsoSvc:      non-isolated service, no instance name (control)

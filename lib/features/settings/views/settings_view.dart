@@ -36,6 +36,12 @@ class SettingsView extends StatelessWidget {
             SettingsSection(
               children: <Widget>[
                 SettingsRow(
+                  icon: Icons.language,
+                  title: 'Language',
+                  value: controller.languageLabel,
+                  onTap: () => Get.toNamed<void>(AppRoutes.language),
+                ),
+                SettingsRow(
                   icon: Icons.contrast_outlined,
                   title: 'Appearance',
                   value: appearanceLabel(controller.themeMode.value),
@@ -51,7 +57,7 @@ class SettingsView extends StatelessWidget {
                   icon: Icons.mail_outline,
                   title: 'Contact us',
                   subtitle: 'Questions or feedback',
-                  onTap: controller.contactSupport,
+                  onTap: () => Get.toNamed<void>(AppRoutes.contact),
                 ),
                 SettingsRow(
                   icon: Icons.star_border,

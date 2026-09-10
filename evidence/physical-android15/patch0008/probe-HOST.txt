@@ -1,0 +1,10 @@
+09-10 09:50:47.088 30601 30601 I Duplika.IsoSvc: IsoService.onBind reached, uid=99021 pid=30601
+09-10 09:50:47.090 30566 30566 I Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.IsoService} in 184 ms
+09-10 09:50:47.093 30566 30566 I Duplika.IsoSvc: ---- P3: bindIsolatedService(PlainService, instanceName="0") ----
+09-10 09:50:47.097 30566 30566 I Duplika.IsoSvc: RESULT: THREW after 4 ms
+09-10 09:50:47.097 30566 30566 I Duplika.IsoSvc:   java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'com.example.duplikaladder.isosvc.PlainService'
+09-10 09:50:47.099 30566 30566 E Duplika.IsoSvc: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'com.example.duplikaladder.isosvc.PlainService'
+09-10 09:50:47.099 30566 30566 I Duplika.IsoSvc: ---- P4: bindService(PlainService) ----
+09-10 09:50:47.341 30614 30614 I Duplika.IsoSvc: PlainService.onBind reached, uid=10973 pid=30614
+09-10 09:50:47.343 30566 30566 I Duplika.IsoSvc: RESULT: accepted=true connected=true component=ComponentInfo{com.example.duplikaladder.isosvc/com.example.duplikaladder.isosvc.PlainService} in 244 ms
+09-10 09:50:47.344 30566 30566 I Duplika.IsoSvc: =============== RUN COMPLETE ===============

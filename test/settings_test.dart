@@ -3,8 +3,11 @@ import 'package:duplika/core/diagnostics/diagnostics_repository.dart';
 import 'package:duplika/core/diagnostics/native_diagnostics.dart';
 import 'package:duplika/core/diagnostics/system_info.dart';
 import 'package:duplika/core/services/settings_store.dart';
+import 'package:duplika/data/models/app_language.dart';
+import 'package:duplika/features/settings/views/language_view.dart';
 import 'package:duplika/features/settings/controllers/settings_controller.dart';
 import 'package:duplika/features/settings/views/appearance_view.dart';
+import 'package:duplika/features/settings/views/contact_view.dart';
 import 'package:duplika/features/settings/views/settings_view.dart';
 import 'package:duplika/features/settings/widgets/theme_preview.dart';
 import 'package:duplika/app/routes/app_routes.dart';
@@ -78,7 +81,6 @@ void main() {
   group('SettingsController', () {
     late InMemoryProfileStorage storage;
     late _FakeNative native;
-    late List<ThemeMode> applied;
     late List<Uri> opened;
     late bool openSucceeds;
 
@@ -86,7 +88,6 @@ void main() {
       return SettingsController(
         diagnostics: DiagnosticsRepository(native: native),
         store: SettingsStore(storage: storage),
-        applyThemeMode: applied.add,
         openUrl: (Uri url) async {
           opened.add(url);
           return openSucceeds;
@@ -97,7 +98,6 @@ void main() {
     setUp(() {
       storage = InMemoryProfileStorage();
       native = _FakeNative(payload: _payload);
-      applied = <ThemeMode>[];
       opened = <Uri>[];
       openSucceeds = true;
     });
@@ -109,7 +109,6 @@ void main() {
       await controller.restoreThemeMode();
 
       expect(controller.themeMode.value, ThemeMode.dark);
-      expect(applied, <ThemeMode>[ThemeMode.dark]);
     });
 
     test('choosing an appearance applies it and stores it', () async {
@@ -118,7 +117,6 @@ void main() {
       await controller.setThemeMode(ThemeMode.light);
 
       expect(controller.themeMode.value, ThemeMode.light);
-      expect(applied, <ThemeMode>[ThemeMode.light]);
       expect(storage.values[SettingsStore.themeModeKey], 'light');
     });
 
@@ -127,8 +125,73 @@ void main() {
 
       await controller.setThemeMode(ThemeMode.system);
 
-      expect(applied, isEmpty);
-      expect(storage.values, isEmpty);
+      expect(controller.themeMode.value, ThemeMode.system);
+      expect(storage.values, isEmpty, reason: 'nothing to store');
+    });
+
+    test('follows the device until a language is chosen', () async {
+      final SettingsController controller = build();
+
+      await controller.restoreLanguage();
+
+      // Null is what the app root reads as 'follow the device'.
+      expect(controller.language.value, isNull);
+      expect(controller.languageLabel, 'System default');
+    });
+
+    test('restores a stored language and applies it', () async {
+      final AppLanguage japanese = AppLanguages.byTag('ja')!;
+      await SettingsStore(storage: storage).setLanguage(japanese);
+      final SettingsController controller = build();
+
+      await controller.restoreLanguage();
+
+      expect(controller.language.value?.tag, 'ja');
+      expect(controller.language.value?.locale, japanese.locale);
+      expect(controller.languageLabel, '日本語');
+    });
+
+    test('choosing a language applies it and stores its tag', () async {
+      final SettingsController controller = build();
+
+      await controller.setLanguage(AppLanguages.byTag('zh-Hant-HK'));
+
+      expect(controller.language.value?.englishName,
+          'Chinese (Traditional, Hong Kong)');
+      expect(storage.values[SettingsStore.languageKey], 'zh-Hant-HK');
+      expect(controller.language.value?.locale.toLanguageTag(), 'zh-Hant-HK');
+    });
+
+    test('going back to System default forgets the stored tag', () async {
+      final SettingsController controller = build();
+      await controller.setLanguage(AppLanguages.byTag('de'));
+
+      await controller.setLanguage(null);
+
+      expect(controller.language.value, isNull);
+      expect(storage.values.containsKey(SettingsStore.languageKey), isFalse);
+    });
+
+    test('choosing the language already in force does nothing', () async {
+      final SettingsController controller = build();
+      await controller.setLanguage(AppLanguages.byTag('it'));
+      storage.values.clear();
+
+      await controller.setLanguage(AppLanguages.byTag('it'));
+
+      expect(controller.language.value?.tag, 'it');
+      expect(storage.values, isEmpty, reason: 'it did not write again');
+    });
+
+    test('a stored language this build dropped falls back to the device', () async {
+      // Removing a language must not strand its users on a locale the app can no
+      // longer supply.
+      storage.values[SettingsStore.languageKey] = 'kl';
+      final SettingsController controller = build();
+
+      await controller.restoreLanguage();
+
+      expect(controller.language.value, isNull);
     });
 
     test('reports the build and the architecture it is running as', () async {
@@ -170,7 +233,7 @@ void main() {
       final SettingsController controller = build();
       await controller.loadSystemInfo();
 
-      await controller.contactSupport();
+      await controller.emailSupport();
 
       expect(opened, hasLength(1));
       expect(opened.single.scheme, 'mailto');
@@ -182,7 +245,7 @@ void main() {
       openSucceeds = false;
       final SettingsController controller = build();
 
-      await controller.contactSupport();
+      await controller.emailSupport();
 
       expect(controller.statusMessage.value, contains('support@tdevs.co'));
     });
@@ -223,7 +286,6 @@ void main() {
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
           store: SettingsStore(storage: InMemoryProfileStorage()),
-          applyThemeMode: (ThemeMode _) {},
           openUrl: (Uri _) async => true,
         ),
       );
@@ -241,6 +303,36 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    /// Settings inside a real GetMaterialApp, so the route table itself is asserted: a
+    /// row names a route, and a route that is not registered fails here rather than on
+    /// a device.
+    Future<void> openRouted(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      Get.put<SettingsController>(
+        SettingsController(
+          diagnostics: DiagnosticsRepository(native: native),
+          store: SettingsStore(storage: InMemoryProfileStorage()),
+          openUrl: (Uri _) async => true,
+        ),
+      );
+      addTearDown(Get.reset);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => GetMaterialApp(
+            theme: AppTheme.light(),
+            initialRoute: AppRoutes.settings,
+            getPages: AppRoutes.pages(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
     setUp(() => native = _FakeNative(payload: _payload));
 
     testWidgets('groups every row under the heading it belongs to', (
@@ -249,6 +341,7 @@ void main() {
       await open(tester);
 
       for (final String label in <String>[
+        'Language',
         'Appearance',
         'SUPPORT',
         'Contact us',
@@ -286,46 +379,45 @@ void main() {
       expect(find.text('Not listed yet'), findsOneWidget);
     });
 
-    testWidgets('Appearance shows the mode in force', (
+    testWidgets('Language and Appearance both show what is in force', (
       WidgetTester tester,
     ) async {
       await open(tester);
 
+      expect(find.text('Language'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
-      expect(find.text('System default'), findsOneWidget);
+      // Both default to following the device, so both read the same until changed.
+      expect(find.text('System default'), findsNWidgets(2));
+    });
+
+    testWidgets('the Language row opens the language page', (
+      WidgetTester tester,
+    ) async {
+      await openRouted(tester);
+
+      await tester.tap(find.text('Language'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LanguageView), findsOneWidget);
+      expect(find.text('Search languages'), findsOneWidget);
+    });
+
+    testWidgets('the Contact us row opens the contact page', (
+      WidgetTester tester,
+    ) async {
+      await openRouted(tester);
+
+      await tester.tap(find.text('Contact us'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ContactView), findsOneWidget);
+      expect(find.text('How can we help?'), findsOneWidget);
     });
 
     testWidgets('the Appearance row opens the appearance page', (
       WidgetTester tester,
     ) async {
-      // Routed through GetMaterialApp rather than pushed by hand, so the route table
-      // itself is what is asserted: the row names a route, and a route that is not
-      // registered fails here rather than on a device.
-      tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
-      tester.view.devicePixelRatio = 3;
-      addTearDown(tester.view.reset);
-
-      Get.put<SettingsController>(
-        SettingsController(
-          diagnostics: DiagnosticsRepository(native: native),
-          store: SettingsStore(storage: InMemoryProfileStorage()),
-          applyThemeMode: (ThemeMode _) {},
-          openUrl: (Uri _) async => true,
-        ),
-      );
-      addTearDown(Get.reset);
-
-      await tester.pumpWidget(
-        ScreenUtilInit(
-          designSize: const Size(390, 844),
-          builder: (BuildContext context, Widget? child) => GetMaterialApp(
-            theme: AppTheme.light(),
-            initialRoute: AppRoutes.settings,
-            getPages: AppRoutes.pages(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openRouted(tester);
 
       await tester.tap(find.text('Appearance'));
       await tester.pumpAndSettle();
@@ -372,7 +464,6 @@ void main() {
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
           store: SettingsStore(storage: InMemoryProfileStorage()),
-          applyThemeMode: (ThemeMode _) {},
           openUrl: (Uri _) async => true,
         ),
       );
@@ -401,7 +492,6 @@ void main() {
 
   group('AppearanceView', () {
     late InMemoryProfileStorage storage;
-    late List<ThemeMode> applied;
     late SettingsController controller;
 
     Future<void> open(
@@ -415,7 +505,6 @@ void main() {
       controller = SettingsController(
         diagnostics: DiagnosticsRepository(native: _FakeNative()),
         store: SettingsStore(storage: storage),
-        applyThemeMode: applied.add,
         openUrl: (Uri _) async => true,
       );
       Get.put<SettingsController>(controller);
@@ -438,7 +527,6 @@ void main() {
 
     setUp(() {
       storage = InMemoryProfileStorage();
-      applied = <ThemeMode>[];
     });
 
     testWidgets('offers all three modes, each with what it does', (
@@ -500,9 +588,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.themeMode.value, ThemeMode.dark);
-      // onInit applies the stored mode first, so the choice is the latest application,
-      // not the only one.
-      expect(applied.last, ThemeMode.dark);
       expect(storage.values[SettingsStore.themeModeKey], 'dark');
 
       final ThemePreview dark = tester
@@ -531,6 +616,325 @@ void main() {
         find.text('Theme changes apply instantly across Duplika.'),
         findsOneWidget,
       );
+    });
+  });
+
+  group('ContactView', () {
+    late List<Uri> opened;
+    late bool openSucceeds;
+    late SettingsController controller;
+
+    Future<void> open(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(390 * 3, 1200 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      controller = SettingsController(
+        diagnostics: DiagnosticsRepository(native: _FakeNative()),
+        store: SettingsStore(storage: InMemoryProfileStorage()),
+        openUrl: (Uri url) async {
+          opened.add(url);
+          return openSucceeds;
+        },
+      );
+      Get.put<SettingsController>(controller);
+      addTearDown(Get.reset);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            theme: AppTheme.light(),
+            home: const ContactView(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    setUp(() {
+      opened = <Uri>[];
+      openSucceeds = true;
+    });
+
+    testWidgets('leads with what the screen is for', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('How can we help?'), findsOneWidget);
+      expect(
+        find.text('Choose your preferred way to contact the Duplika team.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('lists every channel, each saying what it is', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      for (final (String name, String description) in <(String, String)>[
+        ('WhatsApp', 'Chat with our support team'),
+        ('Telegram', 'Message us on Telegram'),
+        ('Email', 'Send us an email'),
+      ]) {
+        expect(find.text(name), findsOneWidget, reason: name);
+        expect(find.text(description), findsOneWidget, reason: description);
+      }
+    });
+
+    testWidgets('sets the expectation for a reply, and for the message', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('Response time'), findsOneWidget);
+      expect(find.textContaining('within 1\u20132 business days'), findsOneWidget);
+      expect(
+        find.text("We'll only use your message to provide support."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a usable channel is marked as leaving the app', (
+      WidgetTester tester,
+    ) async {
+      // A chevron would promise another screen inside Duplika; these hand off to
+      // something else, and the glyph says so before the tap. An inert row carries no
+      // glyph at all, because it has no destination to advertise — with only Email
+      // configured, that is one glyph and not three.
+      await open(tester);
+
+      expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
+    });
+
+    testWidgets('Email opens a composer for the support address', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.tap(find.text('Send us an email'));
+      await tester.pumpAndSettle();
+
+      expect(opened, hasLength(1));
+      expect(opened.single.scheme, 'mailto');
+      expect(opened.single.path, 'support@tdevs.co');
+    });
+
+    testWidgets('an unconfigured channel says so and opens nothing', (
+      WidgetTester tester,
+    ) async {
+      // No WhatsApp number and no Telegram handle are set yet. Both rows stay visible
+      // and inert rather than vanishing, so the gap is legible.
+      await open(tester);
+
+      expect(controller.hasWhatsApp, isFalse);
+      expect(controller.hasTelegram, isFalse);
+      expect(find.text('Not set up yet'), findsNWidgets(2));
+
+      await tester.tap(find.text('Chat with our support team'));
+      await tester.tap(find.text('Message us on Telegram'));
+      await tester.pumpAndSettle();
+
+      expect(opened, isEmpty);
+    });
+
+    testWidgets('a channel that will not open is reported, not swallowed', (
+      WidgetTester tester,
+    ) async {
+      openSucceeds = false;
+      await open(tester);
+
+      await tester.tap(find.text('Send us an email'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('support@tdevs.co'), findsWidgets);
+    });
+  });
+
+  group('LanguageView', () {
+    late InMemoryProfileStorage storage;
+    late SettingsController controller;
+
+    Future<void> open(WidgetTester tester) async {
+      // Taller than a phone so the whole list builds and any row can be found.
+      tester.view.physicalSize = const Size(390 * 3, 3000 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      controller = SettingsController(
+        diagnostics: DiagnosticsRepository(native: _FakeNative()),
+        store: SettingsStore(storage: storage),
+        openUrl: (Uri _) async => true,
+      );
+      Get.put<SettingsController>(controller);
+      addTearDown(Get.reset);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            theme: AppTheme.light(),
+            home: const LanguageView(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    setUp(() {
+      storage = InMemoryProfileStorage();
+    });
+
+    testWidgets('lists System default first, then every language', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('System default'), findsOneWidget);
+      expect(find.text('Use your device language'), findsOneWidget);
+      for (final AppLanguage language in AppLanguages.all) {
+        // findsWidgets, not findsOneWidget: English names itself 'English' in both
+        // rows of its own entry, so its name legitimately appears twice.
+        expect(
+          find.text(language.nativeName),
+          findsWidgets,
+          reason: language.tag,
+        );
+      }
+      expect(find.byType(Radio<bool>), findsNWidgets(AppLanguages.all.length + 1));
+    });
+
+    testWidgets('names each language in itself and in English', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      expect(find.text('日本語'), findsOneWidget);
+      expect(find.text('Japanese'), findsOneWidget);
+      expect(find.text('繁體中文（香港）'), findsOneWidget);
+      expect(find.text('Chinese (Traditional, Hong Kong)'), findsOneWidget);
+    });
+
+    testWidgets('says what the choice governs', (WidgetTester tester) async {
+      await open(tester);
+
+      expect(find.text('Choose the language used in Duplika.'), findsOneWidget);
+      expect(find.text('Language changes apply immediately.'), findsOneWidget);
+    });
+
+    testWidgets('search narrows by English name', (WidgetTester tester) async {
+      await open(tester);
+
+      await tester.enterText(find.byType(TextField), 'japan');
+      await tester.pumpAndSettle();
+
+      expect(find.text('日本語'), findsOneWidget);
+      expect(find.text('Deutsch'), findsNothing);
+      expect(find.text('System default'), findsNothing);
+      expect(find.byType(Radio<bool>), findsOneWidget, reason: 'one row left');
+    });
+
+    testWidgets('search narrows by native name and by tag', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.enterText(find.byType(TextField), 'Русский');
+      await tester.pumpAndSettle();
+      expect(find.text('Russian'), findsOneWidget);
+      expect(find.text('Deutsch'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'uk');
+      await tester.pumpAndSettle();
+      expect(find.text('Українська'), findsOneWidget);
+    });
+
+    testWidgets('System default answers the search too', (
+      WidgetTester tester,
+    ) async {
+      // It is a row in the same list, so a query that describes it must not empty the
+      // screen.
+      await open(tester);
+
+      await tester.enterText(find.byType(TextField), 'device');
+      await tester.pumpAndSettle();
+
+      expect(find.text('System default'), findsOneWidget);
+    });
+
+    testWidgets('a search that matches nothing says so', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.enterText(find.byType(TextField), 'klingon');
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('No language matches'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+    });
+
+    testWidgets('clearing the search brings the whole list back', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.enterText(find.byType(TextField), 'japan');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Clear search'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('System default'), findsOneWidget);
+      expect(find.text('Deutsch'), findsOneWidget);
+      expect(find.byType(Radio<bool>), findsNWidgets(AppLanguages.all.length + 1));
+    });
+
+    testWidgets('tapping a language applies it and stores it', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+
+      expect(controller.language.value?.tag, 'de');
+      expect(controller.language.value?.locale, const Locale('de'));
+      expect(storage.values[SettingsStore.languageKey], 'de');
+    });
+
+    testWidgets('the selected row is the only one selected', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+
+      final Iterable<Radio<bool>> radios =
+          tester.widgetList<Radio<bool>>(find.byType(Radio<bool>));
+      // Each row carries its own single-value group, so exactly one group is on.
+      final int selected = tester
+          .widgetList<RadioGroup<bool>>(find.byType(RadioGroup<bool>))
+          .where((RadioGroup<bool> group) => group.groupValue == true)
+          .length;
+      expect(radios, hasLength(AppLanguages.all.length + 1));
+      expect(selected, 1);
+    });
+
+    testWidgets('choosing System default again clears the stored language', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('System default'));
+      await tester.pumpAndSettle();
+
+      expect(controller.language.value, isNull);
+      expect(storage.values.containsKey(SettingsStore.languageKey), isFalse);
     });
   });
 }

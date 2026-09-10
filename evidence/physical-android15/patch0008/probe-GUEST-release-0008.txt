@@ -1,0 +1,11 @@
+09-10 09:58:17.308  9432  9432 I Duplika.IsoSvc: RESULT: accepted=true connected=false in 6257 ms
+09-10 09:58:17.308  9432  9432 I Duplika.IsoSvc:   NOTE: request accepted but the service never connected within 6000 ms — a silent failure, not an exception.
+09-10 09:58:17.310  9432  9432 I Duplika.IsoSvc: ---- P2: bindService(IsoService) ----
+09-10 09:58:23.480  9432  9432 I Duplika.IsoSvc: RESULT: accepted=true connected=false in 6170 ms
+09-10 09:58:23.481  9432  9432 I Duplika.IsoSvc:   NOTE: request accepted but the service never connected within 6000 ms — a silent failure, not an exception.
+09-10 09:58:23.493  9432  9432 I Duplika.IsoSvc: ---- P3: bindIsolatedService(PlainService, instanceName="0") ----
+09-10 09:58:23.534  9432  9432 I Duplika.IsoSvc: RESULT: THREW after 41 ms
+09-10 09:58:23.534  9432  9432 I Duplika.IsoSvc:   java.lang.SecurityException: Not allowed to bind to service Intent { cmp=com.example.duplikaladder.isosvc/.PlainService }
+09-10 09:58:23.535  9432  9432 E Duplika.IsoSvc: java.lang.SecurityException: Not allowed to bind to service Intent { cmp=com.example.duplikaladder.isosvc/.PlainService }
+09-10 09:58:23.535  9432  9432 E Duplika.IsoSvc: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:58:23.535  9432  9432 I Duplika.IsoSvc: ---- P4: bindService(PlainService) ----

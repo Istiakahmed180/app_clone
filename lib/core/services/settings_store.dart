@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' show ThemeMode;
 
+import '../../data/models/app_language.dart';
 import 'profile_storage.dart';
 
 /// The app-level preferences the user sets for themselves.
@@ -11,6 +12,7 @@ class SettingsStore {
       : _storage = storage ?? const SharedPreferencesProfileStorage();
 
   static const String themeModeKey = 'duplika.settings.theme_mode';
+  static const String languageKey = 'duplika.settings.language';
 
   final ProfileStorage _storage;
 
@@ -32,4 +34,17 @@ class SettingsStore {
 
   Future<void> setThemeMode(ThemeMode mode) =>
       _storage.write(themeModeKey, mode.name);
+
+  /// The chosen language, or null to follow the device.
+  ///
+  /// A stored tag the current build no longer offers also reads as null: dropping a
+  /// language should leave those users on their device's own, not on a locale the app
+  /// cannot supply.
+  Future<AppLanguage?> language() async =>
+      AppLanguages.byTag(await _storage.read(languageKey));
+
+  /// Pass null to go back to following the device.
+  Future<void> setLanguage(AppLanguage? language) => language == null
+      ? _storage.delete(languageKey)
+      : _storage.write(languageKey, language.tag);
 }

@@ -1,0 +1,928 @@
+09-10 10:03:41.089   927   927 I Zygote  : Process 13955 exited due to signal 9 (Killed)
+09-10 10:03:44.583 13270 13290 D BProcessManager: initProcess: com.android.chrome
+09-10 10:03:44.608  1865  1948 I ActivityManager: Start proc 14069:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:03:51.710  1865  1948 I ActivityManager: Start proc 14239:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 10:03:53.608   927   927 I Zygote  : Process 12675 exited due to signal 9 (Killed)
+09-10 10:03:53.657  1865  1948 I ActivityManager: Start proc 14344:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 10:04:02.774  1865  1948 I ActivityManager: Start proc 14619:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:04:03.206   927   927 I Zygote  : Process 12612 exited due to signal 9 (Killed)
+09-10 10:04:26.132 13270 13290 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 10:04:26.169  1865  1948 I ActivityManager: Start proc 14975:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:04:26.763  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 14975) has died: fg  BTOP
+09-10 10:04:26.763 13270 14114 D BProcessManager: App Died: com.android.chrome:sandboxed_process0
+09-10 10:04:26.850   927   927 I Zygote  : Process 11867 exited due to signal 9 (Killed)
+09-10 10:04:27.597  1865  1948 I ActivityManager: Start proc 15015:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:04:27.830 15015 15015 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 15015
+09-10 10:04:27.830 15015 15015 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=9449fb5a-3594-4c79-9331-19cceb469a93 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:27.830 15015 15015 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:27.830 15015 15015 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:04:27.830 15015 15015 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:04:27.835  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013067834, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:04:27.914   927   927 I Zygote  : Process 15015 exited due to signal 9 (Killed)
+09-10 10:04:27.916  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 15015) has died: fg  BTOP
+09-10 10:04:27.965  1865  1948 I ActivityManager: Start proc 15031:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:04:28.181 15031 15031 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 15031
+09-10 10:04:28.181 15031 15031 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=9449fb5a-3594-4c79-9331-19cceb469a93 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:28.181 15031 15031 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:28.181 15031 15031 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:04:28.181 15031 15031 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:04:28.184  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013068184, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:04:30.423   927   927 I Zygote  : Process 15031 exited due to signal 9 (Killed)
+09-10 10:04:32.513   927   927 I Zygote  : Process 13959 exited due to signal 9 (Killed)
+09-10 10:04:32.518   927   927 I Zygote  : Process 13718 exited due to signal 9 (Killed)
+09-10 10:04:32.608   927   927 I Zygote  : Process 13427 exited due to signal 9 (Killed)
+09-10 10:04:41.102  1865  1948 I ActivityManager: Start proc 15198:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:04:48.622   927   927 I Zygote  : Process 14239 exited due to signal 9 (Killed)
+09-10 10:04:52.793  1865  1948 I ActivityManager: Start proc 15352:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:04:53.081 15352 15352 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 15352
+09-10 10:04:53.081 15352 15352 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=d00f566b-8a0a-4b2d-9bbf-788fe504eac1 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:53.081 15352 15352 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:04:53.081 15352 15352 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:04:53.081 15352 15352 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:04:53.088  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013093087, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:04:53.137   927   927 I Zygote  : Process 15352 exited due to signal 9 (Killed)
+09-10 10:04:53.137  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 15352) has died: fg  BTOP
+09-10 10:05:03.199  1865  1948 I ActivityManager: Start proc 15492:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:05:03.423 15492 15492 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 15492
+09-10 10:05:03.423 15492 15492 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=d00f566b-8a0a-4b2d-9bbf-788fe504eac1 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:05:03.423 15492 15492 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:05:03.423 15492 15492 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:05:03.423 15492 15492 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:05:03.434  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013103426, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:05:03.488   927   927 I Zygote  : Process 15492 exited due to signal 9 (Killed)
+09-10 10:05:03.488  1865  2503 I ActivityManager: Process co.tdevs.duplika:p1 (pid 15492) has died: fg  BTOP
+09-10 10:05:50.442  1865  1948 I ActivityManager: Start proc 15979:com.google.android.gm/u0a142 for service {com.google.android.gm/com.google.android.gm.provider.MailSyncAdapterService}
+09-10 10:05:53.358   927   927 I Zygote  : Process 14344 exited due to signal 9 (Killed)
+09-10 10:06:06.048  1865  1948 I ActivityManager: Start proc 16260:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:06:06.974  1865  1948 I ActivityManager: Start proc 16316:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:06:07.015   927   927 I Zygote  : Process 13918 exited due to signal 9 (Killed)
+09-10 10:06:07.061   927   927 I Zygote  : Process 14619 exited due to signal 9 (Killed)
+09-10 10:06:07.157  1865  1948 I ActivityManager: Start proc 16343:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:06:07.480   927   927 I Zygote  : Process 13270 exited due to signal 9 (Killed)
+09-10 10:06:09.443  1865  1948 I ActivityManager: Start proc 16399:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:06:15.554   927   927 I Zygote  : Process 16343 exited due to signal 9 (Killed)
+09-10 10:06:15.560  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 16343) has died: cch+5 CEM 
+09-10 10:06:23.518  1865  1948 I ActivityManager: Start proc 16551:com.facebook.orca/u0a731 for broadcast {com.facebook.orca/com.facebook.push.fbnslite.FbPushSdkFbnsReceiverShim}
+09-10 10:06:45.129  1865  1948 I ActivityManager: Start proc 16916:com.heytap.pictorial/u0a279 for service {com.heytap.pictorial/com.nearme.pullimage.GlanceEventsReportService}
+09-10 10:07:46.230  1865  1948 I ActivityManager: Start proc 17620:com.android.vending/u0a108 for broadcast {com.android.vending/com.google.firebase.iid.FirebaseInstanceIdReceiver}
+09-10 10:07:46.888   927   927 I Zygote  : Process 15979 exited due to signal 9 (Killed)
+09-10 10:07:57.012  1865  1948 I ActivityManager: Start proc 17838:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:07:57.385   927   927 I Zygote  : Process 16260 exited due to signal 9 (Killed)
+09-10 10:08:45.053   927   927 I Zygote  : Process 16399 exited due to signal 9 (Killed)
+09-10 10:08:45.053   927   927 I Zygote  : Process 16916 exited due to signal 9 (Killed)
+09-10 10:08:45.053   927   927 I Zygote  : Process 16316 exited due to signal 9 (Killed)
+09-10 10:08:45.059   927   927 I Zygote  : Process 14069 exited due to signal 9 (Killed)
+09-10 10:08:45.065   927   927 I Zygote  : Process 13242 exited due to signal 9 (Killed)
+09-10 10:08:45.133   927   927 I Zygote  : Process 13611 exited due to signal 9 (Killed)
+09-10 10:08:45.157  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 13611) has died: cch+5 CEM 
+09-10 10:08:45.172   927   927 I Zygote  : Process 17620 exited due to signal 9 (Killed)
+09-10 10:08:45.204   927   927 I Zygote  : Process 15198 exited due to signal 9 (Killed)
+09-10 10:08:45.206  1865  2503 I ActivityManager: Process com.android.vending (pid 17620) has died: cch+45 CEM 
+09-10 10:08:45.214   927   927 I Zygote  : Process 17838 exited due to signal 9 (Killed)
+09-10 10:08:45.241  1865  2503 I ActivityManager: Process com.android.vending:background (pid 17838) has died: cch+5 CEM 
+09-10 10:08:45.248  1865  2506 I ActivityManager: Process com.google.android.apps.messaging (pid 15198) has died: cch+25 CEM 
+09-10 10:08:45.263  1865  1948 I ActivityManager: Start proc 18427:com.facebook.katana/u0a660 for service {com.facebook.katana/com.facebook.falco.jobscheduler.FFJobService}
+09-10 10:08:45.347  1865  1948 I ActivityManager: Start proc 18442:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:08:45.973  1865  1948 I ActivityManager: Start proc 18499:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:08:46.289  1865  1948 I ActivityManager: Start proc 18553:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:08:49.179  1865  1948 I ActivityManager: Start proc 18698:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:08:49.405  1865  1948 I ActivityManager: Start proc 18719:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:08:51.220  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 18553) has died: cch+5 CEM 
+09-10 10:08:51.220   927   927 I Zygote  : Process 18553 exited due to signal 9 (Killed)
+09-10 10:08:51.228  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 18499) has died: cch+15 CEM 
+09-10 10:08:51.229   927   927 I Zygote  : Process 18499 exited due to signal 9 (Killed)
+09-10 10:08:51.269  1865  2503 I ActivityManager: Process com.oplus.crashbox (pid 6922) has died: svcb SVC 
+09-10 10:08:51.269   927   927 I Zygote  : Process 6922 exited due to signal 9 (Killed)
+09-10 10:08:51.280   927   927 I Zygote  : Process 12387 exited due to signal 9 (Killed)
+09-10 10:08:51.283  1865  2506 I ActivityManager: Process com.heytap.htms (pid 12387) has died: svcb SVC 
+09-10 10:08:51.285   927   927 I Zygote  : Process 12578 exited due to signal 9 (Killed)
+09-10 10:08:51.288  1865  2503 I ActivityManager: Process com.facebook.services (pid 12578) has died: svcb SVC 
+09-10 10:08:52.029  1865  1948 I ActivityManager: Start proc 18833:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:08:52.690  1865  1948 I ActivityManager: Start proc 18899:com.facebook.services/u0a226 for content provider {com.facebook.services/com.facebook.oxygen.services.storage.provider.StorageProvider}
+09-10 10:08:52.971  1865  1948 I ActivityManager: Start proc 18938:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:08:53.408  1865  1948 I ActivityManager: Start proc 18988:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:08:53.585  1865  1948 I ActivityManager: Start proc 19021:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:08:54.048   927   927 I Zygote  : Process 16551 exited due to signal 9 (Killed)
+09-10 10:08:54.049  1865  2506 I ActivityManager: Process com.facebook.orca (pid 16551) has died: cch+25 CEM 
+09-10 10:08:55.323   927   927 I Zygote  : Process 18427 exited due to signal 9 (Killed)
+09-10 10:08:55.324  1865  2503 I ActivityManager: Process com.facebook.katana (pid 18427) has died: cch+5 CEM 
+09-10 10:08:57.448 18719 18732 D BProcessManager: initProcess: com.android.chrome
+09-10 10:08:57.481  1865  1948 I ActivityManager: Start proc 19248:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:08:58.701 18719 19268 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 10:08:58.735  1865  1948 I ActivityManager: Start proc 19308:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:08:59.011 18719 18732 D BProcessManager: initProcess: com.android.chrome:privileged_process0
+09-10 10:08:59.026  1865  1948 I ActivityManager: Start proc 19344:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 10:08:59.051  1865  1948 I ActivityManager: Start proc 19345:co.tdevs.duplika:p2/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P2}
+09-10 10:08:59.063 19308 19308 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 19308
+09-10 10:08:59.063 19308 19308 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=74809774-a45c-4932-a31a-99d39c9bb322 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:08:59.063 19308 19308 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:08:59.063 19308 19308 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:08:59.063 19308 19308 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:08:59.078  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013339078, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:08:59.112  1865  1948 I ActivityManager: Start proc 19369:com.oplus.crashbox/1000 for service {com.oplus.crashbox/com.oplus.crashbox.ExceptionMonitorService}
+09-10 10:08:59.138 18719 19267 D BProcessManager: App Died: com.android.chrome:sandboxed_process0
+09-10 10:08:59.139   927   927 I Zygote  : Process 19308 exited due to signal 9 (Killed)
+09-10 10:08:59.138  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 19308) has died: fg  BTOP
+09-10 10:08:59.410 19345 19345 E AndroidRuntime: Process: com.android.chrome:privileged_process0, PID: 19345
+09-10 10:08:59.410 19345 19345 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P2@3116e4e with Intent { act=cdef5b5f-58ed-4230-b994-ee0f3041b5eb cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P2 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:08:59.410 19345 19345 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:08:59.410 19345 19345 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:08:59.410 19345 19345 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:08:59.413  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013339413, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:08:59.457   927   927 I Zygote  : Process 19345 exited due to signal 9 (Killed)
+09-10 10:08:59.457 18719 19267 D BProcessManager: App Died: com.android.chrome:privileged_process0
+09-10 10:08:59.459  1865  2503 I ActivityManager: Process co.tdevs.duplika:p2 (pid 19345) has died: fg  BTOP
+09-10 10:08:59.930  1865  1948 I ActivityManager: Start proc 19489:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:09:00.223   927   927 I Zygote  : Process 18442 exited due to signal 9 (Killed)
+09-10 10:09:00.248  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 18442) has died: cch+15 CEM 
+09-10 10:09:00.309  1865  2503 I ActivityManager: Process com.facebook.system (pid 18988) has died: cch+5 CEM 
+09-10 10:09:00.360   927   927 I Zygote  : Process 18988 exited due to signal 9 (Killed)
+09-10 10:09:00.425  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 18833) has died: cch+5 CEM 
+09-10 10:09:00.425   927   927 I Zygote  : Process 18833 exited due to signal 9 (Killed)
+09-10 10:09:00.491  1865  2503 I ActivityManager: Process com.facebook.services (pid 18899) has died: svcb SVC 
+09-10 10:09:00.500   927   927 I Zygote  : Process 18899 exited due to signal 9 (Killed)
+09-10 10:09:00.548   927   927 I Zygote  : Process 13666 exited due to signal 9 (Killed)
+09-10 10:09:00.557  1865  2506 I ActivityManager: Process com.oplus.cosa (pid 13666) has died: svcb SVC 
+09-10 10:09:00.691  1865  1948 I ActivityManager: Start proc 19541:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:09:00.878   927   927 I Zygote  : Process 19344 exited due to signal 9 (Killed)
+09-10 10:09:01.027  1865  2503 I ActivityManager: Process com.android.vending (pid 19344) has died: cch+5 CEM 
+09-10 10:09:04.009  1865  1948 I ActivityManager: Start proc 19600:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:09:05.576  1865  1948 I ActivityManager: Start proc 19670:com.heytap.mcs.statistics/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.statistics.service.StatisticsApiService}
+09-10 10:09:05.616  1865  1948 I ActivityManager: Start proc 19671:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:09:05.641  1865  1948 I ActivityManager: Start proc 19681:com.heytap.mcs.biz.message/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.message.MessageDealService}
+09-10 10:09:05.850   927   927 I Zygote  : Process 19681 exited due to signal 9 (Killed)
+09-10 10:09:05.850  1865  2506 I ActivityManager: Process com.heytap.mcs.biz.message (pid 19681) has died: fg  SVC 
+09-10 10:09:05.977  1865  1948 I ActivityManager: Start proc 19760:com.heytap.htms:cloudctrl/u0a158 for service {com.heytap.htms/com.heytap.msp.cloudctrl.ipc.CloudCtrlService}
+09-10 10:09:06.175  1865  1948 I ActivityManager: Start proc 19798:com.heytap.htms/u0a158 for service {com.heytap.htms/androidx.room.MultiInstanceInvalidationService}
+09-10 10:09:09.363 18719 18730 D BProcessManager: initProcess: com.android.chrome:privileged_process1
+09-10 10:09:10.998   927   927 I Zygote  : Process 19670 exited due to signal 9 (Killed)
+09-10 10:09:10.999  1865  2503 I ActivityManager: Process com.heytap.mcs.statistics (pid 19670) has died: fg  SVC 
+09-10 10:09:14.437   927   927 I Zygote  : Process 19671 exited due to signal 9 (Killed)
+09-10 10:09:14.438  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 19671) has died: cch+5 CEM 
+09-10 10:09:18.079  1865  1948 I ActivityManager: Start proc 19993:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:09:18.872  1865  1948 I ActivityManager: Start proc 20043:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:09:19.046  1865  1948 I ActivityManager: Start proc 20068:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:09:22.111   927   927 I Zygote  : Process 19021 exited due to signal 9 (Killed)
+09-10 10:09:22.137  1865  1948 I ActivityManager: Start proc 20115:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 10:09:25.032  1865  1948 I ActivityManager: Start proc 20297:com.oplus.cosa/u0a149 for service {com.oplus.cosa/com.oplus.cosa.service.GameEventService}
+09-10 10:09:27.272   927   927 I Zygote  : Process 20068 exited due to signal 9 (Killed)
+09-10 10:09:27.273  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 20068) has died: cch+5 CEM 
+09-10 10:09:37.620   927   927 I Zygote  : Process 19248 exited due to signal 5 (Trap)
+09-10 10:09:37.623  1865  2503 I ActivityManager: Process co.tdevs.duplika:p0 (pid 19248) has died: fg  TOP 
+09-10 10:09:37.740  1865  1948 I ActivityManager: Start proc 20469:com.google.android.googlequicksearchbox:search/u0a118 for service {com.google.android.googlequicksearchbox/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:09:37.831  1865  1948 I ActivityManager: Start proc 20483:com.portonics.mygp/u0a297 for service {com.portonics.mygp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:09:38.834  1865  1948 I ActivityManager: Start proc 20580:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 10:09:38.971  1865  1948 I ActivityManager: Start proc 20599:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService}
+09-10 10:09:39.079  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 18938) has died: cch+35 CEM 
+09-10 10:09:39.081   927   927 I Zygote  : Process 18938 exited due to signal 9 (Killed)
+09-10 10:09:39.128   927   927 I Zygote  : Process 19760 exited due to signal 9 (Killed)
+09-10 10:09:39.128  1865  2503 I ActivityManager: Process com.heytap.htms:cloudctrl (pid 19760) has died: cch+25 CEM 
+09-10 10:09:39.186   927   927 I Zygote  : Process 19993 exited due to signal 9 (Killed)
+09-10 10:09:39.195  1865  2506 I ActivityManager: Process com.android.settings (pid 19993) has died: cch+15 CEM 
+09-10 10:09:39.234  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 19541) has died: cch+5 CEM 
+09-10 10:09:39.235   927   927 I Zygote  : Process 19541 exited due to signal 9 (Killed)
+09-10 10:09:39.337  1865  1948 I ActivityManager: Start proc 20643:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:09:39.374  1865  1948 I ActivityManager: Start proc 20650:com.google.android.googlequicksearchbox:googleapp/u0a118 for service {com.google.android.googlequicksearchbox/com.google.android.libraries.search.integrations.tiktok.RemoteWorkerService_googleapp}
+09-10 10:09:39.776   927   927 I Zygote  : Process 20469 exited due to signal 9 (Killed)
+09-10 10:09:39.778  1865  2506 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 20469) has died: cch+5 CEM 
+09-10 10:09:39.821   927   927 I Zygote  : Process 20643 exited due to signal 9 (Killed)
+09-10 10:09:39.823  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 20643) has died: cch+5 CEM 
+09-10 10:09:39.864  1865  2506 I ActivityManager: Process com.heytap.htms (pid 19798) has died: svcb SVC 
+09-10 10:09:39.864   927   927 I Zygote  : Process 19798 exited due to signal 9 (Killed)
+09-10 10:09:40.001   927   927 I Zygote  : Process 20650 exited due to signal 9 (Killed)
+09-10 10:09:40.026  1865  2503 I ActivityManager: Process com.google.android.googlequicksearchbox:googleapp (pid 20650) has died: cch+5 CEM 
+09-10 10:09:41.190  1865  2506 I ActivityManager: Process com.portonics.mygp (pid 20483) has died: cch+5 CEM 
+09-10 10:09:41.191   927   927 I Zygote  : Process 20483 exited due to signal 9 (Killed)
+09-10 10:09:41.228  1865  1948 I ActivityManager: Start proc 20882:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:09:44.517  1865  1948 I ActivityManager: Start proc 20963:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:09:49.870  1865  1948 I ActivityManager: Start proc 21143:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:10:12.106   927   927 I Zygote  : Process 19489 exited due to signal 9 (Killed)
+09-10 10:10:12.189   927   927 I Zygote  : Process 20043 exited due to signal 9 (Killed)
+09-10 10:10:12.208   927   927 I Zygote  : Process 18698 exited due to signal 9 (Killed)
+09-10 10:10:12.233   927   927 I Zygote  : Process 18719 exited due to signal 9 (Killed)
+09-10 10:10:12.368  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 20963) has died: cch+5 CEM 
+09-10 10:10:12.369   927   927 I Zygote  : Process 20963 exited due to signal 9 (Killed)
+09-10 10:10:12.401  1865  1948 I ActivityManager: Start proc 21472:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:10:12.451   927   927 I Zygote  : Process 19600 exited due to signal 9 (Killed)
+09-10 10:10:12.453  1865  2503 I ActivityManager: Process com.facebook.services (pid 19600) has died: svcb SVC 
+09-10 10:10:12.456   927   927 I Zygote  : Process 20882 exited due to signal 9 (Killed)
+09-10 10:10:12.470   927   927 I Zygote  : Process 20599 exited due to signal 9 (Killed)
+09-10 10:10:12.475   927   927 I Zygote  : Process 21143 exited due to signal 9 (Killed)
+09-10 10:10:12.516  1865  2503 I ActivityManager: Process com.android.vending:background (pid 21143) has died: cch+25 CEM 
+09-10 10:10:12.518  1865  2506 I ActivityManager: Process com.google.android.apps.messaging (pid 20882) has died: cch+15 CEM 
+09-10 10:10:12.548  1865  2503 I ActivityManager: Process com.android.vending (pid 20599) has died: cch+45 CEM 
+09-10 10:10:12.597  1865  1948 I ActivityManager: Start proc 21492:com.google.android.apps.nbu.files/u0a101 for service {com.google.android.apps.nbu.files/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:10:13.085  1865  1948 I ActivityManager: Start proc 21545:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:10:16.496  1865  1948 I ActivityManager: Start proc 21608:com.whatsapp/u0a291 for service {com.whatsapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:10:17.742  1865  1948 I ActivityManager: Start proc 21704:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:10:18.125  1865  1948 I ActivityManager: Start proc 21749:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:10:18.477  1865  1948 I ActivityManager: Start proc 21805:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:10:18.695  1865  3609 I ActivityManager: Start proc 21837:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:10:18.934  1865  1948 I ActivityManager: Start proc 21862:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:10:19.407  1865  1948 I ActivityManager: Start proc 21913:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:10:20.964   927   927 I Zygote  : Process 21704 exited due to signal 9 (Killed)
+09-10 10:10:20.970   927   927 I Zygote  : Process 21545 exited due to signal 9 (Killed)
+09-10 10:10:20.972   927   927 I Zygote  : Process 20297 exited due to signal 9 (Killed)
+09-10 10:10:20.985  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 21704) has died: cch+5 CEM 
+09-10 10:10:21.035  1865  2506 I ActivityManager: Process com.facebook.katana (pid 20580) has died: cch+35 CEM 
+09-10 10:10:21.037   927   927 I Zygote  : Process 20580 exited due to signal 9 (Killed)
+09-10 10:10:21.037   927   927 I Zygote  : Process 21492 exited due to signal 9 (Killed)
+09-10 10:10:21.058  1865  2506 I ActivityManager: Process com.oplus.cosa (pid 20297) has died: svcb SVC 
+09-10 10:10:21.081  1865  2506 I ActivityManager: Process com.google.android.apps.nbu.files (pid 21492) has died: cch+25 CEM 
+09-10 10:10:21.102  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 21545) has died: cch+15 CEM 
+09-10 10:10:21.201  1865  1948 I ActivityManager: Start proc 22026:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:10:27.014 21862 21875 D BProcessManager: initProcess: com.android.chrome
+09-10 10:10:27.042  1865  1948 I ActivityManager: Start proc 22105:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:10:28.234 21862 21871 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 10:10:28.261  1865  1948 I ActivityManager: Start proc 22168:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:10:28.658 21862 21871 D BProcessManager: initProcess: com.android.chrome:privileged_process0
+09-10 10:10:28.687  1865  1948 I ActivityManager: Start proc 22211:co.tdevs.duplika:p2/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P2}
+09-10 10:10:28.743  1865  1948 I ActivityManager: Start proc 22221:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 10:10:28.773 22168 22168 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 22168
+09-10 10:10:28.773 22168 22168 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=de6c20e6-8184-4e0b-8e6d-e9d53bd4ba2e cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:28.773 22168 22168 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:28.773 22168 22168 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:10:28.773 22168 22168 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:10:28.782  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013428781, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:10:28.809 21862 21875 D BProcessManager: App Died: com.android.chrome:sandboxed_process0
+09-10 10:10:28.814   927   927 I Zygote  : Process 22168 exited due to signal 9 (Killed)
+09-10 10:10:28.815  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 22168) has died: fg  BTOP
+09-10 10:10:29.316 22211 22269 W LOG_FLOWCTRL: ==LOGS OVER PROC QUOTA(300), rows(25) bytes(1843) com.android.chrome:privileged_process0 DROPPED==
+09-10 10:10:29.485  1865  1948 I ActivityManager: Start proc 22339:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:10:29.836 22339 22339 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 22339
+09-10 10:10:29.836 22339 22339 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=c01c11ea-89c8-451a-b560-40cc56a78496 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:29.836 22339 22339 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:29.836 22339 22339 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:10:29.836 22339 22339 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:10:29.848  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013429847, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:10:29.864  1086  1248 I SurfaceFlinger: [SF client] NEW(0xb40000704f7c6480) for (22211:com.android.chrome:privileged_process0)
+09-10 10:10:29.871  1086  1248 D OplusLayer: setProcInfo (2021,com.android.chrome/ChromeNativeWindowSurface#2021,com.android.chrome:privileged_process0,0x22180079)
+09-10 10:10:29.896   927   927 I Zygote  : Process 22339 exited due to signal 9 (Killed)
+09-10 10:10:29.897  1865  2503 I ActivityManager: Process co.tdevs.duplika:p1 (pid 22339) has died: fg  BTOP
+09-10 10:10:30.133  1086  1248 D OplusLayer: setProcInfo (2022,com.android.chrome/ChromeChildSurface#2022,com.android.chrome:privileged_process0,0x22180079)
+09-10 10:10:30.196   927   927 I Zygote  : Process 21472 exited due to signal 9 (Killed)
+09-10 10:10:30.198  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 21472) has died: cch+25 CEM 
+09-10 10:10:30.251   927   927 I Zygote  : Process 21913 exited due to signal 9 (Killed)
+09-10 10:10:30.308   927   927 I Zygote  : Process 22026 exited due to signal 9 (Killed)
+09-10 10:10:30.370  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 22026) has died: cch+5 CEM 
+09-10 10:10:30.382  1865  2503 I ActivityManager: Process com.facebook.system (pid 21913) has died: cch+15 CEM 
+09-10 10:10:30.465  1865  2506 I ActivityManager: Process com.android.vending (pid 22221) has died: cch+5 CEM 
+09-10 10:10:30.471   927   927 I Zygote  : Process 22221 exited due to signal 9 (Killed)
+09-10 10:10:34.319  1865  1948 I ActivityManager: Start proc 22458:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:10:46.487  1865  1948 I ActivityManager: Start proc 22600:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:10:46.750 22600 22600 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 22600
+09-10 10:10:46.750 22600 22600 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=869bc981-9118-4d88-bb8d-d0ae61df1311 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:46.750 22600 22600 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:10:46.750 22600 22600 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:10:46.750 22600 22600 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:10:46.757  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013446756, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:10:46.813   927   927 I Zygote  : Process 22600 exited due to signal 9 (Killed)
+09-10 10:10:46.814  1865  2503 I ActivityManager: Process co.tdevs.duplika:p1 (pid 22600) has died: fg  BTOP
+09-10 10:11:02.466  1865  1948 I ActivityManager: Start proc 22789:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:11:02.679 22789 22789 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 22789
+09-10 10:11:02.679 22789 22789 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@c137f50 with Intent { act=51f93c99-a616-48ec-8fdd-d7ae49ac484c cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:11:02.679 22789 22789 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:11:02.679 22789 22789 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:11:02.679 22789 22789 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:11:02.682  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013462681, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:11:40.843  1865  1948 I ActivityManager: Start proc 23197:com.oplus.statistics.rom:cc/u0a109 for content provider {com.oplus.statistics.rom/com.oplus.dcc.cloudctl.CloudCtlContentProvider}
+09-10 10:11:41.104  1865  1948 I ActivityManager: Start proc 23219:com.oplus.cosa/u0a149 for service {com.oplus.cosa/com.oplus.cosa.service.GameEventService}
+09-10 10:11:41.492  1865  1948 I ActivityManager: Start proc 23261:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:11:41.692  1865  1948 I ActivityManager: Start proc 23281:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:11:50.150  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 23281) has died: cch+5 CEM 
+09-10 10:11:50.150   927   927 I Zygote  : Process 23281 exited due to signal 9 (Killed)
+09-10 10:12:08.516   927   927 I Zygote  : Process 22789 exited due to signal 9 (Killed)
+09-10 10:12:12.060   927   927 I Zygote  : Process 23197 exited due to signal 9 (Killed)
+09-10 10:12:12.063  1865  2506 I ActivityManager: Process com.oplus.statistics.rom:cc (pid 23197) has died: vis IMPF
+09-10 10:12:42.090  1865  1948 I ActivityManager: Start proc 23936:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:12:43.061   927   927 I Zygote  : Process 20115 exited due to signal 9 (Killed)
+09-10 10:13:00.334  1865  1948 I ActivityManager: Start proc 24167:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:13:00.697  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 21805) has died: cch+25 CEM 
+09-10 10:13:00.697   927   927 I Zygote  : Process 21805 exited due to signal 9 (Killed)
+09-10 10:13:00.733  1865  2503 I ActivityManager: Process co.tdevs.duplika:black (pid 21862) has died: cch+15 CEM 
+09-10 10:13:00.737   927   927 I Zygote  : Process 21862 exited due to signal 9 (Killed)
+09-10 10:13:01.116  1865  1948 I ActivityManager: Start proc 24213:com.google.android.googlequicksearchbox:search/u0a118 for service {com.google.android.googlequicksearchbox/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:13:01.993  1865  1948 I ActivityManager: Start proc 24264:com.google.android.googlequicksearchbox:googleapp/u0a118 for service {com.google.android.googlequicksearchbox/com.google.android.libraries.search.integrations.tiktok.RemoteWorkerService_googleapp}
+09-10 10:13:03.667  1865  1948 I ActivityManager: Start proc 24456:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i22 for  {com.google.android.googlequicksearchbox/org.chromium.content.app.SandboxedProcessService0:0}
+09-10 10:13:03.756 24456 24456 I cr_WebViewApkApp: version=151.0.7922.199 (792219903) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+09-10 10:13:04.439   927   927 I Zygote  : Process 23936 exited due to signal 9 (Killed)
+09-10 10:13:04.441  1865  2506 I ActivityManager: Process com.android.settings (pid 23936) has died: cch+15 CEM 
+09-10 10:13:04.487   927   927 I Zygote  : Process 23261 exited due to signal 9 (Killed)
+09-10 10:13:04.493  1865  2503 I ActivityManager: Process com.oplus.romupdate (pid 23261) has died: cch+5 CEM 
+09-10 10:13:04.524   927   927 I Zygote  : Process 22458 exited due to signal 9 (Killed)
+09-10 10:13:04.530  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 22458) has died: cch+5 CEM 
+09-10 10:13:04.580   927   927 I Zygote  : Process 24213 exited due to signal 9 (Killed)
+09-10 10:13:04.583  1865  2503 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 24213) has died: cch+5 CEM 
+09-10 10:13:04.718  1865  1948 I ActivityManager: Start proc 24558:com.google.android.googlequicksearchbox:search/u0a118 for broadcast {com.google.android.googlequicksearchbox/com.google.android.libraries.search.gcm.search.SearchProcessGcmBroadcastReceiver_Receiver}
+09-10 10:13:05.251  1865  1948 I ActivityManager: Start proc 24630:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:13:17.132  1865  1948 I ActivityManager: Start proc 24787:com.facebook.katana/u0a660 for broadcast {com.facebook.katana/com.facebook.push.fbnslite.FbPushSdkFbnsReceiverShim}
+09-10 10:13:18.312   602   602 I lowmemorykiller: Kill 'com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:' (24456), uid 99022, oom_score_adj 915 to free 120788kB rss, 34344kB swap; reason: low watermark is breached
+09-10 10:13:18.392  1865  2018 I ActivityManager: Death received, pid = 24456, processName = com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for thread android.os.BinderProxy@9cf7a0f
+09-10 10:13:18.393  2507  2507 I Zygote  : Process 24456 exited due to signal 9 (Killed)
+09-10 10:13:18.431  1865  2506 I ActivityManager: Process com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (pid 24456) has died: cch+15 CEM 
+09-10 10:13:18.476   927   927 I Zygote  : Process 24264 exited due to signal 9 (Killed)
+09-10 10:13:18.480  1865  2503 I ActivityManager: Process com.google.android.googlequicksearchbox:googleapp (pid 24264) has died: cch+5 CEM 
+09-10 10:13:18.759   927   927 I Zygote  : Process 24558 exited due to signal 9 (Killed)
+09-10 10:13:18.767  1865  2506 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 24558) has died: cch+5 CEM 
+09-10 10:13:21.053  1865  1948 I ActivityManager: Start proc 24994:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:13:21.232  1865  2503 I ActivityManager: Process com.facebook.katana (pid 24787) has died: cch+5 CEM 
+09-10 10:13:21.239   927   927 I Zygote  : Process 24787 exited due to signal 9 (Killed)
+09-10 10:13:21.596 24994 25012 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 10:13:21.621  1865  1948 I ActivityManager: Start proc 25024:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:13:22.001 25024 25024 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 25024
+09-10 10:13:22.001 25024 25024 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=07ace2d9-bdf4-4691-adce-db8d1ec09799 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:13:22.001 25024 25024 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:13:22.001 25024 25024 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:13:22.001 25024 25024 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:13:22.012  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013602011, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:13:22.069 24994 25006 D BProcessManager: App Died: com.android.chrome:sandboxed_process0
+09-10 10:13:22.070  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 25024) has died: fg  BTOP
+09-10 10:13:22.070   927   927 I Zygote  : Process 25024 exited due to signal 9 (Killed)
+09-10 10:13:32.128  1865  1948 I ActivityManager: Start proc 25193:co.tdevs.duplika:p1/u0a977 for service {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1}
+09-10 10:13:32.463 25193 25193 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 25193
+09-10 10:13:32.463 25193 25193 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@cf7c549 with Intent { act=07ace2d9-bdf4-4691-adce-db8d1ec09799 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:13:32.463 25193 25193 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:13:32.463 25193 25193 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:13:32.463 25193 25193 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:13:32.471  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013612470, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:14:06.005   927   927 I Zygote  : Process 25193 exited due to signal 9 (Killed)
+09-10 10:14:08.341  1086  1227 I SurfaceFlinger: [SF client] REMOVE (0xb40000704f7c6480) for (22211:com.android.chrome:privileged_process0)
+09-10 10:14:21.692  1865  1948 I ActivityManager: Start proc 25495:com.facebook.katana/u0a660 for service {com.facebook.katana/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:14:31.788   927   927 I Zygote  : Process 24167 exited due to signal 9 (Killed)
+09-10 10:14:41.327  1865  1948 I ActivityManager: Start proc 25761:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:14:44.277 24994 25022 D BProcessManager: initProcess: com.android.chrome
+09-10 10:14:44.302  1865  1948 I ActivityManager: Start proc 25822:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:14:45.652 24994 25022 D BProcessManager: initProcess: com.android.chrome:privileged_process0
+09-10 10:14:45.672  1865  1948 I ActivityManager: Start proc 25902:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 10:14:45.696  1865  1948 I ActivityManager: Start proc 25903:co.tdevs.duplika:p3/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P3}
+09-10 10:14:46.074   927   927 I Zygote  : Process 22105 exited due to signal 9 (Killed)
+09-10 10:14:46.078  1865  2503 I ActivityManager: Process co.tdevs.duplika:p0 (pid 22105) has died: cch+45 CEM 
+09-10 10:14:46.168   927   927 I Zygote  : Process 25495 exited due to signal 9 (Killed)
+09-10 10:14:46.172  1865  2506 I ActivityManager: Process com.facebook.katana (pid 25495) has died: cch+35 CEM 
+09-10 10:14:46.188  1865  2503 I ActivityManager: Process co.tdevs.duplika:p2 (pid 22211) has died: fg  SVC 
+09-10 10:14:46.213 25903 25903 I cr_SplitCompatApp: version=152.0.7977.82 (797708204) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-10 10:14:46.970  1865  1948 I ActivityManager: Start proc 26059:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:14:47.855   927   927 I Zygote  : Process 25822 exited due to signal 11 (Segmentation fault)
+09-10 10:14:47.855  1865  2506 I ActivityManager: Process co.tdevs.duplika:p1 (pid 25822) has died: fg  TOP 
+09-10 10:14:47.886 24994 25022 D BProcessManager: App Died: com.android.chrome:privileged_process0
+09-10 10:14:47.998  1865  2503 I ActivityManager: Process co.tdevs.duplika:p3 (pid 25903) has died: fg  BFGS
+09-10 10:15:19.803  1865  1948 I ActivityManager: Start proc 26356:co.tdevs.duplika:p1/u0a977 for next-top-activity {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyActivity$P1}
+09-10 10:15:19.850   927   927 I Zygote  : Process 21608 exited due to signal 9 (Killed)
+09-10 10:15:19.989 24994 25397 D BProcessManager: initProcess: com.android.chrome
+09-10 10:15:20.041 26356 26356 E AndroidRuntime: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:15:20.041 26356 26356 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:15:20.041 26356 26356 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:15:20.048  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013720048, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:15:20.096  1865  2503 I ActivityManager: Process co.tdevs.duplika:p1 (pid 26356) has died: fg  TOP 
+09-10 10:15:20.098   927   927 I Zygote  : Process 26356 exited due to signal 9 (Killed)
+09-10 10:15:39.194  1865  1948 I ActivityManager: Start proc 26452:com.whatsapp/u0a291 for broadcast {com.whatsapp/com.whatsapp.alarmservice.AlarmBroadcastReceiver}
+09-10 10:15:39.230  1865  1948 I ActivityManager: Start proc 26462:com.google.android.youtube/u0a143 for service {com.google.android.youtube/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:15:39.256  1865  1948 I ActivityManager: Start proc 26465:com.truecaller/u0a786 for service {com.truecaller/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:15:39.998   927   927 I Zygote  : Process 26059 exited due to signal 9 (Killed)
+09-10 10:15:40.201   927   927 I Zygote  : Process 25761 exited due to signal 9 (Killed)
+09-10 10:15:40.202  1865  2503 I ActivityManager: Process com.google.android.apps.messaging (pid 25761) has died: cch+35 CEM 
+09-10 10:15:40.429  1865  2506 I ActivityManager: Process co.tdevs.duplika:black (pid 24994) has died: cch+25 CEM 
+09-10 10:15:40.432   927   927 I Zygote  : Process 24994 exited due to signal 9 (Killed)
+09-10 10:15:40.489   927   927 I Zygote  : Process 25902 exited due to signal 9 (Killed)
+09-10 10:15:40.490  1865  2503 I ActivityManager: Process com.android.vending (pid 25902) has died: cch+5 CEM 
+09-10 10:15:40.614   927   927 I Zygote  : Process 24630 exited due to signal 9 (Killed)
+09-10 10:15:40.615  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 24630) has died: cch+5 CEM 
+09-10 10:15:40.705   927   927 I Zygote  : Process 26462 exited due to signal 9 (Killed)
+09-10 10:15:40.707  1865  2503 I ActivityManager: Process com.google.android.youtube (pid 26462) has died: cch+5 CEM 
+09-10 10:15:40.755  1865  1948 I ActivityManager: Start proc 26697:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:15:41.235  1865  1948 I ActivityManager: Start proc 26755:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i23 for  {com.truecaller/org.chromium.content.app.SandboxedProcessService0:0}
+09-10 10:15:41.324 26755 26755 I cr_WebViewApkApp: version=151.0.7922.199 (792219903) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+09-10 10:15:43.809  1865  1948 I ActivityManager: Start proc 26874:com.google.android.webview:webview_service/u0a138 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+09-10 10:15:59.999  1865  1948 I ActivityManager: Start proc 26972:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:16:00.110  1865  1948 I ActivityManager: Start proc 26998:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:16:00.778  1865  1948 I ActivityManager: Start proc 27070:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:16:00.822  1865  3529 I ActivityManager: Killing 26755:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a786i23 (adj 915): empty #6
+09-10 10:16:00.847  1865  2019 I ActivityManager: Death received, pid = 26755, processName = com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for thread android.os.BinderProxy@ebec7bf
+09-10 10:16:00.847  2507  2507 I Zygote  : Process 26755 exited due to signal 9 (Killed)
+09-10 10:16:00.966  1865  1948 I ActivityManager: Start proc 27095:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:16:01.340   927   927 I Zygote  : Process 26465 exited due to signal 9 (Killed)
+09-10 10:16:09.356   927   927 I Zygote  : Process 27095 exited due to signal 9 (Killed)
+09-10 10:16:09.356  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 27095) has died: cch+5 CEM 
+09-10 10:16:46.798  1865  2506 I ActivityManager: Process com.google.android.webview:webview_service (pid 26874) has died: cch+45 CEM 
+09-10 10:16:46.812   927   927 I Zygote  : Process 21837 exited due to signal 9 (Killed)
+09-10 10:16:46.814   927   927 I Zygote  : Process 26874 exited due to signal 9 (Killed)
+09-10 10:16:46.838   927   927 I Zygote  : Process 26697 exited due to signal 9 (Killed)
+09-10 10:16:46.840   927   927 I Zygote  : Process 26972 exited due to signal 9 (Killed)
+09-10 10:16:46.848   927   927 I Zygote  : Process 26998 exited due to signal 9 (Killed)
+09-10 10:16:46.850  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 26697) has died: cch+5 CEM 
+09-10 10:16:46.865  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 26998) has died: cch+15 CEM 
+09-10 10:16:46.880  1865  2506 I ActivityManager: Process com.android.settings (pid 26972) has died: cch+35 CEM 
+09-10 10:16:46.926  1865  1948 I ActivityManager: Start proc 27325:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:16:47.464  1865  1948 I ActivityManager: Start proc 27348:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:16:48.209  1865  1948 I ActivityManager: Start proc 27389:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:16:51.751  1865  1948 I ActivityManager: Start proc 27443:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:16:51.925  1865  1948 I ActivityManager: Start proc 27469:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:16:52.189  1865  1948 I ActivityManager: Start proc 27485:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.analytics.uploadscheduler.AnalyticsUploadAlarmReceiver}
+09-10 10:16:53.479  1865  2503 I ActivityManager: Process com.oplus.romupdate (pid 27070) has died: cch+25 CEM 
+09-10 10:16:53.480   927   927 I Zygote  : Process 27070 exited due to signal 9 (Killed)
+09-10 10:16:53.548   927   927 I Zygote  : Process 27348 exited due to signal 9 (Killed)
+09-10 10:16:53.551  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 27348) has died: cch+15 CEM 
+09-10 10:16:53.833   927   927 I Zygote  : Process 27389 exited due to signal 9 (Killed)
+09-10 10:16:53.834  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 27389) has died: cch+5 CEM 
+09-10 10:16:53.859   927   927 I Zygote  : Process 27325 exited due to signal 9 (Killed)
+09-10 10:16:53.861  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 27325) has died: svcb SVC 
+09-10 10:16:53.868   927   927 I Zygote  : Process 21749 exited due to signal 9 (Killed)
+09-10 10:16:53.869  1865  2503 I ActivityManager: Process com.facebook.services (pid 21749) has died: svcb SVC 
+09-10 10:16:55.874  1865  1948 I ActivityManager: Start proc 27721:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:17:00.045 27469 27519 D BProcessManager: initProcess: com.android.chrome
+09-10 10:17:00.073  1865  1948 I ActivityManager: Start proc 27772:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:17:01.217 27469 27515 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 10:17:01.245  1865  1948 I ActivityManager: Start proc 27826:co.tdevs.duplika:p1/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 10:17:01.503 27469 27516 D BProcessManager: initProcess: com.android.chrome:privileged_process0
+09-10 10:17:01.509  1865  1948 I ActivityManager: Start proc 27864:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 10:17:01.526  1865  1948 I ActivityManager: Start proc 27865:co.tdevs.duplika:p2/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P2}
+09-10 10:17:01.541 27826 27826 E AndroidRuntime: Process: com.android.chrome:sandboxed_process0, PID: 27826
+09-10 10:17:01.541 27826 27826 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=0a199f23-69fe-484e-b3f0-d8d7ee7a0293 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:17:01.541 27826 27826 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 10:17:01.541 27826 27826 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 10:17:01.541 27826 27826 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 10:17:01.559  1865  2772 D OplusAppStartupMonitor: notifyUnstableAppInfo: Bundle[{unstableTime=1789013821557, reason=crash, userId=0, exceptionMsg=android.app.ContextImpl cannot be cast to android.app.Application, exceptionClass=java.lang.ClassCastException, app_channel_type=unstable, packageName=co.tdevs.duplika, unstable_restrict_switch=true}]
+09-10 10:17:02.032 27865 27865 I cr_SplitCompatApp: version=152.0.7977.82 (797708204) minSdkVersion=29 processName=com.android.chrome:privileged_process0 isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-10 10:17:02.319  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 27721) has died: cch+5 CEM 
+09-10 10:17:02.339 27865 27960 W LOG_FLOWCTRL: ==LOGS OVER PROC QUOTA(300), rows(11) bytes(524) com.android.chrome:privileged_process0 DROPPED==
+09-10 10:17:02.347   927   927 I Zygote  : Process 27721 exited due to signal 9 (Killed)
+09-10 10:17:02.523  1086  1243 I SurfaceFlinger: [SF client] NEW(0xb400007086979380) for (27865:com.android.chrome:privileged_process0)
+09-10 10:17:02.525  1086  1243 D OplusLayer: setProcInfo (2149,com.android.chrome/ChromeNativeWindowSurface#2149,com.android.chrome:privileged_process0,0x22180079)
+09-10 10:17:02.635  1086  1243 D OplusLayer: setProcInfo (2150,com.android.chrome/ChromeChildSurface#2150,com.android.chrome:privileged_process0,0x22180079)
+09-10 10:17:02.726  1865  1948 I ActivityManager: Start proc 28037:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:17:02.782  1865  2503 I ActivityManager: Process com.android.vending (pid 27864) has died: cch+5 CEM 
+09-10 10:17:02.784   927   927 I Zygote  : Process 27864 exited due to signal 9 (Killed)
+09-10 10:17:03.055  1865  1948 I ActivityManager: Start proc 28070:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:17:03.610  1865  1948 I ActivityManager: Start proc 28111:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:17:03.692  1865  1948 I ActivityManager: Start proc 28136:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:17:04.989  1865  1948 I ActivityManager: Start proc 28171:com.facebook.katana/u0a660 for service {com.facebook.katana/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:17:05.493   927   927 I Zygote  : Process 28111 exited due to signal 9 (Killed)
+09-10 10:17:05.496  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 28111) has died: cch+5 CEM 
+09-10 10:17:05.561   927   927 I Zygote  : Process 26452 exited due to signal 9 (Killed)
+09-10 10:17:05.564  1865  2503 I ActivityManager: Process com.whatsapp (pid 26452) has died: svcb SVC 
+09-10 10:17:06.008  1865  1948 I ActivityManager: Start proc 28287:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:17:06.135  1865  2506 I ActivityManager: Process com.facebook.katana (pid 28171) has died: cch+5 CEM 
+09-10 10:17:06.135   927   927 I Zygote  : Process 28171 exited due to signal 9 (Killed)
+09-10 10:17:19.647  1865  1948 I ActivityManager: Start proc 28365:com.oneplus.deskclock:clockWidget/u0a157 for service {com.oneplus.deskclock/com.coloros.widget.smallweather.ClockWidgetWeatherService}
+09-10 10:17:29.665  1865  1948 I ActivityManager: Start proc 28424:com.whatsapp/u0a291 for service {com.whatsapp/com.whatsapp.messageservice.messaging.MessageService}
+09-10 10:17:59.783  1865  1948 I ActivityManager: Start proc 28684:com.google.android.as.oss/u0a232 for service {com.google.android.as.oss/com.google.android.gms.learning.internal.training.InAppJobService}
+09-10 10:18:06.857  1865  1948 I ActivityManager: Start proc 28737:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:18:07.174   927   927 I Zygote  : Process 28136 exited due to signal 9 (Killed)
+09-10 10:18:07.174  1865  2503 I ActivityManager: Process com.facebook.system (pid 28136) has died: cch+5 CEM 
+09-10 10:18:07.206   927   927 I Zygote  : Process 28365 exited due to signal 9 (Killed)
+09-10 10:18:07.206  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 28365) has died: cch+5 CEM 
+09-10 10:18:07.232   927   927 I Zygote  : Process 28684 exited due to signal 9 (Killed)
+09-10 10:18:07.233  1865  2503 I ActivityManager: Process com.google.android.as.oss (pid 28684) has died: cch+5 CEM 
+09-10 10:18:07.588  1865  1948 I ActivityManager: Start proc 28782:com.google.android.as.oss/u0a232 for service {com.google.android.as.oss/com.google.android.gms.learning.internal.training.InAppJobService}
+09-10 10:18:07.774  1865  1948 I ActivityManager: Start proc 28803:com.portonics.mygp/u0a297 for service {com.portonics.mygp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:18:08.495  1865  1948 I ActivityManager: Start proc 28881:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 10:18:08.521   927   927 I Zygote  : Process 27485 exited due to signal 9 (Killed)
+09-10 10:18:08.524  1865  2506 I ActivityManager: Process com.instagram.barcelona (pid 27485) has died: cch+5 CEM 
+09-10 10:18:08.589  1865  1948 I ActivityManager: Start proc 28905:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService}
+09-10 10:18:09.057   927   927 I Zygote  : Process 28287 exited due to signal 9 (Killed)
+09-10 10:18:09.057  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 28287) has died: cch+5 CEM 
+09-10 10:18:12.746  1865  1948 I ActivityManager: Start proc 29092:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:18:14.522  1865  1948 I ActivityManager: Start proc 29140:com.fasset.cashapp/u0a662 for service {com.fasset.cashapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:18:14.660   927   927 I Zygote  : Process 28782 exited due to signal 9 (Killed)
+09-10 10:18:14.660  1865  2506 I ActivityManager: Process com.google.android.as.oss (pid 28782) has died: cch+5 CEM 
+09-10 10:18:15.916   927   927 I Zygote  : Process 28803 exited due to signal 9 (Killed)
+09-10 10:18:17.207 27469 27898 D BProcessManager: App Died: com.android.chrome:sandboxed_process0
+09-10 10:18:17.208   927   927 I Zygote  : Process 27826 exited due to signal 9 (Killed)
+09-10 10:18:19.281  1865  1948 I ActivityManager: Start proc 29359:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:18:19.649   927   927 I Zygote  : Process 28905 exited due to signal 9 (Killed)
+09-10 10:19:13.624   927   927 I Zygote  : Process 28070 exited due to signal 9 (Killed)
+09-10 10:19:18.104  1865  1948 I ActivityManager: Start proc 29708:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:19:19.055  1865  1948 I ActivityManager: Start proc 29762:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:19:19.127   927   927 I Zygote  : Process 29140 exited due to signal 9 (Killed)
+09-10 10:19:19.150   927   927 I Zygote  : Process 28881 exited due to signal 9 (Killed)
+09-10 10:19:19.248  1865  1948 I ActivityManager: Start proc 29786:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:19:19.581   927   927 I Zygote  : Process 29359 exited due to signal 9 (Killed)
+09-10 10:19:27.627   927   927 I Zygote  : Process 29786 exited due to signal 9 (Killed)
+09-10 10:19:27.627  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 29786) has died: cch+5 CEM 
+09-10 10:20:56.428   927   927 I Zygote  : Process 27469 exited due to signal 9 (Killed)
+09-10 10:20:56.437   927   927 I Zygote  : Process 27443 exited due to signal 9 (Killed)
+09-10 10:20:56.497   927   927 I Zygote  : Process 27772 exited due to signal 9 (Killed)
+09-10 10:20:56.497   927   927 I Zygote  : Process 29092 exited due to signal 9 (Killed)
+09-10 10:20:56.497   927   927 I Zygote  : Process 29762 exited due to signal 9 (Killed)
+09-10 10:20:56.505   927   927 I Zygote  : Process 29708 exited due to signal 9 (Killed)
+09-10 10:20:56.510   927   927 I Zygote  : Process 28737 exited due to signal 9 (Killed)
+09-10 10:20:56.524  1865  2503 I ActivityManager: Process com.oplus.romupdate (pid 29762) has died: cch+25 CEM 
+09-10 10:20:56.534  1086  1227 I SurfaceFlinger: [SF client] REMOVE (0xb400007086979380) for (27865:com.android.chrome:privileged_process0)
+09-10 10:20:56.536   927   927 I Zygote  : Process 27865 exited due to signal 9 (Killed)
+09-10 10:20:56.545  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 29092) has died: cch+5 CEM 
+09-10 10:20:56.560  1865  2506 I ActivityManager: Process com.google.android.apps.messaging (pid 28737) has died: cch+15 CEM 
+09-10 10:20:56.569  1865  2503 I ActivityManager: Process com.android.settings (pid 29708) has died: cch+35 CEM 
+09-10 10:20:56.593  1865  1948 I ActivityManager: Start proc 30178:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:20:57.034  1865  1948 I ActivityManager: Start proc 30206:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:21:00.128  1865  1948 I ActivityManager: Start proc 30253:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:21:00.546  1865  1948 I ActivityManager: Start proc 30287:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:21:00.688  1865  1948 I ActivityManager: Start proc 30307:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:21:02.570  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 30206) has died: cch+15 CEM 
+09-10 10:21:02.577   927   927 I Zygote  : Process 30206 exited due to signal 9 (Killed)
+09-10 10:21:02.597   927   927 I Zygote  : Process 30253 exited due to signal 9 (Killed)
+09-10 10:21:02.604  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 30253) has died: cch+5 CEM 
+09-10 10:21:02.767  1865  1948 I ActivityManager: Start proc 30402:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:21:41.438   927   927 I Zygote  : Process 30307 exited due to signal 9 (Killed)
+09-10 10:21:41.489   927   927 I Zygote  : Process 30178 exited due to signal 9 (Killed)
+09-10 10:21:41.493  1865  2503 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 30178) has died: cch+15 CEM 
+09-10 10:21:41.501   927   927 I Zygote  : Process 30287 exited due to signal 9 (Killed)
+09-10 10:21:41.508   927   927 I Zygote  : Process 30402 exited due to signal 9 (Killed)
+09-10 10:21:41.570  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 30402) has died: cch+5 CEM 
+09-10 10:21:41.586  1865  1948 I ActivityManager: Start proc 30669:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:21:41.968  1865  1948 I ActivityManager: Start proc 30693:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:21:42.225  1865  1948 I ActivityManager: Start proc 30719:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:21:45.001  1865  1948 I ActivityManager: Start proc 30774:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:21:45.167  1865  1948 I ActivityManager: Start proc 30793:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:21:47.019   927   927 I Zygote  : Process 30719 exited due to signal 9 (Killed)
+09-10 10:21:47.020  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 30719) has died: cch+5 CEM 
+09-10 10:21:47.036   927   927 I Zygote  : Process 28037 exited due to signal 9 (Killed)
+09-10 10:21:47.038  1865  2506 I ActivityManager: Process com.facebook.services (pid 28037) has died: svcb SVC 
+09-10 10:21:47.041   927   927 I Zygote  : Process 19369 exited due to signal 9 (Killed)
+09-10 10:21:47.048  1865  2503 I ActivityManager: Process com.oplus.crashbox (pid 19369) has died: svcb SVC 
+09-10 10:21:47.051   927   927 I Zygote  : Process 30693 exited due to signal 9 (Killed)
+09-10 10:21:47.058  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 30693) has died: cch+15 CEM 
+09-10 10:21:47.728  1865  1948 I ActivityManager: Start proc 30872:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:21:48.068  1865  1948 I ActivityManager: Start proc 30894:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:21:48.358  1865  1948 I ActivityManager: Start proc 30929:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:21:48.797  1865  1948 I ActivityManager: Start proc 30966:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:21:48.906  1865  1948 I ActivityManager: Start proc 30993:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:21:54.546   927   927 I Zygote  : Process 28424 exited due to signal 9 (Killed)
+09-10 10:21:54.546  1865  2503 I ActivityManager: Process com.whatsapp (pid 28424) has died: cch+25 CEM 
+09-10 10:22:25.023   927   927 I Zygote  : Process 30793 exited due to signal 9 (Killed)
+09-10 10:22:25.062   927   927 I Zygote  : Process 30774 exited due to signal 9 (Killed)
+09-10 10:22:25.108  1865  2506 I ActivityManager: Process com.facebook.system (pid 30966) has died: cch+25 CEM 
+09-10 10:22:25.123   927   927 I Zygote  : Process 30669 exited due to signal 9 (Killed)
+09-10 10:22:25.123   927   927 I Zygote  : Process 30872 exited due to signal 9 (Killed)
+09-10 10:22:25.123   927   927 I Zygote  : Process 30966 exited due to signal 9 (Killed)
+09-10 10:22:25.128   927   927 I Zygote  : Process 30929 exited due to signal 9 (Killed)
+09-10 10:22:25.139  1865  2503 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 30669) has died: fg  RCVR
+09-10 10:22:25.160  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 30872) has died: cch+5 CEM 
+09-10 10:22:25.167   927   927 I Zygote  : Process 30894 exited due to signal 9 (Killed)
+09-10 10:22:25.169  1865  2506 I ActivityManager: Process com.facebook.services (pid 30894) has died: svcb SVC 
+09-10 10:22:25.183  1865  2503 I ActivityManager: Process com.facebook.appmanager (pid 30929) has died: cch+5 CEM 
+09-10 10:22:27.427  1865  1948 I ActivityManager: Start proc 31409:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:22:28.871  1865  1948 I ActivityManager: Start proc 31449:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:22:29.074  1865  1948 I ActivityManager: Start proc 31469:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:22:30.070  1865  1948 I ActivityManager: Start proc 31548:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:22:30.654  1865  1948 I ActivityManager: Start proc 31602:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:22:30.853  1865  1948 I ActivityManager: Start proc 31629:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:22:30.917  1865  2506 I ActivityManager: Process com.oplus.romupdate (pid 31602) has died: cch+5 CEM 
+09-10 10:22:30.918   927   927 I Zygote  : Process 31602 exited due to signal 9 (Killed)
+09-10 10:22:30.928   927   927 I Zygote  : Process 31409 exited due to signal 9 (Killed)
+09-10 10:22:30.934   927   927 I Zygote  : Process 31548 exited due to signal 9 (Killed)
+09-10 10:22:30.936  1865  2506 I ActivityManager: Process com.android.settings (pid 31548) has died: cch+5 CEM 
+09-10 10:22:30.939  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 31409) has died: cch+5 CEM 
+09-10 10:22:35.141  1865  1948 I ActivityManager: Start proc 31653:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:22:35.191  1865  1948 I ActivityManager: Start proc 31666:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:22:35.405  1865  1948 I ActivityManager: Start proc 31705:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:22:35.827  1865  1948 I ActivityManager: Start proc 31745:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:22:37.035  1865  1948 I ActivityManager: Start proc 31789:com.oppo.quicksearchbox/u0a112 for service {com.oppo.quicksearchbox/io.branch.search.internal.services.stub.android.AndroidScheduledQueryService}
+09-10 10:22:37.986  1865  1948 I ActivityManager: Start proc 31908:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.developergroupidinfo.DeveloperGroupIdInfoService}
+09-10 10:22:38.211  1865  1948 I ActivityManager: Start proc 31945:com.heytap.htms:cloudctrl/u0a158 for service {com.heytap.htms/com.heytap.msp.cloudctrl.ipc.CloudCtrlService}
+09-10 10:22:38.665  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 31653) has died: cch+5 CEM 
+09-10 10:22:38.666   927   927 I Zygote  : Process 31653 exited due to signal 9 (Killed)
+09-10 10:22:38.723  1865  2503 I ActivityManager: Process com.heytap.mcs.appservice (pid 31629) has died: cch+5 CEM 
+09-10 10:22:38.728   927   927 I Zygote  : Process 31629 exited due to signal 9 (Killed)
+09-10 10:22:38.777  1865  1948 I ActivityManager: Start proc 31990:com.heytap.htms/u0a158 for service {com.heytap.htms/androidx.room.MultiInstanceInvalidationService}
+09-10 10:22:39.537  1865  1948 I ActivityManager: Start proc 32100:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:22:40.372  1865  1948 I ActivityManager: Start proc 32192:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 10:22:42.733  1865  1948 I ActivityManager: Start proc 32279:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:22:45.055  1865  1948 I ActivityManager: Start proc 32339:com.google.android.apps.messaging/u0a234 for service {com.google.android.apps.messaging/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:22:48.038   927   927 I Zygote  : Process 32100 exited due to signal 9 (Killed)
+09-10 10:22:48.040  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 32100) has died: cch+5 CEM 
+09-10 10:23:09.720   927   927 I Zygote  : Process 31469 exited due to signal 9 (Killed)
+09-10 10:23:09.792  1865  2506 I ActivityManager: Process com.android.vending (pid 31908) has died: cch+5 CEM 
+09-10 10:23:09.802   927   927 I Zygote  : Process 30993 exited due to signal 9 (Killed)
+09-10 10:23:09.803   927   927 I Zygote  : Process 31705 exited due to signal 9 (Killed)
+09-10 10:23:09.803   927   927 I Zygote  : Process 31745 exited due to signal 9 (Killed)
+09-10 10:23:09.804   927   927 I Zygote  : Process 31908 exited due to signal 9 (Killed)
+09-10 10:23:09.804   927   927 I Zygote  : Process 31789 exited due to signal 9 (Killed)
+09-10 10:23:09.804   927   927 I Zygote  : Process 32192 exited due to signal 9 (Killed)
+09-10 10:23:09.804   927   927 I Zygote  : Process 32279 exited due to signal 9 (Killed)
+09-10 10:23:09.831  1865  2503 I ActivityManager: Process com.android.vending:background (pid 32192) has died: cch+5 CEM 
+09-10 10:23:09.843  1865  1948 I ActivityManager: Start proc 32579:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:23:09.868  1865  2503 I ActivityManager: Process com.facebook.appmanager (pid 31705) has died: cch+35 CEM 
+09-10 10:23:09.871  1865  2503 I ActivityManager: Process com.facebook.system (pid 31745) has died: cch+45 CEM 
+09-10 10:23:09.876  1865  2503 I ActivityManager: Process com.oppo.quicksearchbox (pid 31789) has died: svcb SVC 
+09-10 10:23:09.887  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 32279) has died: cch+25 CEM 
+09-10 10:23:10.396  1865  1948 I ActivityManager: Start proc 32602:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:23:13.512  1865  1948 I ActivityManager: Start proc 32658:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:23:23.662   927   927 I Zygote  : Process 31449 exited due to signal 9 (Killed)
+09-10 10:23:27.235  1865  1948 I ActivityManager: Start proc 32761:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:23:27.361  1865  1948 I ActivityManager: Start proc 317:com.facebook.katana/u0a660 for service {com.facebook.katana/com.facebook.falco.jobscheduler.FFJobService}
+09-10 10:23:27.426  1865  1948 I ActivityManager: Start proc 346:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:23:29.313   927   927 I Zygote  : Process 31945 exited due to signal 9 (Killed)
+09-10 10:23:29.313  1865  2506 I ActivityManager: Process com.heytap.htms:cloudctrl (pid 31945) has died: cch+35 CEM 
+09-10 10:23:29.323   927   927 I Zygote  : Process 32658 exited due to signal 9 (Killed)
+09-10 10:23:29.327  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 32658) has died: cch+5 CEM 
+09-10 10:23:29.344  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 32579) has died: cch+15 CEM 
+09-10 10:23:29.344   927   927 I Zygote  : Process 32579 exited due to signal 9 (Killed)
+09-10 10:23:29.345   927   927 I Zygote  : Process 32602 exited due to signal 9 (Killed)
+09-10 10:23:29.347  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 32602) has died: cch+25 CEM 
+09-10 10:23:29.361   927   927 I Zygote  : Process 31990 exited due to signal 9 (Killed)
+09-10 10:23:29.362  1865  2506 I ActivityManager: Process com.heytap.htms (pid 31990) has died: fg  SVC 
+09-10 10:23:29.392   927   927 I Zygote  : Process 31666 exited due to signal 9 (Killed)
+09-10 10:23:29.392  1865  2503 I ActivityManager: Process com.facebook.services (pid 31666) has died: svcb SVC 
+09-10 10:23:29.475  1865  1948 I ActivityManager: Start proc 862:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:23:30.084  1865  1948 I ActivityManager: Start proc 903:com.google.android.youtube/u0a143 for service {com.google.android.youtube/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:23:30.128  1865  1948 I ActivityManager: Start proc 915:com.heytap.mcs.statistics/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.statistics.service.StatisticsApiService}
+09-10 10:23:30.231  1865  1948 I ActivityManager: Start proc 937:com.heytap.mcs.biz.message/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.message.MessageDealService}
+09-10 10:23:30.255  1865  1948 I ActivityManager: Start proc 992:com.google.android.gms.unstable/u0a113 for service {com.google.android.gms/com.google.android.gms.droidguard.DroidGuardService}
+09-10 10:23:30.585   927   927 I Zygote  : Process 937 exited due to signal 9 (Killed)
+09-10 10:23:30.585  1865  2506 I ActivityManager: Process com.heytap.mcs.biz.message (pid 937) has died: fg  SVC 
+09-10 10:23:30.980  1865  1948 I ActivityManager: Start proc 1386:com.heytap.htms:cloudctrl/u0a158 for service {com.heytap.htms/com.heytap.msp.cloudctrl.ipc.CloudCtrlService}
+09-10 10:23:31.128  1865  1948 I ActivityManager: Start proc 1523:com.heytap.htms/u0a158 for service {com.heytap.htms/androidx.room.MultiInstanceInvalidationService}
+09-10 10:23:31.348  1865  1948 I ActivityManager: Start proc 1654:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:23:31.705  1865  2503 I ActivityManager: Process com.heytap.htms:cloudctrl (pid 1386) has died: cch+5 CEM 
+09-10 10:23:31.706   927   927 I Zygote  : Process 1386 exited due to signal 9 (Killed)
+09-10 10:23:33.447   927   927 I Zygote  : Process 1654 exited due to signal 9 (Killed)
+09-10 10:23:33.449  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 1654) has died: cch+5 CEM 
+09-10 10:23:33.483  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 862) has died: cch+5 CEM 
+09-10 10:23:33.483   927   927 I Zygote  : Process 862 exited due to signal 9 (Killed)
+09-10 10:23:33.550   927   927 I Zygote  : Process 903 exited due to signal 9 (Killed)
+09-10 10:23:33.560  1865  2506 I ActivityManager: Process com.google.android.youtube (pid 903) has died: cch+5 CEM 
+09-10 10:23:34.519  1865  1948 I ActivityManager: Start proc 1983:com.facebook.services/u0a226 for content provider {com.facebook.services/com.facebook.oxygen.services.storage.provider.StorageProvider}
+09-10 10:23:34.774  1865  1948 I ActivityManager: Start proc 2072:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:23:35.226  1865  1948 I ActivityManager: Start proc 2194:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:23:35.338  1865  1948 I ActivityManager: Start proc 2281:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:23:35.637  1865  2503 I ActivityManager: Process com.heytap.mcs.statistics (pid 915) has died: fg  SVC 
+09-10 10:23:35.638   927   927 I Zygote  : Process 915 exited due to signal 9 (Killed)
+09-10 10:23:36.407   927   927 I Zygote  : Process 317 exited due to signal 9 (Killed)
+09-10 10:23:36.408  1865  2506 I ActivityManager: Process com.facebook.katana (pid 317) has died: cch+5 CEM 
+09-10 10:23:36.525  1865  1948 I ActivityManager: Start proc 2513:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:23:59.418   346   367 D BProcessManager: initProcess: com.example.duplikaladder.umprobe
+09-10 10:23:59.450  1865  1948 I ActivityManager: Start proc 3187:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:24:57.996   927   927 I Zygote  : Process 3187 exited due to signal 9 (Killed)
+09-10 10:24:58.027   927   927 I Zygote  : Process 32761 exited due to signal 9 (Killed)
+09-10 10:24:58.133   927   927 I Zygote  : Process 346 exited due to signal 9 (Killed)
+09-10 10:24:58.141   927   927 I Zygote  : Process 992 exited due to signal 9 (Killed)
+09-10 10:24:58.144  1865  2503 I ActivityManager: Process com.google.android.gms.unstable (pid 992) has died: cch+35 CEM 
+09-10 10:24:58.167   927   927 I Zygote  : Process 2281 exited due to signal 9 (Killed)
+09-10 10:24:58.177  1865  1948 I ActivityManager: Start proc 3797:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:24:58.224  1865  2506 I ActivityManager: Process com.instagram.barcelona (pid 2281) has died: cch+45 CEM 
+09-10 10:24:58.258  1865  1948 I ActivityManager: Start proc 3799:com.google.android.apps.wellbeing/u0a105 for service {com.google.android.apps.wellbeing/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:24:58.851  1865  1948 I ActivityManager: Start proc 3868:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:25:02.186  1865  1948 I ActivityManager: Start proc 3965:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:25:02.365  1865  1948 I ActivityManager: Start proc 3990:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:25:04.253  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 3868) has died: cch+5 CEM 
+09-10 10:25:04.254   927   927 I Zygote  : Process 3868 exited due to signal 9 (Killed)
+09-10 10:25:04.277   927   927 I Zygote  : Process 1523 exited due to signal 9 (Killed)
+09-10 10:25:04.278   927   927 I Zygote  : Process 2194 exited due to signal 9 (Killed)
+09-10 10:25:04.280  1865  2506 I ActivityManager: Process com.heytap.htms (pid 1523) has died: svcb SVC 
+09-10 10:25:04.281   927   927 I Zygote  : Process 2072 exited due to signal 9 (Killed)
+09-10 10:25:04.291   927   927 I Zygote  : Process 1983 exited due to signal 9 (Killed)
+09-10 10:25:04.292   927   927 I Zygote  : Process 2513 exited due to signal 9 (Killed)
+09-10 10:25:04.295  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 2072) has died: cch+35 CEM 
+09-10 10:25:04.298  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 2513) has died: fg  RCVR
+09-10 10:25:04.302   927   927 I Zygote  : Process 3799 exited due to signal 9 (Killed)
+09-10 10:25:04.304  1865  2506 I ActivityManager: Process com.facebook.services (pid 1983) has died: svcb SVC 
+09-10 10:25:04.309  1865  2506 I ActivityManager: Process com.google.android.apps.wellbeing (pid 3799) has died: cch+15 CEM 
+09-10 10:25:04.319  1865  2503 I ActivityManager: Process com.facebook.system (pid 2194) has died: cch+45 CEM 
+09-10 10:25:06.168  1865  1948 I ActivityManager: Start proc 4098:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:25:12.609  3990  4007 D BProcessManager: initProcess: com.example.duplikaladder.isosplit
+09-10 10:25:12.639  1865  1948 I ActivityManager: Start proc 4160:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:25:14.353  1865  1948 I ActivityManager: Start proc 4238:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:25:14.581  1865  1948 I ActivityManager: Start proc 4296:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:25:14.944  1865  1948 I ActivityManager: Start proc 4338:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:25:15.113  1865  1948 I ActivityManager: Start proc 4367:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:26:12.092  1865  1948 I ActivityManager: Start proc 4930:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:26:12.151  1865  1948 I ActivityManager: Start proc 4931:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:26:12.908  1865  1948 I ActivityManager: Start proc 5033:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:26:12.977   927   927 I Zygote  : Process 32339 exited due to signal 9 (Killed)
+09-10 10:26:13.079  1865  1948 I ActivityManager: Start proc 5062:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:26:13.413   927   927 I Zygote  : Process 3797 exited due to signal 9 (Killed)
+09-10 10:26:19.105   927   927 I Zygote  : Process 4367 exited due to signal 9 (Killed)
+09-10 10:26:19.151  1865  1948 I ActivityManager: Start proc 5145:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 10:26:19.875  1865  1948 I ActivityManager: Start proc 5304:com.whatsapp/u0a291 for service {com.whatsapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:26:20.563   927   927 I Zygote  : Process 4338 exited due to signal 9 (Killed)
+09-10 10:26:21.478   927   927 I Zygote  : Process 5062 exited due to signal 9 (Killed)
+09-10 10:26:21.481  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 5062) has died: cch+5 CEM 
+09-10 10:26:45.898   927   927 I Zygote  : Process 4160 exited due to signal 9 (Killed)
+09-10 10:26:45.973   927   927 I Zygote  : Process 3965 exited due to signal 9 (Killed)
+09-10 10:26:45.990   927   927 I Zygote  : Process 3990 exited due to signal 9 (Killed)
+09-10 10:26:46.133  1865  1948 I ActivityManager: Start proc 5635:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:26:46.151  1865  2506 I ActivityManager: Process com.android.settings (pid 4930) has died: cch+35 CEM 
+09-10 10:26:46.155   927   927 I Zygote  : Process 4098 exited due to signal 9 (Killed)
+09-10 10:26:46.162   927   927 I Zygote  : Process 4296 exited due to signal 9 (Killed)
+09-10 10:26:46.162   927   927 I Zygote  : Process 4930 exited due to signal 9 (Killed)
+09-10 10:26:46.162   927   927 I Zygote  : Process 4931 exited due to signal 9 (Killed)
+09-10 10:26:46.164  1865  2503 I ActivityManager: Process com.facebook.appmanager (pid 4296) has died: cch+45 CEM 
+09-10 10:26:46.194  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 4098) has died: cch+5 CEM 
+09-10 10:26:46.214  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 4931) has died: cch+25 CEM 
+09-10 10:26:46.512  1865  1948 I ActivityManager: Start proc 5670:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:26:46.694  1865  1948 I ActivityManager: Start proc 5698:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:26:49.955  1865  1948 I ActivityManager: Start proc 5785:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:26:50.127  1865  1948 I ActivityManager: Start proc 5808:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:26:52.005   927   927 I Zygote  : Process 5698 exited due to signal 9 (Killed)
+09-10 10:26:52.005  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 5698) has died: cch+5 CEM 
+09-10 10:26:52.029   927   927 I Zygote  : Process 23219 exited due to signal 9 (Killed)
+09-10 10:26:52.033   927   927 I Zygote  : Process 5670 exited due to signal 9 (Killed)
+09-10 10:26:52.033  1865  2503 I ActivityManager: Process com.oplus.cosa (pid 23219) has died: svcb SVC 
+09-10 10:26:52.043  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 5670) has died: cch+15 CEM 
+09-10 10:26:52.064  1865  2503 I ActivityManager: Process com.facebook.services (pid 4238) has died: svcb SVC 
+09-10 10:26:52.065   927   927 I Zygote  : Process 4238 exited due to signal 9 (Killed)
+09-10 10:26:52.386  1865  1948 I ActivityManager: Start proc 5901:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:27:02.063  1865  1948 I ActivityManager: Start proc 5977:com.oplus.cosa/u0a149 for service {com.oplus.cosa/com.oplus.cosa.service.GameEventService}
+09-10 10:27:05.899  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 5635) has died: cch+5 CEM 
+09-10 10:27:05.900   927   927 I Zygote  : Process 5635 exited due to signal 9 (Killed)
+09-10 10:27:05.960  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 5901) has died: cch+5 CEM 
+09-10 10:27:05.967   927   927 I Zygote  : Process 5901 exited due to signal 9 (Killed)
+09-10 10:27:07.722  1865  1948 I ActivityManager: Start proc 6074:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:27:14.253   927   927 I Zygote  : Process 5808 exited due to signal 9 (Killed)
+09-10 10:27:14.266   927   927 I Zygote  : Process 5785 exited due to signal 9 (Killed)
+09-10 10:27:14.384   927   927 I Zygote  : Process 6074 exited due to signal 9 (Killed)
+09-10 10:27:14.393  1865  1948 I ActivityManager: Start proc 6186:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:27:14.431  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 6074) has died: cch+5 CEM 
+09-10 10:27:14.912  1865  1948 I ActivityManager: Start proc 6233:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:27:15.340  1865  1948 I ActivityManager: Start proc 6284:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:27:18.193  1865  1948 I ActivityManager: Start proc 6349:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:27:18.388  1865  1948 I ActivityManager: Start proc 6367:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:27:19.295  1865  1948 I ActivityManager: Start proc 6442:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:27:19.566  1865  1948 I ActivityManager: Start proc 6496:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:27:20.021  1865  1948 I ActivityManager: Start proc 6537:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:27:20.225   927   927 I Zygote  : Process 6233 exited due to signal 9 (Killed)
+09-10 10:27:20.225   927   927 I Zygote  : Process 6284 exited due to signal 9 (Killed)
+09-10 10:27:20.226  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 6284) has died: cch+5 CEM 
+09-10 10:27:20.230  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 6233) has died: cch+15 CEM 
+09-10 10:27:23.102  1865  1948 I ActivityManager: Start proc 6592:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:06.730  1865  1948 I ActivityManager: Start proc 6884:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:28:10.717   927   927 I Zygote  : Process 6349 exited due to signal 9 (Killed)
+09-10 10:28:10.774   927   927 I Zygote  : Process 6367 exited due to signal 9 (Killed)
+09-10 10:28:10.836   927   927 I Zygote  : Process 6537 exited due to signal 9 (Killed)
+09-10 10:28:10.854   927   927 I Zygote  : Process 6496 exited due to signal 9 (Killed)
+09-10 10:28:10.856  1865  2503 I ActivityManager: Process com.facebook.system (pid 6537) has died: cch+45 CEM 
+09-10 10:28:10.880   927   927 I Zygote  : Process 6186 exited due to signal 9 (Killed)
+09-10 10:28:10.880   927   927 I Zygote  : Process 6592 exited due to signal 9 (Killed)
+09-10 10:28:10.893   927   927 I Zygote  : Process 5145 exited due to signal 9 (Killed)
+09-10 10:28:10.893   927   927 I Zygote  : Process 6442 exited due to signal 9 (Killed)
+09-10 10:28:10.900  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 6592) has died: cch+5 CEM 
+09-10 10:28:10.905  1865  2503 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 6186) has died: cch+25 CEM 
+09-10 10:28:10.919  1865  2503 I ActivityManager: Process com.facebook.services (pid 6442) has died: svcb SVC 
+09-10 10:28:10.933  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 6496) has died: cch+35 CEM 
+09-10 10:28:11.003  1865  1948 I ActivityManager: Start proc 6968:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:28:11.571  1865  1948 I ActivityManager: Start proc 6992:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:28:11.618  1865  1948 I ActivityManager: Start proc 7003:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:14.962  1865  1948 I ActivityManager: Start proc 7099:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:28:15.145  1865  1948 I ActivityManager: Start proc 7118:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:28:17.045   927   927 I Zygote  : Process 7003 exited due to signal 9 (Killed)
+09-10 10:28:17.046  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 7003) has died: cch+5 CEM 
+09-10 10:28:17.049   927   927 I Zygote  : Process 6992 exited due to signal 9 (Killed)
+09-10 10:28:17.055  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 6992) has died: cch+5 CEM 
+09-10 10:28:17.065   927   927 I Zygote  : Process 6968 exited due to signal 9 (Killed)
+09-10 10:28:17.065  1865  2503 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 6968) has died: svcb SVC 
+09-10 10:28:17.537  1865  1948 I ActivityManager: Start proc 7211:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:28.606  1865  1948 I ActivityManager: Start proc 7310:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:28:28.909  1865  1948 I ActivityManager: Start proc 7341:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:28:29.363  1865  1948 I ActivityManager: Start proc 7379:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:28:29.469  1865  1948 I ActivityManager: Start proc 7406:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:28:30.716  1865  2506 I ActivityManager: Process com.oplus.romupdate (pid 5033) has died: cch+35 CEM 
+09-10 10:28:30.724   927   927 I Zygote  : Process 5033 exited due to signal 9 (Killed)
+09-10 10:28:30.904  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 7211) has died: cch+5 CEM 
+09-10 10:28:30.904   927   927 I Zygote  : Process 7211 exited due to signal 9 (Killed)
+09-10 10:28:30.938  1865  2506 I ActivityManager: Process com.whatsapp (pid 5304) has died: cch+25 CEM 
+09-10 10:28:30.941   927   927 I Zygote  : Process 5304 exited due to signal 9 (Killed)
+09-10 10:28:32.327  1865  1948 I ActivityManager: Start proc 7630:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:39.183   927   927 I Zygote  : Process 7099 exited due to signal 9 (Killed)
+09-10 10:28:39.240   927   927 I Zygote  : Process 7118 exited due to signal 9 (Killed)
+09-10 10:28:39.315  1865  1948 I ActivityManager: Start proc 7706:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:28:39.358  1865  1948 I ActivityManager: Start proc 7708:com.facebook.katana/u0a660 for service {com.facebook.katana/com.facebook.falco.jobscheduler.FFJobService}
+09-10 10:28:39.379   927   927 I Zygote  : Process 7630 exited due to signal 9 (Killed)
+09-10 10:28:39.407   927   927 I Zygote  : Process 7379 exited due to signal 9 (Killed)
+09-10 10:28:39.426   927   927 I Zygote  : Process 6884 exited due to signal 9 (Killed)
+09-10 10:28:39.439  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 7630) has died: cch+5 CEM 
+09-10 10:28:39.444   927   927 I Zygote  : Process 7310 exited due to signal 9 (Killed)
+09-10 10:28:39.452  1865  2503 I ActivityManager: Process com.google.android.apps.messaging (pid 6884) has died: cch+25 CEM 
+09-10 10:28:39.473  1865  2506 I ActivityManager: Process com.facebook.system (pid 7379) has died: cch+15 CEM 
+09-10 10:28:39.558  1865  2503 I ActivityManager: Process com.facebook.services (pid 7310) has died: svcb SVC 
+09-10 10:28:40.009  1865  1948 I ActivityManager: Start proc 7743:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:40.185  1865  1948 I ActivityManager: Start proc 7786:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:28:40.302  1865  1948 I ActivityManager: Start proc 7818:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:28:40.307   927   927 I Zygote  : Process 7706 exited due to signal 9 (Killed)
+09-10 10:28:40.313  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 7706) has died: cch+5 CEM 
+09-10 10:28:40.497   927   927 I Zygote  : Process 7743 exited due to signal 9 (Killed)
+09-10 10:28:40.499  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 7743) has died: cch+5 CEM 
+09-10 10:28:40.637  1865  1948 I ActivityManager: Start proc 7876:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:43.286  1865  1948 I ActivityManager: Start proc 8008:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:28:43.316  1865  1948 I ActivityManager: Start proc 8009:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:28:43.546  1865  1948 I ActivityManager: Start proc 8043:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:28:45.335   927   927 I Zygote  : Process 7786 exited due to signal 9 (Killed)
+09-10 10:28:45.335  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 7786) has died: cch+15 CEM 
+09-10 10:28:45.357   927   927 I Zygote  : Process 7876 exited due to signal 9 (Killed)
+09-10 10:28:45.357  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 7876) has died: cch+5 CEM 
+09-10 10:28:45.381   927   927 I Zygote  : Process 7818 exited due to signal 9 (Killed)
+09-10 10:28:45.381  1865  2506 I ActivityManager: Process com.facebook.services (pid 7818) has died: svcb SVC 
+09-10 10:28:46.832  1865  1948 I ActivityManager: Start proc 8210:com.facebook.services/u0a226 for content provider {com.facebook.services/com.facebook.oxygen.services.storage.provider.StorageProvider}
+09-10 10:28:47.515  1865  1948 I ActivityManager: Start proc 8252:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:28:59.328   927   927 I Zygote  : Process 7708 exited due to signal 9 (Killed)
+09-10 10:28:59.331  1865  2503 I ActivityManager: Process com.facebook.katana (pid 7708) has died: cch+5 CEM 
+09-10 10:29:17.885  1865  1948 I ActivityManager: Start proc 8516:com.whatsapp/u0a291 for service {com.whatsapp/com.whatsapp.contact.ui.sync.ContactsSyncAdapterService}
+09-10 10:29:39.527   927   927 I Zygote  : Process 8009 exited due to signal 9 (Killed)
+09-10 10:29:39.564   927   927 I Zygote  : Process 8043 exited due to signal 9 (Killed)
+09-10 10:29:39.626  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 7341) has died: cch+25 CEM 
+09-10 10:29:39.628   927   927 I Zygote  : Process 7341 exited due to signal 9 (Killed)
+09-10 10:29:39.628   927   927 I Zygote  : Process 8252 exited due to signal 9 (Killed)
+09-10 10:29:39.647   927   927 I Zygote  : Process 8008 exited due to signal 9 (Killed)
+09-10 10:29:39.659   927   927 I Zygote  : Process 8210 exited due to signal 9 (Killed)
+09-10 10:29:39.666  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 8252) has died: cch+5 CEM 
+09-10 10:29:39.681  1865  2506 I ActivityManager: Process com.google.android.apps.messaging (pid 8008) has died: cch+15 CEM 
+09-10 10:29:39.685  1865  2503 I ActivityManager: Process com.facebook.services (pid 8210) has died: svcb SVC 
+09-10 10:29:39.704  1865  1948 I ActivityManager: Start proc 8744:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:29:40.223  1865  1948 I ActivityManager: Start proc 8767:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:29:41.288  1865  1948 I ActivityManager: Start proc 8810:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:29:41.827  1865  1948 I ActivityManager: Start proc 8840:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:29:43.535  1865  1948 I ActivityManager: Start proc 8918:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:29:43.714  1865  1948 I ActivityManager: Start proc 8940:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:29:45.633   927   927 I Zygote  : Process 8767 exited due to signal 9 (Killed)
+09-10 10:29:45.633   927   927 I Zygote  : Process 8810 exited due to signal 9 (Killed)
+09-10 10:29:45.633  1865  2506 I ActivityManager: Process com.coloros.weather.service (pid 8767) has died: cch+15 CEM 
+09-10 10:29:45.638  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 8810) has died: cch+5 CEM 
+09-10 10:29:45.653   927   927 I Zygote  : Process 8744 exited due to signal 9 (Killed)
+09-10 10:29:45.655  1865  2506 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 8744) has died: svcb SVC 
+09-10 10:29:45.683   927   927 I Zygote  : Process 7406 exited due to signal 9 (Killed)
+09-10 10:29:45.684  1865  2503 I ActivityManager: Process com.instagram.barcelona (pid 7406) has died: cch+25 CEM 
+09-10 10:29:49.045  1865  1948 I ActivityManager: Start proc 9043:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:29:49.706  1865  1948 I ActivityManager: Start proc 9067:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:29:49.937  1865  1948 I ActivityManager: Start proc 9101:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:29:50.325  1865  1948 I ActivityManager: Start proc 9139:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:29:50.489  1865  1948 I ActivityManager: Start proc 9173:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:29:51.342   927   927 I Zygote  : Process 9043 exited due to signal 9 (Killed)
+09-10 10:29:51.342  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 9043) has died: cch+5 CEM 
+09-10 10:29:51.564  1865  1948 I ActivityManager: Start proc 9339:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:30:07.560  1865  1948 I ActivityManager: Start proc 9468:com.oneplus.deskclock:clockWidget/u0a157 for service {com.oneplus.deskclock/com.coloros.widget.smallweather.ClockWidgetWeatherService}
+09-10 10:30:11.558  8940  8951 D BProcessManager: initProcess: com.example.duplikaladder.level6
+09-10 10:30:11.592  1865  1948 I ActivityManager: Start proc 9494:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:30:23.984  1865  1948 I ActivityManager: Start proc 9608:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 10:30:24.855  1865  1948 I ActivityManager: Start proc 9653:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:30:24.916   927   927 I Zygote  : Process 9139 exited due to signal 9 (Killed)
+09-10 10:30:25.032  1865  1948 I ActivityManager: Start proc 9678:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:30:25.366   927   927 I Zygote  : Process 8840 exited due to signal 9 (Killed)
+09-10 10:30:27.444   927   927 I Zygote  : Process 9173 exited due to signal 9 (Killed)
+09-10 10:30:27.483  1865  1948 I ActivityManager: Start proc 9705:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 10:30:33.405   927   927 I Zygote  : Process 9678 exited due to signal 9 (Killed)
+09-10 10:30:33.407  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 9678) has died: cch+5 CEM 
+09-10 10:31:18.258  1865  1948 I ActivityManager: Start proc 10117:com.oplus.notificationmanager/1000 for service {com.oplus.notificationmanager/com.oplus.notification.NotificationCenterService}
+09-10 10:31:22.970  1865  1948 I ActivityManager: Start proc 10152:com.facebook.katana/u0a660 for service {com.facebook.katana/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:31:23.778   927   927 I Zygote  : Process 9468 exited due to signal 9 (Killed)
+09-10 10:31:31.385   927   927 I Zygote  : Process 9608 exited due to signal 9 (Killed)
+09-10 10:32:03.439   927   927 I Zygote  : Process 9494 exited due to signal 9 (Killed)
+09-10 10:32:03.485   927   927 I Zygote  : Process 8918 exited due to signal 9 (Killed)
+09-10 10:32:03.530   927   927 I Zygote  : Process 8940 exited due to signal 9 (Killed)
+09-10 10:32:03.532   927   927 I Zygote  : Process 9101 exited due to signal 9 (Killed)
+09-10 10:32:03.615   927   927 I Zygote  : Process 9705 exited due to signal 9 (Killed)
+09-10 10:32:03.626  1865  2506 I ActivityManager: Process com.instagram.barcelona (pid 9705) has died: cch+45 CEM 
+09-10 10:32:03.663  1865  1948 I ActivityManager: Start proc 10534:com.oneplus.deskclock:clockWidget/u0a157 for broadcast {com.oneplus.deskclock/com.coloros.widget.smallweather.WidgetLauncherStateReceiver}
+09-10 10:32:04.359  1865  1948 I ActivityManager: Start proc 10588:com.coloros.weather.service/u0a166 for service {com.coloros.weather.service/com.oplus.weather.external.WeatherCommonService}
+09-10 10:32:07.816  1865  1948 I ActivityManager: Start proc 10669:co.tdevs.duplika/u0a977 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 10:32:08.022  1865  1948 I ActivityManager: Start proc 10689:co.tdevs.duplika:black/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 10:32:09.884   927   927 I Zygote  : Process 10117 exited due to signal 9 (Killed)
+09-10 10:32:09.885  1865  2503 I ActivityManager: Process com.oplus.notificationmanager (pid 10117) has died: cch+35 CEM 
+09-10 10:32:09.886   927   927 I Zygote  : Process 9653 exited due to signal 9 (Killed)
+09-10 10:32:09.887   927   927 I Zygote  : Process 10588 exited due to signal 9 (Killed)
+09-10 10:32:09.887  1865  2506 I ActivityManager: Process com.oplus.romupdate (pid 9653) has died: cch+45 CEM 
+09-10 10:32:09.891  1865  2503 I ActivityManager: Process com.coloros.weather.service (pid 10588) has died: cch+25 CEM 
+09-10 10:32:09.914   927   927 I Zygote  : Process 5977 exited due to signal 9 (Killed)
+09-10 10:32:09.917  1865  2506 I ActivityManager: Process com.oplus.cosa (pid 5977) has died: svcb SVC 
+09-10 10:32:09.919   927   927 I Zygote  : Process 9339 exited due to signal 9 (Killed)
+09-10 10:32:09.926  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 9339) has died: cch+5 CEM 
+09-10 10:32:09.942   927   927 I Zygote  : Process 9067 exited due to signal 9 (Killed)
+09-10 10:32:09.944  1865  2506 I ActivityManager: Process com.facebook.services (pid 9067) has died: svcb SVC 
+09-10 10:32:12.389  1865  1948 I ActivityManager: Start proc 10778:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:32:18.266 10689 10700 D BProcessManager: initProcess: org.videolan.vlc
+09-10 10:32:18.302  1865  1948 I ActivityManager: Start proc 10823:co.tdevs.duplika:p0/u0a977 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 10:32:18.972  1865  1948 I ActivityManager: Start proc 10850:com.oplus.notificationmanager/1000 for service {com.oplus.notificationmanager/com.oplus.notification.NotificationCenterService}
+09-10 10:32:19.215  1865  1948 I ActivityManager: Start proc 10884:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 10:32:19.440  1865  1948 I ActivityManager: Start proc 10929:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 10:32:21.121   927   927 I Zygote  : Process 10152 exited due to signal 9 (Killed)
+09-10 10:32:22.377  1865  1948 I ActivityManager: Start proc 10979:com.oplus.cosa/u0a149 for service {com.oplus.cosa/com.oplus.cosa.service.GameEventService}
+09-10 10:32:27.856   927   927 I Zygote  : Process 10929 exited due to signal 9 (Killed)
+09-10 10:32:27.857  1865  2506 I ActivityManager: Process com.heytap.mcs.appservice (pid 10929) has died: cch+15 CEM 
+09-10 10:32:32.400  1865  1948 I ActivityManager: Start proc 11059:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 10:32:32.675  1865  1948 I ActivityManager: Start proc 11093:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 10:32:33.123  1865  1948 I ActivityManager: Start proc 11128:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 10:32:33.238  1865  1948 I ActivityManager: Start proc 11152:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 10:32:34.976   927   927 I Zygote  : Process 10534 exited due to signal 9 (Killed)
+09-10 10:32:34.977  1865  2503 I ActivityManager: Process com.oneplus.deskclock:clockWidget (pid 10534) has died: cch+25 CEM 
+09-10 10:33:06.741  1865  1948 I ActivityManager: Start proc 11491:com.google.android.apps.messaging/u0a234 for content provider {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.datamodel.provider.sharedstorage.SharedStorageProvider}
+09-10 10:33:07.585  1865  1948 I ActivityManager: Start proc 11537:com.google.android.googlequicksearchbox:search/u0a118 for service {com.google.android.googlequicksearchbox/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:33:07.610  1865  1948 I ActivityManager: Start proc 11538:com.google.android.as.oss/u0a232 for service {com.google.android.as.oss/com.google.android.gms.learning.internal.training.InAppJobService}
+09-10 10:33:08.503  1865  1948 I ActivityManager: Start proc 11595:com.google.android.googlequicksearchbox:googleapp/u0a118 for service {com.google.android.googlequicksearchbox/com.google.android.libraries.search.integrations.tiktok.RemoteWorkerService_googleapp}
+09-10 10:33:08.841   927   927 I Zygote  : Process 10850 exited due to signal 9 (Killed)
+09-10 10:33:10.561   927   927 I Zygote  : Process 11152 exited due to signal 9 (Killed)
+09-10 10:33:10.591  1865  1948 I ActivityManager: Start proc 11675:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 10:33:11.334  1865  1948 I ActivityManager: Start proc 11803:com.portonics.mygp/u0a297 for service {com.portonics.mygp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 10:33:12.028  1865  1948 I ActivityManager: Start proc 11893:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 10:33:12.122  1865  1948 I ActivityManager: Start proc 11914:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService}
+09-10 10:33:12.126   927   927 I Zygote  : Process 11128 exited due to signal 9 (Killed)
+09-10 10:33:12.127  1865  2506 I ActivityManager: Process com.facebook.system (pid 11128) has died: cch+5 CEM 
+09-10 10:33:12.268   927   927 I Zygote  : Process 11537 exited due to signal 9 (Killed)
+09-10 10:33:12.268  1865  2503 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 11537) has died: cch+5 CEM 
+09-10 10:33:12.317  1865  2506 I ActivityManager: Process com.google.android.googlequicksearchbox:googleapp (pid 11595) has died: cch+5 CEM 
+09-10 10:33:12.320   927   927 I Zygote  : Process 11595 exited due to signal 9 (Killed)
+09-10 10:33:12.360   927   927 I Zygote  : Process 10778 exited due to signal 9 (Killed)
+09-10 10:33:12.360  1865  2503 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 10778) has died: cch+5 CEM 
+09-10 10:33:12.692   927   927 I Zygote  : Process 11538 exited due to signal 9 (Killed)
+09-10 10:33:12.693  1865  2506 I ActivityManager: Process com.google.android.as.oss (pid 11538) has died: cch+5 CEM 
+09-10 10:33:12.735  1865  2503 I ActivityManager: Process com.portonics.mygp (pid 11803) has died: cch+5 CEM 
+09-10 10:33:12.736   927   927 I Zygote  : Process 11803 exited due to signal 9 (Killed)
+09-10 10:33:16.330  1865  1948 I ActivityManager: Start proc 12104:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 10:33:18.169  1865  1948 I ActivityManager: Start proc 12147:com.fasset.cashapp/u0a662 for service {com.fasset.cashapp/androidx.work.impl.background.systemjob.SystemJobService}

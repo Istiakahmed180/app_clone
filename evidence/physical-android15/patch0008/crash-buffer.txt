@@ -1,0 +1,57 @@
+--------- beginning of crash
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: FATAL EXCEPTION: main
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: Process: com.example.duplikaladder.isosvc:iso, PID: 9460
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=aace3ae2-4f76-417b-89a1-edb25242e4d0 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.app.ActivityThread.handleBindService(ActivityThread.java:5386)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mhandleBindService(ActivityThread.java:0)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2698)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:282)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:9500)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:600)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1005)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:521)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.bindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:39)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.createService(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:33)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.dispatcher.AppServiceDispatcher.getOrCreateService(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:28)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.dispatcher.AppServiceDispatcher.onBind(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:15)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.proxy.ProxyService.onBind(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:5)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at android.app.ActivityThread.handleBindService(ActivityThread.java:5371)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	... 9 more
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:426)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	... 15 more
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:394)
+09-10 09:58:11.367  9460  9460 E AndroidRuntime: 	... 15 more
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: FATAL EXCEPTION: main
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: Process: com.example.duplikaladder.isosvc:iso, PID: 9579
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: java.lang.RuntimeException: Unable to bind to service top.niunaijun.blackbox.proxy.ProxyService$P1@3116e4e with Intent { act=efe58da3-70d5-4862-a701-2f992c8e5a25 cmp=co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyService$P1 (has extras) mCallingUid=10977 }: java.lang.RuntimeException: Unable to makeApplication
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.app.ActivityThread.handleBindService(ActivityThread.java:5386)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mhandleBindService(ActivityThread.java:0)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2698)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:282)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:9500)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:600)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1005)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:521)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.bindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:39)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.createService(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:33)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.dispatcher.AppServiceDispatcher.getOrCreateService(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:28)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.dispatcher.AppServiceDispatcher.onBind(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:15)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.proxy.ProxyService.onBind(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:5)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at android.app.ActivityThread.handleBindService(ActivityThread.java:5371)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	... 9 more
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: Caused by: java.lang.RuntimeException: Unable to makeApplication - all fallback attempts failed
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:426)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	... 15 more
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: Caused by: java.lang.ClassCastException: android.app.ContextImpl cannot be cast to android.app.Application
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	at top.niunaijun.blackbox.app.BActivityThread.handleBindApplication(r8-map-id-707aeed179d05fa7b9b19b4e84b881590775323642e56e0272100115776ca9e5:394)
+09-10 09:58:17.537  9579  9579 E AndroidRuntime: 	... 15 more

@@ -1,0 +1,4 @@
+09-10 10:31:18.223  9494  9494 I LadderLevel6: notification posted channel=level6
+09-10 10:31:18.230  1865  2141 D NotificationService--OplusNotificationTrackHelper: PostNotification : {channel_name=Level 6, notification_type=others, app_name=d8f76a2473a66c84ec2e15112c080f8570b2bca8646355f395309a9f3a82c104, push_id=null, importance=3, notification_id=-1296650946, system_state=5|7, channel_id=level6@black-6, pkg=49e7bfadb7b19d7d177b385ec4157b712c6419369acfa7247d889870ba5c0d30, post_time=2026-09-10 10:31:18, notification_source=local}
+09-10 10:31:21.288  9494  9494 W JobInfo : Job 'com.example.duplikaladder.level6/.ProbeJobService#601' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+09-10 10:31:21.289  9494  9494 I LadderLevel6: job schedule result=0

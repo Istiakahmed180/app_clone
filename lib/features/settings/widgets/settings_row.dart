@@ -17,10 +17,22 @@ class SettingsRow extends StatelessWidget {
     this.badge,
     this.onTap,
     this.enabled = true,
+    this.iconColor,
+    this.trailingIcon = Icons.chevron_right,
     super.key,
   });
 
   final IconData icon;
+
+  /// Overrides the accent for a row whose icon carries its own meaning — the third-party
+  /// services on the Contact screen, which are recognised by their colour as much as by
+  /// their glyph. The medallion behind it is tinted from the same colour, so one value
+  /// recolours the pair and they cannot drift apart.
+  final Color? iconColor;
+
+  /// What sits at the trailing edge of a tappable row. A chevron for somewhere else in
+  /// the app; an out-and-away glyph for a row that leaves it.
+  final IconData trailingIcon;
   final String title;
   final String? subtitle;
 
@@ -42,6 +54,12 @@ class SettingsRow extends StatelessWidget {
     final bool tappable = enabled && onTap != null;
     // One opacity over the whole row, so the icon, the title and the value dim together.
     final double opacity = enabled ? 1 : 0.45;
+    final Color accent = iconColor ?? theme.colorScheme.primary;
+    // Tinted from the icon rather than from the scheme: an untinted medallion under a
+    // green glyph reads as a mistake, and 12% holds up on both palettes.
+    final Color medallion = iconColor == null
+        ? theme.colorScheme.primaryContainer
+        : accent.withValues(alpha: 0.12);
 
     return InkWell(
       onTap: tappable ? onTap : null,
@@ -55,10 +73,10 @@ class SettingsRow extends StatelessWidget {
                 width: 34.r,
                 height: 34.r,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
+                  color: medallion,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 18.r, color: theme.colorScheme.primary),
+                child: Icon(icon, size: 18.r, color: accent),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -95,7 +113,7 @@ class SettingsRow extends StatelessWidget {
               if (tappable) ...<Widget>[
                 SizedBox(width: 4.w),
                 Icon(
-                  Icons.chevron_right,
+                  trailingIcon,
                   size: 20.r,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
