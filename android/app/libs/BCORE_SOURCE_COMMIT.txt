@@ -5,7 +5,8 @@ PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the
 the commit above with the numbered patches in engine-patches applied. These include the
 Android 15 AppOps return-type fix, host-platform package visibility, split APK installation
 support, the permission-gated public-media path bridge, the Android 15 UserManager
-application-restrictions method registration, and the LocaleManager per-app-locale hook. The media bridge exposes existing public media directories to a
+application-restrictions method registration, the LocaleManager per-app-locale hook, instance-aware proxy slot allocation, and
+the RoleManager hook. The media bridge exposes existing public media directories to a
 guest only when the host's user-granted android:manage_external_storage app-op is allowed;
 it does not grant or bypass that permission. The package-visibility patch lets a guest's
 by-name PackageManager query for Google Play services, GSF and the Play Store be answered by

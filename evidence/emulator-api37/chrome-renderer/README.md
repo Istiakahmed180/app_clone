@@ -53,3 +53,36 @@ at but did not stop anything.
 Chrome's first-run sign-in step ("Make Chrome your own") still appears. Getting past it
 requires accepting Chrome's Terms of Service, which is the device owner's decision, so the
 flow beyond that point is unverified.
+
+---
+
+## Patch 0011 — the wall behind the renderer fix
+
+Making rendering work exposed the next crash, on the first *completed* navigation:
+
+```
+java.lang.SecurityException: Package com.android.chrome does not belong to 10235
+    at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser
+    at android.app.role.RoleManager.isRoleHeld
+    at hgr.didFinishNavigationInPrimaryMainFrame
+chromium  A  [FATAL] Uncaught Java exception in native code
+libc      A  Fatal signal 5 (SIGTRAP)
+```
+
+Chrome asks "am I the default browser?" after a page commits. Unreachable before patch
+0010, because pages never committed. Same signature already recorded for API 37 in commit
+c94f67c; same shape as the LocaleManager gap — Bcore had no hook for the `role` service.
+
+### After patch 0011
+
+| Check | Result |
+| --- | --- |
+| `does not belong to` | **0** |
+| `SIGTRAP` | **0** |
+| `FATAL EXCEPTION` | **0** |
+| `Uncaught Java exception` | **0** |
+| `IRoleManagerProxy` installed | yes — "Hooked RoleManagerService" |
+| Chrome + renderer + GPU process | **all alive** |
+| New Tab page | renders, and this launch reached it without the sign-in step |
+
+`newtab-after-patch0011.png`.

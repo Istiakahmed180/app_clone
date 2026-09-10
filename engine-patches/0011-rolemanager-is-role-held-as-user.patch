@@ -1,0 +1,186 @@
+Hook RoleManager so a guest asking "am I the default browser?" does not die.
+
+SYMPTOM
+    With patch 0010 Chrome's renderers survive and pages actually commit -- and that is
+    exactly what makes this reachable. On the first completed navigation:
+
+        cr_JniAndroid  E  java.lang.SecurityException:
+            Package com.android.chrome does not belong to 10235
+              at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser
+              at android.app.role.RoleManager.isRoleHeld
+              at hgr.didFinishNavigationInPrimaryMainFrame
+        chromium  A  [FATAL] Uncaught Java exception in native code ...
+        libc      A  Fatal signal 5 (SIGTRAP)
+
+    10235 is the host UID. The exception is thrown on a callback invoked from native code,
+    so Chrome's own handler cannot swallow it: the process aborts.
+
+    This is the same signature already recorded for API 37 emulators in commit c94f67c
+    ("Package com.android.chrome does not belong to [UID] during IRoleManager
+    .isRoleHeldAsUser"). It is not new; it was simply unreachable while navigation never
+    completed.
+
+WHY IT HAPPENS
+    RoleManager.isRoleHeld(role) invokes
+    IRoleManager.isRoleHeldAsUser(roleName, packageName, userId). RoleManagerService lets a
+    caller ask about a package it owns and refuses otherwise. In a container the Binder
+    calling UID is the host's while the package argument is the guest's.
+
+WHY BCORE DID NOT CATCH IT
+    No hook. Bcore has no IRoleManagerProxy and never registered the "role" service, so the
+    call went to the real service unchanged -- the same gap patch 0009 found for
+    LocaleManager.
+
+THE FIX
+    A new IRoleManagerProxy, registered in HookManager beside ILocaleManagerProxy, hooking
+    isRoleHeldAsUser and rewriting the package argument to the host package.
+
+    One difference from patches 0006 and 0009 worth stating, because it is the obvious place
+    to get this wrong: the package is **args[1]** here, not args[0] -- args[0] is the role
+    name. Rewriting index 0 would replace the role with a package name and return a
+    confident, meaningless answer rather than crashing, which is worse. The hook checks the
+    index it actually writes.
+
+SECURITY RATIONALE
+    As patches 0006 and 0009:
+
+    - No UID, package, signature or certificate is spoofed and no SecurityException is
+      suppressed. The platform check still runs and passes on its own terms.
+    - The platform rule is "the caller must own the package it asks about". In a container
+      the caller genuinely IS the host, so asking about the host package is the truthful
+      request.
+    - userId is untouched, so no other Android user is addressed.
+    - The package argument is replaced with the host package, never an arbitrary one, so a
+      guest cannot use this to probe a third party's roles.
+    - A guest cannot hold a platform role at all -- it is not separately installed -- so the
+      host's answer is the only legitimate one available. The practical effect is that a
+      cloned browser learns it is not the default browser, which is true of the clone.
+    - Play Integrity, SafetyNet, GMS and account/OAuth paths are untouched.
+
+VERIFICATION
+    Chrome in a container on the emulator of record, API 35. Before: SIGTRAP on the first
+    completed navigation, reproducible. Expected after: no "does not belong to" exception,
+    no SIGTRAP, and navigation completes.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
+index 56b55cb..25db9a2 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
+@@ -77,6 +77,7 @@ import top.niunaijun.blackbox.fake.service.ISystemUpdateProxy;
+ import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
+ import top.niunaijun.blackbox.fake.service.ITelephonyRegistryProxy;
+ import top.niunaijun.blackbox.fake.service.ILocaleManagerProxy;
++import top.niunaijun.blackbox.fake.service.IRoleManagerProxy;
+ import top.niunaijun.blackbox.fake.service.IUserManagerProxy;
+ import top.niunaijun.blackbox.fake.service.IVibratorServiceProxy;
+ import top.niunaijun.blackbox.fake.service.IVpnManagerProxy;
+@@ -121,6 +122,7 @@ public class HookManager {
+             addInjector(new IWindowManagerProxy());
+             addInjector(new IUserManagerProxy());
+             addInjector(new ILocaleManagerProxy());
++            addInjector(new IRoleManagerProxy());
+             addInjector(new RestrictionsManagerStub());
+             addInjector(new IMediaSessionManagerProxy());
+             addInjector(new IAudioServiceProxy());
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IRoleManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IRoleManagerProxy.java
+new file mode 100644
+index 0000000..7840828
+--- /dev/null
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IRoleManagerProxy.java
+@@ -0,0 +1,96 @@
++package top.niunaijun.blackbox.fake.service;
++
++import android.os.IBinder;
++
++import java.lang.reflect.Method;
++
++import black.android.os.BRServiceManager;
++import top.niunaijun.blackbox.BlackBoxCore;
++import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
++import top.niunaijun.blackbox.fake.hook.MethodHook;
++import top.niunaijun.blackbox.fake.hook.ProxyMethod;
++import top.niunaijun.blackbox.utils.Slog;
++
++/**
++ * Role queries — "am I the default browser?" and similar (API 29+).
++ *
++ * Bcore had no hook for this service, so a guest's call went to the real RoleManagerService
++ * unchanged. The platform lets a caller ask about a package it owns and refuses otherwise:
++ *
++ *   java.lang.SecurityException: Package com.android.chrome does not belong to 10235
++ *       at android.app.role.IRoleManager$Stub$Proxy.isRoleHeldAsUser
++ *       at android.app.role.RoleManager.isRoleHeld
++ *
++ * Chrome asks this from didFinishNavigationInPrimaryMainFrame — after a page commits — and
++ * the SecurityException reaches native code, where it is fatal: "Uncaught Java exception in
++ * native code" followed by SIGTRAP. So the crash only becomes reachable once navigation
++ * actually works, which is why it surfaced after the renderer fix in patch 0010 rather than
++ * before it.
++ *
++ * Same shape and same remedy as {@link ILocaleManagerProxy} and the application-restrictions
++ * hook in {@link IUserManagerProxy}: rewrite the package argument to the host package, which
++ * the Binder calling UID genuinely owns.
++ */
++public class IRoleManagerProxy extends BinderInvocationStub {
++    public static final String TAG = "IRoleManagerProxy";
++
++    /** Context.ROLE_SERVICE, as a literal so this compiles against any platform level. */
++    private static final String SERVICE = "role";
++
++    public IRoleManagerProxy() {
++        super(BRServiceManager.get().getService(SERVICE));
++    }
++
++    @Override
++    protected Object getWho() {
++        try {
++            IBinder binder = BRServiceManager.get().getService(SERVICE);
++            if (binder == null) return null;
++            Class<?> stubClass = Class.forName("android.app.role.IRoleManager$Stub");
++            Method asInterface = stubClass.getMethod("asInterface", IBinder.class);
++            return asInterface.invoke(null, binder);
++        } catch (Exception e) {
++            Slog.d(TAG, "getWho error: " + e.getMessage());
++            return null;
++        }
++    }
++
++    @Override
++    protected void inject(Object baseInvocation, Object proxyInvocation) {
++        if (BRServiceManager.get().getService(SERVICE) != null) {
++            replaceSystemService(SERVICE);
++            Slog.d(TAG, "Hooked RoleManagerService");
++        } else {
++            Slog.d(TAG, "Skipping RoleManagerService hook (service not found)");
++        }
++    }
++
++    @Override
++    public boolean isBadEnv() {
++        return false;
++    }
++
++    /**
++     * {@code IRoleManager.isRoleHeldAsUser(String roleName, String packageName, int userId)}.
++     *
++     * Note the index: unlike the LocaleManager and UserManager hooks, the package is
++     * <b>args[1]</b> here — args[0] is the role name. Rewriting index 0 would replace the role
++     * with a package name and quietly return nonsense, so the argument is located by type
++     * rather than assumed by position.
++     *
++     * userId is untouched, so no other Android user is addressed, and the answer returned is
++     * the platform's own: whether the host holds that role. A guest cannot hold a platform
++     * role — a container app is not separately installed — so the host's answer is the only
++     * legitimate one available.
++     */
++    @ProxyMethod("isRoleHeldAsUser")
++    public static class IsRoleHeldAsUser extends MethodHook {
++        @Override
++        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
++            if (args != null && args.length > 1 && args[1] instanceof String) {
++                args[1] = BlackBoxCore.getHostPkg();
++            }
++            return method.invoke(who, args);
++        }
++    }
++}
