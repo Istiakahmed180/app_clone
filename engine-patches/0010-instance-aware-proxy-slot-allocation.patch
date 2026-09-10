@@ -1,0 +1,239 @@
+Give each isolated-service instance its own process, so Chrome's renderers stop
+evicting each other.
+
+SYMPTOM
+    With patch 0009 the fatal locale crash is gone and Chrome reaches its first-run
+    screen, but web content never renders. The renderer starts and dies, forever:
+
+        BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+        cr_SplitCompatApp:  processName=com.android.chrome:sandboxed_process0
+        BProcessManager: App Died: com.android.chrome:sandboxed_process0
+        cr_ChildProcessConn: onServiceDisconnected (crash or killed by oom): pid=12429
+
+    docs/multiapp-vs-duplika-chrome-comparison.md already measured the difference against
+    a competitor: renderer instances 0-19 in distinct processes there, "never created"
+    here. Its section 10 named this exact gap and deferred it:
+
+        "It does not give Chrome multiple concurrent renderers ... every instance of
+         SandboxedProcessService0 collapses into the single :p1 slot ... matching that
+         needs instance-aware slot allocation, which is a larger change and should be a
+         separate decision."
+
+    This is that change.
+
+CAUSE
+    Context.bindIsolatedService(service, flags, instanceName, ...) is one process per
+    instanceName, all from a single <service> declaration. Chrome uses it for renderers.
+
+    Bcore allocates the proxy slot from the process record:
+
+        ActiveServices.createStubServiceIntent:
+            ProxyManifest.getProxyService(processRecord.bpid)
+
+    and looks the record up by processName alone:
+
+        BProcessManagerService.startProcessLocked:
+            app = bProcess.get(processName);
+
+    Every renderer instance shares one declared processName, so they share one record,
+    one bpid and one ProxyService$PN. Each new bind takes the slot from the previous
+    process, which then dies -- the loop above.
+
+    Patch 0008 is upstream of this. It cleared the instance name (args[6] = null) to stop
+    AMS rejecting the bind, which was correct as far as it went: it let the first renderer
+    start. But it also made every instance indistinguishable, which is what collapses them.
+
+THE CHANGE
+    Separate the map key from the guest-visible process name.
+
+    1. ProcessRecord gains `processKey`, the key the record is stored under. Equal to
+       processName for every ordinary process.
+
+    2. BProcessManagerService.startProcessLocked gains a 6-argument overload taking
+       processKey; the 5-argument form delegates with processKey = processName, so every
+       existing caller is unchanged. get/put/remove use processKey, and onProcessDie
+       removes record.processKey rather than record.processName -- otherwise death cleanup
+       would leak the entry it created.
+
+    3. ActiveServices.bindService derives processKey as processName + "@" + instanceName
+       when the bind carries one, and passes processName through untouched. The guest still
+       sees its real process name; only Bcore's internal map distinguishes instances.
+
+    4. IActivityManagerProxy.bindServiceInstance stashes the instance name on the intent
+       before clearing the argument. args[6] is still nulled for the host AMS call, so
+       patch 0008's fix is intact; the name now survives long enough to key the record.
+
+WHY THIS SHAPE
+    - No new proxy slots are invented. ProxyManifest.FREE_COUNT is already 50, and slot
+      allocation is the existing getUsingBPidL().
+    - The guest's process name is not rewritten. Chrome logs and expects
+      "com.android.chrome:sandboxed_process0"; changing that would be visible to the app.
+    - The 5-argument overload is preserved, so ActivityStack, BJobManagerService, the
+      provider path and startService are byte-for-byte unaffected.
+
+SECURITY IMPACT
+    None identified. No uid, package name, signature, permission or caller identity is
+    altered; the host AMS still receives instanceName = null and still applies its own
+    checks to the proxy component. The change is internal bookkeeping about which container
+    process a guest's own service instance belongs to.
+
+REGRESSION RISK
+    Moderate, and concentrated in one place: every guest process now goes through the
+    keyed lookup. For anything that does not use isolated service instances the key is the
+    process name, so the behaviour is identical by construction. What genuinely changes is
+    that a multi-instance app consumes more of the 50 proxy slots than before -- Chrome may
+    take several. Slot exhaustion was already possible and already throws
+    "No processes available"; this makes it reachable sooner for renderer-heavy apps.
+
+VERIFICATION BAR (docs/multiapp-vs-duplika-chrome-comparison.md section 10)
+    Chrome alive >= 60 s, renderer process created and staying up, New Tab page renders
+    real content, relaunch works. Plus the ladder guards -- Level 6, Level 7 split fixture,
+    VLC -- because this touches process allocation for every guest, not just Chrome.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/BProcessManagerService.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/BProcessManagerService.java
+index b699bcb..a47682a 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/BProcessManagerService.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/BProcessManagerService.java
+@@ -47,6 +47,18 @@ public class BProcessManagerService implements ISystemService {
+     }
+ 
+     public ProcessRecord startProcessLocked(String packageName, String processName, int userId, int bpid, int callingPid) {
++        return startProcessLocked(packageName, processName, processName, userId, bpid, callingPid);
++    }
++
++    /**
++     * @param processName the guest-visible process name, unchanged and handed to the guest
++     * @param processKey  the key this record is stored under. Equal to processName for every
++     *                    ordinary process; distinct per instance for an isolated service
++     *                    bound with an instance name, so that several such processes sharing
++     *                    one declared processName each get their own record, their own bpid
++     *                    and therefore their own ProxyService$PN slot.
++     */
++    public ProcessRecord startProcessLocked(String packageName, String processName, String processKey, int userId, int bpid, int callingPid) {
+         ApplicationInfo info = BPackageManagerService.get().getApplicationInfo(packageName, 0, userId);
+         if (info == null)
+             return null;
+@@ -59,7 +71,7 @@ public class BProcessManagerService implements ISystemService {
+                 bProcess = new HashMap<>();
+             }
+             if (bpid == -1) {
+-                app = bProcess.get(processName);
++                app = bProcess.get(processKey);
+                 if (app != null) {
+                     if (app.initLock != null) {
+                         app.initLock.block();
+@@ -75,13 +87,14 @@ public class BProcessManagerService implements ISystemService {
+                 throw new RuntimeException("No processes available");
+             }
+             app = new ProcessRecord(info, processName);
++            app.processKey = processKey;
+             app.uid = Process.myUid();
+             app.bpid = bpid;
+             app.buid = BPackageManagerService.get().getAppId(packageName);
+             app.callingBUid = getBUidByPidOrPackageName(callingPid, packageName);
+             app.userId = userId;
+ 
+-            bProcess.put(processName, app);
++            bProcess.put(processKey, app);
+             mPidsSelfLocked.add(app);
+ 
+             synchronized (mProcessMap) {
+@@ -89,7 +102,7 @@ public class BProcessManagerService implements ISystemService {
+             }
+             if (!initAppProcessL(app)) {
+                 
+-                bProcess.remove(processName);
++                bProcess.remove(processKey);
+                 mPidsSelfLocked.remove(app);
+                 app = null;
+             } else {
+@@ -194,7 +207,7 @@ public class BProcessManagerService implements ISystemService {
+             record.kill();
+             Map<String, ProcessRecord> process = mProcessMap.get(record.buid);
+             if (process != null) {
+-                process.remove(record.processName);
++                process.remove(record.processKey);
+                 if (process.isEmpty()) {
+                     mProcessMap.remove(record.buid);
+                 }
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/ProcessRecord.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/ProcessRecord.java
+index 4b5bbd2..aa941af 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/ProcessRecord.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/ProcessRecord.java
+@@ -15,6 +15,16 @@ import top.niunaijun.blackbox.proxy.ProxyManifest;
+ public class ProcessRecord extends Binder {
+     public final ApplicationInfo info;
+     final public String processName;
++    /**
++     * Key this record is stored under in BProcessManagerService's per-uid map.
++     *
++     * Normally equal to {@link #processName}. It differs only for an isolated service bound
++     * with an instance name, where several processes legitimately share one declared
++     * processName and must not collapse into a single record -- see
++     * BProcessManagerService#startProcessLocked. Kept on the record so death cleanup removes
++     * the entry it actually created.
++     */
++    public String processKey;
+     public IBActivityThread bActivityThread;
+     public IInterface appThread;
+     public int uid;
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/am/ActiveServices.java b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/am/ActiveServices.java
+index 0b4faf6..a27b00d 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/am/ActiveServices.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/am/ActiveServices.java
+@@ -92,14 +92,27 @@ public class ActiveServices {
+         return 0;
+     }
+ 
++    /** Carries the guest's isolated-service instance name from IActivityManagerProxy. */
++    public static final String INSTANCE_NAME_EXTRA = "_B_|_InstanceName";
++
+     public Intent bindService(Intent intent, final IBinder binder, String resolvedType, int userId) {
+         ResolveInfo resolveInfo = resolveService(intent, resolvedType, userId);
+         if (resolveInfo == null)
+             return intent;
+         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
++        // An isolated service bound with an instance name is one process per instance, all
++        // from a single <service> declaration. Keying the record on processName alone
++        // collapses them into one, so each new bind evicts the previous process -- which is
++        // what Chrome's renderers hit: bind, App Died, rebind, forever. Key on the instance
++        // as well when there is one; unchanged for every other bind.
++        String instanceName = intent.getStringExtra(INSTANCE_NAME_EXTRA);
++        String processKey = instanceName == null
++                ? serviceInfo.processName
++                : serviceInfo.processName + "@" + instanceName;
+         ProcessRecord processRecord = BProcessManagerService.get().startProcessLocked(
+                 serviceInfo.packageName,
+                 serviceInfo.processName,
++                processKey,
+                 userId,
+                 -1, Binder.getCallingPid());
+ 
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
+index 5b17d68..2b1f31d 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/IActivityManagerProxy.java
+@@ -30,6 +30,7 @@ import black.android.content.pm.BRUserInfo;
+ import black.android.util.BRSingleton;
+ import top.niunaijun.blackbox.BlackBoxCore;
+ import top.niunaijun.blackbox.app.BActivityThread;
++import top.niunaijun.blackbox.core.system.am.ActiveServices;
+ import top.niunaijun.blackbox.core.env.AppSystemEnv;
+ import top.niunaijun.blackbox.entity.AppConfig;
+ import top.niunaijun.blackbox.entity.am.RunningAppProcessInfo;
+@@ -431,6 +432,15 @@ public class IActivityManagerProxy extends ClassInvocationStub {
+             // bindIsolatedService, so the sibling hook below never runs -- and the guest's
+             // instance name would then be applied to a ProxyService$PN, which is not an
+             // isolated service. ActivityManagerService rejects that combination.
++            //
++            // Clearing it is still right for the host AMS call, but the name itself is not
++            // noise: it is what tells one renderer from the next. Dropping it outright made
++            // every instance identical, so they all landed in one proxy slot and evicted each
++            // other. Carry it through on the intent, where ActiveServices keys the process
++            // record on it, then clear the argument as before.
++            if (args[6] instanceof String && args[2] instanceof Intent) {
++                ((Intent) args[2]).putExtra(ActiveServices.INSTANCE_NAME_EXTRA, (String) args[6]);
++            }
+             args[6] = null;
+             return BindServiceCommon(who,method,args,7);
+         }
