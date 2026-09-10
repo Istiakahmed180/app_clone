@@ -143,6 +143,41 @@ void main() {
       expect(decision.proceed, isTrue);
     },
   );
+
+  testWidgets(
+    'a push-dependent app is warned about before it is cloned, and can still be cloned',
+    (WidgetTester tester) async {
+      // The failure this warns about is measured, not predicted:
+      // evidence/physical-android15/fcm-cabexfx/. Play services refuses to register a
+      // clone for push, and the app then stalls for about thirty seconds before giving
+      // up. Without this warning that stall is all the user sees.
+      await _pump(
+        tester,
+        const CompatibilityReport(
+          packageName: 'org.example.push',
+          verdict: CompatibilityVerdict.limited,
+          findings: <CompatibilityFinding>[
+            CompatibilityFinding(
+              code: 'PUSH_UNSUPPORTED',
+              message: 'Push notifications will not work in a clone. Google Play services '
+                  'will not register this app for push while it runs under Duplika\'s '
+                  'identity, so messages sent to the clone never arrive.',
+              blocking: false,
+            ),
+          ],
+          bridgeablePermissions: <String>[],
+          missingPermissions: <String>[],
+          requiresGms: true,
+        ),
+      );
+
+      expect(find.textContaining('Push notifications will not work'), findsOneWidget);
+      // Not blocking: the app is usable, it just never receives messages. Refusing to
+      // clone it would be a bigger lie than the missing warning was.
+      final Finder button = find.widgetWithText(FilledButton, 'Add clone');
+      expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+    },
+  );
 }
 
   const CompatibilityReport _gmsReport = CompatibilityReport(

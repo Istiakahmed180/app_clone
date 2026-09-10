@@ -90,12 +90,13 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (requiresGms) {
             findings += Finding(
                 CODE_REQUIRES_GMS,
-                "Google Play services is available inside a clone, but Google features that " +
-                    "must verify this app's own identity are not supported — including " +
-                    "sign-in and identity-bound APIs such as location and SMS verification. " +
-                    "Other Google features are unaffected.",
+                GMS_MESSAGE,
                 blocking = false,
             )
+        }
+
+        if (usesPush(packageInfo.requestedPermissions?.toSet().orEmpty())) {
+            findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
 
         val bridgeable = bridgeablePermissions(packageInfo)
@@ -162,12 +163,13 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (requiresGms) {
             findings += Finding(
                 CODE_REQUIRES_GMS,
-                "Google Play services is available inside a clone, but Google features that " +
-                    "must verify this app's own identity are not supported — including " +
-                    "sign-in and identity-bound APIs such as location and SMS verification. " +
-                    "Other Google features are unaffected.",
+                GMS_MESSAGE,
                 blocking = false,
             )
+        }
+
+        if (usesPush(requested)) {
+            findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
 
         val hostDeclared = hostDeclaredPermissions()
@@ -280,6 +282,20 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         }
     }
 
+    /**
+     * Whether the app uses Firebase Cloud Messaging / GCM push.
+     *
+     * The permission is the marker: an app cannot receive push without requesting
+     * `com.google.android.c2dm.permission.RECEIVE`, and it is declared in the manifest, so
+     * the same check works for an installed package and for an uninstalled archive.
+     *
+     * This is a subset of [GMS_PERMISSION_MARKERS] rather than a separate signal, and it is
+     * reported separately on purpose: "sign-in may not work" and "notifications will never
+     * arrive" are very different things to a user about to clone a messaging app.
+     */
+    private fun usesPush(requestedPermissions: Set<String>): Boolean =
+        PUSH_PERMISSION in requestedPermissions
+
     private fun hasNativeCode(info: ApplicationInfo): Boolean =
         !info.nativeLibraryDir.isNullOrEmpty() && java.io.File(info.nativeLibraryDir).let {
             it.isDirectory && (it.list()?.isNotEmpty() == true)
@@ -300,7 +316,33 @@ class AppCompatibilityAnalyzer(private val context: Context) {
 
     companion object {
         const val CODE_REQUIRES_GMS = "REQUIRES_GMS"
+        const val CODE_PUSH_UNSUPPORTED = "PUSH_UNSUPPORTED"
         const val CODE_PERMISSIONS_REQUIRED = "PERMISSIONS_REQUIRED"
+
+        /**
+         * Note what this no longer says: "other Google features are unaffected". Push is a
+         * Google feature and it is affected, so that sentence was an overclaim once push was
+         * measured. Push now has its own finding rather than being folded in here.
+         */
+        private const val GMS_MESSAGE =
+            "Google Play services is available inside a clone, but Google features that must " +
+                "verify this app's own identity are not supported — including sign-in and " +
+                "identity-bound APIs such as location and SMS verification."
+
+        /**
+         * Measured, not predicted: `evidence/physical-android15/fcm-cabexfx/`. Play services
+         * logs `GCM: Invalid caller: <package> <host uid>` and the client library surfaces
+         * `SERVICE_NOT_AVAILABLE` about thirty seconds later. The delay is worth warning
+         * about too — without it the clone simply looks like it has hung on first launch.
+         */
+        private const val PUSH_MESSAGE =
+            "Push notifications will not work in a clone. Google Play services will not " +
+                "register this app for push while it runs under Duplika's identity, so " +
+                "messages sent to the clone never arrive. The app is otherwise usable, but " +
+                "expect a pause on first launch while it waits for a push registration that " +
+                "cannot succeed."
+
+        private const val PUSH_PERMISSION = "com.google.android.c2dm.permission.RECEIVE"
 
         private val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
 
