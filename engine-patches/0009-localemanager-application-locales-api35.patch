@@ -1,0 +1,209 @@
+Android 15 / API 35: hook LocaleManager so a guest can read its own per-app locale.
+
+SYMPTOM
+    Chrome reaches its first-run screen inside a container and then dies on the main
+    thread a few seconds later:
+
+        FATAL EXCEPTION: main
+        Process: com.android.chrome, PID: 10409
+        java.lang.SecurityException: getApplicationLocales: Neither user 10234 nor
+            current process has android.permission.READ_APP_SPECIFIC_LOCALES.
+          at android.app.ILocaleManager$Stub$Proxy.getApplicationLocales
+          at android.app.LocaleManager.getApplicationLocales(LocaleManager.java:126)
+          at tj7.queueIdle
+
+    10234 is the host (co.tdevs.duplika) UID. The call comes from an idle handler, so it
+    lands after the UI is already up -- which is why Chrome appears to start and then
+    vanishes, and why "Continue" often looks like the thing that broke it.
+
+WHY IT HAPPENS
+    LocaleManager.getApplicationLocales() invokes
+    ILocaleManager.getApplicationLocales(packageName, userId). LocaleManagerService
+    requires READ_APP_SPECIFIC_LOCALES unless the caller owns the package it is asking
+    about. In a container the Binder calling UID is the host's while the package argument
+    is the guest's, so the platform correctly sees a caller asking about a package it does
+    not own.
+
+WHY BCORE DID NOT CATCH IT
+    Not a mis-registration this time -- there was no hook at all. Bcore has no
+    ILocaleManagerProxy and never registered the "locale" service, so the call went to the
+    real LocaleManagerService unchanged. Per-app locales are API 33+, newer than most of
+    the proxy set.
+
+THE FIX
+    A new ILocaleManagerProxy, registered in HookManager beside IUserManagerProxy, hooking
+    getApplicationLocales and setApplicationLocales. Both rewrite args[0] -- the package --
+    to the host package, exactly as IUserManagerProxy's application-restrictions hook does.
+
+    getWho() resolves android.app.ILocaleManager$Stub by reflection because
+    black-reflection carries no stub for it, following the pattern
+    ISensitiveContentProtectionManagerProxy already uses. inject() no-ops when the service
+    is absent, so a platform below API 33 is unaffected.
+
+SECURITY RATIONALE
+    The same argument as patch 0006, and for the same reason it is not a bypass:
+
+    - No UID, package, signature or certificate is spoofed, and no SecurityException is
+      suppressed. The platform check still runs and passes on its own terms.
+    - The platform rule is "the caller must own the package it asks about". Inside a
+      container the caller genuinely IS the host, so asking about the host package is the
+      truthful request rather than a forged one.
+    - userId is untouched, so no other Android user is addressed.
+    - The package argument is replaced with the host package, never an arbitrary one, so a
+      guest cannot use this to read a third-party app's locale.
+    - A virtual user is not an Android user and a guest has no separate per-app locale
+      record at the platform level, so the host's value is the only legitimate answer. On a
+      device where nobody has set a per-app override that value is empty, which is what the
+      host itself receives.
+    - Play Integrity, SafetyNet, GMS and account/OAuth paths are untouched. This does not
+      affect the caller-identity boundary in docs/level10-gms-caller-identity-boundary.md;
+      LocaleManager is a platform service, not a Google one.
+
+    The setter is included deliberately. Fixing only the read path would move the crash one
+    call later for any guest that sets its own locale.
+
+VALIDATION
+    Chrome in a container on the emulator of record, API 35: before this patch the
+    SecurityException above is fatal and reproducible. Expected after: no
+    READ_APP_SPECIFIC_LOCALES exception, and Chrome survives past the idle handler.
+
+    Note what this patch does NOT claim to fix. The GoogleApiManager "Unknown calling
+    package name" refusals in the same log are the documented caller-identity boundary and
+    are unaffected -- they are non-fatal for Chrome. Renderer stability and page rendering
+    (criteria 6 and 7 in docs/patch0008-...-verification.md) are separate and still open.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
+index 3701fe5..56b55cb 100644
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/hook/HookManager.java
+@@ -76,6 +76,7 @@ import top.niunaijun.blackbox.fake.service.IStorageStatsManagerProxy;
+ import top.niunaijun.blackbox.fake.service.ISystemUpdateProxy;
+ import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
+ import top.niunaijun.blackbox.fake.service.ITelephonyRegistryProxy;
++import top.niunaijun.blackbox.fake.service.ILocaleManagerProxy;
+ import top.niunaijun.blackbox.fake.service.IUserManagerProxy;
+ import top.niunaijun.blackbox.fake.service.IVibratorServiceProxy;
+ import top.niunaijun.blackbox.fake.service.IVpnManagerProxy;
+@@ -119,6 +120,7 @@ public class HookManager {
+             addInjector(new ContentServiceStub());
+             addInjector(new IWindowManagerProxy());
+             addInjector(new IUserManagerProxy());
++            addInjector(new ILocaleManagerProxy());
+             addInjector(new RestrictionsManagerStub());
+             addInjector(new IMediaSessionManagerProxy());
+             addInjector(new IAudioServiceProxy());
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/ILocaleManagerProxy.java b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/ILocaleManagerProxy.java
+new file mode 100644
+index 0000000..042638d
+--- /dev/null
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/fake/service/ILocaleManagerProxy.java
+@@ -0,0 +1,109 @@
++package top.niunaijun.blackbox.fake.service;
++
++import android.os.IBinder;
++
++import java.lang.reflect.Method;
++
++import black.android.os.BRServiceManager;
++import top.niunaijun.blackbox.BlackBoxCore;
++import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
++import top.niunaijun.blackbox.fake.hook.MethodHook;
++import top.niunaijun.blackbox.fake.hook.ProxyMethod;
++import top.niunaijun.blackbox.utils.Slog;
++
++/**
++ * Per-app locales (API 33+).
++ *
++ * Bcore had no hook for this service at all, so a guest's call went to the real
++ * LocaleManagerService unchanged. The platform rule is that a caller may read the per-app
++ * locale of a package it owns, and needs READ_APP_SPECIFIC_LOCALES for any other package.
++ * Inside a container the Binder calling UID is the host's while the package argument is the
++ * guest's, so the platform sees a caller asking about someone else's package and refuses:
++ *
++ *   java.lang.SecurityException: getApplicationLocales: Neither user 10234 nor current
++ *       process has android.permission.READ_APP_SPECIFIC_LOCALES.
++ *
++ * Chrome makes this call from an idle handler shortly after startup and the SecurityException
++ * reaches its main thread, so the crash is fatal rather than degraded.
++ *
++ * The fix is the one {@link IUserManagerProxy}'s application-restrictions hook already uses:
++ * rewrite the package argument to the host package, which the calling UID genuinely owns. The
++ * platform check still runs and passes on its own terms; nothing is spoofed and no exception
++ * is suppressed.
++ */
++public class ILocaleManagerProxy extends BinderInvocationStub {
++    public static final String TAG = "ILocaleManagerProxy";
++
++    /** Context.LOCALE_SERVICE, as a literal so this compiles against any platform level. */
++    private static final String SERVICE = "locale";
++
++    public ILocaleManagerProxy() {
++        super(BRServiceManager.get().getService(SERVICE));
++    }
++
++    @Override
++    protected Object getWho() {
++        try {
++            IBinder binder = BRServiceManager.get().getService(SERVICE);
++            if (binder == null) return null;
++            Class<?> stubClass = Class.forName("android.app.ILocaleManager$Stub");
++            Method asInterface = stubClass.getMethod("asInterface", IBinder.class);
++            return asInterface.invoke(null, binder);
++        } catch (Exception e) {
++            Slog.d(TAG, "getWho error: " + e.getMessage());
++            return null;
++        }
++    }
++
++    @Override
++    protected void inject(Object baseInvocation, Object proxyInvocation) {
++        if (BRServiceManager.get().getService(SERVICE) != null) {
++            replaceSystemService(SERVICE);
++            Slog.d(TAG, "Hooked LocaleManagerService");
++        } else {
++            Slog.d(TAG, "Skipping LocaleManagerService hook (service not found)");
++        }
++    }
++
++    @Override
++    public boolean isBadEnv() {
++        return false;
++    }
++
++    /**
++     * {@code ILocaleManager.getApplicationLocales(String packageName, int userId)}.
++     *
++     * args[0] is the package in every platform revision of this method, so rewriting index 0
++     * is correct without inspecting the rest of the signature. userId is left untouched, so
++     * no other Android user is addressed.
++     */
++    @ProxyMethod("getApplicationLocales")
++    public static class GetApplicationLocales extends MethodHook {
++        @Override
++        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
++            if (args != null && args.length > 0 && args[0] instanceof String) {
++                args[0] = BlackBoxCore.getHostPkg();
++            }
++            return method.invoke(who, args);
++        }
++    }
++
++    /**
++     * The setter, for the same reason.
++     *
++     * Without it a guest that sets its own locale hits the same refusal from the write side
++     * (SET_APP_SPECIFIC_LOCALES), which would turn a fixed read path into a crash one call
++     * later. The argument list is longer and differs between platform revisions -- it grew
++     * fromDelegate and caller parameters -- but args[0] is the package throughout.
++     */
++    @ProxyMethod("setApplicationLocales")
++    public static class SetApplicationLocales extends MethodHook {
++        @Override
++        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
++            if (args != null && args.length > 0 && args[0] instanceof String) {
++                args[0] = BlackBoxCore.getHostPkg();
++            }
++            return method.invoke(who, args);
++        }
++    }
++}

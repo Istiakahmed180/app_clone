@@ -4,13 +4,20 @@ https://github.com/ALEX5402/NewBlackbox
 PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the source at
 the commit above with the numbered patches in engine-patches applied. These include the
 Android 15 AppOps return-type fix, host-platform package visibility, split APK installation
-support, the permission-gated public-media path bridge, and the Android 15 UserManager
-application-restrictions method registration. The media bridge exposes existing public media directories to a
+support, the permission-gated public-media path bridge, the Android 15 UserManager
+application-restrictions method registration, and the LocaleManager per-app-locale hook. The media bridge exposes existing public media directories to a
 guest only when the host's user-granted android:manage_external_storage app-op is allowed;
 it does not grant or bypass that permission. The package-visibility patch lets a guest's
 by-name PackageManager query for Google Play services, GSF and the Play Store be answered by
 the host PackageManager verbatim, and removes an upstream hardcoded fabricated PackageInfo
 for com.android.vending; it changes no signature, permission, UID or identity.
+
+The LocaleManager patch (0009) adds a proxy Bcore did not have at all, so a guest's
+getApplicationLocales call went to the real LocaleManagerService and was refused --
+"Neither user <host uid> nor current process has READ_APP_SPECIFIC_LOCALES" -- fatally, from
+Chrome's idle handler. It rewrites the package argument to the host package, which the Binder
+calling UID genuinely owns, exactly as patch 0006 does; userId is untouched and no identity is
+spoofed.
 
 The UserManager patch (0006) registers the existing application-restrictions hook under the
 Binder method name API 35 actually invokes, getApplicationRestrictionsForUser, in addition to
