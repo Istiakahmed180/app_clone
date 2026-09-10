@@ -9,6 +9,7 @@ import '../../features/apps/controllers/app_picker_controller.dart';
 import '../../features/diagnostics/controllers/diagnostics_controller.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/onboarding/controllers/onboarding_controller.dart';
+import '../../features/settings/controllers/settings_controller.dart';
 import '../../native/native_bridge.dart';
 
 /// Registers the long-lived dependency graph once, before the first route builds.
@@ -39,6 +40,14 @@ class AppBinding extends Bindings {
         repository: Get.find<VirtualProfileRepository>(),
         nativeBridge: Get.find<NativeBridge>(),
       ),
+      permanent: true,
+    );
+
+    // Permanent, and created here rather than with the Settings route: it applies the
+    // stored appearance, which has to happen at launch and not the first time someone
+    // opens Settings.
+    Get.put<SettingsController>(
+      SettingsController(diagnostics: Get.find<DiagnosticsRepository>()),
       permanent: true,
     );
   }

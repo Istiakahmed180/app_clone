@@ -1,0 +1,27 @@
+DUP_OBSERVERS_START host=2026-09-10 09:27:13
+DUP_APP_LAUNCH host=09:27:14
+DUP_ONBOARDING_ACCEPTED host=09:27:41
+DUP_BG_RUN_PROMPT_DISMISSED host=09:28:08 granted=NO
+DUP_ADD_CLONE_TAP host=09:29:04 pkg=com.android.chrome v=152.0.7977.82 splits=6
+DUP_ADD_CLONE_CONFIRM host=09:29:28
+DUP_STEP_A_LAUNCH_TAP host=2026-09-10 09:29:55 device=09:29:55
+DUP_STEP_B_FRE_SCREENSHOT host=09:30:28
+=== ATTEMPT 2 (relaunch, fast tap) ===
+DUP2_RELAUNCH_TAP host=09:32:13
+DUP2_FRE_VISIBLE host=09:32:23 after=2x2s
+DUP2_STEP_D_STAY_SIGNED_OUT_TAP host=09:32:41 id=signin_fre_dismiss_button bounds=[61,2103][1019,2225]
+t+10s host=09:33:07  22058 u0_a976      co.tdevs.duplika:p1 
+t+20s host=09:33:17  22058 u0_a976      co.tdevs.duplika:p1 
+t+30s host=09:33:28  22058 u0_a976      co.tdevs.duplika:p1 
+t+40s host=09:33:38  22058 u0_a976      co.tdevs.duplika:p1 
+t+50s host=09:33:48  22058 u0_a976      co.tdevs.duplika:p1 
+t+60s host=09:33:58  22058 u0_a976      co.tdevs.duplika:p1 
+t+70s host=09:34:08  22058 u0_a976      co.tdevs.duplika:p1 
+t+80s host=09:34:18  22058 u0_a976      co.tdevs.duplika:p1 
+DUP2_FATAL host=09:32:53.904 IllegalArgumentException instanceName='0' ProxyService$P1
+DUP2_CHROME_SIGTRAP host=09:32:55.872 tid=Chrome_ProcessL pid=20132
+DUP2_CHROME_DEAD host=09:32:57.631 signal=5(Trap) lifetime=44.6s from launch 09:32:13
+DUP_STEP_F_ALIVE_AFTER_60S = NO (died at 44.6s)
+DUP_STEP_G_RENDERER = NEVER CREATED
+DUP_STEP_H_NEWTAB = NEVER REACHED
+DUP_STEP_I_RELAUNCH = attempt 2 was the relaunch; reproduced identically

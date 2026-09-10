@@ -71,6 +71,30 @@ class SystemInfoSnapshot {
 
   String? get appVersion => _string('appVersion');
 
+  String? get appVersionCode => _string('appVersionCode');
+
+  /// Every ABI this device can run, most preferred first. Empty when the platform did
+  /// not answer, which is not the same as a device that supports nothing.
+  List<String> get supportedAbis {
+    final Object? value = native['supportedAbis'];
+    return value is List
+        ? value.map((Object? abi) => '$abi').toList(growable: false)
+        : const <String>[];
+  }
+
+  /// The ABI the device actually runs code as. Drives what a guest app can be, so it is
+  /// reported to the user and not only to a diagnostics export.
+  String? get primaryAbi => _string('primaryAbi') ?? supportedAbis.firstOrNull;
+
+  /// Whether [primaryAbi] is a 64-bit one. `null` when there is no ABI to judge.
+  bool? get is64Bit {
+    final String? abi = primaryAbi;
+    if (abi == null) {
+      return null;
+    }
+    return abi.contains('64');
+  }
+
   String get engineStatus => _string('engineStatus') ?? 'unknown';
 
   String get deviceSummary {

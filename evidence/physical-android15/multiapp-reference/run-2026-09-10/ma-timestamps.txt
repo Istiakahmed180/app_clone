@@ -1,0 +1,3 @@
+MA_OBSERVERS_START host=2026-09-10 09:25:55
+MA_APP_LAUNCH host=09:25:57
+MA_CONSENT_GATE_ENCOUNTERED host=09:26:43 action=NONE reason=third-party ToS acceptance requires user authorization

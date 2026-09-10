@@ -114,6 +114,14 @@ class HomeView extends GetView<HomeController> {
       tooltip: 'More',
       itemBuilder: (BuildContext context) => <PopupMenuEntry<void>>[
         PopupMenuItem<void>(
+          onTap: () => Get.toNamed<void>(AppRoutes.settings),
+          child: const ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.settings_outlined),
+            title: Text('Settings'),
+          ),
+        ),
+        PopupMenuItem<void>(
           onTap: () => Get.toNamed<void>(AppRoutes.developerTools),
           child: const ListTile(
             contentPadding: EdgeInsets.zero,

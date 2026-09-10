@@ -1,0 +1,510 @@
+09-10 09:27:14.374  1865  1948 I ActivityManager: Start proc 15981:co.tdevs.duplika/u0a976 for next-top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 09:27:14.601  1865  1948 I ActivityManager: Start proc 16006:co.tdevs.duplika:black/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 09:27:15.037  1865  1948 I ActivityManager: Start proc 16067:com.google.android.apps.photos/u0a240 for service {com.google.android.apps.photos/com.google.android.libraries.social.mediamonitor.MediaMonitorJobSchedulerService}
+09-10 09:27:15.712   927   927 I Zygote  : Process 15735 exited due to signal 9 (Killed)
+09-10 09:27:15.882  1865  2503 I ActivityManager: Process com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (pid 15700) has died: cch+45 CEM 
+09-10 09:27:15.936  2507  2507 I Zygote  : Process 15700 exited due to signal 9 (Killed)
+09-10 09:27:16.004   927   927 I Zygote  : Process 15330 exited due to signal 9 (Killed)
+09-10 09:27:16.004  1865  2506 I ActivityManager: Process com.snaptube.premium (pid 15330) has died: cch+35 CEM 
+09-10 09:27:16.438  1865  2503 I ActivityManager: Process com.google.android.webview:webview_service (pid 15865) has died: cch+25 CEM 
+09-10 09:27:16.443   927   927 I Zygote  : Process 15865 exited due to signal 9 (Killed)
+09-10 09:27:16.465   927   927 I Zygote  : Process 14793 exited due to signal 9 (Killed)
+09-10 09:27:16.466  1865  2506 I ActivityManager: Process com.google.android.permissioncontroller (pid 14793) has died: cch+15 CEM 
+09-10 09:27:16.477   927   927 I Zygote  : Process 16067 exited due to signal 9 (Killed)
+09-10 09:27:16.477  1865  2503 I ActivityManager: Process com.google.android.apps.photos (pid 16067) has died: cch+5 CEM 
+09-10 09:27:16.494   927   927 I Zygote  : Process 13117 exited due to signal 9 (Killed)
+09-10 09:27:16.495  1865  2506 I ActivityManager: Process com.heytap.htms (pid 13117) has died: svcb SVC 
+09-10 09:27:16.502  1865  2503 I ActivityManager: Process com.oppo.quicksearchbox (pid 12687) has died: svcb SVC 
+09-10 09:27:16.502   927   927 I Zygote  : Process 12687 exited due to signal 9 (Killed)
+09-10 09:27:16.515   927   927 I Zygote  : Process 15090 exited due to signal 9 (Killed)
+09-10 09:27:16.517  1865  2506 I ActivityManager: Process com.oplus.securitypermission (pid 15090) has died: svcb SVC 
+09-10 09:27:16.518   927   927 I Zygote  : Process 10246 exited due to signal 9 (Killed)
+09-10 09:27:16.520  1865  2503 I ActivityManager: Process com.facebook.services (pid 10246) has died: svcb SVC 
+09-10 09:27:26.557  1865  1948 I ActivityManager: Start proc 16217:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 09:27:26.819  1865  1948 I ActivityManager: Start proc 16246:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 09:27:27.255  1865  1948 I ActivityManager: Start proc 16289:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 09:27:27.376  1865  1948 I ActivityManager: Start proc 16315:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.push.FbnsInitBroadcastReceiver}
+09-10 09:27:28.491   927   927 I Zygote  : Process 15552 exited due to signal 9 (Killed)
+09-10 09:27:28.492  1865  2506 I ActivityManager: Process com.android.vending:background (pid 15552) has died: cch+15 CEM 
+09-10 09:27:28.550   927   927 I Zygote  : Process 15234 exited due to signal 9 (Killed)
+09-10 09:27:28.555  1865  2503 I ActivityManager: Process com.android.vending (pid 15234) has died: cch+5 CEM 
+09-10 09:28:24.184  1865  1948 I ActivityManager: Start proc 17014:com.google.android.gm/u0a142 for service {com.google.android.gm/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:28:24.205  1865  1948 I ActivityManager: Start proc 17015:com.google.android.youtube/u0a143 for service {com.google.android.youtube/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:28:24.220  1865  1948 I ActivityManager: Start proc 17016:com.facebook.katana/u0a660 for service {com.facebook.katana/com.facebook.falco.jobscheduler.FFJobService}
+09-10 09:28:24.828   927   927 I Zygote  : Process 16289 exited due to signal 9 (Killed)
+09-10 09:28:24.830  1865  2506 I ActivityManager: Process com.facebook.system (pid 16289) has died: cch+5 CEM 
+09-10 09:28:26.203   927   927 I Zygote  : Process 17015 exited due to signal 9 (Killed)
+09-10 09:28:26.207  1865  2503 I ActivityManager: Process com.google.android.youtube (pid 17015) has died: cch+5 CEM 
+09-10 09:28:26.435  1865  2506 I ActivityManager: Process com.google.android.gm (pid 17014) has died: cch+5 CEM 
+09-10 09:28:26.436   927   927 I Zygote  : Process 17014 exited due to signal 9 (Killed)
+09-10 09:28:30.384 17016 17192 W fb4a.Fixie/ActivityStackResetterFixer: Enable Activity Stack Resetter
+09-10 09:29:28.717 15981 16116 W BlackBoxCore: isRunningApplication failed: top.niunaijun.blackbox.core.system.am.BActivityManagerService cannot be cast to top.niunaijun.blackbox.core.system.am.ActivityStack
+09-10 09:29:32.948  1865  1948 I ActivityManager: Start proc 17912:com.whatsapp/u0a291 for service {com.whatsapp/com.whatsapp.contact.ui.sync.ContactsSyncAdapterService}
+09-10 09:29:55.188  1865  1948 I ActivityManager: Start proc 18194:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 09:29:55.313 16006 16021 D ActivityStack: startActivityLocked : ActivityInfo{c1da4cd com.google.android.apps.chrome.Main}
+09-10 09:29:55.319 16006 16021 D BProcessManager: init bUid = 10001, bPid = 0
+09-10 09:29:55.320 16006 16021 D BProcessManager: initProcess: com.android.chrome
+09-10 09:29:55.354  1865  1948 I ActivityManager: Start proc 18221:co.tdevs.duplika:p0/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 09:29:55.792 16006 16021 D ActivityStack: ActivityInfo{c1da4cd com.google.android.apps.chrome.Main}, windowIsTranslucent: false
+09-10 09:29:55.914 15981 16116 W BlackBoxCore: isRunningApplication failed: top.niunaijun.blackbox.core.system.am.BActivityManagerService cannot be cast to top.niunaijun.blackbox.core.system.am.ActivityStack
+09-10 09:29:55.997   927   927 I Zygote  : Process 15255 exited due to signal 9 (Killed)
+09-10 09:29:56.021   927   927 I Zygote  : Process 14753 exited due to signal 9 (Killed)
+09-10 09:29:56.175   927   927 I Zygote  : Process 15616 exited due to signal 9 (Killed)
+09-10 09:29:56.189   927   927 I Zygote  : Process 14836 exited due to signal 9 (Killed)
+09-10 09:29:56.339 18221 18221 I cr_SplitCompatApp: version=152.0.7977.82 (797708204) minSdkVersion=29 processName=com.android.chrome isIsolatedProcess=false splits=chrome,config.en,dev_ui,on_demand,stack_unwinder
+09-10 09:29:56.485 16006 18248 D ActivityStack: onActivityCreated : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:29:56.586 16006 18286 D ActivityStack: startActivityLocked : ActivityInfo{fc3b4cf org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:29:56.592 16006 18286 D ActivityStack: ActivityInfo{fc3b4cf org.chromium.chrome.browser.firstrun.FirstRunActivity}, windowIsTranslucent: false
+09-10 09:29:56.647 16006 18273 D ActivityStack: onFinishActivity : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:29:56.654 16006 18273 D ActivityStack: onActivityResumed : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:29:56.695 16006 18273 D ActivityStack: onActivityCreated : ComponentInfo{com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:29:56.715   927   927 I Zygote  : Process 16315 exited due to signal 9 (Killed)
+09-10 09:29:56.720  1865  2503 I ActivityManager: Process com.instagram.barcelona (pid 16315) has died: cch+25 CEM 
+09-10 09:29:56.721   927   927 I Zygote  : Process 16246 exited due to signal 9 (Killed)
+09-10 09:29:56.729  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 16246) has died: cch+15 CEM 
+09-10 09:29:56.810 16006 18293 D ActivityStack: onActivityResumed : ComponentInfo{com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:29:57.289   927   927 I Zygote  : Process 18194 exited due to signal 9 (Killed)
+09-10 09:29:57.290  1865  2503 I ActivityManager: Process com.android.settings (pid 18194) has died: cch+15 CEM 
+09-10 09:29:57.911 16006 18293 D ActivityStack: onActivityDestroyed : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:30:02.858  1865  1948 I ActivityManager: Start proc 18406:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 09:30:03.640   927   927 I Zygote  : Process 17016 exited due to signal 9 (Killed)
+09-10 09:30:03.649  1865  2506 I ActivityManager: Process com.facebook.katana (pid 17016) has died: cch+15 CEM 
+09-10 09:30:04.144  1865  1948 I ActivityManager: Start proc 18511:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 09:30:14.907  1865  1948 I ActivityManager: Start proc 18691:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 09:30:36.299 16006 18293 D BProcessManager: init bUid = 10001, bPid = 1
+09-10 09:30:36.299 16006 18293 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 09:30:36.352  1865  1948 I ActivityManager: Start proc 18940:co.tdevs.duplika:p1/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: BindServiceCommon: Unexpected error
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:200)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:3)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	... 23 more
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: Caused by: android.os.RemoteException: Remote stack trace:
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at com.android.server.am.ActiveServices.retrieveServiceLocked(ActiveServices.java:5141)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at com.android.server.am.ActiveServices.bindServiceLocked(ActiveServices.java:4283)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at com.android.server.am.ActivityManagerService.bindServiceInstance(ActivityManagerService.java:15388)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at com.android.server.am.ActivityManagerService.bindServiceInstance(ActivityManagerService.java:15333)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:3081)
+09-10 09:30:36.728 18221 18935 E ActivityManagerStub: 
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: ActivityManager invoke: Unexpected error in bindServiceInstance
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:215)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:3)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:30:36.731 18221 18935 E ActivityManagerStub: 	... 23 more
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: BindServiceCommon: Unexpected error
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:205)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:30)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:30:36.734 18221 18935 E ActivityManagerStub: 	... 23 more
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: Handling uncaught Java exception
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: java.lang.reflect.UndeclaredThrowableException
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: Caused by: java.lang.reflect.InvocationTargetException
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:215)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:30)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	... 17 more
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:30:36.775 18221 18935 E cr_JniAndroid: 	... 23 more
+09-10 09:30:37.635 18221 18935 E cr_JniAndroid: Global uncaught exception handler did not terminate the process.
+09-10 09:30:38.915   927   927 I Zygote  : Process 18221 exited due to signal 5 (Trap)
+09-10 09:30:38.916 16006 18310 D BProcessManager: App Died: com.android.chrome
+09-10 09:30:38.922  1865  2503 I ActivityManager: Process co.tdevs.duplika:p0 (pid 18221) has died: fg  TOP 
+09-10 09:30:39.034  1865  1948 I ActivityManager: Start proc 18992:com.oplus.crashbox/1000 for service {com.oplus.crashbox/com.oplus.crashbox.ExceptionMonitorService}
+09-10 09:30:39.199   927   927 I Zygote  : Process 16006 exited due to signal 9 (Killed)
+09-10 09:31:52.446  1865  1948 I ActivityManager: Start proc 19712:com.facebook.katana/u0a660 for service {com.facebook.katana/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:31:58.334 19712 19804 W fb4a.Fixie/ActivityStackResetterFixer: Enable Activity Stack Resetter
+09-10 09:32:13.067  1865  1948 I ActivityManager: Start proc 20113:co.tdevs.duplika:black/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 09:32:13.482 20113 20126 D ActivityStack: startActivityLocked : ActivityInfo{c186309 com.google.android.apps.chrome.Main}
+09-10 09:32:13.497 20113 20126 D BProcessManager: init bUid = 10001, bPid = 0
+09-10 09:32:13.498 20113 20126 D BProcessManager: initProcess: com.android.chrome
+09-10 09:32:13.536  1865  1948 I ActivityManager: Start proc 20132:co.tdevs.duplika:p0/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P0}
+09-10 09:32:13.803 20113 20126 D ActivityStack: ActivityInfo{c186309 com.google.android.apps.chrome.Main}, windowIsTranslucent: false
+09-10 09:32:13.885 15981 16116 W BlackBoxCore: isRunningApplication failed: top.niunaijun.blackbox.core.system.am.BActivityManagerService cannot be cast to top.niunaijun.blackbox.core.system.am.ActivityStack
+09-10 09:32:14.224 20113 20155 D ActivityStack: onActivityCreated : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:32:14.315 20113 20123 D ActivityStack: startActivityLocked : ActivityInfo{5a81d21 org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:32:14.321 20113 20123 D ActivityStack: ActivityInfo{5a81d21 org.chromium.chrome.browser.firstrun.FirstRunActivity}, windowIsTranslucent: false
+09-10 09:32:14.375 20113 20171 D ActivityStack: onFinishActivity : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:32:14.380 20113 20171 D ActivityStack: onActivityResumed : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:32:14.392 20113 20123 D ActivityStack: onActivityCreated : ComponentInfo{com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:32:14.503 20113 20178 D ActivityStack: onActivityResumed : ComponentInfo{com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+09-10 09:32:14.830  1865  2503 I ActivityManager: Process com.oplus.romupdate (pid 13755) has died: cch+55 CEM 
+09-10 09:32:14.848   927   927 I Zygote  : Process 13755 exited due to signal 9 (Killed)
+09-10 09:32:14.915   927   927 I Zygote  : Process 18406 exited due to signal 9 (Killed)
+09-10 09:32:14.917  1865  2506 I ActivityManager: Process com.android.vending (pid 18406) has died: cch+45 CEM 
+09-10 09:32:15.456 20113 20177 D ActivityStack: onActivityDestroyed : ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}
+09-10 09:32:19.903  1865  1948 I ActivityManager: Start proc 20307:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.installservice.DevTriggeredUpdateService}
+09-10 09:32:41.692  1865  1948 I ActivityManager: Start proc 20673:com.portonics.mygp/u0a297 for service {com.portonics.mygp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:41.714  1865  1948 I ActivityManager: Start proc 20675:com.facebook.appmanager/u0a236 for service {com.facebook.appmanager/com.facebook.analytics2.logger.legacy.uploader.LollipopUploadService}
+09-10 09:32:41.746  1865  1948 I ActivityManager: Start proc 20687:net.omobio.airtelsc/u0a373 for service {net.omobio.airtelsc/com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService}
+09-10 09:32:42.349  1865  1948 I ActivityManager: Start proc 20781:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 09:32:42.371  1865  2503 I ActivityManager: Process co.tdevs.duplika:p1 (pid 18940) has died: cch+35 CEM 
+09-10 09:32:42.371   927   927 I Zygote  : Process 18940 exited due to signal 9 (Killed)
+09-10 09:32:42.495   927   927 I Zygote  : Process 19712 exited due to signal 9 (Killed)
+09-10 09:32:42.527  1865  1948 I ActivityManager: Start proc 20825:com.facebook.katana/u0a660 for restart com.facebook.katana
+09-10 09:32:42.779  1865  2503 I ActivityManager: Process com.android.vending (pid 20307) has died: cch+5 CEM 
+09-10 09:32:42.790   927   927 I Zygote  : Process 20307 exited due to signal 9 (Killed)
+09-10 09:32:42.893  1865  1948 I ActivityManager: Start proc 20913:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService}
+09-10 09:32:42.942   927   927 I Zygote  : Process 18691 exited due to signal 9 (Killed)
+09-10 09:32:42.966  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 18691) has died: cch+5 CEM 
+09-10 09:32:43.033  1865  1948 I ActivityManager: Start proc 20954:com.imo.android.imoim/u0a389 for broadcast {com.imo.android.imoim/com.imo.android.imoim.Alarms}
+09-10 09:32:43.042  1865  2503 I ActivityManager: Process com.android.vending:background (pid 18511) has died: cch+5 CEM 
+09-10 09:32:43.109   927   927 I Zygote  : Process 18511 exited due to signal 9 (Killed)
+09-10 09:32:43.153   927   927 I Zygote  : Process 16217 exited due to signal 9 (Killed)
+09-10 09:32:43.161  1865  2506 I ActivityManager: Process com.facebook.services (pid 16217) has died: svcb SVC 
+09-10 09:32:43.197  1865  1948 I ActivityManager: Start proc 20992:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.analytics.uploadscheduler.AnalyticsUploadAlarmReceiver}
+09-10 09:32:43.582  1865  1948 I ActivityManager: Start proc 21105:com.google.android.googlequicksearchbox:search/u0a118 for service {com.google.android.googlequicksearchbox/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:43.904  1865  2503 I ActivityManager: Process com.portonics.mygp (pid 20673) has died: cch+5 CEM 
+09-10 09:32:43.904   927   927 I Zygote  : Process 20673 exited due to signal 9 (Killed)
+09-10 09:32:44.167  1865  1948 I ActivityManager: Start proc 21175:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 09:32:44.397   927   927 I Zygote  : Process 20913 exited due to signal 9 (Killed)
+09-10 09:32:44.404  1865  2506 I ActivityManager: Process com.android.vending (pid 20913) has died: fg  TRNB
+09-10 09:32:44.826  1865  2503 I ActivityManager: Process com.facebook.system (pid 20781) has died: cch+15 CEM 
+09-10 09:32:44.827   927   927 I Zygote  : Process 20781 exited due to signal 9 (Killed)
+09-10 09:32:44.916  1865  2506 I ActivityManager: Process com.facebook.appmanager (pid 20675) has died: cch+5 CEM 
+09-10 09:32:44.917   927   927 I Zygote  : Process 20675 exited due to signal 9 (Killed)
+09-10 09:32:44.968  1865  1948 I ActivityManager: Start proc 21378:com.google.android.cellbroadcastreceiver/u0a262 for broadcast {com.google.android.cellbroadcastreceiver/com.android.cellbroadcastreceiver.CellBroadcastReceiver}
+09-10 09:32:45.030   927   927 I Zygote  : Process 20954 exited due to signal 9 (Killed)
+09-10 09:32:45.030  1865  2503 I ActivityManager: Process com.imo.android.imoim (pid 20954) has died: cch+5 CEM 
+09-10 09:32:45.150   927   927 I Zygote  : Process 21175 exited due to signal 9 (Killed)
+09-10 09:32:45.152  1865  2506 I ActivityManager: Process com.android.vending:background (pid 21175) has died: cch+5 CEM 
+09-10 09:32:45.385  1865  2503 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 21105) has died: cch+5 CEM 
+09-10 09:32:45.386   927   927 I Zygote  : Process 21105 exited due to signal 9 (Killed)
+09-10 09:32:45.484  1865  1948 I ActivityManager: Start proc 21453:com.google.android.googlequicksearchbox:search/u0a118 for service {com.google.android.googlequicksearchbox/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:45.599   927   927 I Zygote  : Process 21378 exited due to signal 9 (Killed)
+09-10 09:32:45.599  1865  2506 I ActivityManager: Process com.google.android.cellbroadcastreceiver (pid 21378) has died: cch+5 CEM 
+09-10 09:32:45.630  1865  1948 I ActivityManager: Start proc 21492:com.facebook.services/u0a226 for service {com.facebook.services/com.facebook.oxygen.services.fbns.PreloadedFbnsService}
+09-10 09:32:45.650   927   927 I Zygote  : Process 20687 exited due to signal 9 (Killed)
+09-10 09:32:45.654  1865  2503 I ActivityManager: Process net.omobio.airtelsc (pid 20687) has died: cch+5 CEM 
+09-10 09:32:45.962  1865  1948 I ActivityManager: Start proc 21560:com.facebook.appmanager/u0a236 for content provider {com.facebook.appmanager/com.facebook.oxygen.appmanager.firstparty.settings.FirstPartySettingsProvider}
+09-10 09:32:46.092  1865  1948 I ActivityManager: Start proc 21593:com.google.android.googlequicksearchbox:googleapp/u0a118 for service {com.google.android.googlequicksearchbox/com.google.android.libraries.search.integrations.tiktok.RemoteWorkerService_googleapp}
+09-10 09:32:46.980  1865  1948 I ActivityManager: Start proc 21681:com.google.android.as.oss/u0a232 for service {com.google.android.as.oss/com.google.android.gms.learning.internal.training.InAppJobService}
+09-10 09:32:47.020  1865  1948 I ActivityManager: Start proc 21690:com.facebook.system/u0a227 for content provider {com.facebook.system/com.facebook.oxygen.installer.api.AppManagerApiProvider}
+09-10 09:32:47.773  1865  2506 I ActivityManager: Process com.google.android.as.oss (pid 21681) has died: cch+5 CEM 
+09-10 09:32:47.774   927   927 I Zygote  : Process 21681 exited due to signal 9 (Killed)
+09-10 09:32:48.029  1865  2503 I ActivityManager: Process co.tdevs.duplika (pid 15981) has died: prev LAST
+09-10 09:32:48.039   927   927 I Zygote  : Process 15981 exited due to signal 9 (Killed)
+09-10 09:32:48.675   927   927 I Zygote  : Process 20113 exited due to signal 9 (Killed)
+09-10 09:32:48.694  1865  2506 I ActivityManager: Process co.tdevs.duplika:black (pid 20113) has died: cch+5 CEM 
+09-10 09:32:48.801   927   927 I Zygote  : Process 17912 exited due to signal 9 (Killed)
+09-10 09:32:48.802  1865  2503 I ActivityManager: Process com.whatsapp (pid 17912) has died: svcb SVC 
+09-10 09:32:48.846 20825 20979 W fb4a.Fixie/ActivityStackResetterFixer: Enable Activity Stack Resetter
+09-10 09:32:49.116   927   927 I Zygote  : Process 20825 exited due to signal 9 (Killed)
+09-10 09:32:49.118  1865  2506 I ActivityManager: Process com.facebook.katana (pid 20825) has died: prev LAST
+09-10 09:32:50.138  1865  1948 I ActivityManager: Start proc 21853:co.tdevs.duplika:black/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.core.system.SystemCallProvider}
+09-10 09:32:50.548  1865  1948 I ActivityManager: Start proc 21871:com.google.android.as.oss/u0a232 for service {com.google.android.as.oss/com.google.android.gms.learning.internal.training.InAppJobService}
+09-10 09:32:53.064  1865  1948 I ActivityManager: Start proc 21930:com.google.android.tts/u0a134 for service {com.google.android.tts/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:53.088  1865  1948 I ActivityManager: Start proc 21931:com.google.android.rkpdapp/u0a261 for service {com.google.android.rkpdapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:53.112  1865  1948 I ActivityManager: Start proc 21935:com.google.android.webview:webview_service/u0a138 for service {com.google.android.webview/org.chromium.android_webview.services.AwVariationsSeedFetcher}
+09-10 09:32:53.348  1865  1948 I ActivityManager: Start proc 21994:com.snaptube.premium/u0a294 for service {com.snaptube.premium/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:53.550  1865  1948 I ActivityManager: Start proc 22037:com.fasset.cashapp/u0a662 for service {com.fasset.cashapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:53.664 21853 21861 D BProcessManager: init bUid = 10001, bPid = 1
+09-10 09:32:53.664 21853 21861 D BProcessManager: initProcess: com.android.chrome:sandboxed_process0
+09-10 09:32:53.681  1865  1948 I ActivityManager: Start proc 22058:co.tdevs.duplika:p1/u0a976 for content provider {co.tdevs.duplika/top.niunaijun.blackbox.proxy.ProxyContentProvider$P1}
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: BindServiceCommon: Unexpected error
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:200)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:3)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	... 23 more
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: Caused by: android.os.RemoteException: Remote stack trace:
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at com.android.server.am.ActiveServices.retrieveServiceLocked(ActiveServices.java:5141)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at com.android.server.am.ActiveServices.bindServiceLocked(ActiveServices.java:4283)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at com.android.server.am.ActivityManagerService.bindServiceInstance(ActivityManagerService.java:15388)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at com.android.server.am.ActivityManagerService.bindServiceInstance(ActivityManagerService.java:15333)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:3081)
+09-10 09:32:53.901 20132 22044 E ActivityManagerStub: 
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: ActivityManager invoke: Unexpected error in bindServiceInstance
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:215)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:3)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:32:53.904 20132 22044 E ActivityManagerStub: 	... 23 more
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: BindServiceCommon: Unexpected error
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: java.lang.reflect.InvocationTargetException
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:205)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:30)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:32:53.908 20132 22044 E ActivityManagerStub: 	... 23 more
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: Handling uncaught Java exception
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: java.lang.reflect.UndeclaredThrowableException
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at $Proxy104.bindServiceInstance(Unknown Source)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:2204)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.app.ContextImpl.bindIsolatedService(ContextImpl.java:2095)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.content.ContextWrapper.bindIsolatedService(ContextWrapper.java:897)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at js2.b(chromium-Chrome.aab-stable-797708204:35)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at gb4.a(chromium-Chrome.aab-stable-797708204:20)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at sje.h(chromium-Chrome.aab-stable-797708204:30)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at y94.d(chromium-Chrome.aab-stable-797708204:7)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at y94.k(chromium-Chrome.aab-stable-797708204:9)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at a94.b(chromium-Chrome.aab-stable-797708204:14)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at ha4.a(chromium-Chrome.aab-stable-797708204:27)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at org.chromium.content.browser.ChildProcessLauncherHelperImpl.createAndStart(chromium-Chrome.aab-stable-797708204:330)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.MessageQueue.next(MessageQueue.java:370)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Looper.loopOnce(Looper.java:214)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Looper.loop(Looper.java:387)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: Caused by: java.lang.reflect.InvocationTargetException
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.BindServiceCommon(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:215)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy$bindServiceInstance.hook(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:2)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.hook.ClassInvocationStub.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:33)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at top.niunaijun.blackbox.fake.service.IActivityManagerProxy.invoke(r8-map-id-7dc5cbb48e33d9f8c2e29072e7f4a85d0ae638e51549ec5435e523de987a8f9d:30)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at java.lang.reflect.Proxy.invoke(Proxy.java:1009)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	... 17 more
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: Caused by: java.lang.IllegalArgumentException: Can't use instance name '0' with non-isolated non-sdk sandbox service 'top.niunaijun.blackbox.proxy.ProxyService$P1'
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3275)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Parcel.createException(Parcel.java:3255)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3238)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.os.Parcel.readException(Parcel.java:3180)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	at android.app.IActivityManager$Stub$Proxy.bindServiceInstance(IActivityManager.java:6490)
+09-10 09:32:53.978 20132 22044 E cr_JniAndroid: 	... 23 more
+09-10 09:32:54.126   927   927 I Zygote  : Process 21871 exited due to signal 9 (Killed)
+09-10 09:32:54.128  1865  2503 I ActivityManager: Process com.google.android.as.oss (pid 21871) has died: cch+5 CEM 
+09-10 09:32:54.215  1865  1948 I ActivityManager: Start proc 22189:com.android.vending/u0a108 for service {com.android.vending/com.google.android.finsky.developergroupidinfo.DeveloperGroupIdInfoService}
+09-10 09:32:54.423  1865  1948 I ActivityManager: Start proc 22240:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 09:32:54.591  1865  1948 I ActivityManager: Start proc 22267:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i18 for  {com.snaptube.premium/org.chromium.content.app.SandboxedProcessService0:0}
+09-10 09:32:54.865  1865  2506 I ActivityManager: Process com.facebook.system (pid 21690) has died: cch+5 CEM 
+09-10 09:32:54.924   927   927 I Zygote  : Process 21690 exited due to signal 9 (Killed)
+09-10 09:32:54.986   927   927 I Zygote  : Process 21931 exited due to signal 9 (Killed)
+09-10 09:32:54.991  1865  2503 I ActivityManager: Process com.google.android.rkpdapp (pid 21931) has died: cch+5 CEM 
+09-10 09:32:54.997   927   927 I Zygote  : Process 21930 exited due to signal 9 (Killed)
+09-10 09:32:55.016  1865  2506 I ActivityManager: Process com.google.android.tts (pid 21930) has died: cch+5 CEM 
+09-10 09:32:55.061  1865  2503 I ActivityManager: Process com.google.android.webview:webview_service (pid 21935) has died: cch+5 CEM 
+09-10 09:32:55.062   927   927 I Zygote  : Process 21935 exited due to signal 9 (Killed)
+09-10 09:32:55.161   927   927 I Zygote  : Process 21994 exited due to signal 9 (Killed)
+09-10 09:32:55.220  1865  1948 I ActivityManager: Start proc 22363:com.android.externalstorage/u0a68 for content provider {com.android.externalstorage/com.android.externalstorage.ExternalStorageProvider}
+09-10 09:32:55.259  1865  2506 I ActivityManager: Process com.snaptube.premium (pid 21994) has died: cch+5 CEM 
+09-10 09:32:55.345  2507  2507 I Zygote  : Process 22267 exited due to signal 9 (Killed)
+09-10 09:32:55.396 20132 22044 E cr_JniAndroid: Global uncaught exception handler did not terminate the process.
+09-10 09:32:55.452   927   927 I Zygote  : Process 22037 exited due to signal 9 (Killed)
+09-10 09:32:55.454  1865  2506 I ActivityManager: Process com.fasset.cashapp (pid 22037) has died: cch+5 CEM 
+09-10 09:32:56.330  1865  1948 I ActivityManager: Start proc 22507:com.google.android.apps.maps/u0a141 for service {com.google.android.apps.maps/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:56.344  1865  1948 I ActivityManager: Start proc 22508:com.google.android.calendar/u0a133 for service {com.google.android.calendar/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:56.816  1865  2503 I ActivityManager: Process com.facebook.katana (pid 22240) has died: cch+5 CEM 
+09-10 09:32:56.818   927   927 I Zygote  : Process 22240 exited due to signal 9 (Killed)
+09-10 09:32:56.874  1865  1948 I ActivityManager: Start proc 22557:com.android.providers.calendar/u0a175 for content provider {com.android.providers.calendar/com.android.providers.calendar.CalendarProvider2}
+09-10 09:32:57.261  1865  1948 I ActivityManager: Start proc 22640:com.oplus.uxdesign/u0a219 for service {com.oplus.uxdesign/com.oplus.uxdesign.icon.autocheck.AutoCheckService}
+09-10 09:32:57.575  1865  2506 I ActivityManager: Process co.tdevs.duplika:p0 (pid 20132) has died: fg  TOP 
+09-10 09:32:57.631   927   927 I Zygote  : Process 20132 exited due to signal 5 (Trap)
+09-10 09:32:57.684  1865  2854 I ActivityManager: Start proc 22681:co.tdevs.duplika/u0a976 for top-activity {co.tdevs.duplika/co.tdevs.duplika.MainActivity}
+09-10 09:32:57.800  1865  1948 I ActivityManager: Start proc 22700:com.google.android.projection.gearhead:car/u0a98 for service {com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService}
+09-10 09:32:58.807   927   927 I Zygote  : Process 21593 exited due to signal 9 (Killed)
+09-10 09:32:58.807  1865  1948 I ActivityManager: Start proc 22795:com.fasset.cashapp/u0a662 for service {com.fasset.cashapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:32:59.268   927   927 I Zygote  : Process 21453 exited due to signal 9 (Killed)
+09-10 09:33:00.130 22681 22887 W BlackBoxCore: isRunningApplication failed: top.niunaijun.blackbox.core.system.am.BActivityManagerService cannot be cast to top.niunaijun.blackbox.core.system.am.ActivityStack
+09-10 09:33:00.999  1865  1948 I ActivityManager: Start proc 22961:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 09:33:01.545   927   927 I Zygote  : Process 22508 exited due to signal 9 (Killed)
+09-10 09:33:01.550   927   927 I Zygote  : Process 22557 exited due to signal 9 (Killed)
+09-10 09:33:03.877   927   927 I Zygote  : Process 20992 exited due to signal 9 (Killed)
+09-10 09:33:03.906  1865  1948 I ActivityManager: Start proc 23131:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 09:33:05.145  1865  1948 I ActivityManager: Start proc 23284:com.google.android.apps.photos/u0a240 for service {com.google.android.apps.photos/com.google.android.libraries.social.mediamonitor.MediaMonitorJobSchedulerService}
+09-10 09:33:05.374   927   927 I Zygote  : Process 22640 exited due to signal 9 (Killed)
+09-10 09:33:05.376  1865  2506 I ActivityManager: Process com.oplus.uxdesign (pid 22640) has died: cch+45 CEM 
+09-10 09:33:05.434  1865  2503 I ActivityManager: Process com.google.android.apps.maps (pid 22507) has died: cch+35 CEM 
+09-10 09:33:05.436   927   927 I Zygote  : Process 22507 exited due to signal 9 (Killed)
+09-10 09:33:05.837  1865  1948 I ActivityManager: Start proc 23369:com.android.vending:background/u0a108 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+09-10 09:33:06.243   927   927 I Zygote  : Process 22795 exited due to signal 9 (Killed)
+09-10 09:33:06.403  1865  1948 I ActivityManager: Start proc 23432:com.google.android.apps.walletnfcrel/u0a237 for service {com.google.android.apps.walletnfcrel/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:33:06.878 22961 23068 W fb4a.Fixie/ActivityStackResetterFixer: Enable Activity Stack Resetter
+09-10 09:33:07.113   927   927 I Zygote  : Process 22961 exited due to signal 9 (Killed)
+09-10 09:33:18.863  1865  1948 I ActivityManager: Start proc 23632:com.whatsapp/u0a291 for service {com.whatsapp/com.whatsapp.messageservice.messaging.MessageService}
+09-10 09:33:39.396  1865  1948 I ActivityManager: Start proc 23899:com.oplus.uxdesign/u0a219 for service {com.oplus.uxdesign/com.oplus.uxdesign.icon.autocheck.AutoCheckService}
+09-10 09:33:39.416  1865  1948 I ActivityManager: Start proc 23900:com.fasset.cashapp/u0a662 for service {com.fasset.cashapp/androidx.work.impl.background.systemjob.SystemJobService}
+09-10 09:33:39.740   927   927 I Zygote  : Process 22700 exited due to signal 9 (Killed)
+09-10 09:33:39.879  1865  1948 I ActivityManager: Start proc 23968:com.facebook.katana/u0a660 for content provider {com.facebook.katana/com.facebook.platform.common.provider.PlatformProviderBase}
+09-10 09:33:40.084   927   927 I Zygote  : Process 22189 exited due to signal 9 (Killed)
+09-10 09:33:40.122   927   927 I Zygote  : Process 23284 exited due to signal 9 (Killed)
+09-10 09:33:45.525 23968 24074 W fb4a.Fixie/ActivityStackResetterFixer: Enable Activity Stack Resetter
+09-10 09:33:50.177   927   927 I Zygote  : Process 23432 exited due to signal 9 (Killed)
+09-10 09:34:16.888   927   927 I Zygote  : Process 23131 exited due to signal 9 (Killed)
+09-10 09:34:16.939  1865  1948 I ActivityManager: Start proc 24442:com.instagram.barcelona/u0a795 for broadcast {com.instagram.barcelona/com.instagram.util.startup.appwarmer.KeepWarmReceiver}
+09-10 09:34:51.134  1865  1948 I ActivityManager: Start proc 24852:com.android.settings/1000 for broadcast {com.android.settings/com.android.settings.fuelgauge.batteryusage.BatteryUsageBroadcastReceiver}
+09-10 09:34:52.047  1865  1948 I ActivityManager: Start proc 24912:com.oplus.romupdate/u0a165 for content provider {com.oplus.romupdate/com.oplusos.romupdate.provider.RomUpdateProvider}
+09-10 09:34:52.125   927   927 I Zygote  : Process 23900 exited due to signal 9 (Killed)
+09-10 09:34:52.230  1865  1948 I ActivityManager: Start proc 24951:com.heytap.mcs.appservice/1000 for service {com.heytap.mcs/com.heytap.mcs.biz.appservice.McsSdkService}
+09-10 09:34:52.583   927   927 I Zygote  : Process 23369 exited due to signal 9 (Killed)

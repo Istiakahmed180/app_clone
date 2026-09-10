@@ -9,18 +9,17 @@ import '../../../data/models/engine_result.dart';
 import '../../../data/models/space_identity.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../controllers/home_controller.dart';
-import 'space_identity_editor_view.dart';
 
 /// The device identifiers one space presents as its own.
 ///
 /// A page rather than a sheet because the identifier rows are meant to be read and
 /// copied rather than glanced at.
 ///
-/// The values are real stored per-space values and Modify/Reset really change them, but
-/// a guest app does not read them yet: Bcore exposes no way to point its identifier
-/// hooks at a per-space store. This screen therefore does not tell the user their
-/// identifiers are isolated — see [SpaceIdentity.isolatedFromGuests] and the Space
-/// identity section of `docs/ARCHITECTURE.md`.
+/// The values are the real stored per-space values, but a guest app does not read them
+/// yet: Bcore exposes no way to point its identifier hooks at a per-space store. This
+/// screen therefore does not tell the user their identifiers are isolated — see
+/// [SpaceIdentity.isolatedFromGuests] and the Space identity section of
+/// `docs/ARCHITECTURE.md`. It is read-only for the same reason.
 class SpaceInfoView extends StatefulWidget {
   const SpaceInfoView({
     required this.controller,
@@ -52,12 +51,12 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
     _load();
   }
 
-  Future<void> _load({String action = 'read'}) async {
+  Future<void> _load() async {
     setState(() => _busy = true);
     try {
       final SpaceIdentity identity = await widget.controller.spaceIdentity(
         widget.profile,
-        action: action,
+        action: 'read',
       );
       if (mounted) {
         setState(() {
@@ -90,8 +89,6 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
           Text('Device identifiers', style: theme.textTheme.titleMedium),
           SizedBox(height: 10.h),
           _identifierCard(theme),
-          SizedBox(height: 20.h),
-          _identityActions(theme),
         ],
       ),
     );
@@ -233,71 +230,6 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
         ),
       ),
     );
-  }
-
-  Widget _identityActions(ThemeData theme) {
-    final bool enabled = _identity != null && !_busy;
-
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: FilledButton(
-            onPressed: enabled ? _modify : null,
-            child: const Text('Modify'),
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: enabled ? _reset : null,
-            child: const Text('Reset'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Opens the editor, where each identifier is typed by hand.
-  Future<void> _modify() async {
-    final bool? saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (BuildContext context) => SpaceIdentityEditorView(
-          controller: widget.controller,
-          profile: widget.profile,
-          identity: _identity!,
-          spaceIndex: widget.instanceIndex,
-          isRunning: widget.state.running,
-        ),
-      ),
-    );
-    if (saved != true || !mounted) {
-      return;
-    }
-    await _load();
-    if (mounted) {
-      _say('This space\'s identifiers were changed.');
-    }
-  }
-
-  /// Replaces the whole set with new random values, after asking.
-  ///
-  /// Asked because it is irreversible: the previous values are overwritten and kept
-  /// nowhere, so "undo" is not a thing that can be offered afterwards.
-  Future<void> _reset() async {
-    if (!await showResetIdentityDialog(context) || !mounted) {
-      return;
-    }
-    await _load(action: 'regenerate');
-    if (!mounted) {
-      return;
-    }
-    _say('This space was given a new set of identifiers.');
-  }
-
-  void _say(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
