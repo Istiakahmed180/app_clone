@@ -5,6 +5,38 @@ commit `89b59836c66f173756a4ae258cf379a957649820`). These live here as source pa
 because the engine ships as a prebuilt `android/app/libs/bcore.aar` and is not built from
 source in this project.
 
+## Runtime overrides (`overrides/`) — and a trap to avoid
+
+`overrides/` holds whole Java classes that replace their vendored counterparts.
+`apply-runtime-overrides.sh` recompiles them against the shipped `classes.jar` and rewrites
+`android/app/libs/bcore.aar` in place. Unlike the `*.patch` files, which are applied by
+`build-engine.sh` when the engine is rebuilt from source, **these are only present in the
+binary if that script has been run since they were last edited.**
+
+That trap was hit: `IActivityManagerProxy$checkPermission.java` had been written to handle
+Android 15's `checkPermissionForDevice`, but the committed AAR still registered only the
+older `checkPermission`. The result was that `Context.checkSelfPermission`,
+`checkCallingOrSelfPermission` and `checkPermission(pid, uid)` all returned **DENIED** inside
+a guest for permissions the app genuinely declared and had been granted — because those
+resolve by UID, and the guest's virtual UID means nothing to the platform. The
+`PackageManager.checkPermission(perm, packageName)` family was unaffected, which is why the
+defect stayed hidden: most probes had used the package-name form.
+
+Measured consequences (Pixel 9 / API 35, `level10_gms` P18): 3 of 7 lookup variants DENIED in
+a guest against 7/7 GRANTED on the host. Downstream, the Google Maps SDK refused to construct
+a `MapView` (`SecurityException: The Maps API requires ... INTERNET, ACCESS_NETWORK_STATE`),
+and Level 6's runtime-permission probe reported `camera=false` even after the user granted it.
+After running the script: 7/7 GRANTED, Maps completes end to end, Level 6 reports the grant.
+
+The override maps the guest UID to the **host** UID — the UID the process genuinely runs
+under — before the platform's check. It tells the platform the truth about who is asking and
+changes only what an app is told about *its own* permissions. It does not affect what Play
+services observes: the caller-identity refusals documented in
+`docs/level10-gms-caller-identity-boundary.md` are unchanged, verified before and after.
+
+**If you edit anything under `overrides/`, run `engine-patches/apply-runtime-overrides.sh`
+and commit the resulting `bcore.aar`, or the change does not exist at runtime.**
+
 ## 0005 — Permission-gated public media paths
 
 `IOCore` previously redirected the complete shared-storage tree into each clone's private

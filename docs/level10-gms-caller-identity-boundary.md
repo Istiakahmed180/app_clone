@@ -1,6 +1,13 @@
 # Level 10 — the GMS caller-identity boundary (root cause CONFIRMED)
 
-Status: **CONFIRMED — UNSUPPORTED / SECURITY BOUNDARY.** No production code changed.
+Status: **CONFIRMED — UNSUPPORTED / SECURITY BOUNDARY.**
+
+The boundary itself is unchanged and unfixable by design. One production change was made in
+the later compatibility-expansion phase, and it is deliberately unrelated to the boundary:
+`android/app/libs/bcore.aar` was rebuilt so that the repository's own, previously
+uncompiled, `checkPermissionForDevice` override is actually present (§6a). It changes what a
+guest app is told about **its own** permissions and nothing about what Play services
+observes.
 
 This document closes the question left open as "Finding 4 — UNKNOWN" in
 `evidence/physical-android15/level10-gms/root-cause-analysis.md` and as "root cause
@@ -114,7 +121,23 @@ guest result meaningful. **REJECTED.**
 That negative result matters: it is what forced the search past locally-readable data and on
 to capturing the remote exception.
 
-## 4. Scope of the boundary
+## 4. What works, and what the boundary covers
+
+### Legitimately supported in a guest — measured, host and guest, Debug and Release
+
+| Capability | Guest | Caller-scoped | Note |
+| --- | --- | --- | --- |
+| `isGooglePlayServicesAvailable` | PASS `SUCCESS(0)` | no | |
+| Package metadata coherence | PASS | no | |
+| GoogleApi client framework | PASS | no | via AppSet ID |
+| Advertising ID (direct AIDL) | PASS | no | |
+| App Set ID | PASS | no | |
+| **Chimera / Dynamite module loading** | **PASS** | no | Play services serves module code into the guest process; gates Maps, ML Kit, Cast |
+| **Play services security provider** | **PASS** | no | `ProviderInstaller.installIfNeeded`; `GmsCore_OpenSSL` visibly installed |
+| **Google Maps SDK** | **PASS** | no | SDK init, MapView, GoogleMap, camera op — after the permission fix below |
+| Firebase initialization (`firebase-common`) | PASS | no | Level 9 Test E; Firebase *Messaging* is not a dependency and is NOT TESTED |
+
+### Scope of the boundary
 
 Measured on Pixel 9 / API 35, Debug and minified Release, both columns:
 
@@ -156,7 +179,54 @@ The refusal is an identity assertion the container legitimately cannot make.
 
 **Classification: UNSUPPORTED / SECURITY BOUNDARY. This must not be "fixed".**
 
-## 6. Legitimately fixable, and deliberately not fixed here
+## 6a. A legitimately fixable defect, found and fixed (permission lookup)
+
+The compatibility-expansion phase found a defect that is **not** this boundary and is
+squarely fixable. It is recorded here because it was initially easy to mistake for one.
+
+The Maps SDK refused to construct a `MapView` in a guest:
+
+```
+SecurityException: The Maps API requires the additional following permissions ...
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+```
+
+The fixture declares both, and the identical APK passed on the host. Two probes separated
+the cause:
+
+- **P17** — `getPackageInfo(self, GET_PERMISSIONS)` returns all five declared permissions in
+  a guest, identically to the host. The obvious explanation was **wrong**.
+- **P18** — asked the same question seven ways. The split was exact:
+
+  | Lookup family | Host | Guest (before) |
+  | --- | --- | --- |
+  | `Context.checkSelfPermission` / `checkCallingOrSelfPermission` / `checkPermission(pid,uid)` | GRANTED | **DENIED** |
+  | `PackageManager.checkPermission(perm, package)` / `getPackageInfo` | GRANTED | GRANTED |
+
+The `Context` family resolves by **pid/uid**. A guest runs with a virtual UID, so the call
+reached the real platform with a UID it does not know, and the platform correctly answered
+DENIED. Nothing about Google, nothing about identity assertion: the app was asking about
+itself and getting a wrong answer.
+
+**The fix was already written in this repository and had never been compiled into the
+shipped binary.** `engine-patches/overrides/…/IActivityManagerProxy$checkPermission.java`
+adds a `checkPermissionForDevice` hook that maps the guest UID to the host UID before the
+platform check — the Android 15 path that `Context.checkSelfPermission` now takes. The
+shipped `bcore.aar` registered only the older `checkPermission` method. Running
+`engine-patches/apply-runtime-overrides.sh` installed it.
+
+After the fix, in a guest: all seven lookups GRANTED, the Maps SDK completes all four
+stages, and Level 6's runtime-permission probe reports `notification=true camera=true`
+where it previously stayed `false` after the user granted.
+
+**Why this is not identity spoofing.** The UID mapping is guest→**host**, i.e. to the UID
+the process genuinely runs under. It tells the platform the truth about who is asking, and
+it changes only what *this app* is told about *its own* permissions. It does not touch what
+Play services observes: the caller-identity refusals are unchanged (28-29 per run, before
+and after), and every caller-scoped API still fails exactly as documented above.
+
+## 6b. Legitimately fixable, and deliberately not fixed here
 
 P9 did find one value that is objectively wrong, unrelated to this boundary:
 
@@ -170,11 +240,26 @@ regardless of the UID asked about. That is a wrong answer about another package,
 shape as the Level 9 package-visibility defect, and correcting it would involve no identity
 assertion — it would report the host's true mapping for a UID the caller did not claim.
 
-It is **not** fixed in this phase, for the reason the project's own rules require: it is not
+**TODO (open, deliberately deferred):** *correct `getPackagesForUid` virtualization when a
+real guest caller path demonstrates dependency on it.*
+
+It is **not** fixed, for the reason the project's own rules require: it is not
 the cause of any measured failure. P11 and the confirmed root cause show the GMS path does
 not depend on it. Changing engine behaviour to correct a value nothing is known to read
 would be exactly the speculative patch the brief forbids. It is recorded here so a future
 phase that finds a caller which *does* read it has the measurement already.
+
+## 6c. Play Billing — an open question, not a classified boundary
+
+The Play Store refuses a billing connection from a guest:
+`responseCode=3 BILLING_UNAVAILABLE, "Google Play In-app Billing API version is less than 3"`,
+against `OK` on the host, in both Debug and Release. Connection only was tested; no purchase
+flow exists in the fixture.
+
+This is **not** classified. It is a different host app (`com.android.vending`), a different
+Binder path, and the message is about an API version rather than a caller identity, so
+assuming it is the same boundary would be exactly the inference this project keeps having to
+undo. It is recorded as the strongest open lead for a future phase.
 
 ## 7. Play Integrity and Firebase
 

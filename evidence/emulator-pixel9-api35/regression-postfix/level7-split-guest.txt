@@ -1,0 +1,19 @@
+09-10 15:19:16.153  4199  4266 I Duplika.VIRTUAL_ENGINE: [launch_20260910_5v2_001] Launch requested for com.example.duplikaladder.level7fixture
+09-10 15:19:16.154  4199  4266 I Duplika.VIRTUAL_ENGINE: [launch_20260910_5v2_001] Starting com.example.duplikaladder.level7fixture in virtual user 3
+09-10 15:19:16.155  4199  4266 W BlackBoxCore: All files access not granted for launching: com.example.duplikaladder.level7fixture
+09-10 15:19:16.188  4229  4237 D ActivityStack: startActivityLocked : ActivityInfo{cea9eb5 com.example.duplikaladder.level7fixture.MainActivity}
+09-10 15:19:16.189  4229  4237 D BProcessManager: initProcess: com.example.duplikaladder.level7fixture
+09-10 15:19:16.453  4229  4237 D ActivityStack: ActivityInfo{cea9eb5 com.example.duplikaladder.level7fixture.MainActivity}, windowIsTranslucent: false
+09-10 15:19:16.471  4199  4266 I Duplika.Launch: Launched com.example.duplikaladder.level7fixture in user 3
+09-10 15:19:16.472  4199  4266 I Duplika.VIRTUAL_ENGINE: [launch_20260910_5v2_001] Guest process accepted the launch of com.example.duplikaladder.level7fixture
+09-10 15:19:16.472  4199  4266 I Duplika.VIRTUAL_ENGINE: [launch_20260910_5v2_001] Launched com.example.duplikaladder.level7fixture
+09-10 15:19:16.521  4308  4308 D NativeCore: openDexFileNative: /data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.apk
+09-10 15:19:16.521  4308  4308 W ziparchive: Unable to open '/data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.dm': No such file or directory
+09-10 15:19:16.521  4308  4308 W ziparchive: Unable to open '/data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.dm': No such file or directory
+09-10 15:19:16.545  4308  4308 D nativeloader: Configuring clns-8 for other apk /data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/lib/arm64:/data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/co.tdevs.duplika/blackbox/data/user/3/com.example.duplikaladder.level7fixture
+09-10 15:19:16.545   574  1274 W PackageManager: Invalid dex load report. loadingPackageName=com.example.duplikaladder.level7fixture, uid=10224
+09-10 15:19:16.564  4229  4238 D ActivityStack: onActivityCreated : ComponentInfo{com.example.duplikaladder.level7fixture/com.example.duplikaladder.level7fixture.MainActivity}
+09-10 15:19:16.574  4308  4308 D nativeloader: Load /data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.apk!/lib/arm64-v8a/liblevel7fixture.so using ns clns-8 from class loader (caller=/data/app/~~4KgoKBrujTUz4zkT_v9Ixw==/com.example.duplikaladder.level7fixture-OlzrLaZXx0qcZGoAfCAI_A==/base.apk!classes3.dex): ok
+09-10 15:19:16.597  4308  4308 D AppInstrumentation: callActivityOnCreate: com.example.duplikaladder.level7fixture.MainActivity
+09-10 15:19:16.698  4229  4238 D ActivityStack: onActivityResumed : ComponentInfo{com.example.duplikaladder.level7fixture/com.example.duplikaladder.level7fixture.MainActivity}
+09-10 15:19:16.701   574  3114 D CoreBackPreview: Window{c730627 u0 com.example.duplikaladder.level7fixture/com.example.duplikaladder.level7fixture.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@36b127d, mPriority=0, mIsAnimationCallback=false}

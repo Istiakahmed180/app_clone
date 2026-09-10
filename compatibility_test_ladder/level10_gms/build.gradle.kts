@@ -55,4 +55,14 @@ dependencies {
     // P5 — read-only account inspection. Used ONLY to observe that no account is present
     // and to classify account-bound APIs as a security boundary. No sign-in is attempted.
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // P15 — the Maps SDK. Added for the compatibility-expansion phase to answer a question
+    // no existing probe covers: how far up a real, heavyweight Google SDK a guest can get.
+    // NO API key is declared anywhere in this fixture, deliberately — see ProbeMaps.
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+
+    // P16 — Play Billing. Talks to the Play Store (com.android.vending), not to Play
+    // services, so it exercises a different host app and a different Binder path from
+    // everything else here. Connection only; no purchase flow exists in this fixture.
+    implementation("com.android.billingclient:billing:7.1.1")
 }

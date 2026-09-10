@@ -1,0 +1,169 @@
+Duplika.GMS10: ================ LEVEL 10 GMS API REACH RUN ================
+Duplika.GMS10.UID: guestPackage=com.example.duplikaladder.level10gms
+Duplika.GMS10.UID: hostUid=10225 pid=2603
+Duplika.GMS10.UID: processName=com.example.duplikaladder.level10gms
+Duplika.GMS10.UID: dataDir=/data/user/0/com.example.duplikaladder.level10gms
+Duplika.GMS10.UID: virtualized=false virtualUserId=n/a (host installation)
+Duplika.GMS10: device=Google sdk_gphone64_arm64 android=15 api=35 abi=arm64-v8a
+Duplika.GMS10: buildType=release minified=true
+Duplika.GMS10: ================ P0 — package visibility + Play services availability (Level 10 baseline) ================
+Duplika.GMS10.Package: com.google.android.gms getPackageInfo OK versionName=26.33.32 (260400-974685114) versionCode=263332035
+Duplika.GMS10.Package: com.google.android.gms getApplicationInfo OK enabled=true uidOfPackage=10144
+Duplika.GMS10.Package: com.google.android.gms enabledSetting=0
+Duplika.GMS10.Package: com.google.android.gms consistency packageInfo=true applicationInfo=true enabled=true consistent=true
+Duplika.GMS10.Package: com.android.vending getPackageInfo OK versionName=53.0.27-34 [0] [PR] 973951861 versionCode=85302740
+Duplika.GMS10.Package: com.android.vending getApplicationInfo OK enabled=true uidOfPackage=10140
+Duplika.GMS10.Package: com.android.vending enabledSetting=1
+Duplika.GMS10.Package: com.android.vending consistency packageInfo=true applicationInfo=true enabled=true consistent=true
+Duplika.GMS10.Package: getInstalledPackages count=89
+Duplika.GMS10: isGooglePlayServicesAvailable=0 name=SUCCESS
+Duplika.GMS10: P0 verdict=PASS (consistent package metadata and SUCCESS(0) availability)
+Duplika.GMS10: ================ P1 — direct AIDL GMS service (AdvertisingIdClient, no framework) ================
+Duplika.GMS10: AdvertisingIdClient OK in 115 ms idPresent=true idLength=36 limitAdTrackingEnabled=false
+Duplika.GMS10: P1 verdict=PASS (direct-AIDL GMS service call completed in the guest)
+Duplika.GMS10: ================ P2 — GoogleApi framework client (AppSet ID, no credentials) ================
+Duplika.GMS10: AppSetIdClient constructed
+Duplika.GMS10: getAppSetIdInfo task submitted
+Duplika.GMS10: AppSet ID OK idPresent=true idLength=36 scope=1
+Duplika.GMS10: P2 verdict=PASS (GoogleApi-framework call completed in the guest)
+Duplika.GMS10: ================ P3 — Level 9 control (SettingsClient.checkLocationSettings) ================
+Duplika.GMS10: checkLocationSettings task submitted
+Duplika.GMS10: checkLocationSettings succeeded
+Duplika.GMS10: P3 verdict=PASS (GoogleApi call completed against Play services)
+Duplika.GMS10: ================ P4 — caller identity trace (diagnosis only, nothing is modified) ================
+Duplika.GMS10.UID: claimedPackage=com.example.duplikaladder.level10gms uid=10225 pid=2603
+Duplika.GMS10.UID: getPackagesForUid(10225)=[com.example.duplikaladder.level10gms] (answered by the VIRTUALIZED PackageManager)
+Duplika.GMS10.UID: declaredUidForOwnPackage=10225 matchesProcessUid=true
+Duplika.GMS10.UID: NOTE the kernel Binder calling uid is not observable from inside the guest; see Level 9 host-side capture
+Duplika.GMS10: P4 verdict=PASS (self-consistent INSIDE the guest (says nothing about the host's view))
+Duplika.GMS10: ================ P5 — account-bound APIs (observed read-only, never attempted) ================
+Duplika.GMS10.UID: accountsByType(com.google) count=0 fabricatedAccountObserved=false
+Duplika.GMS10: getLastSignedInAccount present=false (local read, no network, no authentication)
+Duplika.GMS10: P5 verdict=UNSUPPORTED (no account; boundary not crossed)
+Duplika.GMS10: ================ P6 — per-API availability and service resolution (why P2 works and P3 does not) ================
+Duplika.GMS10.Package: GMS declared services visible to guest=361
+Duplika.GMS10.Intent: queryIntentServices action=com.google.android.location.internal.GoogleLocationManagerService.START matches=1 component=com.google.android.location.internal.GoogleLocationManagerService
+Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.appset.service.START matches=0 component=none
+Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.auth.api.signin.service.START matches=1 component=com.google.android.gms.chimera.GmsApiService
+Duplika.GMS10.Intent: queryIntentServices action=com.google.android.gms.common.service.START matches=1 component=com.google.android.gms.chimera.GmsApiService
+Duplika.GMS10: checkApiAvailability(LocationServices/Settings) = available
+Duplika.GMS10: P6 verdict=PARTIAL (inconclusive component resolution pattern)
+Duplika.GMS10: ================ P7 — cross-API discriminator (ActivityRecognition vs LocationServices) ================
+Duplika.GMS10: ACTIVITY_RECOGNITION permission=DENIED
+Duplika.GMS10: ActivityRecognitionClient constructed: e1.c
+Duplika.GMS10: checkApiAvailability(ActivityRecognition) = available
+Duplika.GMS10: checkApiAvailability(LocationServices/Settings) = available
+Duplika.GMS10: removeActivityUpdates outcome=SecurityException: Activity detection usage requires the ACTIVITY_RECOGNITION permission elapsedMs=8
+Duplika.GMS10: P7 verdict=PASS (both permission-gated APIs available)
+Duplika.GMS10: ================ P8 — cross-artifact discriminator (SmsRetriever vs location APIs) ================
+Duplika.GMS10: SmsRetrieverClient constructed: b1.b
+Duplika.GMS10: checkApiAvailability(SmsRetriever) = available
+Duplika.GMS10: checkApiAvailability(ActivityRecognition) = available
+Duplika.GMS10: checkApiAvailability(LocationServices/Settings) = available
+Duplika.GMS10: startSmsRetriever outcome=completed (self-expiring listener registered; no SMS read) elapsedMs=235
+Duplika.GMS10: P8 verdict=PASS (all three APIs available (host control))
+Duplika.GMS10: ================ P9 — local-input differential (what the client can read without IPC) ================
+Duplika.GMS10.Package: P9 caller.packageName = com.example.duplikaladder.level10gms
+Duplika.GMS10.Package: P9 caller.opPackageName = com.example.duplikaladder.level10gms
+Duplika.GMS10.Package: P9 caller.attributionTag = null
+Duplika.GMS10.Package: P9 caller.uid = 10225
+Duplika.GMS10.Package: P9 caller.applicationInfo.uid = 10225
+Duplika.GMS10.Package: P9 sig.self.sha256 = 69df23f34bf3fde41c741f7277f52246d5a023d5c57fa7c0dc82f06c85dfc6f5 (count=1)
+Duplika.GMS10.Package: P9 sig.gms.sha256 = f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83 (count=1)
+Duplika.GMS10.Package: P9 sig.vending.sha256 = f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83 (count=1)
+Duplika.GMS10.Package: P9 sig.checkSignatures(self,gms) = NO_MATCH(-3)
+Duplika.GMS10.Package: P9 sig.checkSignatures(gms,vending) = MATCH(0)
+Duplika.GMS10.Package: P9 gms.uid = 10144
+Duplika.GMS10.Package: P9 gms.enabled = true
+Duplika.GMS10.Package: P9 gms.sourceDir = /data/app/~~Cs5M3EUvvsQnC-Bqt6E1tQ==/com.google.android.gms-BgY1Vbtbd4VwmwQKuiNEpQ==/base.apk
+Duplika.GMS10.Package: P9 gms.metaData[com.google.android.gms.version] = 263332000
+Duplika.GMS10.Package: P9 gms.getPackagesForUid = [com.google.android.gsf, com.google.android.gms]
+Duplika.GMS10.Package: P9 provider.resolve[com.google.android.chimera.router.remapping1] = com.google.android.gms/com.google.android.gms.chimera.container.router.RemappingComponentRouterProvider exported=false   (Chimera component router)
+Duplika.GMS10.Package: P9 provider.acquire[com.google.android.chimera.router.remapping1] = threw SecurityException: Permission Denial: opening provider com.google.android.gms.chimera.container.router.RemappingComponentRouterProvider from ProcessRecord{6ec74c8 2603:com.example.duplikaladder.level10gms/u0a225} (pid=2603, uid=10225) that is not exported from UID 10144
+Duplika.GMS10.Package: P9 provider.resolve[com.google.android.gms.settings.gms] = com.google.android.gms/com.google.android.gms.chimera.GmsBrokerContentProvider exported=true   (GMS settings/broker)
+Duplika.GMS10.Package: P9 provider.acquire[com.google.android.gms.settings.gms] = acquired
+Duplika.GMS10.Package: P9 provider.resolve[com.google.android.gms.phenotype] = com.google.android.gms/com.google.android.gms.phenotype.provider.ConfigurationProvider exported=true   (GMS phenotype (flags))
+Duplika.GMS10.Package: P9 provider.acquire[com.google.android.gms.phenotype] = acquired
+Duplika.GMS10.Package: P9 provider.resolve[com.google.android.gms.chimera] = com.google.android.gms/com.google.android.gms.chimera.container.GmsModuleProvider exported=true   (GMS chimera modules)
+Duplika.GMS10.Package: P9 provider.acquire[com.google.android.gms.chimera] = acquired
+Duplika.GMS10.Package: P9 service[com.google.android.location.internal.GoogleLocationManagerService.START] = matches=1 component=com.google.android.location.internal.GoogleLocationManagerService metaDataKeys=2   (LocationServices (FAILS in guest))
+Duplika.GMS10.Package: P9 service[com.google.android.gms.location.ACTIVITY_RECOGNITION] = matches=0   (ActivityRecognition (FAILS in guest))
+Duplika.GMS10.Package: P9 service[com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START] = matches=1 component=com.google.android.gms.chimera.GmsApiService metaDataKeys=1   (SmsRetriever (FAILS in guest))
+Duplika.GMS10.Package: P9 service[com.google.android.gms.appset.service.START] = matches=0   (AppSet (WORKS in guest))
+Duplika.GMS10.Package: P9 service[com.google.android.gms.ads.identifier.service.START] = matches=1 component=com.google.android.gms.ads.identifier.service.AdvertisingIdService metaDataKeys=1   (AdvertisingId (WORKS in guest, direct AIDL))
+Duplika.GMS10: P9 verdict=PARTIAL (differential recorded; interpretation requires the paired host run)
+Duplika.GMS10: ================ P10 — direct service bind (is the bind itself refused?) ================
+Duplika.GMS10.Binder: P10 com.google.android.location.internal.GoogleLocationManagerService.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+Duplika.GMS10.Binder: P10 com.google.android.gms.auth.api.phone.service.SmsRetrieverApiService.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+Duplika.GMS10.Binder: P10 com.google.android.gms.common.service.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.common.internal.IGmsServiceBroker exception=none
+Duplika.GMS10.Binder: P10 com.google.android.gms.ads.identifier.service.START -> bindService=true onServiceConnected=true interface=com.google.android.gms.ads.identifier.internal.IAdvertisingIdService exception=none
+Duplika.GMS10: P10 CONCLUSION: the service behind a FAILING GoogleApi binds successfully from this process. Service routing, package visibility and Binder forwarding are excluded; the refusal is the client library's own local decision, not a blocked bind.
+Duplika.GMS10: P10 verdict=PASS (failing API's service binds; bind refusal excluded)
+Duplika.GMS10: ================ P11 — attribution context experiment (is getOpPackageName the input?) ================
+Duplika.GMS10.UID: P11 getPackageName=com.example.duplikaladder.level10gms getOpPackageName=com.example.duplikaladder.level10gms differ=false
+Duplika.GMS10: P11 checkApiAvailability(LocationServices baseline) = available
+Duplika.GMS10: P11 checkApiAvailability(SmsRetriever baseline) = available
+Duplika.GMS10: P11 checkApiAvailability(LocationServices corrected) = available
+Duplika.GMS10: P11 checkApiAvailability(SmsRetriever corrected) = available
+Duplika.GMS10: P11 verdict=PASS (host control: available before and after; wrapper is inert)
+Duplika.GMS10: ================ P12 — capability checks (Google Sign-In, Play Integrity — never exercised) ================
+Duplika.GMS10: P12 checkApiAvailability(GoogleSignIn) = available
+Duplika.GMS10: P12 PlayIntegrity apiOnClasspath=false
+Duplika.GMS10: P12 verdict=PASS (sign-in API available (host); integrity NOT TESTED by design)
+Duplika.GMS10: ================ P13 — Chimera/Dynamite module loading (gates Maps, ML Kit, security provider) ================
+Duplika.GMS10: P13 com.google.android.gms.providerinstaller.dynamite local=0 remote=0 load=threw b: No acceptable module com.google.android.gms.providerinstaller.dynamite found. Local version is 0 and remote version is 0.
+Duplika.GMS10: P13 com.google.android.gms.maps_dynamite local=0 remote=203115000 load=loaded moduleContext=u
+Duplika.GMS10: P13 com.google.mlkit.dynamite.barcode local=0 remote=0 load=threw b: No acceptable module com.google.mlkit.dynamite.barcode found. Local version is 0 and remote version is 0.
+Duplika.GMS10: P13 com.google.android.gms.cast.framework.dynamite local=0 remote=263332001 load=loaded moduleContext=u
+Duplika.GMS10: P13 Chimera module loading WORKS for this caller — Play services served module code into the process. This is independent of the caller-identity boundary.
+Duplika.GMS10: P13 verdict=PASS (Chimera module loading works (2/4 loaded))
+Duplika.GMS10: ================ P14 — Play services security provider (ProviderInstaller) ================
+Duplika.GMS10: P14 providersBefore=[AndroidNSSP, AndroidOpenSSL, CertPathProvider, AndroidKeyStoreBCWorkaround, BC, HarmonyJSSE, AndroidKeyStore]
+Duplika.GMS10: P14 installIfNeeded -> installIfNeeded returned normally
+Duplika.GMS10: P14 providersAfter=[GmsCore_OpenSSL, AndroidNSSP, AndroidOpenSSL, CertPathProvider, AndroidKeyStoreBCWorkaround, BC, HarmonyJSSE, AndroidKeyStore]
+Duplika.GMS10: P14 the Play services security provider installed successfully — a non-trivial, widely used, non-caller-scoped Google API working end to end for this caller.
+Duplika.GMS10: P14 verdict=PASS (security provider installed; GMS provider present)
+Duplika.GMS10: ================ P15 — Google Maps SDK, staged (placeholder key; authorisation expected to fail) ================
+Duplika.GMS10: P15 stage1.MapsInitializer.initialize = callback renderer=LEGACY
+Duplika.GMS10: P15 stage2.MapView construction = constructed i1.b
+Duplika.GMS10: P15 stage3.GoogleMap callback = GoogleMap delivered i1.a
+Duplika.GMS10: P15 stage4.camera operation = moveCamera OK, readback zoom=10.0 lat=51.5074
+Duplika.GMS10: P15 the Maps SDK initialised, constructed a MapView and delivered a GoogleMap for this caller. Rendering authorisation is a separate, key-bound question this fixture deliberately cannot answer.
+Duplika.GMS10: P15 verdict=PASS (SDK initialised, MapView built, GoogleMap delivered)
+Duplika.GMS10: ================ P16 — Play Billing connection (connection only; no purchase flow) ================
+Duplika.GMS10: P16 startConnection -> responseCode=0 (OK) debugMessage=""
+Duplika.GMS10: P16 isFeatureSupported(SUBSCRIPTIONS) -> responseCode=0 (OK)
+Duplika.GMS10: P16 the Play Store accepted a billing connection from this caller. Connection is not entitlement: whether a purchase or ownership query would be attributed correctly is NOT tested here.
+Duplika.GMS10: P16 verdict=PASS (Play Store accepted a billing connection)
+Duplika.GMS10: ================ P17 — manifest self-inspection (does the guest report its own declarations?) ================
+Duplika.GMS10.Package: P17 self.requestedPermissions.count = 5
+Duplika.GMS10.Package: P17 self.requestedPermissions = [android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE, android.permission.ACTIVITY_RECOGNITION, com.android.vending.BILLING, com.google.android.gms.permission.AD_ID]
+Duplika.GMS10.Package: P17 permission[android.permission.INTERNET] = declaredInManifest=true granted=GRANTED
+Duplika.GMS10.Package: P17 permission[android.permission.ACCESS_NETWORK_STATE] = declaredInManifest=true granted=GRANTED
+Duplika.GMS10.Package: P17 permission[android.permission.ACTIVITY_RECOGNITION] = declaredInManifest=true granted=DENIED
+Duplika.GMS10.Package: P17 self.metaData[com.google.android.geo.API_KEY] = present
+Duplika.GMS10.Package: P17 self.componentCounts = activities=5 services=3 providers=-1
+Duplika.GMS10: P17 self-inspection intact: all 3 declared permissions are reported back
+Duplika.GMS10: P17 verdict=PASS (manifest self-inspection correct)
+Duplika.GMS10: ================ P18 — permission lookup variants (which path does the Maps module use?) ================
+Duplika.GMS10.Package: P18 gmsPackageContext = created
+Duplika.GMS10.Package: P18  1 context.checkSelfPermission           = GRANTED
+Duplika.GMS10.Package: P18  2 context.checkCallingOrSelfPermission  = GRANTED
+Duplika.GMS10.Package: P18  3 context.checkPermission(pid,uid)      = GRANTED
+Duplika.GMS10.Package: P18  4 appPM.checkPermission(perm,self)      = GRANTED
+Duplika.GMS10.Package: P18  5 appPM.getPackageInfo declared?        = declared (5 total)
+Duplika.GMS10.Package: P18  6 gmsCtxPM.checkPermission(perm,self)   = GRANTED
+Duplika.GMS10.Package: P18  7 gmsCtxPM.getPackageInfo declared?     = declared (5 total)
+Duplika.GMS10.Package: P18  1 context.checkSelfPermission           = GRANTED
+Duplika.GMS10.Package: P18  2 context.checkCallingOrSelfPermission  = GRANTED
+Duplika.GMS10.Package: P18  3 context.checkPermission(pid,uid)      = GRANTED
+Duplika.GMS10.Package: P18  4 appPM.checkPermission(perm,self)      = GRANTED
+Duplika.GMS10.Package: P18  5 appPM.getPackageInfo declared?        = declared (5 total)
+Duplika.GMS10.Package: P18  6 gmsCtxPM.checkPermission(perm,self)   = GRANTED
+Duplika.GMS10.Package: P18  7 gmsCtxPM.getPackageInfo declared?     = declared (5 total)
+Duplika.GMS10: P18 verdict=PASS (all lookup variants report the permissions as present)
+Duplika.GMS10: ================ BOUNDARY LOCATION (from the P1 vs P2 comparison) ================
+Duplika.GMS10: P1 direct-AIDL=PASS  P2 GoogleApi-framework=PASS  P3 Level9-control=PASS
+Duplika.GMS10: CONCLUSION: both client layers work; Level 9's DEVELOPER_ERROR is specific to that one API rather than to the framework.
+Duplika.GMS10: ================ RUN COMPLETE ================
+Duplika.GMS10: report written to /data/user/0/com.example.duplikaladder.level10gms/files/level10-gms-report.txt

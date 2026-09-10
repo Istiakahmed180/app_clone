@@ -1,0 +1,21 @@
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: ================ USERMANAGER PROBE ================
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: package=com.example.duplikaladder.umprobe
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: uid=10006 pid=3412
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: processName=com.example.duplikaladder.umprobe
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: dataDir=/data/user/0/co.tdevs.duplika/blackbox/data/user/1/com.example.duplikaladder.umprobe
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: virtualized=true virtualUserId=1
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: device=Google sdk_gphone64_arm64 android=15 api=35
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: buildType=debug minified=false
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: 
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: ---- P1: getApplicationRestrictions(OWN package) ----
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: this is Chrome's exact call shape: an app asking about itself
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: RESULT: SUCCESS in 0 ms — bundleNull=false keyCount=0
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: (restriction values are deliberately not recorded)
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: 
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: ---- P2 control: getUserRestrictions() (own user, no package argument) ----
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: RESULT: SUCCESS — keyCount=1
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: 
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: ---- P3 control: UserManager.isSystemUser() ----
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: RESULT: SUCCESS — isSystemUser=true
+09-10 15:05:32.647  3412  3412 I Duplika.UMProbe: ================ RUN COMPLETE ================
+09-10 15:05:32.648  3412  3412 I Duplika.UMProbe: report written to /data/user/0/co.tdevs.duplika/blackbox/data/user/1/com.example.duplikaladder.umprobe/files/um-probe-report.txt

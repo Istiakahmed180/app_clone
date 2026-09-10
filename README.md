@@ -310,11 +310,24 @@ It does **not** provide:
   WhatsApp (launch + container isolation) on one device; other apps may still fail
 - an independent Android UID — guests run under the **host's** UID and inherit its permission
   grants; isolation is at the container/storage level, not the kernel UID level
-- GMS virtualization. Measured, not assumed: inside a container
-  `isGooglePlayServicesAvailable` returns `SERVICE_MISSING` and `com.google.android.gms` is
-  not visible to the guest at all, so Google sign-in, FCM push and the Maps SDK fail at their
-  first call (`docs/PHASE_4_COMPATIBILITY.md`)
-- Firebase, camera, mic or location virtualization
+- **caller-scoped Google APIs.** Superseded measurement, and the direction matters: the
+  Phase 4 statement that `isGooglePlayServicesAvailable` returns `SERVICE_MISSING` and that
+  `com.google.android.gms` is invisible to a guest was fixed by engine patch 0002 and is no
+  longer true. Availability is now `SUCCESS(0)`, and the GMS availability check, the
+  GoogleApi client framework, Advertising ID, App Set ID, Chimera module loading, the Play
+  services security provider and the Maps SDK all work in a container.
+  What does **not** work is any Google API whose access must be attributed to the calling
+  package — LocationServices, ActivityRecognition, SmsRetriever and Google Sign-In. Play
+  services refuses these with `SecurityException: Unknown calling package name`, because a
+  guest's package does not belong to the Binder calling UID. That is Google's identity
+  model working correctly, not a Duplika defect, and it must not be "fixed"
+  (`docs/level10-gms-caller-identity-boundary.md`)
+- Play Billing. The Play Store refuses a billing connection from a container
+  (`BILLING_UNAVAILABLE`); root cause not yet established
+- Firebase Messaging virtualization — not a dependency of this project and not tested.
+  Firebase *initialization* (`firebase-common`) is measured and works in a guest
+  (`compatibility_test_ladder/level9_gms` Test E)
+- camera, mic or location virtualization
 - a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
 - any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 

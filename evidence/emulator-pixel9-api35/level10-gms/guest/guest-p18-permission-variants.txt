@@ -1,0 +1,18 @@
+================ P18 — permission lookup variants (which path does the Maps module use?) ================
+P18 gmsPackageContext = created
+P18  1 context.checkSelfPermission           = DENIED
+P18  2 context.checkCallingOrSelfPermission  = DENIED
+P18  3 context.checkPermission(pid,uid)      = DENIED
+P18  4 appPM.checkPermission(perm,self)      = GRANTED
+P18  5 appPM.getPackageInfo declared?        = declared (5 total)
+P18  6 gmsCtxPM.checkPermission(perm,self)   = GRANTED
+P18  7 gmsCtxPM.getPackageInfo declared?     = declared (5 total)
+P18  1 context.checkSelfPermission           = DENIED
+P18  2 context.checkCallingOrSelfPermission  = DENIED
+P18  3 context.checkPermission(pid,uid)      = DENIED
+P18  4 appPM.checkPermission(perm,self)      = GRANTED
+P18  5 appPM.getPackageInfo declared?        = declared (5 total)
+P18  6 gmsCtxPM.checkPermission(perm,self)   = GRANTED
+P18  7 gmsCtxPM.getPackageInfo declared?     = declared (5 total)
+P18 6 lookup variant answer(s) report the permission as absent
+P18 verdict=FAIL (6 lookup variant answer(s) report absent)

@@ -1,0 +1,10 @@
+================ P17 — manifest self-inspection (does the guest report its own declarations?) ================
+P17 self.requestedPermissions.count = 5
+P17 self.requestedPermissions = [android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE, android.permission.ACTIVITY_RECOGNITION, com.android.vending.BILLING, com.google.android.gms.permission.AD_ID]
+P17 permission[android.permission.INTERNET] = declaredInManifest=true granted=GRANTED
+P17 permission[android.permission.ACCESS_NETWORK_STATE] = declaredInManifest=true granted=GRANTED
+P17 permission[android.permission.ACTIVITY_RECOGNITION] = declaredInManifest=true granted=DENIED
+P17 self.metaData[com.google.android.geo.API_KEY] = present
+P17 self.componentCounts = activities=6 services=3 providers=-1
+P17 self-inspection intact: all 3 declared permissions are reported back
+P17 verdict=PASS (manifest self-inspection correct)

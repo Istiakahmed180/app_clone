@@ -66,6 +66,12 @@ public class MainActivity extends Activity {
         results.put("P10", TestResult.notTested("P10", "Direct service bind"));
         results.put("P11", TestResult.notTested("P11", "Attribution context experiment"));
         results.put("P12", TestResult.notTested("P12", "Sign-In / Play Integrity capability"));
+        results.put("P13", TestResult.notTested("P13", "Chimera/Dynamite modules"));
+        results.put("P14", TestResult.notTested("P14", "Security provider"));
+        results.put("P15", TestResult.notTested("P15", "Google Maps SDK"));
+        results.put("P16", TestResult.notTested("P16", "Play Billing connection"));
+        results.put("P17", TestResult.notTested("P17", "Manifest self-inspection"));
+        results.put("P18", TestResult.notTested("P18", "Permission lookup variants"));
         setContentView(buildUi());
 
         // Self-running, so a host installation and a clone both need nothing but
@@ -138,6 +144,12 @@ public class MainActivity extends Activity {
             post(ProbeServiceBind.run(this));
             post(ProbeAttributionContext.run(this));
             post(ProbeCapabilityChecks.run(this));
+            post(ProbeDynamiteModules.run(this));
+            post(ProbeSecurityProvider.run(this));
+            post(ProbeMaps.run(this));
+            post(ProbeBilling.run(this));
+            post(ProbeManifestSelfInspection.run(this));
+            post(ProbePermissionLookupVariants.run(this));
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 logComparison();

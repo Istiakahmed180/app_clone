@@ -26,6 +26,23 @@
         android:label="Ladder L10 GMS"
         android:allowBackup="false"
         android:theme="@style/Level10Theme">
+        <!-- P15 (Maps). A PLACEHOLDER, NOT A REAL KEY, and not registered to anybody.
+             The Maps SDK refuses to initialise at all when no key meta-data is present, so
+             without this the probe stops at a local manifest check and measures nothing
+             about virtualization — which is exactly what the first host run showed
+             (evidence/.../host-p15-maps-no-key.txt: "API key not found").
+
+             This value does NOT bypass anything. Google's authorisation still runs and is
+             still expected to FAIL, identically on host and in a guest, because the key is
+             registered to no project. What it buys is the ability to measure the stages in
+             between: renderer module load, resource access and MapView inflation, which are
+             the parts a container can actually break. Borrowing a real key, or one
+             registered to this package, would be the identity manoeuvre the phase forbids —
+             and would not work anyway, since the container cannot present that identity. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyPLACEHOLDER-NOT-A-REAL-KEY-diagnostics-only" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
