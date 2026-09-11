@@ -155,7 +155,8 @@
       It stays opt-in: this only declares it. Android grants it solely through the
       "All files access" screen in Settings, never silently, and clones that do not need it
       are unaffected. Note for release: Play requires a declared justification for this
-      permission, so it must be argued in the listing (or the media-app subset used instead).
+      permission; the exception argument and the fallback if it is rejected are prepared
+      in docs/PLAY_PERMISSION_DECLARATIONS.md.
     -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" tools:node="remove" />

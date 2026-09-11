@@ -85,8 +85,12 @@ override path.
 **Changed in Phase 3.** Cloning arbitrary apps requires enumerating them, and on Android 11+
 `QUERY_ALL_PACKAGES` is the only way to do that. It is now requested.
 
-This is a Play-policy-sensitive permission. A dual-app/cloning product is one of Google's
-permitted use cases, but the declaration must be justified at review. Duplika uses it for
+This is a Play-policy-sensitive permission. Google's enumerated permitted uses are device
+search, antivirus, file managers and browsers, with eligibility for other apps that must
+discover all installed apps for awareness or interoperability — the basis on which a
+cloning tool's picker qualifies, and the basis on which every shipping product in this
+category declares it. The declaration must still be justified at review; the paste-ready
+justification is prepared in `docs/PLAY_PERMISSION_DECLARATIONS.md`. Duplika uses it for
 exactly one purpose — listing launchable apps for the clone picker — and never to inspect
 another application's private data.
 

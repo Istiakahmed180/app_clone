@@ -70,8 +70,11 @@ system screen, outside this app.
 - [ ] Decide where the data-collection disclosure lives now that the terms dialog is
       gone. Duplika still reads the installed-app list and writes crash logs, and Play
       wants that disclosed prominently, not only inside a linked policy.
-- [ ] Justify `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` in the Play listing, alongside
-      `QUERY_ALL_PACKAGES` and `MANAGE_EXTERNAL_STORAGE`. See `docs/SECURITY.md`.
+- [ ] Submit the Play Console declarations for `QUERY_ALL_PACKAGES` and
+      `MANAGE_EXTERNAL_STORAGE`, and put the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
+      justification in the listing and review notes. The paste-ready text, the video
+      script and the fallbacks if a declaration is rejected are prepared in
+      `docs/PLAY_PERMISSION_DECLARATIONS.md`; what remains is the submission itself.
 
 The distribution blocker in the root `README` and `docs/DEPENDENCY_LICENSE_AUDIT.md` is
 separate from all of this, and none of it is affected by finishing the list above.
