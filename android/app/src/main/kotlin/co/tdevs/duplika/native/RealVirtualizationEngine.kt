@@ -817,14 +817,17 @@ class RealVirtualizationEngine(
                     phase(
                         "CHROME_FRE_HANDOFF",
                         DiagCategory.LAUNCH,
-                        "Chrome onboarding completed; reopening the clone on the browser",
+                        "Chrome onboarding completed; reopening the browser",
                         level = DiagLevel.SUCCESS,
                         packageName = packageName,
                         profileId = profileId,
                         virtualUserId = virtualUserId,
                     )
+                    // The browser cannot be brought forward on top of the FRE (Chrome keeps
+                    // one task), so the clone is restarted. The pause is kept as short as the
+                    // container can tolerate to minimise the moment the host UI is visible.
                     launcher.stop(packageName, virtualUserId)
-                    Thread.sleep(CHROME_FRE_RELAUNCH_DELAY_MS)
+                    Thread.sleep(CHROME_FRE_RESTART_GAP_MS)
                     launcher.launch(packageName, virtualUserId)
                     return@Thread
                 }
@@ -855,6 +858,6 @@ class RealVirtualizationEngine(
 
         const val CHROME_FRE_POLL_INTERVAL_MS = 800L
         const val CHROME_FRE_WATCH_TIMEOUT_MS = 10 * 60 * 1000L
-        const val CHROME_FRE_RELAUNCH_DELAY_MS = 1_200L
+        const val CHROME_FRE_RESTART_GAP_MS = 150L
     }
 }
