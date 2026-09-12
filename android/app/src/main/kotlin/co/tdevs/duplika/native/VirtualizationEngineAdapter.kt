@@ -2,6 +2,7 @@ package co.tdevs.duplika.native
 
 import android.app.Application
 import android.content.Context
+import java.io.File
 
 /**
  * The seam between Duplika and whichever third-party virtualization backend is in
@@ -71,6 +72,21 @@ interface VirtualizationEngineAdapter {
      * both.
      */
     fun clearPackageCache(packageName: String, virtualUserId: Int): EngineResult<Unit>
+
+    /**
+     * The guest's own `shared_prefs/<preferenceName>.xml` file inside this container, or
+     * null when the container has no data directory yet.
+     *
+     * Exposed so the host can read a guest's own first-run flag without reaching into a
+     * backend type: a guest that completes onboarding by sending a PendingIntent cannot
+     * hand back to its next screen inside a container, so the host watches this file and
+     * relaunches the clone instead. Read-only; the guest owns the file.
+     */
+    fun guestSharedPreferencesFile(
+        packageName: String,
+        virtualUserId: Int,
+        preferenceName: String,
+    ): File?
 
     fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean
 

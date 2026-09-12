@@ -607,6 +607,7 @@ class RealVirtualizationEngine(
                 profileId = profileId,
                 virtualUserId = virtualUserId,
             )
+            watchChromeFirstRun(profileId, packageName, virtualUserId)
             return first
         }
 
@@ -649,6 +650,7 @@ class RealVirtualizationEngine(
                     virtualUserId = virtualUserId,
                     metadata = mapOf("attempt" to "2"),
                 )
+                watchChromeFirstRun(profileId, packageName, virtualUserId)
             }
             is EngineResult.Failure -> {
                 phase(
@@ -781,4 +783,78 @@ class RealVirtualizationEngine(
             is EngineAvailability.Available -> null
             is EngineAvailability.Unavailable -> EngineResult.Failure(state.code, state.message)
         }
+
+    /**
+     * Opens the browser after Chrome's first-run onboarding.
+     *
+     * Chrome's First Run Experience does not hand back to the browser inside a container:
+     * it finishes by sending a PendingIntent, and that send never starts its target here,
+     * so the "Welcome to Chrome" screen stays on top even though onboarding is done. The
+     * completion is written to the guest's own preferences, so watch that file and, the
+     * moment it flips to complete, relaunch the clone; Chrome then skips the FRE and opens
+     * the New Tab page.
+     *
+     * Chrome only, and armed only when the clone has not already completed onboarding, so
+     * the relaunch cannot arm it again (the flag is already set when it starts).
+     */
+    private fun watchChromeFirstRun(
+        profileId: String,
+        packageName: String,
+        virtualUserId: Int,
+    ) {
+        if (packageName != CHROME_PACKAGE) return
+        val preferences = adapter.guestSharedPreferencesFile(
+            packageName,
+            virtualUserId,
+            CHROME_PREFERENCES_NAME,
+        ) ?: return
+        if (isFirstRunComplete(preferences)) return
+
+        Thread {
+            val deadline = System.currentTimeMillis() + CHROME_FRE_WATCH_TIMEOUT_MS
+            while (System.currentTimeMillis() < deadline) {
+                if (isFirstRunComplete(preferences)) {
+                    phase(
+                        "CHROME_FRE_HANDOFF",
+                        DiagCategory.LAUNCH,
+                        "Chrome onboarding completed; reopening the clone on the browser",
+                        level = DiagLevel.SUCCESS,
+                        packageName = packageName,
+                        profileId = profileId,
+                        virtualUserId = virtualUserId,
+                    )
+                    launcher.stop(packageName, virtualUserId)
+                    Thread.sleep(CHROME_FRE_RELAUNCH_DELAY_MS)
+                    launcher.launch(packageName, virtualUserId)
+                    return@Thread
+                }
+                try {
+                    Thread.sleep(CHROME_FRE_POLL_INTERVAL_MS)
+                } catch (_: InterruptedException) {
+                    return@Thread
+                }
+            }
+        }.apply {
+            isDaemon = true
+            name = "duplika-chrome-fre"
+        }.start()
+    }
+
+    private fun isFirstRunComplete(preferences: File): Boolean = try {
+        preferences.isFile && preferences.readText().contains(CHROME_FIRST_RUN_COMPLETE_MARKER)
+    } catch (_: Throwable) {
+        false
+    }
+
+    private companion object {
+        const val CHROME_PACKAGE = "com.android.chrome"
+        const val CHROME_PREFERENCES_NAME = "com.android.chrome_preferences"
+
+        /** Chrome's own first-run-complete flag, as written by FirstRunStatus. */
+        const val CHROME_FIRST_RUN_COMPLETE_MARKER = "name=\"first_run_flow\" value=\"true\""
+
+        const val CHROME_FRE_POLL_INTERVAL_MS = 800L
+        const val CHROME_FRE_WATCH_TIMEOUT_MS = 10 * 60 * 1000L
+        const val CHROME_FRE_RELAUNCH_DELAY_MS = 1_200L
+    }
 }

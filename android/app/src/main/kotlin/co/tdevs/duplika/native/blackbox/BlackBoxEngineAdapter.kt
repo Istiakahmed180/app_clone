@@ -327,6 +327,22 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             BlackBoxCore.get().isInstalled(packageName, virtualUserId)
         }.getOrDefault(false)
 
+    /**
+     * Bcore's own accessor for the container's data directory, so the layout is not guessed.
+     * A container that has never run has no file; callers treat null and a missing file the
+     * same way.
+     */
+    override fun guestSharedPreferencesFile(
+        packageName: String,
+        virtualUserId: Int,
+        preferenceName: String,
+    ): File? = runCatching {
+        File(
+            BEnvironment.getDataDir(packageName, virtualUserId),
+            "shared_prefs/$preferenceName.xml",
+        )
+    }.getOrNull()
+
     override fun launch(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED) {
             // Launch reads the same package service that install does, so it needs the
