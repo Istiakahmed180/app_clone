@@ -21,6 +21,12 @@ jar uf "$WORK/classes.jar" -C "$WORK/classes" .
 cp "$WORK/classes.jar" "$WORK/aar/classes.jar"
 
 OUT="$ROOT/android/app/libs/bcore-runtime-fixed.aar"
-(cd "$WORK/aar" && zip -qr "$OUT" .)
+# Git Bash on Windows ships unzip but not zip; jar is already a build requirement, so use it
+# when zip is unavailable. Both produce a plain zip, which is what an AAR is.
+if command -v zip >/dev/null 2>&1; then
+  (cd "$WORK/aar" && zip -qr "$OUT" .)
+else
+  (cd "$WORK/aar" && jar cfM "$OUT" .)
+fi
 mv "$OUT" "$ROOT/android/app/libs/bcore.aar"
 echo "Installed runtime overrides into android/app/libs/bcore.aar"
