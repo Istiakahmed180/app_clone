@@ -1,0 +1,39 @@
+Fall back to a real Application when makeApplication fails, instead of a bad cast.
+
+SYMPTOM
+    Launching a guest activity in a proxy process -- notably Chrome's sandboxed
+    renderer bind -- can fail in BActivityThread.handleBindApplication because
+    LoadedApk.makeApplication throws. The fallback then did:
+
+        application = (Application) packageContext;
+
+    packageContext is a ContextImpl, never an Application, so the cast threw
+    ClassCastException and the process died with:
+
+        java.lang.RuntimeException: Unable to makeApplication
+          at BActivityThread.handleBindApplication
+        Caused by: Unable to makeApplication - all fallback attempts failed
+        Caused by: ClassCastException: android.app.ContextImpl cannot be cast to
+                    android.app.Application
+
+    This is reproducible from the OnePlus CPH2605's data_app_crash DropBox entries
+    (2026-09-10, processes co.tdevs.duplika:p0 and :p1) and is the unresolved
+    "Defect B" named in docs/chrome-stay-signed-out-android15-investigation.md.
+
+FIX
+    Reuse the class's own createApplicationWithFallback(), which retries the guest
+    Application and finally builds a minimal android.app.Application with a base
+    context. The bind then completes instead of aborting the process.
+
+diff --git a/Bcore/src/main/java/top/niunaijun/blackbox/app/BActivityThread.java b/Bcore/src/main/java/top/niunaijun/blackbox/app/BActivityThread.java
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/app/BActivityThread.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/app/BActivityThread.java
+@@ -451,7 +451,7 @@
+                     Slog.w(TAG, "Creating minimal application context as fallback");
+                     try {
+                         
+-                        application = (Application) packageContext;
++                        application = createApplicationWithFallback(applicationInfo);
+                         if (application == null) {
+                             Slog.e(TAG, "Even package context is null, this is critical");
+                             throw new RuntimeException("Unable to create application context");
