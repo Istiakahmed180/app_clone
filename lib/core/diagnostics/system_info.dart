@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../../data/models/app_details.dart';
 import 'diagnostic_logger.dart';
 
 /// One entry in the System Information screen.
@@ -129,6 +130,14 @@ class SystemInfoSnapshot {
           SystemInfoField('Supported ABIs', _text('supportedAbis')),
           SystemInfoField('Primary ABI', _text('primaryAbi')),
         ]),
+        SystemInfoSection('Memory', <SystemInfoField>[
+          SystemInfoField('Total RAM', _bytes('totalMemBytes')),
+          SystemInfoField('Available RAM', _bytes('availMemBytes')),
+          // Android's own line for "start killing things", not one Duplika picked.
+          SystemInfoField('Low-memory threshold', _bytes('memoryThresholdBytes')),
+          SystemInfoField('Under memory pressure', _text('underMemoryPressure')),
+          SystemInfoField('Low-RAM device', _text('isLowRamDevice')),
+        ]),
         SystemInfoSection('Runtime', <SystemInfoField>[
           SystemInfoField('Dart', dartVersion),
           // The Flutter SDK version is not exposed to a running app. Saying so is more
@@ -145,10 +154,17 @@ class SystemInfoSnapshot {
           SystemInfoField('Detail', _text('engineDetail')),
           SystemInfoField('Bcore attached', _text('bcoreAttached')),
           SystemInfoField('Virtual users', _text('virtualUserIds')),
+          // Labelled 'Host' because they are Android's numbers, not the engine's: the
+          // containers above are not Android users and this cap does not bound them.
+          SystemInfoField(
+            'Host multi-user support',
+            _text('hostSupportsMultipleUsers'),
+          ),
+          SystemInfoField('Host max Android users', _text('hostMaxAndroidUsers')),
         ]),
         SystemInfoSection('Storage', <SystemInfoField>[
-          SystemInfoField('Internal free', _text('internalFreeBytes')),
-          SystemInfoField('Internal total', _text('internalTotalBytes')),
+          SystemInfoField('Internal free', _bytes('internalFreeBytes')),
+          SystemInfoField('Internal total', _bytes('internalTotalBytes')),
           SystemInfoField('External storage state', _text('externalStorageState')),
           SystemInfoField('All-files access', _text('isExternalStorageManager')),
         ]),
@@ -187,13 +203,35 @@ class SystemInfoSnapshot {
     return value == null ? null : '$value';
   }
 
+  /// `7.6 GB (8127352832 bytes)`, or plain `0 bytes` when there is nothing to round.
+  ///
+  /// Both halves earn their place above a kilobyte: the round number is the one a person
+  /// reads, and the exact one is what makes two reports comparable. Below that they would
+  /// be the same number printed twice, so only one is given.
+  ///
+  /// Zero is a measurement, not a gap — a full volume really does read zero, and that is
+  /// the reading a storage report exists to show. Only a negative is treated as no answer.
+  String _bytes(String key) {
+    final Object? value = native[key];
+    if (value is! num || value < 0) {
+      return 'unavailable';
+    }
+    final int bytes = value.toInt();
+    if (bytes < 1024) {
+      return '$bytes bytes';
+    }
+    return '${AppDetails.formatBytes(bytes)} ($bytes bytes)';
+  }
+
   String _text(String key) {
     final Object? value = native[key];
     if (value == null) {
       return 'unavailable';
     }
     if (value is List) {
-      return value.join(', ');
+      // An empty row reads as a field that failed to render. 'none' is the finding:
+      // the engine holds no virtual users, the device declares no ABIs.
+      return value.isEmpty ? 'none' : value.join(', ');
     }
     return '$value';
   }

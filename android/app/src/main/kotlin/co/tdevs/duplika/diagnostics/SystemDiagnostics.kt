@@ -1,10 +1,13 @@
 package co.tdevs.duplika.diagnostics
 
+import android.app.ActivityManager
 import android.content.Context
+import android.content.res.Resources
 import android.os.Build
 import android.os.Environment
 import android.os.Process
 import android.os.StatFs
+import android.os.UserManager
 import co.tdevs.duplika.DuplikaApplication
 import co.tdevs.duplika.native.EngineAvailability
 
@@ -41,6 +44,17 @@ class SystemDiagnostics(private val context: Context) {
             put("supportedAbis", Build.SUPPORTED_ABIS.toList())
             put("primaryAbi", Build.SUPPORTED_ABIS.firstOrNull())
 
+            // How much room a clone has to run in, as opposed to room to exist in. An
+            // idle container costs storage; a running one costs this. `isLowRamDevice`
+            // is the manufacturer's own declaration and is the closest thing to a
+            // verdict the platform offers.
+            val memory = runCatching { memoryInfo() }.getOrNull()
+            put("totalMemBytes", memory?.totalMem)
+            put("availMemBytes", memory?.availMem)
+            put("memoryThresholdBytes", memory?.threshold)
+            put("underMemoryPressure", memory?.lowMemory)
+            put("isLowRamDevice", runCatching { activityManager()?.isLowRamDevice }.getOrNull())
+
             when (availability) {
                 is EngineAvailability.Available -> {
                     put("engineStatus", "READY")
@@ -64,6 +78,15 @@ class SystemDiagnostics(private val context: Context) {
                 runCatching { DuplikaApplication.engine.listVirtualUserIds() }.getOrDefault(emptyList()),
             )
 
+            // Android's own multi-user configuration, recorded because it is the first
+            // thing a reader assumes is the ceiling on clones. It is not: the engine
+            // numbers its own virtual users inside this app's storage and never asks
+            // the platform for a secondary user, so a device that permits one Android
+            // user still hosts as many containers as there is room for. Kept here so a
+            // report can rule the assumption out rather than invite it.
+            put("hostSupportsMultipleUsers", runCatching { UserManager.supportsMultipleUsers() }.getOrNull())
+            put("hostMaxAndroidUsers", hostMaxAndroidUsers())
+
             put("internalFreeBytes", runCatching { freeBytes() }.getOrNull())
             put("internalTotalBytes", runCatching { totalBytes() }.getOrNull())
             put("externalStorageState", runCatching { Environment.getExternalStorageState() }.getOrNull())
@@ -81,6 +104,25 @@ class SystemDiagnostics(private val context: Context) {
             put("nativeProcesses", DiagnosticLogger.knownProcesses())
         }
     }
+
+    private fun activityManager(): ActivityManager? =
+        context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+
+    private fun memoryInfo(): ActivityManager.MemoryInfo? =
+        activityManager()?.let { manager ->
+            ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
+        }
+
+    /**
+     * The platform's cap on Android user accounts, read from the framework resource the
+     * platform itself consults. Null when the resource cannot be resolved — an unknown
+     * is the honest answer, and this number constrains nothing Duplika does anyway.
+     */
+    private fun hostMaxAndroidUsers(): Int? = runCatching {
+        val resources = Resources.getSystem()
+        val id = resources.getIdentifier("config_multiuserMaximumUsers", "integer", "android")
+        if (id == 0) null else resources.getInteger(id)
+    }.getOrNull()
 
     private fun freeBytes(): Long =
         StatFs(context.filesDir.absolutePath).let { it.availableBlocksLong * it.blockSizeLong }
