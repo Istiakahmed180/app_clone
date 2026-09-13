@@ -20,6 +20,7 @@ enum CloneAction {
   forceStop,
   clearCache,
   clearStorage,
+  toggleHidden,
   shareApp,
   delete,
 }
@@ -43,6 +44,7 @@ Future<CloneAction?> showCloneActionSheet(
   Uint8List? icon,
   int siblingCount = 1,
   int instanceIndex = 1,
+  bool hidden = false,
 }) {
   return showModalBottomSheet<CloneAction>(
     context: context,
@@ -56,6 +58,7 @@ Future<CloneAction?> showCloneActionSheet(
       icon: icon,
       siblingCount: siblingCount,
       instanceIndex: instanceIndex,
+      hidden: hidden,
     ),
   );
 }
@@ -67,6 +70,7 @@ class _CloneActionSheet extends StatelessWidget {
     required this.icon,
     required this.siblingCount,
     required this.instanceIndex,
+    required this.hidden,
   });
 
   final VirtualProfileModel profile;
@@ -74,6 +78,7 @@ class _CloneActionSheet extends StatelessWidget {
   final Uint8List? icon;
   final int siblingCount;
   final int instanceIndex;
+  final bool hidden;
 
   @override
   Widget build(BuildContext context) {
@@ -221,10 +226,26 @@ class _CloneActionSheet extends StatelessWidget {
           ],
         ),
         SizedBox(height: 12.h),
-        const _ActionRow(
-          action: CloneAction.shareApp,
-          icon: Icons.share_outlined,
-          label: 'Share app',
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: _ActionRow(
+                action: CloneAction.toggleHidden,
+                icon: hidden
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                label: hidden ? 'Unhide' : 'Hide',
+              ),
+            ),
+            SizedBox(width: 12.w),
+            const Expanded(
+              child: _ActionRow(
+                action: CloneAction.shareApp,
+                icon: Icons.share_outlined,
+                label: 'Share app',
+              ),
+            ),
+          ],
         ),
       ],
     );

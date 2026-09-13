@@ -15,12 +15,14 @@ import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
 import '../../../native/native_bridge.dart';
+import '../../private_space/controllers/private_space_controller.dart';
 
 class HomeController extends GetxController {
   HomeController({
     required this._engine,
     required this._nativeBridge,
     required this._repository,
+    required this._privateSpace,
   });
 
   final VirtualizationEngine _engine;
@@ -29,6 +31,10 @@ class HomeController extends GetxController {
   /// Consulted only for what a new clone should be called. The same seam the picker
   /// uses, so both flows name clones by one rule.
   final VirtualProfileRepository _repository;
+
+  /// The lock and the hidden-clone flag. The grid reads [visibleProfiles] and the
+  /// Private space screen reads [hiddenProfiles] from the same loaded list.
+  final PrivateSpaceController _privateSpace;
   final AppLogger _logger = const AppLogger('HomeController');
 
   final RxList<VirtualProfileModel> profiles = <VirtualProfileModel>[].obs;
@@ -63,6 +69,44 @@ class HomeController extends GetxController {
 
   VirtualProfileState stateFor(VirtualProfileModel profile) =>
       profileStates[profile.id] ?? VirtualProfileState.unknown;
+
+  /// True once the user has set up the Private space. While it is false, the `hidden`
+  /// flag is simply not applied — there is no lock for a hidden clone to sit behind.
+  bool get privateSpaceEnabled => _privateSpace.enabled;
+
+  /// Clones shown on the main grid.
+  List<VirtualProfileModel> get visibleProfiles => privateSpaceEnabled
+      ? profiles.where((VirtualProfileModel p) => !p.hidden).toList(growable: false)
+      : profiles.toList(growable: false);
+
+  /// Clones kept behind the lock, in the same grouped order as the main grid.
+  List<VirtualProfileModel> get hiddenProfiles => privateSpaceEnabled
+      ? profiles.where((VirtualProfileModel p) => p.hidden).toList(growable: false)
+      : const <VirtualProfileModel>[];
+
+  int get hiddenCount => hiddenProfiles.length;
+
+  /// Whether the grid is currently showing the hidden clones instead of the main set.
+  ///
+  /// Session-only: leaving the app or locking the space drops back to the main grid, so
+  /// handing the phone over cannot leave the hidden apps on screen.
+  final RxBool viewingPrivate = false.obs;
+
+  PrivateSpaceController get privateSpace => _privateSpace;
+
+  void enterPrivateSpace() {
+    if (privateSpaceEnabled) {
+      viewingPrivate.value = true;
+    }
+  }
+
+  void exitPrivateSpace() => viewingPrivate.value = false;
+
+  /// Moves a clone in or out of the Private space, then lets the grid reload.
+  Future<void> setHidden(VirtualProfileModel profile, bool hidden) =>
+      _privateSpace.setHidden(profile.id, hidden);
+
+  Future<void> unhideAll() => _privateSpace.unhideAll();
 
   /// Compatibility problems worth showing on an existing clone's card.
   ///
@@ -137,6 +181,22 @@ class HomeController extends GetxController {
 
   String get testAppName =>
       testApp.value?.displayName ?? AppConstants.testAppFallbackName;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Hiding or unhiding a clone, or turning the space off, rewrites the same list this
+    // controller shows. Reloading on the revision counter keeps the two in step without
+    // either controller reaching into the other's state.
+    ever<int>(_privateSpace.revision, (_) => refreshAll());
+    // Relocking the space (on a timer, on backgrounding, or when it is turned off) also
+    // drops the grid back to the main set, so the hidden clones are never left on screen.
+    ever<bool>(_privateSpace.unlocked, (bool unlocked) {
+      if (!unlocked) {
+        viewingPrivate.value = false;
+      }
+    });
+  }
 
   @override
   void onReady() {

@@ -4,6 +4,8 @@ import 'package:duplika/core/diagnostics/native_diagnostics.dart';
 import 'package:duplika/core/diagnostics/system_info.dart';
 import 'package:duplika/core/services/settings_store.dart';
 import 'package:duplika/data/models/app_language.dart';
+import 'package:duplika/data/repositories/virtual_profile_repository.dart';
+import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/l10n/app_localizations.dart';
 import 'package:duplika/features/settings/views/language_view.dart';
 import 'package:duplika/features/settings/controllers/settings_controller.dart';
@@ -277,6 +279,16 @@ void main() {
   group('SettingsView', () {
     late _FakeNative native;
 
+    /// Settings reads the Private space controller for its one privacy row, so the
+    /// graph has to hold one before the screen is built.
+    void registerPrivateSpace() {
+      Get.put<PrivateSpaceController>(
+        PrivateSpaceController(
+          repository: VirtualProfileRepository(storage: InMemoryProfileStorage()),
+        ),
+      );
+    }
+
     Future<void> open(WidgetTester tester) async {
       // The page is taller than a phone, so on a phone-sized surface a ListView never
       // builds its lower half and nothing down there can be found.
@@ -284,6 +296,7 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
+      registerPrivateSpace();
       Get.put<SettingsController>(
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
@@ -315,6 +328,7 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
+      registerPrivateSpace();
       Get.put<SettingsController>(
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
@@ -466,6 +480,7 @@ void main() {
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
+      registerPrivateSpace();
       Get.put<SettingsController>(
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),

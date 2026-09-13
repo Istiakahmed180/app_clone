@@ -16,6 +16,37 @@ void main() {
     expect(VirtualProfileModel.fromJson(profile.toJson()), profile);
   });
 
+  test('hidden defaults to false and round-trips when set', () {
+    final VirtualProfileModel profile = VirtualProfileModel(
+      id: 'abc',
+      packageName: 'com.example.virtualtestapp',
+      appName: 'Virtual Test App',
+      profileName: 'Profile 1',
+      createdAt: DateTime.parse('2026-09-05T10:00:00.000'),
+    );
+
+    expect(profile.hidden, isFalse);
+    final VirtualProfileModel hidden = profile.copyWith(hidden: true);
+    expect(hidden.hidden, isTrue);
+    expect(VirtualProfileModel.fromJson(hidden.toJson()).hidden, isTrue);
+  });
+
+  test('a profile stored before the Private space existed reads as not hidden', () {
+    // Older rows carry no `hidden` key at all, and must not be mistaken for hidden ones.
+    final VirtualProfileModel profile = VirtualProfileModel.fromJson(
+      <String, dynamic>{
+        'id': 'abc',
+        'packageName': 'com.example.virtualtestapp',
+        'appName': 'Virtual Test App',
+        'profileName': 'Profile 1',
+        'createdAt': '2026-09-05T10:00:00.000',
+        'enabled': true,
+      },
+    );
+
+    expect(profile.hidden, isFalse);
+  });
+
   test('TestAppModel reports a not-installed result cleanly', () {
     final TestAppModel model = TestAppModel.fromMap(<String, dynamic>{
       'installed': false,

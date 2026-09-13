@@ -5,6 +5,7 @@ import 'package:duplika/data/models/space_identity.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
+import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/native/native_bridge.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
 import 'package:duplika/features/home/widgets/clone_count_dialog.dart';
@@ -435,6 +436,7 @@ void main() {
         ),
         nativeBridge: bridge,
         repository: repository,
+        privateSpace: PrivateSpaceController(repository: repository),
       );
 
       await tester.pumpWidget(

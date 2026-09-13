@@ -128,6 +128,7 @@ class VirtualProfileRepository {
     String profileId, {
     String? profileName,
     bool? enabled,
+    bool? hidden,
   }) async {
     final List<VirtualProfileModel> profiles = await getProfiles();
     final int index = profiles.indexWhere(
@@ -144,6 +145,7 @@ class VirtualProfileRepository {
     final VirtualProfileModel updated = profiles[index].copyWith(
       profileName: name,
       enabled: enabled,
+      hidden: hidden,
     );
 
     final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(
@@ -151,6 +153,26 @@ class VirtualProfileRepository {
     )..[index] = updated;
     await _persist(next);
     return updated;
+  }
+
+  /// Moves a profile in or out of the Private space. The container is untouched.
+  Future<VirtualProfileModel> setHidden(String profileId, bool hidden) =>
+      updateProfile(profileId, hidden: hidden);
+
+  /// Brings every hidden clone back to the main grid, in one write.
+  ///
+  /// Used when the Private space is turned off: the lock is gone, so leaving clones
+  /// hidden would strand them behind a door that no longer exists.
+  Future<void> unhideAll() async {
+    final List<VirtualProfileModel> profiles = await getProfiles();
+    if (!profiles.any((VirtualProfileModel p) => p.hidden)) {
+      return;
+    }
+    await _persist(
+      profiles
+          .map((VirtualProfileModel p) => p.copyWith(hidden: false))
+          .toList(growable: false),
+    );
   }
 
   Future<void> deleteProfile(String profileId) async {

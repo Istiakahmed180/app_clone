@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../private_space/controllers/private_space_controller.dart';
+import '../../private_space/views/private_space_settings_view.dart';
 import '../controllers/settings_controller.dart';
 import '../../../l10n/l10n_context.dart';
 import '../widgets/appearance_labels.dart';
@@ -27,6 +29,8 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsController controller = Get.find<SettingsController>();
+    final PrivateSpaceController privateSpace =
+        Get.find<PrivateSpaceController>();
     final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
@@ -50,6 +54,24 @@ class SettingsView extends StatelessWidget {
                   title: l10n.settingsAppearance,
                   value: appearanceLabel(l10n, controller.themeMode.value),
                   onTap: () => Get.toNamed<void>(AppRoutes.appearance),
+                ),
+              ],
+            ),
+            SizedBox(height: 22.h),
+            SettingsSection(
+              title: 'Privacy',
+              children: <Widget>[
+                SettingsRow(
+                  icon: Icons.lock_outline,
+                  title: 'Private space',
+                  subtitle: 'Hide apps behind a PIN',
+                  value: privateSpace.enabled ? 'On' : 'Off',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) =>
+                          PrivateSpaceSettingsView(privateSpace: privateSpace),
+                    ),
+                  ),
                 ),
               ],
             ),

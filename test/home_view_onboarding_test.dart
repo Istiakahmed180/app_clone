@@ -8,6 +8,7 @@ import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/core/virtualization/virtualization_engine.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
+import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/features/home/views/home_view.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/widgets/virtualization_warning.dart';
@@ -94,6 +95,7 @@ void main() {
         engine: Get.find<VirtualizationEngine>(),
         nativeBridge: bridge,
         repository: repository,
+        privateSpace: PrivateSpaceController(repository: repository),
       ),
     );
     Get.put<OnboardingController>(onboarding);

@@ -9,6 +9,7 @@ import '../../features/apps/controllers/app_picker_controller.dart';
 import '../../features/diagnostics/controllers/diagnostics_controller.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/onboarding/controllers/onboarding_controller.dart';
+import '../../features/private_space/controllers/private_space_controller.dart';
 import '../../features/settings/controllers/settings_controller.dart';
 import '../../native/native_bridge.dart';
 
@@ -33,6 +34,14 @@ class AppBinding extends Bindings {
 
     Get.put<NativeBridge>(NativeBridge(), permanent: true);
     Get.put<VirtualProfileRepository>(VirtualProfileRepository(), permanent: true);
+
+    // Permanent: the lock state and the hidden set outlive any single screen, and the
+    // Settings screen can change both while Home is still alive underneath.
+    Get.put<PrivateSpaceController>(
+      PrivateSpaceController(repository: Get.find<VirtualProfileRepository>()),
+      permanent: true,
+    );
+
     // Phase 2 backs profiles with the native container engine. DemoVirtualizationEngine
     // is kept in the tree as the reference no-op implementation of the same interface.
     Get.put<VirtualizationEngine>(
@@ -63,6 +72,7 @@ class HomeBinding extends Bindings {
         engine: Get.find<VirtualizationEngine>(),
         nativeBridge: Get.find<NativeBridge>(),
         repository: Get.find<VirtualProfileRepository>(),
+        privateSpace: Get.find<PrivateSpaceController>(),
       ),
     );
     Get.lazyPut<OnboardingController>(

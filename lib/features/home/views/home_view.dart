@@ -11,6 +11,9 @@ import '../../onboarding/controllers/onboarding_controller.dart';
 import '../../onboarding/widgets/background_permission_banner.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
+import '../../private_space/views/private_space_settings_view.dart';
+import '../../private_space/widgets/private_space_tile.dart';
+import '../../private_space/widgets/unlock_dialog.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/add_clone_tile.dart';
 import '../widgets/clone_action_sheet.dart';
@@ -34,8 +37,19 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: Obx(
+    // Back inside the Private space closes it rather than leaving the app, so a stray
+    // back press does not background the app with the hidden grid still on screen.
+    return Obx(
+      () => PopScope<Object?>(
+        canPop: !controller.viewingPrivate.value,
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (!didPop && controller.viewingPrivate.value) {
+            controller.privateSpace.lock();
+            controller.exitPrivateSpace();
+          }
+        },
+        child: Scaffold(
+          bottomNavigationBar: Obx(
         () => _onboarding.showBackgroundPrompt.value
             ? BackgroundPermissionBanner(
                 onConfirm: () => _confirmBackgroundPermission(context),
@@ -52,10 +66,18 @@ class HomeView extends GetView<HomeController> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                child: HomeHeader(
-                  title: AppConstants.appTitle,
-                  subtitle: 'Your private space',
-                  trailing: _overflowMenu(context),
+                child: Obx(
+                  () => HomeHeader(
+                    title: controller.viewingPrivate.value
+                        ? 'Private space'
+                        : AppConstants.appTitle,
+                    subtitle: controller.viewingPrivate.value
+                        ? _hiddenSubtitle()
+                        : 'Your private space',
+                    trailing: controller.viewingPrivate.value
+                        ? _privateCloseButton()
+                        : _overflowMenu(context),
+                  ),
                 ),
               ),
               Expanded(
@@ -89,7 +111,12 @@ class HomeView extends GetView<HomeController> {
                             ),
                           ),
                         _grid(context),
-                        if (controller.profiles.isEmpty) _emptyState(),
+                        if (!controller.viewingPrivate.value &&
+                            controller.visibleProfiles.isEmpty)
+                          _emptyState(),
+                        if (controller.viewingPrivate.value &&
+                            controller.hiddenProfiles.isEmpty)
+                          _privateEmptyState(),
                       ],
                     ),
                   );
@@ -97,6 +124,8 @@ class HomeView extends GetView<HomeController> {
               ),
             ],
           ),
+        ),
+      ),
         ),
       ),
     );
@@ -137,7 +166,14 @@ class HomeView extends GetView<HomeController> {
   /// The grid. `shrinkWrap` because it sits inside the page's scroll view rather than
   /// owning its own — the header, the engine warning and the hint scroll with it, and
   /// the controller already builds every profile eagerly, so nothing lazy is lost.
+  ///
+  /// One grid serves both the main set and the Private space: entering the space swaps
+  /// which profiles it maps, and adds a locked tile to get into it from the main set.
   Widget _grid(BuildContext context) {
+    final bool private = controller.viewingPrivate.value;
+    final List<VirtualProfileModel> profiles =
+        private ? controller.hiddenProfiles : controller.visibleProfiles;
+
     return GridView.count(
       crossAxisCount: _columns,
       shrinkWrap: true,
@@ -148,8 +184,8 @@ class HomeView extends GetView<HomeController> {
       // badge comfortable room without the tile turning into a card.
       childAspectRatio: 1,
       children: <Widget>[
-        AddCloneTile(onTap: _openAddProfile),
-        ...controller.profiles.map(
+        if (!private) AddCloneTile(onTap: _openAddProfile),
+        ...profiles.map(
           (VirtualProfileModel profile) => CloneTile(
             profile: profile,
             state: controller.stateFor(profile),
@@ -160,10 +196,82 @@ class HomeView extends GetView<HomeController> {
             isRemoving: controller.removing.contains(profile.id),
             isLaunching: controller.launching.contains(profile.id),
             onTap: () => _launch(context, profile),
-            onLongPress: () => _openActions(context, profile),
+            onLongPress: () => _openActions(context, profile, hidden: private),
           ),
         ),
+        if (!private && controller.privateSpaceEnabled)
+          PrivateSpaceTile(
+            hiddenCount: controller.hiddenCount,
+            onTap: () => _openPrivateSpace(context),
+          ),
       ],
+    );
+  }
+
+  /// `3 hidden` / `No hidden apps`, in the header while the space is open.
+  String _hiddenSubtitle() {
+    final int count = controller.hiddenCount;
+    return count == 1 ? '1 hidden app' : '$count hidden apps';
+  }
+
+  /// Leaves the Private space and relocks it in the same tap.
+  Widget _privateCloseButton() {
+    return IconButton(
+      tooltip: 'Lock and close',
+      icon: const Icon(Icons.lock_outline),
+      onPressed: () {
+        controller.privateSpace.lock();
+        controller.exitPrivateSpace();
+      },
+    );
+  }
+
+  /// Opens the Private space, asking for the lock first when it is closed.
+  Future<void> _openPrivateSpace(BuildContext context) async {
+    if (controller.privateSpace.unlocked.value) {
+      controller.enterPrivateSpace();
+      return;
+    }
+    final bool unlocked = await showPrivateSpaceUnlockDialog(
+      context,
+      controller.privateSpace,
+    );
+    if (unlocked) {
+      controller.enterPrivateSpace();
+    }
+  }
+
+  /// Sends the user to set up the Private space before hiding their first clone.
+  Future<void> _offerPrivateSpaceSetup(BuildContext context) async {
+    final bool go = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Set up Private space?'),
+            content: const Text(
+              'Hiding a clone needs a Private space. Create one with a PIN first.',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Not now'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Set up'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!go || !context.mounted) {
+      return;
+    }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => PrivateSpaceSettingsView(
+          privateSpace: controller.privateSpace,
+        ),
+      ),
     );
   }
 
@@ -180,6 +288,19 @@ class HomeView extends GetView<HomeController> {
         message: 'Add an app to create your first private instance.',
         actionLabel: 'Add your first app',
         onAction: _openAddProfile,
+      ),
+    );
+  }
+
+  /// Shown when the lock is open but nothing is hidden yet.
+  Widget _privateEmptyState() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20.h),
+      child: EmptyState(
+        icon: Icons.visibility_off_outlined,
+        title: 'Nothing hidden yet',
+        message:
+            'Hold any app on the main grid and choose Hide to move it in here.',
       ),
     );
   }
@@ -219,8 +340,9 @@ class HomeView extends GetView<HomeController> {
 
   Future<void> _openActions(
     BuildContext context,
-    VirtualProfileModel profile,
-  ) async {
+    VirtualProfileModel profile, {
+    bool hidden = false,
+  }) async {
     final CloneAction? action = await showCloneActionSheet(
       context,
       profile: profile,
@@ -228,6 +350,7 @@ class HomeView extends GetView<HomeController> {
       icon: controller.iconFor(profile),
       siblingCount: controller.siblingCount(profile),
       instanceIndex: controller.instanceIndex(profile),
+      hidden: hidden || profile.hidden,
     );
     if (action == null || !context.mounted) {
       return;
@@ -493,6 +616,21 @@ class HomeView extends GetView<HomeController> {
           _showMessage(
             context,
             '${profile.profileName} was reset. Its next launch is a first launch.',
+          );
+        }
+      case CloneAction.toggleHidden:
+        if (!controller.privateSpaceEnabled) {
+          await _offerPrivateSpaceSetup(context);
+          return;
+        }
+        final bool willHide = !profile.hidden;
+        await controller.setHidden(profile, willHide);
+        if (context.mounted) {
+          _showMessage(
+            context,
+            willHide
+                ? '${profile.profileName} hidden in Private space.'
+                : '${profile.profileName} is back on the main grid.',
           );
         }
       case CloneAction.shareApp:

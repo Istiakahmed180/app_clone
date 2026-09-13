@@ -4,8 +4,10 @@ import 'package:duplika/core/constants/app_constants.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/data/models/clone_budget.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
+import 'package:duplika/core/services/private_space_store.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
+import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/native/native_bridge.dart';
 
 import 'fakes/in_memory_profile_storage.dart';
@@ -14,7 +16,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const MethodChannel channel = MethodChannel(NativeBridge.channelName);
+  late InMemoryProfileStorage storage;
   late VirtualProfileRepository repository;
+  late PrivateSpaceController privateSpace;
   late HomeController controller;
   late Map<String, Map<Object?, Object?>> responses;
 
@@ -35,7 +39,12 @@ void main() {
       };
 
   setUp(() {
-    repository = VirtualProfileRepository(storage: InMemoryProfileStorage());
+    storage = InMemoryProfileStorage();
+    repository = VirtualProfileRepository(storage: storage);
+    privateSpace = PrivateSpaceController(
+      repository: repository,
+      store: PrivateSpaceStore(storage: storage),
+    );
     responses = <String, Map<Object?, Object?>>{
       'isVirtualizationAvailable': <Object?, Object?>{'available': true, 'backend': 'test'},
       'getTestAppInfo': <Object?, Object?>{'installed': false, 'packageName': 'x'},
@@ -57,7 +66,11 @@ void main() {
       engine: RealVirtualizationEngine(repository: repository, nativeBridge: bridge),
       nativeBridge: bridge,
       repository: repository,
+      privateSpace: privateSpace,
     );
+    // Constructed directly rather than through GetX, so the lifecycle hook that wires the
+    // revision listener is invoked by hand.
+    controller.onInit();
   });
 
   tearDown(() {
@@ -433,6 +446,63 @@ void main() {
 
       expect(error, isNull);
       expect(await repository.getProfiles(), hasLength(6));
+    });
+  });
+
+  group('private space filtering', () {
+    Future<VirtualProfileModel> clone(String name) => repository.createProfile(
+          packageName: AppConstants.testAppPackage,
+          appName: 'Virtual Test App',
+          profileName: name,
+        );
+
+    test('with the space off, a hidden flag is not applied', () async {
+      final VirtualProfileModel profile = await clone('A');
+      await repository.setHidden(profile.id, true);
+      await privateSpace.reload();
+      await controller.refreshAll();
+
+      expect(controller.privateSpaceEnabled, isFalse);
+      expect(
+        controller.visibleProfiles.map((VirtualProfileModel p) => p.id),
+        contains(profile.id),
+      );
+      expect(controller.hiddenProfiles, isEmpty);
+    });
+
+    test('with the space on, hidden clones leave the main grid', () async {
+      final VirtualProfileModel visible = await clone('A');
+      final VirtualProfileModel hidden = await clone('B');
+      await repository.setHidden(hidden.id, true);
+      await storage.write(PrivateSpaceStore.enabledKey, 'true');
+      await privateSpace.reload();
+      await controller.refreshAll();
+
+      expect(controller.privateSpaceEnabled, isTrue);
+      expect(
+        controller.visibleProfiles.map((VirtualProfileModel p) => p.id),
+        <String>[visible.id],
+      );
+      expect(
+        controller.hiddenProfiles.map((VirtualProfileModel p) => p.id),
+        <String>[hidden.id],
+      );
+      expect(controller.hiddenCount, 1);
+    });
+
+    test('hiding a clone reloads the grid through the revision counter', () async {
+      final VirtualProfileModel profile = await clone('A');
+      await storage.write(PrivateSpaceStore.enabledKey, 'true');
+      await privateSpace.reload();
+      await controller.refreshAll();
+      expect(controller.visibleProfiles, hasLength(1));
+
+      await controller.setHidden(profile, true);
+      // setHidden bumps the revision; the listener reloads asynchronously.
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.visibleProfiles, isEmpty);
+      expect(controller.hiddenProfiles, hasLength(1));
     });
   });
 }

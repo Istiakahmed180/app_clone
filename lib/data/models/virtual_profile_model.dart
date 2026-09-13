@@ -17,6 +17,7 @@ class VirtualProfileModel {
     required this.profileName,
     required this.createdAt,
     this.enabled = true,
+    this.hidden = false,
   });
 
   factory VirtualProfileModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +28,7 @@ class VirtualProfileModel {
       profileName: json['profileName'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
+      hidden: json['hidden'] as bool? ?? false,
     );
   }
 
@@ -37,7 +39,18 @@ class VirtualProfileModel {
   final DateTime createdAt;
   final bool enabled;
 
-  VirtualProfileModel copyWith({String? profileName, bool? enabled}) {
+  /// True when this clone lives in the Private space rather than the main grid.
+  ///
+  /// Host-side metadata only: hiding never touches the container, so a clone keeps its
+  /// data and keeps running. Absent from older stored profiles, hence the `false`
+  /// default in [fromJson].
+  final bool hidden;
+
+  VirtualProfileModel copyWith({
+    String? profileName,
+    bool? enabled,
+    bool? hidden,
+  }) {
     return VirtualProfileModel(
       id: id,
       packageName: packageName,
@@ -45,6 +58,7 @@ class VirtualProfileModel {
       profileName: profileName ?? this.profileName,
       createdAt: createdAt,
       enabled: enabled ?? this.enabled,
+      hidden: hidden ?? this.hidden,
     );
   }
 
@@ -55,6 +69,7 @@ class VirtualProfileModel {
         'profileName': profileName,
         'createdAt': createdAt.toIso8601String(),
         'enabled': enabled,
+        'hidden': hidden,
       };
 
   @override
@@ -66,9 +81,10 @@ class VirtualProfileModel {
           other.appName == appName &&
           other.profileName == profileName &&
           other.createdAt == createdAt &&
-          other.enabled == enabled;
+          other.enabled == enabled &&
+          other.hidden == hidden;
 
   @override
   int get hashCode =>
-      Object.hash(id, packageName, appName, profileName, createdAt, enabled);
+      Object.hash(id, packageName, appName, profileName, createdAt, enabled, hidden);
 }

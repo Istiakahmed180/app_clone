@@ -229,4 +229,54 @@ void main() {
       expect(await reloaded.getProfiles(), isEmpty);
     });
   });
+
+  group('private space flag', () {
+    test('setHidden moves one clone without touching the others', () async {
+      final VirtualProfileModel first = await create('First');
+      final VirtualProfileModel second = await create('Second');
+
+      await repository.setHidden(first.id, true);
+
+      final List<VirtualProfileModel> profiles = await repository.getProfiles();
+      expect(
+        profiles.firstWhere((VirtualProfileModel p) => p.id == first.id).hidden,
+        isTrue,
+      );
+      expect(
+        profiles.firstWhere((VirtualProfileModel p) => p.id == second.id).hidden,
+        isFalse,
+      );
+    });
+
+    test('a hidden flag survives a repository reload', () async {
+      final VirtualProfileModel profile = await create('Profile 1');
+      await repository.setHidden(profile.id, true);
+
+      final VirtualProfileRepository reloaded =
+          VirtualProfileRepository(storage: storage);
+
+      expect((await reloaded.getProfile(profile.id))!.hidden, isTrue);
+    });
+
+    test('unhideAll brings every clone back', () async {
+      final VirtualProfileModel first = await create('First');
+      final VirtualProfileModel second = await create('Second');
+      await repository.setHidden(first.id, true);
+      await repository.setHidden(second.id, true);
+
+      await repository.unhideAll();
+
+      final List<VirtualProfileModel> profiles = await repository.getProfiles();
+      expect(profiles.every((VirtualProfileModel p) => !p.hidden), isTrue);
+    });
+
+    test('unhideAll on a clean list is a no-op', () async {
+      await create('Profile 1');
+      final String before = storage.values[AppConstants.profilesStorageKey]!;
+
+      await repository.unhideAll();
+
+      expect(storage.values[AppConstants.profilesStorageKey], before);
+    });
+  });
 }
