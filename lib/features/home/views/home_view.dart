@@ -50,7 +50,8 @@ class HomeView extends GetView<HomeController> {
         },
         child: Scaffold(
           bottomNavigationBar: Obx(
-        () => _onboarding.showBackgroundPrompt.value
+        () => _onboarding.accepted.value == true &&
+                _onboarding.showBackgroundPrompt.value
             ? BackgroundPermissionBanner(
                 onConfirm: () => _confirmBackgroundPermission(context),
                 onDismiss: _onboarding.dismissBackgroundPrompt,

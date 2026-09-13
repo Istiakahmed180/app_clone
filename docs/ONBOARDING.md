@@ -1,30 +1,39 @@
 # First-launch onboarding
 
-One thing happens on first launch, and it does not block the home screen:
+Two things happen on first launch:
 
 | Step | Blocks the app? | Owned by |
 | --- | --- | --- |
+| Data-and-permissions disclosure | **Yes** — until accepted | `OnboardingController` + `DataDisclosure` |
 | Doze exemption offer | No | `BatteryOptimization.kt` |
 
 `OnboardingController` owns the order and `OnboardingHost` owns how each step appears, so
 the sequence is testable without pumping a single widget.
 
-## Nothing is allowed to block
+## The disclosure is the one thing that blocks
+
+The data disclosure is a gate, and that is a deliberate exception to the rule below, not
+an oversight. Play requires a **prominent disclosure** for the installed-app inventory
+`QUERY_ALL_PACKAGES` makes readable, and a policy the user is never shown is not a
+disclosure. The gate holds until the user taps *Agree and continue*, it is shown before
+the clone picker is reachable — so before any installed-app data is read — and the answer
+is remembered. Nothing else blocks.
+
+## Nothing else is allowed to block
 
 The Doze exemption is not a gate, deliberately. It is a convenience: clones work without
 it; they just get dozed along with the host. It is offered once, from a dismissible
 banner, and a dismissal is permanent — re-asking every launch is the pattern this app is
 trying not to be.
 
-## No terms dialog, no consent form, and no AdMob id
+## No terms dialog and no consent form — but a disclosure that gates
 
-The first-launch terms and data-collection disclosure (`TermsDialog`) has been removed,
-along with the stored acceptance version. Nothing gates the app at launch any more.
-
-**Before this ships**, the disclosure that dialog carried has to live somewhere: what
-Duplika reads from the device is unchanged — the installed-app list and crash logs — and
-Play requires a prominent disclosure for it. The Privacy Policy row in Settings is the
-only surviving legal surface, and a policy the user is never shown is not a disclosure.
+The old first-launch terms dialog was removed, and it is not coming back in that form. What
+returned is narrower and truthful: `DataDisclosure` states what Duplika reads (the
+installed-app list), that it stays on-device, and that the battery and all-files requests
+are optional — and it gates the app until accepted. That is the prominent disclosure Play
+requires for `QUERY_ALL_PACKAGES`, and it lives in the app rather than only in a linked
+policy the user is never shown.
 
 Earlier builds ran Google's User Messaging Platform (UMP) consent form at first launch.
 It is gone, along with the `com.google.android.ump` dependency, the
@@ -67,9 +76,8 @@ system screen, outside this app.
 - [ ] Publish the Privacy Policy and Terms of Service, put their URLs in
       `LegalConstants`, and set `policiesArePlaceholders = false`. Until then Settings
       hides the rows rather than pointing them at dead `example.com` links.
-- [ ] Decide where the data-collection disclosure lives now that the terms dialog is
-      gone. Duplika still reads the installed-app list and writes crash logs, and Play
-      wants that disclosed prominently, not only inside a linked policy.
+- [x] The data-collection disclosure lives in `DataDisclosure` and gates the app until
+      accepted — the prominent disclosure `QUERY_ALL_PACKAGES` requires. See above.
 - [ ] Submit the Play Console declarations for `QUERY_ALL_PACKAGES` and
       `MANAGE_EXTERNAL_STORAGE`, and put the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
       justification in the listing and review notes. The paste-ready text, the video

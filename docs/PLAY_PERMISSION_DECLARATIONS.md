@@ -15,7 +15,7 @@ quotes below were taken from the live Play Console Help pages (checked 2026-09-1
 | Permission | Declared at | Play requirement |
 | --- | --- | --- |
 | `QUERY_ALL_PACKAGES` | `AndroidManifest.xml:89` | Permissions Declaration Form (App content → Permission declarations) |
-| `MANAGE_EXTERNAL_STORAGE` | `AndroidManifest.xml:160` | Permissions Declaration Form, as an **exception** — app cloning is not an enumerated permitted use |
+| `MANAGE_EXTERNAL_STORAGE` | `AndroidManifest.xml:166` | Permissions Declaration Form, as an **exception** — app cloning is not an enumerated permitted use |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | `AndroidManifest.xml:102` | No declaration form (normal permission). Play still reviews the use case, so it must be documented in the store description and the review instructions |
 
 The declaration form has the same shape for both permissions: state the core functionality,
@@ -69,7 +69,7 @@ with the video before redesigning.
 
 ### How Duplika actually uses it (verified, not asserted)
 
-Declared only — `AndroidManifest.xml:148-160` carries the reasoning. Duplika's own code
+Declared only — `AndroidManifest.xml:152-166` carries the reasoning. Duplika's own code
 **never requests it at runtime** (there is no `ACTION_MANAGE_ALL_FILES_ACCESS_SETTINGS`
 anywhere in the codebase; only the diagnostics probes read
 `Environment.isExternalStorageManager()` as a passive state check). It is not surfaced by
@@ -181,11 +181,16 @@ The Data safety form must stay consistent with these declarations. The installed
 inventory is queried and displayed on-device and never leaves the device (no network
 egress exists in the app), so under Play's definition of "collection" (transmission off
 the device) it is **not collected**. The prominent-disclosure requirement attached to
-QUERY_ALL_PACKAGES is the same open item tracked in `docs/ONBOARDING.md` — the two must
-be resolved together, not separately.
+QUERY_ALL_PACKAGES is **implemented**: `DataDisclosure`
+(`lib/features/onboarding/widgets/data_disclosure.dart`) gates the app on first launch,
+before the clone picker — and therefore before any installed-app read — is reachable, with
+an explicit *Agree and continue*. See `docs/ONBOARDING.md`. The disclosure and the Data
+safety form must still be kept in step whenever the read set changes.
 
 ## Remaining steps (need Play Console access)
 
+- [x] In-app prominent disclosure implemented — `DataDisclosure` gates first launch before
+      the picker is reachable (`docs/ONBOARDING.md`).
 - [ ] Submit the declaration form for `QUERY_ALL_PACKAGES` (text above).
 - [ ] Submit the declaration form for `MANAGE_EXTERNAL_STORAGE` as an exception (text above).
 - [ ] Record and link the demonstration video.

@@ -54,6 +54,19 @@ void main() {
     expect(controller.showBackgroundPrompt.value, isTrue);
   });
 
+  test('the disclosure starts unaccepted, and stays accepted once agreed to', () async {
+    await controller.start();
+    expect(controller.accepted.value, isFalse);
+
+    await controller.acceptDisclosure();
+    expect(controller.accepted.value, isTrue);
+
+    // A new controller over the same store — i.e. the next launch — sees it accepted.
+    build();
+    await controller.start();
+    expect(controller.accepted.value, isTrue);
+  });
+
   test('a native bridge with no handler at all still reaches ready', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);

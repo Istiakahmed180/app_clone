@@ -26,6 +26,7 @@ void main() {
 
   const MethodChannel channel = MethodChannel(NativeBridge.channelName);
   late OnboardingController onboarding;
+  late InMemoryProfileStorage onboardingStorage;
   late VirtualProfileRepository repository;
   late bool ignoringBattery;
   late bool virtualizationAvailable;
@@ -81,8 +82,11 @@ void main() {
     repository = VirtualProfileRepository(storage: InMemoryProfileStorage());
 
     final OnboardingStore store = OnboardingStore(
-      storage: InMemoryProfileStorage(),
+      storage: onboardingStorage = InMemoryProfileStorage(),
     );
+    // These tests are about the home screen, not the disclosure gate, so it is accepted
+    // before they run. The gate itself is exercised in its own test below.
+    await store.acceptDisclosure();
     onboarding = OnboardingController(nativeBridge: bridge, store: store);
 
     Get.put<NativeBridge>(bridge);
@@ -125,6 +129,28 @@ void main() {
 
     expect(find.byType(HomeView), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the data disclosure gates the home screen until accepted', (
+    WidgetTester tester,
+  ) async {
+    // Forget the stored acceptance, so this is a first launch again.
+    await onboardingStorage.delete(OnboardingStore.disclosureKey);
+    await onboarding.start();
+
+    await pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Before you start'), findsOneWidget);
+    expect(find.text('Agree and continue'), findsOneWidget);
+    // The grid is not built behind the gate, so nothing is read before consent.
+    expect(find.text('Add app'), findsNothing);
+
+    await tester.tap(find.text('Agree and continue'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Before you start'), findsNothing);
+    expect(find.text('Add app'), findsOneWidget);
   });
 
   testWidgets('a working device is given no banner above the clone list', (

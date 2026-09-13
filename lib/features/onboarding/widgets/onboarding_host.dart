@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/onboarding_controller.dart';
+import 'data_disclosure.dart';
 
 /// Drives the first-launch sequence for whatever screen it wraps.
 ///
+/// The data disclosure is a gate: until it is accepted, the wrapped screen is not built.
+/// Everything after it is additive (the Doze banner), so the controller still owns the
+/// order and this only decides *how* a step appears.
+///
 /// Stateful only because the sequence has to react to the app coming back to the
-/// foreground; the sequence itself lives in [OnboardingController]. The controller
-/// decides *what* comes next, this decides *how* it appears.
+/// foreground; the sequence itself lives in [OnboardingController].
 class OnboardingHost extends StatefulWidget {
   const OnboardingHost({required this.child, super.key});
 
@@ -42,5 +46,19 @@ class _OnboardingHostState extends State<OnboardingHost> with WidgetsBindingObse
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    return Obx(() {
+      // Null means the stored answer has not been read yet. Nothing is shown rather than
+      // the wrapped screen, so a first launch never flashes the picker before the
+      // disclosure.
+      switch (_controller.accepted.value) {
+        case null:
+          return const SizedBox.shrink();
+        case false:
+          return DataDisclosure(onAccept: _controller.acceptDisclosure);
+        case true:
+          return widget.child;
+      }
+    });
+  }
 }

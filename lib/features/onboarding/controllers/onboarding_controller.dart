@@ -20,10 +20,12 @@ enum OnboardingStep {
   ready,
 }
 
-/// Runs the first-launch sequence: the Doze offer.
+/// Runs the first-launch sequence: the data disclosure, then the Doze offer.
 ///
-/// Nothing here blocks. The Doze exemption is a convenience the user is free to ignore,
-/// so it cannot strand someone on a screen they cannot leave.
+/// One step now blocks, and deliberately so: the data-and-permissions disclosure Play
+/// requires for the installed-app inventory. It is shown before anything behind it, with
+/// an explicit accept, and the answer is remembered. Everything after it is still
+/// non-blocking — the Doze exemption is a convenience the user is free to ignore.
 class OnboardingController extends GetxController {
   OnboardingController({
     required NativeBridge nativeBridge,
@@ -36,6 +38,10 @@ class OnboardingController extends GetxController {
   final AppLogger _logger = const AppLogger('OnboardingController');
 
   final Rx<OnboardingStep> step = OnboardingStep.idle.obs;
+
+  /// Whether the disclosure has been accepted. `null` while the stored answer is being
+  /// read, so the view can hold rather than flash the wrong thing.
+  final RxnBool accepted = RxnBool();
 
   /// Whether to offer the Doze exemption. False once granted or dismissed.
   final RxBool showBackgroundPrompt = false.obs;
@@ -50,7 +56,20 @@ class OnboardingController extends GetxController {
   /// Runs the sequence from wherever the user left off.
   Future<void> start() async {
     step.value = OnboardingStep.ready;
+    accepted.value = await _store.disclosureAccepted();
     await _evaluateBackgroundPrompt();
+  }
+
+  /// Records the user's acceptance of the data-and-permissions disclosure.
+  Future<void> acceptDisclosure() async {
+    accepted.value = true;
+    try {
+      await _store.acceptDisclosure();
+    } on Object catch (error, stackTrace) {
+      // Shown either way: re-asking a user who has already agreed is worse than asking
+      // once more next launch after a storage failure.
+      _logger.error('Could not record disclosure acceptance', error, stackTrace);
+    }
   }
 
   /// Opens the Doze exemption prompt.

@@ -50,7 +50,7 @@ state is faked in Flutter.
 | `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
 | `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
 | `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
-| `docs/ONBOARDING.md` | First-launch consent, terms and the Doze exemption; what must change before release |
+| `docs/ONBOARDING.md` | First-launch data disclosure (gates the app), the Doze exemption; what must change before release |
 | `docs/PLAY_PERMISSION_DECLARATIONS.md` | Paste-ready Play Console declarations for the three restricted permissions |
 
 > **Attribution:** the root `NOTICE` and `licenses/` now carry the required notices for xDL,
