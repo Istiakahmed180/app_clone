@@ -483,28 +483,30 @@ void main() {
     });
   });
 
-  group('failure messages', () {
-    // 512 MB free is exactly the controller's reserved headroom, so nothing is left for
-    // a clone and the refusal is certain regardless of the app's size.
-    void refuseForSpace() {
-      overrides['getStorageStatus'] = <Object?, Object?>{
-        'freeBytes': 512 * 1024 * 1024,
-        'totalBytes': 64 * 1024 * 1024 * 1024,
+  group('the clone budget in the UI', () {
+    const int mb = 1024 * 1024;
+
+    void withCapacity({
+      required int freeMb,
+      int totalMemGb = 8,
+      bool lowRam = false,
+    }) {
+      overrides['getDeviceCapacity'] = <Object?, Object?>{
+        'freeBytes': freeMb * mb,
+        'totalBytes': 64 * 1024 * mb,
+        'totalMemBytes': totalMemGb * 1024 * mb,
+        'isLowRamDevice': lowRam,
       };
-      overrides['getAppDetails'] = ok(<String, Object?>{
-        'packageName': 'com.example.app',
-        'appName': 'Example',
-        'apkCount': 1,
-        'totalSizeBytes': 100 * 1024 * 1024,
-        'abis': <Object?>[],
-        'components': <Object?>[],
-      });
     }
 
-    /// Sheet -> Clone -> confirm the count dialog.
-    Future<void> askForOneClone(WidgetTester tester) async {
+    /// Sheet -> Clone. Stops wherever that lands: a stepper, or a refusal.
+    Future<void> tapClone(WidgetTester tester) async {
       await tester.tap(find.text('Clone'));
       await tester.pumpAndSettle();
+    }
+
+    /// Confirms the count dialog and waits out the progress barrier.
+    Future<void> confirm(WidgetTester tester) async {
       await tester.tap(
         find.descendant(
           of: find.byType(AlertDialog),
@@ -518,33 +520,60 @@ void main() {
       }
     }
 
-    testWidgets('a refusal is put in a dialog, not a snack bar', (
+    testWidgets('the stepper is capped by the device, and says why', (
       WidgetTester tester,
     ) async {
-      refuseForSpace();
+      withCapacity(freeMb: 8192, lowRam: true);
       await openSheet(tester);
 
-      await askForOneClone(tester);
+      await tapClone(tester);
 
-      // The whole point: it waits to be read instead of sliding away on a timer.
+      // The reason stands in for the bare range: a ceiling with nothing beside it
+      // reads as arbitrary rather than as this device's answer.
+      expect(
+        find.text('Up to 4 on a device with 8.0 GB of memory'),
+        findsOneWidget,
+      );
+      expect(find.text('Choose from 1 to 20'), findsNothing);
+    });
+
+    testWidgets('a roomy device still offers the full range', (
+      WidgetTester tester,
+    ) async {
+      withCapacity(freeMb: 8192);
+      await openSheet(tester);
+
+      await tapClone(tester);
+
+      expect(find.text('Choose from 1 to 20'), findsOneWidget);
+    });
+
+    testWidgets('a device with no room never opens a stepper', (
+      WidgetTester tester,
+    ) async {
+      // Inside the 512 MB the device keeps spare: every value a stepper could offer
+      // is one that would be refused, so it is not worth showing.
+      withCapacity(freeMb: 400);
+      await openSheet(tester);
+
+      await tapClone(tester);
+
+      expect(find.text('Number of clones'), findsNothing);
       expect(find.text('Couldn\'t do that'), findsOneWidget);
       expect(
-        find.text(
-          'Not enough space for another Example clone. Each one needs about '
-          '100 MB and 512 MB is free.',
-        ),
+        find.textContaining('There is no room for another Example clone'),
         findsOneWidget,
       );
       expect(find.byType(SnackBar), findsNothing);
       expect(Get.find<HomeController>().profiles, hasLength(1));
     });
 
-    testWidgets('the dialog goes away on OK, leaving the grid', (
+    testWidgets('the refusal goes away on OK, leaving the grid', (
       WidgetTester tester,
     ) async {
-      refuseForSpace();
+      withCapacity(freeMb: 400);
       await openSheet(tester);
-      await askForOneClone(tester);
+      await tapClone(tester);
 
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
@@ -556,10 +585,11 @@ void main() {
     testWidgets('a success still uses the snack bar, with nothing to dismiss', (
       WidgetTester tester,
     ) async {
-      // No storage override: the check cannot read the numbers and stands aside.
+      withCapacity(freeMb: 8192);
       await openSheet(tester);
+      await tapClone(tester);
 
-      await askForOneClone(tester);
+      await confirm(tester);
 
       expect(find.text('Added another Example.'), findsOneWidget);
       expect(find.text('Couldn\'t do that'), findsNothing);

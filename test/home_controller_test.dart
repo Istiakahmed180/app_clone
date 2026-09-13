@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:duplika/core/constants/app_constants.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
+import 'package:duplika/data/models/clone_budget.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
@@ -257,84 +258,176 @@ void main() {
     expect(controller.warningsFor(profile), isEmpty);
   });
 
-  // The clone space check. Sizes are chosen against the controller's own 512 MB
-  // headroom: `usable = free - 512 MB`, and a clone is estimated at its APK size.
+  // The clone budget. Figures are chosen against the controller's own constants:
+  // 512 MB of storage headroom, ~64 KB per clone, and an absolute ceiling of 20.
   const int mb = 1024 * 1024;
 
-  void withSpace({required int freeMb, required int appMb}) {
-    responses['getStorageStatus'] = <Object?, Object?>{
+  void withCapacity({
+    required int freeMb,
+    int? totalMemGb = 8,
+    bool lowRam = false,
+  }) {
+    responses['getDeviceCapacity'] = <Object?, Object?>{
       'freeBytes': freeMb * mb,
       'totalBytes': 64 * 1024 * mb,
+      'totalMemBytes': totalMemGb == null ? null : totalMemGb * 1024 * mb,
+      'isLowRamDevice': lowRam,
     };
-    responses['getAppDetails'] = ok('APP_DETAILS', <String, Object?>{
-      'packageName': AppConstants.testAppPackage,
-      'appName': 'Virtual Test App',
-      'apkCount': 1,
-      'totalSizeBytes': appMb * mb,
-      'abis': <Object?>[],
-      'components': <Object?>[],
-    });
   }
 
-  test('a batch that cannot fit is refused before anything is created', () async {
-    final VirtualProfileModel profile = await seedClone();
-    // 250 MB usable, 100 MB each: two fit, five were asked for.
-    withSpace(freeMb: 512 + 250, appMb: 100);
-    await controller.refreshAll();
+  group('clone budget', () {
+    test('a roomy device is offered the full range', () async {
+      withCapacity(freeMb: 8192);
 
-    final String? error = await controller.createClones(profile, 5);
+      final CloneBudget budget = await controller.cloneBudget();
 
-    expect(error, contains('Not enough space for 5 more'));
-    expect(error, contains('room for 2'));
-    // Refused up front: the one seeded clone is still the only one.
-    expect(await repository.getProfiles(), hasLength(1));
+      expect(budget.maximum, 20);
+      expect(budget.reason, 'Choose from 1 to 20');
+    });
+
+    test('a device inside its own headroom is offered nothing', () async {
+      // Below the 512 MB the device keeps spare, so there is no usable room at all.
+      withCapacity(freeMb: 400);
+
+      final CloneBudget budget = await controller.cloneBudget();
+
+      expect(budget.allowsNone, isTrue);
+      // The figure is named so the user knows what to clear.
+      expect(budget.reason, contains('400 MB'));
+      // The caller's sentence already carries the verdict; saying it again here is
+      // what made the composed message repeat itself.
+      expect(budget.reason, isNot(contains('no room')));
+    });
+
+    test('room for part of a clone is room for none, and reads like it', () async {
+      // Clears the 512 MB headroom by 30 KB — less than one clone costs. The figure
+      // reaches zero only after the minimum, which is where the wording is decided.
+      responses['getDeviceCapacity'] = <Object?, Object?>{
+        'freeBytes': 512 * mb + 30 * 1024,
+        'totalBytes': 64 * 1024 * mb,
+        'totalMemBytes': 8 * 1024 * mb,
+        'isLowRamDevice': false,
+      };
+
+      final CloneBudget budget = await controller.cloneBudget();
+
+      expect(budget.allowsNone, isTrue);
+      // 'Up to 0 — 512 MB of space left' is not a sentence anyone should be shown.
+      expect(budget.reason, isNot(contains('Up to 0')));
+      expect(budget.reason, startsWith('Only 512 MB is free'));
+    });
+
+    test('a low-RAM device is held to a handful, and told why', () async {
+      withCapacity(freeMb: 8192, lowRam: true);
+
+      final CloneBudget budget = await controller.cloneBudget();
+
+      expect(budget.maximum, 4);
+      expect(budget.reason, contains('memory'));
+    });
+
+    test('a modest phone is offered fewer than a large one', () async {
+      withCapacity(freeMb: 8192, totalMemGb: 2);
+      expect((await controller.cloneBudget()).maximum, 6);
+
+      withCapacity(freeMb: 8192, totalMemGb: 4);
+      expect((await controller.cloneBudget()).maximum, 12);
+
+      withCapacity(freeMb: 8192, totalMemGb: 8);
+      expect((await controller.cloneBudget()).maximum, 20);
+    });
+
+    test('a nearly-full device is bound by space, and says so', () async {
+      // 512 MB headroom + 512 KB usable: eight clones at 64 KB each.
+      withCapacity(freeMb: 512, totalMemGb: 8);
+      responses['getDeviceCapacity'] = <Object?, Object?>{
+        'freeBytes': 512 * mb + 512 * 1024,
+        'totalBytes': 64 * 1024 * mb,
+        'totalMemBytes': 8 * 1024 * mb,
+        'isLowRamDevice': false,
+      };
+
+      final CloneBudget budget = await controller.cloneBudget();
+
+      expect(budget.maximum, 8);
+      expect(budget.reason, contains('space left'));
+    });
+
+    test('a device that will not answer is offered everything', () async {
+      // `getDeviceCapacity` is absent from `responses`, so the bridge throws. A failed
+      // capability check must not stand between the user and a clone that would work.
+      final CloneBudget budget = await controller.cloneBudget();
+
+      expect(budget.maximum, 20);
+    });
   });
 
-  test('the refusal names the app when not even one more fits', () async {
-    final VirtualProfileModel profile = await seedClone();
-    // 10 MB usable against a 100 MB app: nothing fits.
-    withSpace(freeMb: 512 + 10, appMb: 100);
-    await controller.refreshAll();
+  group('creating clones against the budget', () {
+    test('a batch beyond the budget is refused before anything is made', () async {
+      final VirtualProfileModel profile = await seedClone();
+      withCapacity(freeMb: 8192, lowRam: true); // budget of 4
+      await controller.refreshAll();
 
-    final String? error = await controller.createClones(profile, 3);
+      final String? error = await controller.createClones(profile, 9);
 
-    expect(error, contains('another Virtual Test App clone'));
-    expect(await repository.getProfiles(), hasLength(1));
-  });
+      expect(error, contains('Not enough room for 9 more'));
+      expect(error, contains('can take 4'));
+      // Refused up front: the one seeded clone is still the only one.
+      expect(await repository.getProfiles(), hasLength(1));
+    });
 
-  test('a batch that fits is created', () async {
-    final VirtualProfileModel profile = await seedClone();
-    // 400 MB usable, 100 MB each: four fit, two were asked for.
-    withSpace(freeMb: 512 + 400, appMb: 100);
-    await controller.refreshAll();
+    test('a device with no room names the app it is refusing', () async {
+      final VirtualProfileModel profile = await seedClone();
+      withCapacity(freeMb: 400);
+      await controller.refreshAll();
 
-    final String? error = await controller.createClones(profile, 2);
+      final String? error = await controller.createClones(profile, 3);
 
-    expect(error, isNull);
-    expect(await repository.getProfiles(), hasLength(3));
-  });
+      expect(error, contains('another Virtual Test App clone'));
+      expect(await repository.getProfiles(), hasLength(1));
+    });
 
-  test('clones are still created when the space check cannot run', () async {
-    // `getStorageStatus` is absent from `responses`, so the bridge throws. A failed
-    // diagnostic must not stand between the user and a clone that would have worked.
-    final VirtualProfileModel profile = await seedClone();
-    await controller.refreshAll();
+    test('a batch within the budget is created', () async {
+      final VirtualProfileModel profile = await seedClone();
+      withCapacity(freeMb: 8192, lowRam: true); // budget of 4
+      await controller.refreshAll();
 
-    final String? error = await controller.createClones(profile, 2);
+      final String? error = await controller.createClones(profile, 4);
 
-    expect(error, isNull);
-    expect(await repository.getProfiles(), hasLength(3));
-  });
+      expect(error, isNull);
+      expect(await repository.getProfiles(), hasLength(5));
+    });
 
-  test('an app whose size is unknown is not refused', () async {
-    final VirtualProfileModel profile = await seedClone();
-    // Plenty free, but a zero size is "could not read", not "costs nothing".
-    withSpace(freeMb: 512 + 400, appMb: 0);
-    await controller.refreshAll();
+    test('clones are still created when the check cannot run', () async {
+      final VirtualProfileModel profile = await seedClone();
+      await controller.refreshAll();
 
-    final String? error = await controller.createClones(profile, 2);
+      final String? error = await controller.createClones(profile, 2);
 
-    expect(error, isNull);
-    expect(await repository.getProfiles(), hasLength(3));
+      expect(error, isNull);
+      expect(await repository.getProfiles(), hasLength(3));
+    });
+
+    test('an app\'s archive size has no say in the budget', () async {
+      final VirtualProfileModel profile = await seedClone();
+      // A 4 GB app on a device with 1 GB usable. The old model charged a clone for a
+      // copy of the archive and would have refused; the engine installs the package
+      // once and every clone after it costs only its own empty directories.
+      responses['getAppDetails'] = ok('APP_DETAILS', <String, Object?>{
+        'packageName': AppConstants.testAppPackage,
+        'appName': 'Virtual Test App',
+        'apkCount': 1,
+        'totalSizeBytes': 4 * 1024 * mb,
+        'abis': <Object?>[],
+        'components': <Object?>[],
+      });
+      withCapacity(freeMb: 512 + 1024, totalMemGb: 8);
+      await controller.refreshAll();
+
+      final String? error = await controller.createClones(profile, 5);
+
+      expect(error, isNull);
+      expect(await repository.getProfiles(), hasLength(6));
+    });
   });
 }

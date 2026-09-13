@@ -5,12 +5,12 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
-import '../../../data/models/app_details.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/space_identity.dart';
-import '../../../data/models/storage_status.dart';
+import '../../../data/models/clone_budget.dart';
+import '../../../data/models/device_capacity.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
@@ -392,9 +392,9 @@ class HomeController extends GetxController {
   /// would leave the user with an unexplained partial result; carrying on gets them as
   /// many as the engine will give and then says exactly what happened.
   ///
-  /// A batch that cannot fit on the device is refused before any of it is attempted:
+  /// A batch beyond what the device can take is refused before any of it is attempted:
   /// filling the disk one container at a time takes a minute to arrive at a failure
-  /// the free-space figure already knew about.
+  /// [cloneBudget] already knew about.
   ///
   /// Returns null when every clone was created, or a user-facing message otherwise.
   Future<String?> createClones(
@@ -402,7 +402,7 @@ class HomeController extends GetxController {
     int count, {
     void Function(int created, int total)? onProgress,
   }) async {
-    final String? refusal = await _storageRefusal(profile, count);
+    final String? refusal = await _budgetRefusal(profile, count);
     if (refusal != null) {
       return refusal;
     }
@@ -438,6 +438,12 @@ class HomeController extends GetxController {
     return 'Created $created of $count. $firstFailure';
   }
 
+  /// The most clones the dialog will ever offer, whatever the device could take.
+  ///
+  /// A stepper is for a small number. Past twenty the honest control is a text field,
+  /// and nobody has asked for one.
+  static const int _absoluteMaximum = 20;
+
   /// Space the device keeps for itself, held back from the clone estimate.
   ///
   /// Android starts refusing writes and running its own cleanup well before a volume
@@ -445,46 +451,122 @@ class HomeController extends GetxController {
   /// the user's other apps down with it.
   static const int _storageHeadroomBytes = 512 * 1024 * 1024;
 
-  /// Why [count] more clones of [profile] will not fit, or null to go ahead.
+  /// What one more clone of an app that already has one actually costs on disk.
   ///
-  /// The estimate is the app's own archive size, which is deliberately optimistic: a
-  /// container install writes optimised dex on top of a copy of the APK, so the real
-  /// cost is higher. Refusing only what fails the optimistic figure means a refusal
-  /// here is one no device could have satisfied, and a borderline batch is still let
-  /// through to try — [createClones] reports honestly if it then runs out.
+  /// Measured, not guessed: forty-five containers of a single app occupied 2.6 MB of the
+  /// engine's store — about 40 KB each — because the package is installed once and every
+  /// clone after it gets only its own empty data directories. Rounded up for the odd
+  /// device with larger blocks.
   ///
-  /// Returns null whenever the numbers cannot be read. A diagnostic that fails must
-  /// not stand between the user and a clone that would have worked.
-  Future<String?> _storageRefusal(VirtualProfileModel profile, int count) async {
-    final StorageStatus storage;
-    final AppDetails details;
+  /// It is deliberately not the app's APK size. Charging a clone for a copy of the
+  /// archive that is never made refuses batches the device would have taken easily.
+  static const int _perCloneBytes = 64 * 1024;
+
+  /// How many more clones this device should be offered, and why.
+  ///
+  /// The count dialog takes its ceiling from here and [createClones] checks against the
+  /// same figure, so the app can never offer a number it will then refuse.
+  ///
+  /// A device that will not answer gets the full offer. A capability check that failed
+  /// must not stand between the user and a clone that would have worked.
+  Future<CloneBudget> cloneBudget() async {
+    final DeviceCapacity capacity;
     try {
-      storage = await _nativeBridge.storageStatus();
-      details = await _nativeBridge.appDetails(profile.packageName);
+      capacity = await _nativeBridge.deviceCapacity();
     } on AppException catch (error) {
-      _logger.warning('Skipped the clone space check: ${error.message}');
-      return null;
+      _logger.warning('Clone budget fell back to the default: ${error.message}');
+      return const CloneBudget(
+        maximum: _absoluteMaximum,
+        reason: 'Choose from 1 to $_absoluteMaximum',
+      );
     }
 
-    final int perClone = details.totalSizeBytes;
-    if (storage.isUnknown || perClone <= 0) {
-      return null;
+    final int usable = capacity.freeBytes - _storageHeadroomBytes;
+    final int storageCap = capacity.knowsStorage
+        ? (usable <= 0 ? 0 : usable ~/ _perCloneBytes)
+        : _absoluteMaximum;
+    final int memoryCap = _memoryCap(capacity);
+    final int maximum = <int>[
+      _absoluteMaximum,
+      storageCap,
+      memoryCap,
+    ].reduce((int a, int b) => a < b ? a : b);
+
+    // Decided after the minimum, not before it: a volume with room for part of a clone
+    // clears the headroom check and still lands on nothing, and 'Up to 0' is not a
+    // sentence. Only storage can bring the figure this low, so it is what gets named.
+    //
+    // States the two figures and stops. Callers put this after a sentence that has
+    // already said there is no room, so repeating the verdict here would say it twice.
+    if (maximum <= 0) {
+      return CloneBudget(
+        maximum: 0,
+        reason:
+            'Only ${capacity.freeLabel} is free, and the device keeps half a '
+            'gigabyte spare.',
+      );
     }
 
-    final int usable = storage.freeBytes - _storageHeadroomBytes;
-    final int fits = usable <= 0 ? 0 : usable ~/ perClone;
-    if (fits >= count) {
+    if (maximum >= _absoluteMaximum) {
+      return const CloneBudget(
+        maximum: _absoluteMaximum,
+        reason: 'Choose from 1 to $_absoluteMaximum',
+      );
+    }
+    // Name the figure that actually bound the offer, so the number reads as this
+    // device's answer rather than as an arbitrary cap.
+    if (storageCap <= memoryCap) {
+      return CloneBudget(
+        maximum: maximum,
+        reason: 'Up to $maximum — ${capacity.freeLabel} of space left',
+      );
+    }
+    return CloneBudget(
+      maximum: maximum,
+      reason: 'Up to $maximum on a device with ${capacity.totalMemLabel} of memory',
+    );
+  }
+
+  /// What this device should be encouraged to *run*, which is a different question.
+  ///
+  /// An idle container costs [_perCloneBytes] and no memory at all, so RAM does not
+  /// bound how many clones can exist. It bounds how many are usable at once — which is
+  /// what someone who made twenty of them is about to try. These tiers are a judgement
+  /// about that, not a measurement of anything: tune them, do not trust them.
+  int _memoryCap(DeviceCapacity capacity) {
+    if (capacity.isLowRamDevice ?? false) {
+      return 4;
+    }
+    if (!capacity.knowsMemory) {
+      return _absoluteMaximum;
+    }
+    const int gb = 1024 * 1024 * 1024;
+    final int total = capacity.totalMemBytes!;
+    if (total < 3 * gb) {
+      return 6;
+    }
+    if (total < 6 * gb) {
+      return 12;
+    }
+    return _absoluteMaximum;
+  }
+
+  /// Why [count] more clones of [profile] cannot be made, or null to go ahead.
+  ///
+  /// A backstop rather than the main guard: the dialog already offers no more than the
+  /// budget allows. This catches the case where the device filled up between the offer
+  /// and the confirmation.
+  Future<String?> _budgetRefusal(VirtualProfileModel profile, int count) async {
+    final CloneBudget budget = await cloneBudget();
+    if (count <= budget.maximum) {
       return null;
     }
-
-    final String each = AppDetails.formatBytes(perClone);
-    if (fits == 0) {
-      return 'Not enough space for another ${profile.appName} clone. '
-          'Each one needs about $each and ${storage.freeLabel} is free.';
+    if (budget.allowsNone) {
+      return 'There is no room for another ${profile.appName} clone. '
+          '${budget.reason}';
     }
-    return 'Not enough space for $count more ${profile.appName} clones. '
-        'Each one needs about $each and ${storage.freeLabel} is free — '
-        'room for $fits.';
+    return 'Not enough room for $count more ${profile.appName} clones — '
+        'this device can take ${budget.maximum} right now.';
   }
 
   /// Stops the guest if it is running. Returns null on success.

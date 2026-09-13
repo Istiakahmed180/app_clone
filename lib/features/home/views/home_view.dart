@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../data/models/clone_budget.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/empty_state.dart';
 import '../../onboarding/controllers/onboarding_controller.dart';
@@ -243,9 +244,27 @@ class HomeView extends GetView<HomeController> {
     BuildContext context,
     VirtualProfileModel profile,
   ) async {
+    // Asked before the stepper is drawn, so the ceiling on offer is one this device can
+    // actually deliver. A dialog that offered twenty and then refused five would teach
+    // the user not to believe either number.
+    final CloneBudget budget = await controller.cloneBudget();
+    if (!context.mounted) {
+      return;
+    }
+    if (budget.allowsNone) {
+      // No stepper: every value it could offer is one that would be refused.
+      await _showFailure(
+        context,
+        'There is no room for another ${profile.appName} clone. ${budget.reason}',
+      );
+      return;
+    }
+
     final int? count = await showCloneCountDialog(
       context,
       appName: profile.appName,
+      maximum: budget.maximum,
+      reason: budget.reason,
     );
     if (count == null || !context.mounted) {
       return;

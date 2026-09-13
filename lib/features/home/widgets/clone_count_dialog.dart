@@ -9,8 +9,12 @@ import '../../../app/theme/app_theme.dart';
 /// range is one tap away, and there is no way to type something that has to be rejected.
 ///
 /// The bound is real, not decorative. Each clone is a container install of a few
-/// seconds, so twenty is already close to a minute of work — and the engine allocates
-/// one virtual user per clone, which is not a free resource.
+/// seconds, so twenty is already close to a minute of work — and the caller sizes
+/// [maximum] to what this device can actually take.
+///
+/// [reason] is shown in place of the plain range. A ceiling with nothing beside it
+/// reads as an arbitrary limit; the same number next to "1.2 GB of space left" reads
+/// as this device's answer, and tells the user what to change to raise it.
 ///
 /// Returns the chosen count, or null if cancelled.
 Future<int?> showCloneCountDialog(
@@ -18,6 +22,7 @@ Future<int?> showCloneCountDialog(
   required String appName,
   int minimum = 1,
   int maximum = 20,
+  String? reason,
 }) {
   return showDialog<int>(
     context: context,
@@ -25,6 +30,7 @@ Future<int?> showCloneCountDialog(
       appName: appName,
       minimum: minimum,
       maximum: maximum,
+      reason: reason,
     ),
   );
 }
@@ -34,11 +40,13 @@ class _CloneCountDialog extends StatefulWidget {
     required this.appName,
     required this.minimum,
     required this.maximum,
+    this.reason,
   });
 
   final String appName;
   final int minimum;
   final int maximum;
+  final String? reason;
 
   @override
   State<_CloneCountDialog> createState() => _CloneCountDialogState();
@@ -126,7 +134,8 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Choose from ${widget.minimum} to ${widget.maximum}',
+            widget.reason ??
+                'Choose from ${widget.minimum} to ${widget.maximum}',
             style: theme.textTheme.bodySmall,
           ),
         ],
