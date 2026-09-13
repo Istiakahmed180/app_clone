@@ -8,6 +8,7 @@ import '../core/diagnostics/diagnostic_operation.dart';
 import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
 import '../data/models/app_details.dart';
+import '../data/models/app_disguise_mode.dart';
 import '../data/models/battery_prompt_screen.dart';
 import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
@@ -42,6 +43,34 @@ class NativeBridge {
   Future<DeviceCapacity> deviceCapacity() async {
     final Map<String, dynamic> result = await _invokeMap('getDeviceCapacity');
     return DeviceCapacity.fromMap(result);
+  }
+
+  /// What the app currently presents as on the launcher.
+  ///
+  /// The enabled manifest alias is the source of truth, so this is a real query rather than
+  /// a stored preference. A failure reads as [AppDisguiseMode.normal], which never hides the
+  /// app.
+  Future<AppDisguiseMode> getAppDisguise() async {
+    try {
+      final EngineResponse response = await _invokeEngine('getAppDisguise');
+      return AppDisguiseMode.parse(response.data['mode'] as String?);
+    } on AppException catch (error, stackTrace) {
+      _logger.error('Could not read the launcher disguise', error, stackTrace);
+      return AppDisguiseMode.normal;
+    }
+  }
+
+  /// Switches the launcher icon/name, and returns the state the platform reports afterwards
+  /// — not the requested one, so a refused change cannot read as applied.
+  Future<AppDisguiseMode> setAppDisguise(AppDisguiseMode mode) async {
+    final EngineResponse response = await _invokeEngine(
+      'setAppDisguise',
+      <String, dynamic>{'mode': mode.wireName},
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return AppDisguiseMode.parse(response.data['mode'] as String?);
   }
 
   Future<bool> isTestAppInstalled() async {
@@ -197,8 +226,7 @@ class NativeBridge {
   }
 
   /// Whether the current launcher can pin shortcuts at all.
-  Future<bool> areShortcutsSupported() async {
-    final EngineResponse response = await _invokeEngine(
+  Future<bool> areShortcutsSupported() async {    final EngineResponse response = await _invokeEngine(
       'areShortcutsSupported',
     );
     return response.data['supported'] as bool? ?? false;

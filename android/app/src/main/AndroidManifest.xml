@@ -21,11 +21,36 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+        </activity>
+
+        <!-- The launcher entry is an alias, not the activity itself, so the icon and label
+             can be switched at runtime. `LauncherDuplika` is the normal entry; the second
+             alias disguises the app as a calculator. `AppDisguise` enables exactly one of
+             them at all times — disabling both would strand the app with no way in. -->
+        <activity-alias
+            android:name=".LauncherDuplika"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:label="Duplika"
+            android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherCalculator"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="Calculator"
+            android:icon="@drawable/ic_calculator">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
         <!-- Target of per-clone home-screen shortcuts. Exported because the system
              launches it on the launcher's behalf; it carries no UI and only acts on a
              profile id that already exists. -->

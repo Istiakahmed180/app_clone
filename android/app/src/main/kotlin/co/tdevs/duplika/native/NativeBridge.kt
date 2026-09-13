@@ -30,6 +30,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val battery = BatteryOptimization(appContext)
     private val appDetails = AppDetailsReader(appContext)
     private val deviceCapacity = DeviceCapacity(appContext)
+    private val disguise = AppDisguise(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
 
@@ -133,6 +134,25 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
         when (call.method) {
             "getPlatformInfo" -> result.success(testAppManager.getPlatformInfo())
             "getDeviceCapacity" -> result.success(deviceCapacity.read())
+
+            "getAppDisguise" -> result.success(
+                success(
+                    "APP_DISGUISE_READ",
+                    "Launcher disguise read.",
+                    mapOf("mode" to disguise.currentMode().name),
+                ),
+            )
+            "setAppDisguise" -> {
+                val mode = AppDisguise.Mode.parse(call.argument<String>("mode"))
+                disguise.setMode(mode)
+                result.success(
+                    success(
+                        "APP_DISGUISE_SET",
+                        "Launcher disguise set.",
+                        mapOf("mode" to disguise.currentMode().name),
+                    ),
+                )
+            }
             "isTestAppInstalled" -> result.success(testAppManager.isTestAppInstalled())
             "getTestAppInfo" -> result.success(testAppManager.getTestAppInfo())
 

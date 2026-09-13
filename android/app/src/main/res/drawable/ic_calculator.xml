@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Body. The disguise is only convincing if it looks like the thing it claims to be,
+         so this is a plain calculator: screen on top, a keypad below. -->
+    <path
+        android:fillColor="#FF5A2E"
+        android:pathData="M26,14 h56 a12,12 0 0 1 12,12 v56 a12,12 0 0 1 -12,12 h-56 a12,12 0 0 1 -12,-12 v-56 a12,12 0 0 1 12,-12 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,26 h44 v14 h-44 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,48 h10 v10 h-10 z M49,48 h10 v10 h-10 z M66,48 h10 v10 h-10 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,62 h10 v10 h-10 z M49,62 h10 v10 h-10 z M66,62 h10 v10 h-10 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,76 h10 v10 h-10 z M49,76 h27 v10 h-27 z" />
+</vector>

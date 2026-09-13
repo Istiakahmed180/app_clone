@@ -4,12 +4,15 @@ import 'package:duplika/data/models/engine_result.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/widgets/clone_action_sheet.dart';
+import 'package:duplika/features/disguise/controllers/disguise_controller.dart';
 import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/features/private_space/views/private_space_settings_view.dart';
 import 'package:duplika/features/private_space/widgets/private_space_tile.dart';
+import 'package:duplika/native/native_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 
 import 'fakes/in_memory_profile_storage.dart';
 
@@ -152,6 +155,12 @@ void main() {
       biometric: _FakeBiometric(),
     );
     await controller.reload();
+
+    // The settings screen reads the disguise controller for its one Disguise row.
+    Get.put<DisguiseController>(
+      DisguiseController(bridge: NativeBridge(), privateSpace: controller),
+    );
+    addTearDown(Get.reset);
 
     await tester.pumpWidget(
       _host(PrivateSpaceSettingsView(privateSpace: controller)),

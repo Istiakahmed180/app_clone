@@ -7,6 +7,8 @@ import '../../settings/widgets/settings_section.dart';
 import '../controllers/private_space_controller.dart';
 import '../widgets/unlock_dialog.dart';
 import 'private_space_setup_view.dart';
+import '../../disguise/controllers/disguise_controller.dart';
+import '../../../data/models/app_disguise_mode.dart';
 
 /// The lock's own settings: set it up, change the PIN, pick the biometric, turn it off.
 ///
@@ -64,6 +66,7 @@ class PrivateSpaceSettingsView extends StatelessWidget {
 
   Widget _enabled(BuildContext context) {
     final bool biometricAvailable = privateSpace.biometricAvailable.value;
+    final DisguiseController disguise = Get.find<DisguiseController>();
 
     return ListView(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
@@ -97,6 +100,22 @@ class PrivateSpaceSettingsView extends StatelessWidget {
           ],
         ),
         SizedBox(height: 22.h),
+        SettingsSection(
+          title: 'Disguise',
+          children: <Widget>[
+            SwitchListTile(
+              secondary: const Icon(Icons.calculate_outlined),
+              value: disguise.disguised,
+              onChanged: (bool value) => _setDisguise(context, value),
+              title: const Text('Disguise as Calculator'),
+              subtitle: const Text(
+                'Replaces Duplika\'s icon with a calculator. Type your Private space PIN '
+                'and press = to open the app.',
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 22.h),
         TextButton.icon(
           onPressed: () => _turnOff(context),
           icon: const Icon(Icons.lock_open_outlined),
@@ -115,6 +134,57 @@ class PrivateSpaceSettingsView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _setDisguise(BuildContext context, bool enable) async {
+    final DisguiseController disguise = Get.find<DisguiseController>();
+    final bool confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: Text(enable ? 'Disguise as Calculator?' : 'Show Duplika again?'),
+            content: Text(
+              enable
+                  ? 'Duplika\'s icon is replaced by a calculator named "Calculator". To '
+                      'open Duplika, type your Private space PIN and press =. If you '
+                      'forget the PIN you will not be able to open the app.'
+                  : 'Duplika will show its own icon and name on the home screen again.',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(enable ? 'Disguise' : 'Show app'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed || !context.mounted) {
+      return;
+    }
+
+    final AppDisguiseMode? applied = await disguise.setMode(
+      enable ? AppDisguiseMode.calculator : AppDisguiseMode.normal,
+    );
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            applied == null
+                ? 'Could not change how the app appears.'
+                : enable
+                    ? 'Duplika now looks like Calculator on your home screen.'
+                    : 'Duplika is back on your home screen.',
+          ),
+        ),
+      );
   }
 
   Future<void> _openSetup(
@@ -163,6 +233,12 @@ class PrivateSpaceSettingsView extends StatelessWidget {
       return;
     }
     await privateSpace.disable();
+    // The disguise is unlocked with this PIN, so it cannot outlive the PIN: leaving it on
+    // would leave only a calculator and no way in.
+    final DisguiseController disguise = Get.find<DisguiseController>();
+    if (disguise.disguised) {
+      await disguise.setMode(AppDisguiseMode.normal);
+    }
     if (context.mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()

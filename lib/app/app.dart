@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../core/constants/app_constants.dart';
+import '../data/models/app_disguise_mode.dart';
 import '../data/models/app_language.dart';
+import '../features/disguise/controllers/disguise_controller.dart';
+import '../features/disguise/views/calculator_view.dart';
 import '../features/settings/controllers/settings_controller.dart';
 import '../l10n/app_localizations.dart';
 import 'routes/app_bindings.dart';
@@ -30,7 +33,21 @@ class _DuplikaAppState extends State<DuplikaApp> {
 
   @override
   Widget build(BuildContext context) {
-    return DuplikaAppRoot(settings: Get.find<SettingsController>());
+    final DisguiseController disguise = Get.find<DisguiseController>();
+
+    // The disguise is decided before anything else: while the platform answer is in flight
+    // nothing is shown (so a disguised launch never flashes the clone grid), and a locked
+    // calculator stands in for the whole app until the Private space PIN is entered.
+    return Obx(() {
+      final AppDisguiseMode? mode = disguise.mode.value;
+      if (mode == null) {
+        return const SizedBox.shrink();
+      }
+      if (mode == AppDisguiseMode.calculator && disguise.locked.value) {
+        return CalculatorView(controller: disguise);
+      }
+      return DuplikaAppRoot(settings: Get.find<SettingsController>());
+    });
   }
 }
 

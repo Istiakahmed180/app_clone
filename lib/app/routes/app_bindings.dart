@@ -7,6 +7,7 @@ import '../../core/virtualization/virtualization_engine.dart';
 import '../../data/repositories/virtual_profile_repository.dart';
 import '../../features/apps/controllers/app_picker_controller.dart';
 import '../../features/diagnostics/controllers/diagnostics_controller.dart';
+import '../../features/disguise/controllers/disguise_controller.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/onboarding/controllers/onboarding_controller.dart';
 import '../../features/private_space/controllers/private_space_controller.dart';
@@ -39,6 +40,16 @@ class AppBinding extends Bindings {
     // Settings screen can change both while Home is still alive underneath.
     Get.put<PrivateSpaceController>(
       PrivateSpaceController(repository: Get.find<VirtualProfileRepository>()),
+      permanent: true,
+    );
+
+    // Permanent and built at startup: the root has to know whether the app is disguised
+    // before it draws anything, or a disguised launch would show the real UI first.
+    Get.put<DisguiseController>(
+      DisguiseController(
+        bridge: Get.find<NativeBridge>(),
+        privateSpace: Get.find<PrivateSpaceController>(),
+      ),
       permanent: true,
     );
 
