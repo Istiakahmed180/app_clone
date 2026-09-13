@@ -45,10 +45,14 @@ class SpaceIdentity {
 
   /// Whether guest apps actually read these values.
   ///
-  /// **False today.** Bcore has the hooks (`DeviceIdProxy`,
-  /// `ISettingsProviderProxy`) but no API to point them at a per-space store, so a
-  /// guest still sees the device's own identifiers. Wiring it up means a class override
-  /// through `engine-patches/apply-runtime-overrides.sh`, which is a separate change.
+  /// **False today, and deliberately deferred.** Bcore has the hooks (`AndroidIdProxy`,
+  /// `DeviceIdProxy`, `IDeviceIdentifiersPolicyProxy`) but none consults a per-space store.
+  /// The smallest wiring attempt — replacing the nested `AndroidIdProxy$GetString` — was
+  /// measured and does not register, because Bcore discovers hooks by scanning declared
+  /// **member** classes; a real fix replaces the enclosing stub classes, which is a
+  /// substantial engine change. It is on hold until the licence blocker and the Play
+  /// identifier-spoofing question are settled. See the "What is not true yet" section of
+  /// `docs/ARCHITECTURE.md`.
   ///
   /// A constant rather than a runtime check because there is nothing to check yet: the
   /// day the override ships, this becomes a real query and every screen that reads it

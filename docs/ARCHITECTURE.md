@@ -127,14 +127,30 @@ is still looking at it) and again in `SpaceIdentityStore.validate` (because the 
 only writer of a file a guest process will read, and a writer that trusts its caller is not
 a guard). Keep the two in step.
 
-### What is not true yet
+### What is not true yet — wiring the identity into guests is deliberately deferred
 
-**Guest apps do not read these values.** Bcore has the hooks (`DeviceIdProxy`,
-`IDeviceIdentifiersPolicyProxy`, `ISettingsProviderProxy$GetString`) but exposes no API to
-point them at a per-space store, so a cloned app still sees the device's own identifiers.
-Wiring it up means a class override through `engine-patches/apply-runtime-overrides.sh`,
-reading the JSON above and keying off `BlackBoxCore.getAppConfig().userId` inside the guest.
-That is a separate change and has not been made.
+**Guest apps do not read these values.** Bcore has the hooks (`AndroidIdProxy` for
+`android_id`, `DeviceIdProxy` for the telephony device id, `IDeviceIdentifiersPolicyProxy`
+for the serial) but none of them consults a per-space store, so a cloned app sees the device's
+own identifiers — or, for `android_id`, an upstream mock when the real value is unusable.
+
+**The smallest wiring attempt does not work, and that is measured, not assumed.** Replacing the
+nested `AndroidIdProxy$GetString` with a hand-written class that returns the space value does
+not take effect: Bcore discovers hooks by scanning `getClass().getDeclaredClasses()` for
+`@ProxyMethod`-annotated **member** classes, and a hand-written class that merely shares the
+binary name is not a member class, so it is never registered. A real fix means replacing the
+**enclosing** stub classes themselves — reproducing their binding against an R8-obfuscated
+prebuilt AAR — which is a substantial engine change with regression risk for every app that
+reads a device identifier.
+
+**Deferred by decision, for three reasons.** (1) The distribution blocker in the root `README`
+and `docs/DEPENDENCY_LICENSE_AUDIT.md` is unresolved, so no engine work here could ship yet.
+(2) Identifier spoofing is sensitive under Play policy — that question needs an answer rather
+than an assumption, and nothing is spoofed today. (3) Most of these identifiers are already
+inert on modern Android: the IMEI and serial need privileged permissions a normal app does not
+hold, the MAC addresses come back as the constant `02:00:00:00:00:00`, and `android_id` — the
+one that matters — is often treated as install-scoped. If it is taken up, the spike is scoped
+to `android_id` and the serial, on its own branch, with Levels 6/7/8 re-run.
 
 `SpaceIdentity.isolatedFromGuests` is the single `false` that records this. The Space Info
 screen shows the set and makes **no claim about it either way** — it must never say the
@@ -142,10 +158,6 @@ identifiers are isolated or private to the space while that constant is false. A
 `test/clone_tile_test.dart` asserts the screen carries no such wording. When the override
 ships, that constant becomes a real query and every screen reading it starts telling the
 truth without being rewritten.
-
-Note also that identifier spoofing is sensitive under Play policy. Nothing here is wired
-into a guest, so nothing is spoofed today; before it is, that policy question needs an
-answer rather than an assumption.
 
 ## Consistency rules
 

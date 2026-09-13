@@ -17,6 +17,7 @@ public final class MainActivity extends Activity {
     private android.content.SharedPreferences state;
     private TextView stateView;
     private TextView permView;
+    private TextView androidIdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +67,29 @@ public final class MainActivity extends Activity {
         checkCamera.setOnClickListener(view -> updatePermission());
         root.addView(checkCamera);
 
+        androidIdView = new TextView(this);
+        androidIdView.setTextSize(18);
+        root.addView(androidIdView);
+
+        Button checkAndroidId = new Button(this);
+        checkAndroidId.setText("Check Android ID");
+        checkAndroidId.setOnClickListener(view -> updateAndroidId());
+        root.addView(checkAndroidId);
+
         setContentView(root);
         updateState();
         updatePermission();
+        updateAndroidId();
+    }
+
+    /**
+     * Reports the Android ID this process is told. Used to see whether a space's own value
+     * reaches the guest.
+     */
+    private void updateAndroidId() {
+        CharSequence id = android.provider.Settings.Secure.getString(
+                getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        androidIdView.setText("android_id=" + (id == null ? "null" : id));
     }
 
     /**
