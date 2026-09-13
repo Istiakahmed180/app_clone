@@ -187,7 +187,7 @@ class HomeView extends GetView<HomeController> {
   Future<void> _confirmBackgroundPermission(BuildContext context) async {
     final String? message = await _onboarding.requestBackgroundPermission();
     if (message != null && context.mounted) {
-      _showMessage(context, message);
+      await _showFailure(context, message);
     }
     // Android owns the answer, so ask it rather than assuming the prompt succeeded.
     await _onboarding.refreshBackgroundPrompt();
@@ -212,7 +212,7 @@ class HomeView extends GetView<HomeController> {
     // Only failures are announced. A launch that worked brings the guest to the front,
     // so a message about it lands on top of the app the user is now looking at.
     if (error != null) {
-      _showMessage(context, error);
+      await _showFailure(context, error);
     }
   }
 
@@ -274,12 +274,15 @@ class HomeView extends GetView<HomeController> {
     Navigator.of(context).pop();
     progress.dispose();
 
+    if (error != null) {
+      await _showFailure(context, error);
+      return;
+    }
     _showMessage(
       context,
-      error ??
-          (count == 1
-              ? 'Added another ${profile.appName}.'
-              : 'Added $count more copies of ${profile.appName}.'),
+      count == 1
+          ? 'Added another ${profile.appName}.'
+          : 'Added $count more copies of ${profile.appName}.',
     );
   }
 
@@ -435,7 +438,11 @@ class HomeView extends GetView<HomeController> {
         if (!context.mounted) {
           return;
         }
-        _showMessage(context, error ?? 'Stopped ${profile.profileName}.');
+        if (error != null) {
+          await _showFailure(context, error);
+        } else {
+          _showMessage(context, 'Stopped ${profile.profileName}.');
+        }
       case CloneAction.clearCache:
         final bool confirmed = await _confirmClearCache(context) ?? false;
         if (!confirmed || !context.mounted) {
@@ -445,10 +452,11 @@ class HomeView extends GetView<HomeController> {
         if (!context.mounted) {
           return;
         }
-        _showMessage(
-          context,
-          error ?? 'Cache cleared for ${profile.profileName}.',
-        );
+        if (error != null) {
+          await _showFailure(context, error);
+        } else {
+          _showMessage(context, 'Cache cleared for ${profile.profileName}.');
+        }
       case CloneAction.clearStorage:
         // Confirmed: this is every login, message and setting inside the clone, and
         // there is no undo. Uninstall is the only other action that asks.
@@ -460,17 +468,20 @@ class HomeView extends GetView<HomeController> {
         if (!context.mounted) {
           return;
         }
-        _showMessage(
-          context,
-          error ??
-              '${profile.profileName} was reset. Its next launch is a first launch.',
-        );
+        if (error != null) {
+          await _showFailure(context, error);
+        } else {
+          _showMessage(
+            context,
+            '${profile.profileName} was reset. Its next launch is a first launch.',
+          );
+        }
       case CloneAction.shareApp:
         final String? error = await controller.shareApp(profile);
         // Only a failure is worth saying: on success the share sheet is already on
-        // screen, and a snack bar behind it would be talking over the answer.
+        // screen, and a dialog behind it would be talking over the answer.
         if (error != null && context.mounted) {
-          _showMessage(context, error);
+          await _showFailure(context, error);
         }
       case CloneAction.rename:
         final String? name = await showRenameProfileDialog(
@@ -482,7 +493,7 @@ class HomeView extends GetView<HomeController> {
         }
         final String? error = await controller.renameProfile(profile, name);
         if (error != null && context.mounted) {
-          _showMessage(context, error);
+          await _showFailure(context, error);
         }
       case CloneAction.clone:
         await _cloneAgain(context, profile);
@@ -491,11 +502,14 @@ class HomeView extends GetView<HomeController> {
         if (!context.mounted) {
           return;
         }
-        _showMessage(
-          context,
-          error ??
-              'Confirm the shortcut on your home screen to finish adding it.',
-        );
+        if (error != null) {
+          await _showFailure(context, error);
+        } else {
+          _showMessage(
+            context,
+            'Confirm the shortcut on your home screen to finish adding it.',
+          );
+        }
       case CloneAction.delete:
         final bool confirmed = await showUninstallCloneDialog(
           context,
@@ -511,14 +525,38 @@ class HomeView extends GetView<HomeController> {
         // so the clone that goes is the one the user watched go.
         final String? error = await controller.uninstall(profile);
         if (error != null && context.mounted) {
-          _showMessage(context, error);
+          await _showFailure(context, error);
         }
     }
   }
 
+  /// Confirms something that worked, and gets out of the way.
   void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Says why something did not happen, and waits to be dismissed.
+  ///
+  /// A snack bar was the wrong shape for these. They run to two lines, they land at the
+  /// bottom of a grid the user is not looking at, and they leave on a timer — so a
+  /// refusal the user never read is indistinguishable from a clone that silently failed
+  /// to appear. Successes keep the snack bar: they need no reply, and a dialog for every
+  /// one would be a tap tax on the path that worked.
+  Future<void> _showFailure(BuildContext context, String message) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Couldn\'t do that'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }

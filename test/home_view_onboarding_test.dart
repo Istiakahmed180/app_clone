@@ -30,6 +30,9 @@ void main() {
   late bool virtualizationAvailable;
   late List<String> calls;
 
+  /// Per-test replies that win over the defaults below, for driving a failure.
+  late Map<String, Map<Object?, Object?>> overrides;
+
   Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
     'success': true,
     'code': 'OK',
@@ -41,9 +44,14 @@ void main() {
     ignoringBattery = false;
     virtualizationAvailable = true;
     calls = <String>[];
+    overrides = <String, Map<Object?, Object?>>{};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
           calls.add(call.method);
+          final Map<Object?, Object?>? override = overrides[call.method];
+          if (override != null) {
+            return override;
+          }
           switch (call.method) {
             case 'isVirtualizationAvailable':
               return <Object?, Object?>{
@@ -472,6 +480,89 @@ void main() {
       expect(tester.getTopLeft(find.text('Duplika')).dy, before);
       expect(find.text('Duplika'), findsOneWidget);
       expect(find.text('Your private space'), findsOneWidget);
+    });
+  });
+
+  group('failure messages', () {
+    // 512 MB free is exactly the controller's reserved headroom, so nothing is left for
+    // a clone and the refusal is certain regardless of the app's size.
+    void refuseForSpace() {
+      overrides['getStorageStatus'] = <Object?, Object?>{
+        'freeBytes': 512 * 1024 * 1024,
+        'totalBytes': 64 * 1024 * 1024 * 1024,
+      };
+      overrides['getAppDetails'] = ok(<String, Object?>{
+        'packageName': 'com.example.app',
+        'appName': 'Example',
+        'apkCount': 1,
+        'totalSizeBytes': 100 * 1024 * 1024,
+        'abis': <Object?>[],
+        'components': <Object?>[],
+      });
+    }
+
+    /// Sheet -> Clone -> confirm the count dialog.
+    Future<void> askForOneClone(WidgetTester tester) async {
+      await tester.tap(find.text('Clone'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Clone'),
+        ),
+      );
+      // Not pumpAndSettle: the progress barrier holds a spinner that never stops
+      // scheduling frames, so settling would time out rather than reach the answer.
+      for (int i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+    }
+
+    testWidgets('a refusal is put in a dialog, not a snack bar', (
+      WidgetTester tester,
+    ) async {
+      refuseForSpace();
+      await openSheet(tester);
+
+      await askForOneClone(tester);
+
+      // The whole point: it waits to be read instead of sliding away on a timer.
+      expect(find.text('Couldn\'t do that'), findsOneWidget);
+      expect(
+        find.text(
+          'Not enough space for another Example clone. Each one needs about '
+          '100 MB and 512 MB is free.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(SnackBar), findsNothing);
+      expect(Get.find<HomeController>().profiles, hasLength(1));
+    });
+
+    testWidgets('the dialog goes away on OK, leaving the grid', (
+      WidgetTester tester,
+    ) async {
+      refuseForSpace();
+      await openSheet(tester);
+      await askForOneClone(tester);
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Couldn\'t do that'), findsNothing);
+      expect(find.byType(CloneTile), findsOneWidget);
+    });
+
+    testWidgets('a success still uses the snack bar, with nothing to dismiss', (
+      WidgetTester tester,
+    ) async {
+      // No storage override: the check cannot read the numbers and stands aside.
+      await openSheet(tester);
+
+      await askForOneClone(tester);
+
+      expect(find.text('Added another Example.'), findsOneWidget);
+      expect(find.text('Couldn\'t do that'), findsNothing);
     });
   });
 }
