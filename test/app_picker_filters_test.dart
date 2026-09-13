@@ -358,6 +358,9 @@ void main() {
   group('AppPickerView rows', () {
     const MethodChannel channel = MethodChannel(NativeBridge.channelName);
 
+    /// What `analyzeApp` answers for the next tap. Empty means "not analysed".
+    late Map<String, Object?> analyzeData;
+
     Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
       'success': true,
       'code': 'OK',
@@ -366,9 +369,12 @@ void main() {
     };
 
     setUp(() {
+      analyzeData = <String, Object?>{};
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
             switch (call.method) {
+              case 'analyzeApp':
+                return ok(analyzeData);
               case 'listInstalledApps':
                 return ok(<String, Object?>{
                   'apps': <Object?>[
@@ -477,6 +483,50 @@ void main() {
         findsNWidgets(3),
         reason: 'the other rows and the Popular card keep their plus',
       );
+    });
+
+    testWidgets('says what will not work before cloning an installed app', (
+      WidgetTester tester,
+    ) async {
+      // The app depends on Play services and cannot receive push. Both are non-blocking,
+      // so the clone is still allowed — but the user has to be told first.
+      analyzeData = <String, Object?>{
+        'packageName': 'com.example.one',
+        'verdict': 'LIMITED',
+        'findings': <Object?>[
+          <Object?, Object?>{
+            'code': 'REQUIRES_GMS',
+            'message': 'Google sign-in is not supported in a clone.',
+            'blocking': false,
+          },
+          <Object?, Object?>{
+            'code': 'PUSH_UNSUPPORTED',
+            'message': 'Push notifications will not arrive in this clone.',
+            'blocking': false,
+          },
+        ],
+        'bridgeablePermissions': <Object?>[],
+        'missingPermissions': <Object?>[],
+        'requiresGms': true,
+      };
+
+      await pumpPicker(tester);
+
+      await tester.tap(find.text('Alpha'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add clone'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Google sign-in is not supported in a clone.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Push notifications will not arrive in this clone.'),
+        findsOneWidget,
+      );
+      // The clone is offered, not started: the sheet is the thing the user answers.
+      expect(find.widgetWithText(FilledButton, 'Add clone'), findsOneWidget);
     });
   });
 }

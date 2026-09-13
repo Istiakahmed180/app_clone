@@ -65,4 +65,12 @@ dependencies {
     // services, so it exercises a different host app and a different Binder path from
     // everything else here. Connection only; no purchase flow exists in this fixture.
     implementation("com.android.billingclient:billing:7.1.1")
+
+    // P21 — Firebase Authentication. Separates Firebase's credential sign-in paths
+    // (email/password, anonymous) from Google Sign-In, which P12 shows is refused at
+    // connection time. No google-services plugin and no google-services.json: the probe
+    // initialises Firebase by hand with an invalid placeholder key, so no real project,
+    // key, account or credential is involved.
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth")
 }

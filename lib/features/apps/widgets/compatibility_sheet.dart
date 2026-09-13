@@ -28,7 +28,6 @@ class CompatibilitySheet extends StatelessWidget {
     required this.appName,
     required this.report,
     required this.existingClones,
-    required this.onGrantPermissions,
     super.key,
   });
 
@@ -36,15 +35,11 @@ class CompatibilitySheet extends StatelessWidget {
   final CompatibilityReport report;
   final int existingClones;
 
-  /// Returns the refreshed report after the user has answered the permission dialog.
-  final Future<CompatibilityReport> Function() onGrantPermissions;
-
   static Future<CloneDecision> show(
     BuildContext context, {
     required String appName,
     required CompatibilityReport report,
     required int existingClones,
-    required Future<CompatibilityReport> Function() onGrantPermissions,
   }) async {
     final CloneDecision? decision = await showModalBottomSheet<CloneDecision>(
       context: context,
@@ -54,7 +49,6 @@ class CompatibilitySheet extends StatelessWidget {
         appName: appName,
         report: report,
         existingClones: existingClones,
-        onGrantPermissions: onGrantPermissions,
       ),
     );
     return decision ?? const CloneDecision.cancelled();
@@ -65,7 +59,6 @@ class CompatibilitySheet extends StatelessWidget {
         appName: appName,
         initialReport: report,
         existingClones: existingClones,
-        onGrantPermissions: onGrantPermissions,
       );
 }
 
@@ -74,33 +67,18 @@ class _SheetBody extends StatefulWidget {
     required this.appName,
     required this.initialReport,
     required this.existingClones,
-    required this.onGrantPermissions,
   });
 
   final String appName;
   final CompatibilityReport initialReport;
   final int existingClones;
-  final Future<CompatibilityReport> Function() onGrantPermissions;
 
   @override
   State<_SheetBody> createState() => _SheetBodyState();
 }
 
 class _SheetBodyState extends State<_SheetBody> {
-  late CompatibilityReport _report = widget.initialReport;
-  bool _requesting = false;
-
-  Future<void> _grant() async {
-    setState(() => _requesting = true);
-    final CompatibilityReport refreshed = await widget.onGrantPermissions();
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _report = refreshed;
-      _requesting = false;
-    });
-  }
+  late final CompatibilityReport _report = widget.initialReport;
 
   @override
   Widget build(BuildContext context) {
@@ -164,25 +142,10 @@ class _SheetBodyState extends State<_SheetBody> {
               ),
             ],
 
-            if (_report.needsPermissions) ...<Widget>[
-              SizedBox(height: 16.h),
-              FilledButton.tonalIcon(
-                onPressed: _requesting ? null : _grant,
-                icon: const Icon(Icons.lock_open_outlined),
-                label: Text(
-                  _requesting
-                      ? 'Waiting for your answer…'
-                      : 'Grant ${_report.missingPermissions.length} permission(s)',
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Clones run under Duplika\'s identity, so these are granted to '
-                'Duplika itself. You can decline and clone anyway.',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
-            ],
+            // The "Grant N permission(s)" action was removed at the product owner's
+            // request. What remains is the warning itself: the app's declaration list is
+            // shown in the finding above, but there is no in-sheet route to ask for the
+            // host grants.
 
             // No Google Play services opt-in here any more. A GMS-dependent app still
             // gets its REQUIRES_GMS warning through the findings list above; what is gone

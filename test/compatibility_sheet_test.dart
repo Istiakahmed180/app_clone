@@ -14,7 +14,6 @@ Future<void> _pump(WidgetTester tester, CompatibilityReport report) async {
             appName: 'Example',
             report: report,
             existingClones: 0,
-            onGrantPermissions: () async => report,
           ),
         ),
       ),
@@ -124,7 +123,6 @@ void main() {
                       appName: 'Example',
                       report: _gmsReport,
                       existingClones: 0,
-                      onGrantPermissions: () async => _gmsReport,
                     );
                   },
                   child: const Text('open'),

@@ -250,16 +250,39 @@ class AppPickerView extends GetView<AppPickerController> {
     );
   }
 
-  /// Clones straight away, with no sheet in between.
+  /// Clones an installed app, showing what is known about it first.
   ///
   /// Both routes into cloning an installed app come here — the Popular card and a list
-  /// row's Add clone — so neither asks anything. The row shows its own progress; see
-  /// [AppPickerController.cloneNow].
+  /// row's Add clone. The analysis runs before anything is created, and whenever there is
+  /// something to say — a Play services dependency, push that cannot arrive, an
+  /// unsupported ABI, or an app that could not be examined — the compatibility sheet says
+  /// it and the user decides. A clone that is problem-free still gets no sheet, so the
+  /// one-tap path stays one tap for the apps where there is nothing to warn about.
   ///
-  /// Nothing raises the non-blocking findings any more: the missing host permissions and
-  /// the Play services option lived in the sheet this replaced, and there is no other
-  /// route to either for an installed app.
+  /// This is deliberately the same sheet the APK-import path uses, so the two ways of
+  /// creating a clone tell the user the same things in the same words.
   Future<void> _quickClone(BuildContext context, InstalledAppModel app) async {
+    final CompatibilityReport report = await controller.analyze(app.packageName);
+    if (!context.mounted) {
+      return;
+    }
+
+    if (!report.analysed || report.findings.isNotEmpty) {
+      final int existing = await controller.instanceCount(app.packageName);
+      if (!context.mounted) {
+        return;
+      }
+      final CloneDecision decision = await CompatibilitySheet.show(
+        context,
+        appName: app.appName,
+        report: report,
+        existingClones: existing,
+      );
+      if (!decision.proceed || !context.mounted) {
+        return;
+      }
+    }
+
     final String? error = await controller.cloneNow(app);
     if (!context.mounted) {
       return;
@@ -382,8 +405,6 @@ class AppPickerView extends GetView<AppPickerController> {
       appName: candidate.appName,
       report: report,
       existingClones: existing,
-      onGrantPermissions: () =>
-          _grantPermissions(context, candidate.packageName),
     );
 
     if (!decision.proceed || !context.mounted) {
@@ -401,28 +422,6 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     Get.back<bool>(result: true);
-  }
-
-  /// Runs the permission request and reports why it did not happen, if it did not.
-  ///
-  /// A request can be refused before the dialog is ever shown (another one is open, or the
-  /// host went away); saying nothing would leave the sheet looking unchanged for no reason.
-  Future<CompatibilityReport> _grantPermissions(
-    BuildContext context,
-    String packageName,
-  ) async {
-    final PermissionRequestResult? result = await controller.requestPermissions(
-      packageName,
-    );
-
-    if (result == null && context.mounted) {
-      final String? reason = controller.errorMessage.value;
-      if (reason != null) {
-        _showMessage(context, reason);
-      }
-    }
-
-    return controller.analyze(packageName);
   }
 
   void _showMessage(BuildContext context, String message) {

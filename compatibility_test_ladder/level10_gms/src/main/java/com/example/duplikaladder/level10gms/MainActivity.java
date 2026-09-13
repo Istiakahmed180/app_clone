@@ -72,8 +72,7 @@ public class MainActivity extends Activity {
         results.put("P16", TestResult.notTested("P16", "Play Billing connection"));
         results.put("P17", TestResult.notTested("P17", "Manifest self-inspection"));
         results.put("P18", TestResult.notTested("P18", "Permission lookup variants"));
-        results.put("P19", TestResult.notTested("P19", "microG signature acceptance"));
-        results.put("P20", TestResult.notTested("P20", "Secure-environment declaration"));
+        results.put("P21", TestResult.notTested("P21", "Firebase Auth paths"));
         setContentView(buildUi());
 
         // Self-running, so a host installation and a clone both need nothing but
@@ -152,8 +151,7 @@ public class MainActivity extends Activity {
             post(ProbeBilling.run(this));
             post(ProbeManifestSelfInspection.run(this));
             post(ProbePermissionLookupVariants.run(this));
-            post(ProbeMicrogSignatureAcceptance.run(this));
-            post(ProbeSecureEnvDeclaration.run(this));
+            post(ProbeFirebaseAuth.run(this));
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 logComparison();
