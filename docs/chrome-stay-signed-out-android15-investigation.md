@@ -352,7 +352,7 @@ the fixture uses no account and no credentials.
 | 6 | Level 6 / 7 / 8 | re-run — artifact changed |
 | 7 | Chrome, fresh virtual user, Debug + Release | renderer starts; **survives past 43 s unprompted**, then the button is pressed |
 | 8 | Chrome post-click | New Tab page reached, or the next distinct defect identified |
-| 9 | `flutter analyze` / `flutter test` | 0 errors / 245 passing |
+| 9 | `flutter analyze` / `flutter test` | 0 errors / 364 passing |
 
 Acceptance is cell 7 **and** 8. Chrome is not fixed until it reaches the New Tab page.
 

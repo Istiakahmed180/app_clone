@@ -271,6 +271,10 @@ flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 ```
 
+The suite is currently **364 Dart tests**; `flutter analyze` reports 0 errors and four
+pre-existing info lints. The investigation and phase documents under `docs/` quote the count
+as it was at *their* commit — that is a snapshot, not this figure.
+
 Release builds minify, and the engine needs keep rules to survive that
 (`android/app/proguard-rules.pro`). Without them the engine dies in
 `attachBaseContext` and every clone is unusable — see `docs/RELEASE_BUILD.md`:

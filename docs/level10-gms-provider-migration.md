@@ -123,7 +123,7 @@ VirtualAppInstaller(context, adapter, securityChecker, analyzer,
 
 - 22 JVM unit tests — pass, no device
 - `flutter analyze` — 4 pre-existing info lints, 0 errors
-- `flutter test` — 246/246
+- `flutter test` — 364/364
 - Android Debug + Release builds (minification on) — pass
 - Physical, OnePlus CPH2605 / Android 15 / API 35, release build:
   `GMS_PROVIDER requestedProvider=AUTO selectedProvider=REAL_GMS availability=AVAILABLE
@@ -220,7 +220,7 @@ Evidence: `evidence/physical-android15/level10-gms/cross-artifact-probe/` and
 
 ## Verification
 
-- `flutter analyze` 4 pre-existing info lints, 0 errors · `flutter test` 245/245 ·
+- `flutter analyze` 4 pre-existing info lints, 0 errors · `flutter test` 364/364 ·
   22 Kotlin unit tests · Debug + Release builds (minification on)
 - Physical, OnePlus CPH2605 / Android 15 / API 35, release build:
   - installed-app route (user 11): `requested=false`, `selectedProvider=REAL_GMS`

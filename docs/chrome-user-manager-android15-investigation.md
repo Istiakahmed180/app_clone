@@ -233,7 +233,7 @@ W BlackBoxCore: isRunningApplication failed:
 No production code changed, so nothing to regress. Verified anyway:
 
 - `flutter analyze` — 0 errors (4 pre-existing info-level lints)
-- `flutter test` — **245/245**
+- `flutter test` — **364/364**
 - `usermanagerprobe` Debug **and** Release built, minification retained
 - Host and guest probe cells run on the device of record
 
@@ -336,7 +336,7 @@ is the container owner's, which the calling UID owns); both controls still succe
 
 ## Project validation
 
-`flutter analyze` 0 errors (4 pre-existing info lints) · `flutter test` **245/245** ·
+`flutter analyze` 0 errors (4 pre-existing info lints) · `flutter test` **364/364** ·
 Duplika Debug and Release both built, Release minification retained.
 
 **Level 6/7/8 regression: NOT executed** in this phase and not claimed. The engine artifact

@@ -220,7 +220,7 @@ Verified:
 - `GoogleApi` inheritance confirmed by `javap`, so the measurement is symmetric with
   Phases 8/9
 - All four cells measured on the device of record, Debug and Release agreeing
-- `flutter analyze` 0 errors (4 pre-existing info lints); `flutter test` **245/245**
+- `flutter analyze` 0 errors (4 pre-existing info lints); `flutter test` **364/364**
 - Production behaviour changed: **NO**
 
 ## 18. Recommended next step

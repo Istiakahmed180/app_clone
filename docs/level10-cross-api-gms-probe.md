@@ -156,7 +156,7 @@ token; no fake GMS response; no attempt to make the failing API pass.
 | `docs/`, `evidence/` | documentation |
 
 Existing regression status is therefore unchanged. `flutter analyze` (0 errors) and
-`flutter test` (245/245) were run to confirm nothing drifted. **Level 6, 7 and 8 were NOT
+`flutter test` (364/364) were run to confirm nothing drifted. **Level 6, 7 and 8 were NOT
 executed in this phase** and are not claimed.
 
 ## 13. Limitations

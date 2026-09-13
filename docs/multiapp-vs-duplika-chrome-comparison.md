@@ -408,7 +408,7 @@ no working-tree changes:
 | Check | Result |
 |---|---|
 | `flutter analyze` | **0 errors** (4 pre-existing info lints) |
-| `flutter test` | **240/240 passed**, 0 failed, 0 skipped |
+| `flutter test` | **364/364 passed**, 0 failed, 0 skipped |
 
 > **Caveat.** From roughly 09:26 onward — while the device runs were in progress — an
 > unrelated settings feature began appearing in the working tree from outside this
@@ -418,11 +418,11 @@ no working-tree changes:
 > snapshot taken before they landed; re-running the suite now would also exercise
 > that in-progress work.
 
-The task sheet expected 245. The current tree contains exactly 240 `test(` /
-`testWidgets(` declarations, matching the 240 reported, so 245 is a stale figure
-carried in older docs (`level10-*`, `chrome-split-apk-launch-investigation.md`); it
-predates test removals such as commit `458f4e1` "Retire legacy GMS provisioning".
-Nothing is failing or skipped.
+The task sheet expected 245. The suite at the time of this study contained 240 tests —
+matching the 240 `test(` / `testWidgets(` declarations in that tree — so 245 was a stale
+figure carried in older docs (`level10-*`, `chrome-split-apk-launch-investigation.md`); it
+predates test removals such as commit `458f4e1` "Retire legacy GMS provisioning". The suite
+has since grown well past both figures and now runs **364**. Nothing is failing or skipped.
 
 No `bcore.aar` was replaced. No code was modified. Nothing was committed.
 

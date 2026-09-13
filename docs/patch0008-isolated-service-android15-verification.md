@@ -198,14 +198,15 @@ Four of five pass outright; the fifth is unreliable. Hence PARTIAL, not PASS.
 | Level 6 — modern-API fixture | **PASS** — guest UI reached; `SQLite value=1`; `notification posted channel=level6`; `job schedule result=0`, which is the **modal historical value** (13 recorded `=0` vs 4 `=1`), so not a change |
 | Level 7 / 8 — VLC (real app, native, config splits) | **PASS** — guest UI (`StartActivity` → `OnboardingActivity`); `libvlc.so` and `libvlcjni.so` loaded from `split_config.arm64_v8a.apk`; `libvlc 3.0.23 Vetinari` initialised |
 | `flutter analyze` | **0 errors** (4 pre-existing info lints) |
-| `flutter test` | **276/276 passed**, 0 failed, 0 skipped |
+| `flutter test` | **364/364 passed**, 0 failed, 0 skipped |
 
 Level 8's Markor / Fossify Notes / AntennaPod cells and the WebView-isolation tests were
 **not** run. Debug-build runs were **not** performed; everything above is release + R8.
 
-> The test count rose from 240 to 276 because an unrelated settings feature landed in the
-> working tree from outside this work during the session. Those 36 tests are not mine and
-> all pass.
+> The test count at this phase was 276; it had risen from 240 because an unrelated settings
+> feature landed in the working tree from outside this work during the session. The suite has
+> grown since — it now runs 364 — so the figures in this document are the count at its commit,
+> not today's. Nothing was failing or skipped.
 
 ---
 

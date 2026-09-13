@@ -344,7 +344,7 @@ Every row below was run on the physical device. Nothing is claimed that was not 
 | 12 | **Chrome, fresh virtual user 1, Release** | **LAUNCHES** — `splits=5 activities=62 services=93 receivers=30 providers=8`; `Launched com.android.chrome in user 1` first attempt; real first-run UI rendered |
 | 13 | Chrome relaunch | Launch **succeeds** again; renderer never starts, so the window stays blank |
 | 14 | `flutter analyze` | 0 errors, 4 pre-existing info lints |
-| 15 | `flutter test` | **245/245** |
+| 15 | `flutter test` | **364/364** |
 
 **Not executed, and therefore not claimed:** a Duplika **Debug** build was not installed, so
 rows 3, 4, 6 and 12 were measured in **Release (minified)** only — except the UserManager

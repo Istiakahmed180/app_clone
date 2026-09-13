@@ -225,7 +225,7 @@ N/A — no fix was made.
 No production code changed, so no regression risk was introduced. Verified anyway:
 
 - `flutter analyze` — 4 pre-existing info lints, 0 errors
-- `flutter test` — 245/245
+- `flutter test` — 364/364
 - Duplika release build launches on device, all pre-existing clones intact, installed-app
   and APK-import clone flows both work, `RealGmsProvider` still selected, GMS diagnostic
   otherwise unchanged (P0/P1/P2 PASS), 0 crashes/ANRs
