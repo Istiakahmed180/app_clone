@@ -352,8 +352,11 @@ normal app.
 
 Two consequences worth stating plainly rather than discovering later:
 
-- In notification settings the user manages these under **Duplika**, not under the
-  cloned app, and cannot silence one clone without silencing all of them.
+- In notification settings the user manages these under **Duplika**, not under the cloned
+  app. One clone can still be silenced on its own: the engine gives every clone its own
+  channel (`<channel>@black-<userId>`) and labels it with the clone number, and the clone's
+  **Notifications** action opens the screen where that channel is toggled. What it cannot do
+  is present them under the cloned app's own name.
 - `POST_NOTIFICATIONS` is a single host-wide grant. Denying it silences every clone at once.
   This is the same host-identity limit that applies to camera, microphone and storage, and
   the compatibility sheet already reports it: cloning the test app showed

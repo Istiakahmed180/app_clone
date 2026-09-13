@@ -70,8 +70,21 @@ class NativeBridge {
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
-    return AppDisguiseMode.parse(response.data['mode'] as String?);
+      return AppDisguiseMode.parse(response.data['mode'] as String?);
   }
+
+  /// Opens Android's notification settings, where each clone is its own channel.
+  ///
+  /// Guests post under Duplika, but the engine namespaces each clone's channels and labels
+  /// them with a clone number, so one clone can be silenced without the others. Returns
+  /// normally when a screen opened; throws otherwise.
+  Future<void> openCloneNotificationSettings() async {
+    final EngineResponse response = await _invokeEngine('openCloneNotificationSettings');
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+  }
+
 
   Future<bool> isTestAppInstalled() async {
     try {

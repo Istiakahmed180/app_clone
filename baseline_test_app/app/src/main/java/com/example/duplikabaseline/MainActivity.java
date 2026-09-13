@@ -51,8 +51,44 @@ public final class MainActivity extends Activity {
                 startActivity(new Intent(this, SecondActivity.class)));
         root.addView(navigate);
 
+        Button postNotification = new Button(this);
+        postNotification.setText("Post notification");
+        postNotification.setOnClickListener(view -> postNotification());
+        root.addView(postNotification);
+
         setContentView(root);
         updateState();
+    }
+
+    /**
+     * Posts a notification on a channel, so a clone can be checked to have a channel of its
+     * own. The text carries this instance's own state, so a notification can be traced back
+     * to the instance that sent it.
+     */
+    private void postNotification() {
+        android.app.NotificationManager manager =
+                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager == null) {
+            return;
+        }
+        final String channelId = "baseline";
+        android.app.Notification.Builder builder;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            manager.createNotificationChannel(new android.app.NotificationChannel(
+                    channelId,
+                    "Baseline notifications",
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT));
+            builder = new android.app.Notification.Builder(this, channelId);
+        } else {
+            builder = new android.app.Notification.Builder(this);
+        }
+        manager.notify(
+                1001,
+                builder.setContentTitle("Baseline")
+                        .setContentText("count=" + state.getInt(COUNT, 0)
+                                + " name=" + state.getString(NAME, "Initial user"))
+                        .setSmallIcon(android.R.drawable.ic_dialog_info)
+                        .build());
     }
 
     @Override

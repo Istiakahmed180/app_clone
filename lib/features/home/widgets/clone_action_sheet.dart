@@ -22,6 +22,7 @@ enum CloneAction {
   clearCache,
   clearStorage,
   toggleHidden,
+  notifications,
   shareApp,
   delete,
 }
@@ -300,6 +301,12 @@ class _CloneActionSheet extends StatelessWidget {
               ),
             ),
           ],
+        ),
+        SizedBox(height: 12.h),
+        const _ActionRow(
+          action: CloneAction.notifications,
+          icon: Icons.notifications_outlined,
+          label: 'Notifications',
         ),
       ],
     );

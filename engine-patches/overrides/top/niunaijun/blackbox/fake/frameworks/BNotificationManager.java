@@ -67,10 +67,36 @@ public class BNotificationManager extends BlackManager<IBNotificationManagerServ
     public void createNotificationChannel(NotificationChannel channel) {
         try {
             IBNotificationManagerService service = serviceOrRetry();
-            if (service != null) service.createNotificationChannel(channel, BActivityThread.getUserId());
+            if (service != null) {
+                labelForClone(channel, BActivityThread.getUserId());
+                service.createNotificationChannel(channel, BActivityThread.getUserId());
+            }
         } catch (Exception e) {
             Log.w(TAG, "Unable to create notification channel", e);
         }
+    }
+
+    /**
+     * Makes a clone's channel identifiable in Android's notification settings.
+     *
+     * The engine already gives every clone its own channel — the service rewrites the id to
+     * `<channel>@black-<userId>` — so muting one channel silences one clone. What made that
+     * useless was the label: every clone of an app shows the guest's own channel name, so two
+     * clones of Chrome both read "Browser notifications" and the user cannot tell which is
+     * which. Appending the container id is the smallest change that makes the row choosable.
+     *
+     * The id is deliberately untouched: it is the engine's key, and rewriting it here would
+     * break the mapping the service depends on.
+     */
+    private void labelForClone(NotificationChannel channel, int userId) {
+        if (channel == null || userId < 0) {
+            return;
+        }
+        CharSequence current = channel.getName();
+        String suffix = " · Clone " + (userId + 1);
+        channel.setName(current == null || current.length() == 0
+                ? "Clone " + (userId + 1)
+                : current + suffix);
     }
 
     public void deleteNotificationChannel(String channelId) {

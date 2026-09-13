@@ -269,6 +269,30 @@ void main() {
     expect(controller.warningsFor(profile), isEmpty);
   });
 
+  test('the notifications action opens the system screen', () async {
+    responses['openCloneNotificationSettings'] =
+        ok('NOTIFICATION_SETTINGS_OPENED', <String, Object?>{});
+    await controller.refreshAll();
+
+    final String? error = await controller.openNotificationSettings();
+
+    expect(error, isNull);
+  });
+
+  test('a refused notification settings screen is reported, not swallowed', () async {
+    responses['openCloneNotificationSettings'] = <Object?, Object?>{
+      'success': false,
+      'code': 'NOTIFICATION_SETTINGS_UNAVAILABLE',
+      'message': 'This device has no notification settings screen to open.',
+      'data': <Object?, Object?>{},
+    };
+    await controller.refreshAll();
+
+    final String? error = await controller.openNotificationSettings();
+
+    expect(error, contains('no notification settings'));
+  });
+
   // The clone budget. Figures are chosen against the controller's own constants:
   // 512 MB of storage headroom, ~64 KB per clone, and an absolute ceiling of 20.
   const int mb = 1024 * 1024;

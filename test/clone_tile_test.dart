@@ -313,6 +313,7 @@ void main() {
       expect(find.text('Clear cache'), findsOneWidget);
       expect(find.text('Clear storage'), findsOneWidget);
       expect(find.text('Share app'), findsOneWidget);
+      expect(find.text('Notifications'), findsOneWidget);
 
       // And the one that destroys it.
       expect(find.text('Uninstall'), findsOneWidget);

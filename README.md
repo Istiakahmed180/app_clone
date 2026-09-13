@@ -366,11 +366,11 @@ Not started. In rough priority order:
    Everything here is verified on one OnePlus device running Android 15.
 3. **Decide on the backend**: patch Bcore's broken `isRunningApplication` upstream, or move to
    another backend behind the existing adapter.
-5. **Per-clone notification control.** Guest notifications already work (see
-   `docs/PHASE_4_COMPATIBILITY.md`), but they are posted under Duplika's identity, so a
-   user cannot silence one clone without silencing all of them.
-6. **Decide what to do about Google Play Services**, which most popular apps depend on and
+4. **Decide what to do about Google Play Services**, which most popular apps depend on and
    which this build does not virtualize.
 
 Resolved since this list was first written: the canonical `REQUIRE_SECURE_ENV` property name is
 now confirmed against real apps (see `docs/SECURITY.md`), and multi-app support has shipped.
+Per-clone notification control is also resolved: the engine namespaces and labels each
+clone's notification channels, and a clone's **Notifications** action opens the screen where
+one clone can be silenced on its own.

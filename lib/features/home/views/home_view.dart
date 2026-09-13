@@ -669,6 +669,13 @@ class HomeView extends GetView<HomeController> {
             'Confirm the shortcut on your home screen to finish adding it.',
           );
         }
+      case CloneAction.notifications:
+        // On success the system's own notification screen opens over the app, so there is
+        // nothing to say; only a refusal needs a message.
+        final String? error = await controller.openNotificationSettings();
+        if (error != null && context.mounted) {
+          await _showFailure(context, error);
+        }
       case CloneAction.delete:
         final bool confirmed = await showUninstallCloneDialog(
           context,

@@ -37,6 +37,25 @@ services observes: the caller-identity refusals documented in
 **If you edit anything under `overrides/`, run `engine-patches/apply-runtime-overrides.sh`
 and commit the resulting `bcore.aar`, or the change does not exist at runtime.**
 
+## `overrides/…/BNotificationManager.java` — binder retry, and per-clone channel labels
+
+Two things. The class re-fetches the notification service binder once from the registry
+instead of dereferencing a cache the engine had cleared — a guest binding on Android 15 could
+otherwise lose a channel read to a race between the health check and the call.
+
+It also labels each clone's notification channel with its container number (`… · Clone 1`)
+before the service creates it. That label is what makes per-clone muting usable: the engine
+already gives every clone its own channel id (`<channel>@black-<userId>`, in
+`IBNotificationManagerService.getBlackChannelId`), so muting one channel silences one clone —
+but every clone of an app would otherwise show the guest's own channel name, so two clones of
+Chrome both read "Browser" and the user cannot tell which row to turn off. The channel **id**
+is deliberately untouched: it is the engine's key, and rewriting it here would break the
+mapping the service depends on.
+
+The label is applied when a guest creates its channel. Channels that already exist on a device
+before this override is built keep their old name until the guest recreates them (Android
+allows a name update on re-create; not every app re-calls `createNotificationChannel`).
+
 ## 0005 — Permission-gated public media paths
 
 `IOCore` previously redirected the complete shared-storage tree into each clone's private

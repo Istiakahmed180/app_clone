@@ -136,6 +136,20 @@ class HomeController extends GetxController {
   Uint8List? iconFor(VirtualProfileModel profile) =>
       appIcons[profile.packageName];
 
+  /// Opens Android's notification settings, where each clone is its own channel.
+  ///
+  /// Guests post under Duplika, but the engine keeps each clone's channels apart and labels
+  /// them, so the screen this opens can silence one clone without touching the others.
+  /// Returns null on success, or a user-facing message.
+  Future<String?> openNotificationSettings() async {
+    try {
+      await _nativeBridge.openCloneNotificationSettings();
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
   /// How many profiles share this profile's package, used to label multi-instance clones.
   int siblingCount(VirtualProfileModel profile) => _siblings(profile).length;
 
