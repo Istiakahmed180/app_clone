@@ -167,6 +167,9 @@ imported APKs may be cloned. The policy is now a deny-list plus the secure-envir
 
   There is still no override path for a declaration that is detected.
 
-Banking, payment, authenticator, anti-cheat and Play-Integrity-dependent apps were deliberately
-**not** tested and remain outside what this build can be said to support. Nothing prevents a
-user from attempting them; nothing claims they will work.
+Multi-account **game** support, banking, payment, authenticator, anti-cheat and
+Play-Integrity-dependent apps were deliberately **not** tested and remain outside what this
+build can be said to support. Anti-cheat and integrity **bypass** is on the forbidden list
+above and will not be implemented. Nothing prevents a user from attempting these apps; nothing
+claims they will work, and a game that detects the container and refuses is behaving
+correctly.

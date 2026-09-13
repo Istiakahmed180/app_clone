@@ -95,7 +95,7 @@ and anti-cheat apps remains out of scope.
 | Multiple independent instances of one app | Device-fingerprint or location spoofing |
 | Isolated per-clone application storage | Any security bypass, VPN mode or anti-detection |
 | `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK download or code update |
-| Self-healing containers (rebuild on failed launch) | Verified support for banking/anti-cheat/GMS apps |
+| Self-healing containers (rebuild on failed launch) | Verified support for games, banking/anti-cheat/GMS apps |
 
 ## 4. Directory structure
 
@@ -340,6 +340,9 @@ It does **not** provide:
 - camera, mic or location **data** virtualization — no spoofed frames, audio or coordinates,
   and none is planned. **Denial** is the supported control: a clone's **Permissions** action
   can turn any of them off for that clone (a check-layer policy, not a hard sandbox)
+- **multi-account game support.** No game that uses anti-cheat or Play Integrity was tested,
+  and bypassing either is on the forbidden list (`docs/SECURITY.md`). A game that detects the
+  container and refuses to run is behaving correctly — that is a boundary, not a defect to fix
 - a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
 - any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 

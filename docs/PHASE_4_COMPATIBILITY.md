@@ -397,7 +397,10 @@ Two consequences worth stating plainly rather than discovering later:
 - Imported APKs are now analysed from the archive itself (`analyzeApk`), so they no longer
   fall back to a clean bill of health. If analysis genuinely fails the sheet says
   **"Not analysed"** rather than "Supported".
-- Banking, payment, authenticator and anti-cheat apps remain untested and out of scope.
+- Multi-account **game** support, banking, payment, authenticator and anti-cheat apps remain
+  untested and out of scope. A game that uses anti-cheat or Play Integrity should be expected
+  to detect the container and refuse to run — that is the correct outcome, and bypassing
+  either is forbidden (`docs/SECURITY.md`). It is a boundary, not a gap to close.
 - Verified on one device and one OEM build.
 
 ## Google Play services — measured, and what actually breaks
