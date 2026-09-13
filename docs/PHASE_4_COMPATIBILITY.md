@@ -382,6 +382,11 @@ Two consequences worth stating plainly rather than discovering later:
   `system_server` check the **host's** grants, and an app that reaches a service without
   checking first is not stopped. True per-clone enforcement would need a real UID per clone,
   which this container architecture does not provide.
+- **Camera / mic / location are not virtualized, and that is a boundary, not a gap.** No
+  spoofed frames, audio or coordinates exist and none is planned — it is a privacy/spoofing
+  limit (`docs/SECURITY.md`), and the engine has no hook for injecting synthetic media. What
+  is supported is **denial**: the Per-clone permission scoping above can turn any of them off
+  for one clone. So "camera virtualization" here means controlled **off**, never fake **data**.
 - Compatibility findings are shown **before cloning** (the picker's compatibility sheet) and,
   after cloning, in the existing clone's long-press sheet (`showCloneActionSheet`, fed by
   `HomeController.warningsFor`). The tile itself deliberately carries no warning badge: the

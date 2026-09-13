@@ -91,7 +91,7 @@ and anti-cheat apps remains out of scope.
 | Delivered | Explicitly NOT delivered |
 | --- | --- |
 | Clone any installed app (picker with search + icons) | GMS / Play Store / Firebase virtualization |
-| Import and run an APK that is not installed | Camera / mic / location / notification virtualization |
+| Import and run an APK that is not installed | Camera / mic / location **data** virtualization (per-clone denial is supported — see §13) |
 | Multiple independent instances of one app | Device-fingerprint or location spoofing |
 | Isolated per-clone application storage | Any security bypass, VPN mode or anti-detection |
 | `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK download or code update |
@@ -337,7 +337,9 @@ It does **not** provide:
 - Firebase Messaging virtualization — not a dependency of this project and not tested.
   Firebase *initialization* (`firebase-common`) is measured and works in a guest
   (`compatibility_test_ladder/level9_gms` Test E)
-- camera, mic or location virtualization
+- camera, mic or location **data** virtualization — no spoofed frames, audio or coordinates,
+  and none is planned. **Denial** is the supported control: a clone's **Permissions** action
+  can turn any of them off for that clone (a check-layer policy, not a hard sandbox)
 - a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
 - any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 

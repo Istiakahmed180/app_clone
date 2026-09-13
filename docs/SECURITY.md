@@ -11,6 +11,10 @@ implemented, and none should be added without an explicit decision recorded here
 - credential, cookie, token or private-app-data extraction
 - stealth execution or hiding the container from the apps running inside it
 - screenshot or `FLAG_SECURE` defeat
+- camera, microphone or location **spoofing** — synthetic frames, audio or coordinates.
+  Turning a permission *off* for a clone is a different thing and is supported through the
+  clone's Permissions action; fabricating the data a permission-granted app then reads is not,
+  and is not planned.
 
 ### Backend options pinned by Duplika
 
