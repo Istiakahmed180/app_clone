@@ -66,7 +66,7 @@ class ContainerIsolationTest {
         val profileId = "isolation-${System.nanoTime()}"
         createdProfiles += profileId
 
-        val result = engine.installAppToProfile(profileId, PACKAGE)
+        val result = engine.installAppToProfile(profileId, PACKAGE, provisionGms = false)
         assertTrue("install into $profileId returned $result", result is EngineResult.Success)
 
         val virtualUserId = engine.profileState(profileId, PACKAGE)["virtualUserId"]

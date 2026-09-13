@@ -28,7 +28,6 @@ class ChannelDiagnostics {
     'stopProfile',
     'deleteProfile',
     'inspectApk',
-    'requestGuestPermissions',
     'pinCloneShortcut',
     'requestIgnoreBatteryOptimizations',
   };

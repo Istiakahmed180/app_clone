@@ -72,9 +72,9 @@ with the video before redesigning.
 Declared only — `AndroidManifest.xml:152-166` carries the reasoning. Duplika's own code
 **never requests it at runtime** (there is no `ACTION_MANAGE_ALL_FILES_ACCESS_SETTINGS`
 anywhere in the codebase; only the diagnostics probes read
-`Environment.isExternalStorageManager()` as a passive state check). It is not surfaced by
-the permission bridge either — it is signature/special-access, so the runtime dialog can
-never deliver it.
+`Environment.isExternalStorageManager()` as a passive state check). It is
+signature/special-access, so a runtime dialog could never deliver it and Duplika never
+asks for it programmatically.
 
 It exists because guests run under Duplika's UID: when a cloned media player or file
 manager touches shared storage, Android checks **Duplika's** grant. Removing the

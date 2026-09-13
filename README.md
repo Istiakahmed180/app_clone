@@ -1,6 +1,6 @@
 # Duplika — Phase 4
 
-**Phase 4 adds an app compatibility layer: verdicts, permission bridging and honest warnings.**
+**Phase 4 adds an app compatibility layer: verdicts and honest warnings.**
 
 **Any installed app can now be cloned, and APKs can be imported without installing them.**
 
@@ -48,7 +48,7 @@ state is faked in Flutter.
 | `docs/DEPENDENCY_LICENSE_AUDIT.md` | Licences, and **open provenance risk** |
 | `docs/PHASE_2_TEST_PLAN.md` | Phase 2 test plan, results, evidence, performance baseline |
 | `docs/PHASE_3_TEST_PLAN.md` | Phase 3 capabilities, results and defects fixed |
-| `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, permission bridging, limitations |
+| `docs/PHASE_4_COMPATIBILITY.md` | Compatibility verdicts, limitations, and the later removal of permission bridging |
 | `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
 | `docs/ONBOARDING.md` | First-launch data disclosure (gates the app), the Doze exemption; what must change before release |
 | `docs/PLAY_PERMISSION_DECLARATIONS.md` | Paste-ready Play Console declarations for the three restricted permissions |
@@ -160,7 +160,6 @@ android/app/src/main/kotlin/co/tdevs/duplika/
     ├── VirtualAppLauncher.kt       starts/stops the guest in a container
     ├── AppSecurityChecker.kt       deny-list + REQUIRE_SECURE_ENV admission
     ├── AppCompatibilityAnalyzer.kt compatibility verdict for an app or an APK
-    ├── PermissionBridge.kt         asks the user for permissions a guest needs
     ├── InstalledAppsProvider.kt    launchable apps and their icons, for the picker
     ├── ApkImporter.kt              identity of a picked APK file
     ├── ApkManifestReader.kt        decodes an APK's compiled AndroidManifest.xml

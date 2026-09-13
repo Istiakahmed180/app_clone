@@ -121,9 +121,10 @@
              launcher-specific ones (Samsung, Huawei, Oppo, HTC, Sony, badge providers).
 
          Deliberately NOT removed:
-           - Every dangerous permission. PermissionBridge can only request what the
-             host declares, so removing one would silently and permanently deny that
-             capability to every clone.
+            - Every dangerous permission. Guests run under the host's identity, so a
+              clone can only use a dangerous permission the host declares and holds.
+              Removing one would silently and permanently deny that capability to every
+              clone.
            - Every normal permission.
            - Anything the shipping competitor still declares.
 

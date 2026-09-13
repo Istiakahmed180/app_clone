@@ -296,23 +296,6 @@ class AppPickerController extends GetxController {
     }
   }
 
-  /// Asks for the permissions the guest needs. Returns null when it could not be asked.
-  Future<PermissionRequestResult?> requestPermissions(
-    String packageName,
-  ) async {
-    try {
-      final PermissionRequestResult result = await _bridge
-          .requestGuestPermissions(packageName);
-      _reports.remove(
-        packageName,
-      ); // grants changed; the cached verdict is stale
-      return result;
-    } on AppException catch (error) {
-      errorMessage.value = error.message;
-      return null;
-    }
-  }
-
   final Map<String, CompatibilityReport> _reports =
       <String, CompatibilityReport>{};
 

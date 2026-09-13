@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.content.pm.PermissionInfo
-import android.os.Build
 
 /**
  * Works out, before anything is cloned, what will and will not work for a target app —
@@ -26,10 +24,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         val packageName: String,
         val verdict: Verdict,
         val findings: List<Finding>,
-        /** Dangerous permissions the guest declares that the host is able to hold. */
-        val bridgeablePermissions: List<String>,
-        /** Of those, the ones the host has not been granted yet. */
-        val missingPermissions: List<String>,
         val requiresGms: Boolean,
         val abi: String?,
     ) {
@@ -39,8 +33,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             "findings" to findings.map {
                 mapOf("code" to it.code, "message" to it.message, "blocking" to it.blocking)
             },
-            "bridgeablePermissions" to bridgeablePermissions,
-            "missingPermissions" to missingPermissions,
             "requiresGms" to requiresGms,
             "abi" to abi,
         )
@@ -64,8 +56,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                         blocking = true,
                     ),
                 ),
-                bridgeablePermissions = emptyList(),
-                missingPermissions = emptyList(),
                 requiresGms = false,
                 abi = null,
             )
@@ -99,17 +89,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
 
-        val bridgeable = bridgeablePermissions(packageInfo)
-        val missing = bridgeable.filterNot(::isGrantedToHost)
-        if (missing.isNotEmpty()) {
-            findings += Finding(
-                CODE_PERMISSIONS_REQUIRED,
-                "The clone needs ${missing.size} permission(s) that Duplika does not hold yet. " +
-                    "Guests run under the host's identity, so the host must be granted them.",
-                blocking = false,
-            )
-        }
-
         val verdict = when {
             findings.any { it.blocking } -> Verdict.UNSUPPORTED
             findings.isNotEmpty() -> Verdict.LIMITED
@@ -120,8 +99,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             packageName = packageName,
             verdict = verdict,
             findings = findings,
-            bridgeablePermissions = bridgeable,
-            missingPermissions = missing,
             requiresGms = requiresGms,
             abi = abi,
         )
@@ -172,18 +149,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
 
-        val hostDeclared = hostDeclaredPermissions()
-        val bridgeable = requested.filter { it in hostDeclared }.filter(::isDangerous).sorted()
-        val missing = bridgeable.filterNot(::isGrantedToHost)
-        if (missing.isNotEmpty()) {
-            findings += Finding(
-                CODE_PERMISSIONS_REQUIRED,
-                "The clone needs ${missing.size} permission(s) that Duplika does not hold yet. " +
-                    "Guests run under the host's identity, so the host must be granted them.",
-                blocking = false,
-            )
-        }
-
         return Report(
             packageName = packageName,
             verdict = when {
@@ -192,8 +157,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                 else -> Verdict.SUPPORTED
             },
             findings = findings,
-            bridgeablePermissions = bridgeable,
-            missingPermissions = missing,
             requiresGms = requiresGms,
             abi = abi.takeIf { it != UNSUPPORTED_ABI },
         )
@@ -220,47 +183,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         Slog.w(Slog.INSTALL, "Could not read ABIs from $apkPath: ${error.message}")
         null
     }
-
-    /**
-     * Permissions worth bridging: dangerous ones the guest asks for that the host is also
-     * able to hold. The host cannot be granted a permission it does not declare, and the
-     * engine's merged manifest is what makes most of them declarable.
-     */
-    private fun bridgeablePermissions(guest: PackageInfo): List<String> {
-        val requested = guest.requestedPermissions?.toSet() ?: return emptyList()
-        val hostDeclared = hostDeclaredPermissions()
-
-        return requested
-            .filter { it in hostDeclared }
-            .filter(::isDangerous)
-            .sorted()
-    }
-
-    private fun hostDeclaredPermissions(): Set<String> = try {
-        context.packageManager
-            .getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
-            .requestedPermissions
-            ?.toSet()
-            .orEmpty()
-    } catch (_: PackageManager.NameNotFoundException) {
-        emptySet()
-    }
-
-    private fun isDangerous(permission: String): Boolean = try {
-        val info = context.packageManager.getPermissionInfo(permission, 0)
-        val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            info.protection
-        } else {
-            @Suppress("DEPRECATION")
-            info.protectionLevel and PermissionInfo.PROTECTION_MASK_BASE
-        }
-        level == PermissionInfo.PROTECTION_DANGEROUS
-    } catch (_: PackageManager.NameNotFoundException) {
-        false
-    }
-
-    fun isGrantedToHost(permission: String): Boolean =
-        context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     /**
      * GMS dependency is inferred from the markers Play apps conventionally declare. This
@@ -317,7 +239,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     companion object {
         const val CODE_REQUIRES_GMS = "REQUIRES_GMS"
         const val CODE_PUSH_UNSUPPORTED = "PUSH_UNSUPPORTED"
-        const val CODE_PERMISSIONS_REQUIRED = "PERMISSIONS_REQUIRED"
 
         /**
          * Note what this no longer says: "other Google features are unaffected". Push is a

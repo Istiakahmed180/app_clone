@@ -83,6 +83,19 @@ without declaring any of the usual markers will not be flagged.
 
 ### 2. Permission bridging (`PermissionBridge`)
 
+> ## ⚠️ REMOVED after this phase
+>
+> Permission bridging — the `PermissionBridge` native class, the bridge method
+> `requestGuestPermissions`, the Dart `PermissionRequestResult` model, and the sheet's
+> "Grant N permission(s)" action — has since been **deleted**. The clone picker and the
+> clone card no longer ask for or grant the host's permissions.
+>
+> The prose below is kept as the phase record of what existed and why; it is no longer
+> current. The analyzer no longer reports a permissions finding at all — the
+> `PERMISSIONS_REQUIRED` code, the bridgeable/missing computation and the `Report` fields
+> behind it were removed with the bridge. A guest can only use a dangerous permission the
+> host already holds.
+
 Because a guest runs under the host's identity, the host must hold the permissions the guest
 needs. The bridge asks for exactly those, through the ordinary system dialog.
 
@@ -335,20 +348,15 @@ Two consequences worth stating plainly rather than discovering later:
 - **GMS is still not virtualized.** The layer reports the dependency; it does not fix it.
   Sign-in, push and maps will still fail inside clones of GMS-dependent apps.
 - **GMS detection is heuristic** (see above).
-- **Permission bridging is host-wide, not per-clone.** Granting the camera for one clone
-  grants it to Duplika, and therefore to every clone. Per-clone permission scoping
-  would require the engine to virtualize permission checks, which it does not.
-- Compatibility is now shown on existing clones too, not only in the picker. `HomeController`
-  analyses each **distinct** cloned package once per refresh. `CloneTile` marks the clone with
-  the most serious finding — blocking ones win — and the long-press sheet
-  (`showCloneActionSheet`) lists every finding in full, blocking first.
-
-  One trap was designed around: a clone created from an **imported APK** is normally not
-  installed on the host, so a naive analysis reports `APP_NOT_FOUND` as a blocking problem.
-  That clone has its own container and works fine, so flagging it would be a false alarm about
-  the import feature itself. `HomeController.warningsFor` filters `APP_NOT_FOUND` out, and a
-  report that could not be produced at all yields no warnings rather than a scary one. Covered
-  by `test/home_controller_test.dart` and `test/clone_tile_test.dart`.
+- **Permission bridging was removed** — see the note at section 2. The analyzer no longer
+  reports a permissions finding at all, and nothing in the app asks for or grants the host's
+  permissions. A guest can therefore only use a dangerous permission the host already holds.
+  The old host-wide caveat (granting for one clone granted for all) is moot: there is no
+  grant action any more.
+- Compatibility findings are shown **before cloning** (the picker's compatibility sheet) and
+  for **imported APKs**. The home-side display this phase added — a badge on `CloneTile` and
+  findings in the long-press sheet via `HomeController.warningsFor` — was later removed along
+  with the permission-bridge UI, so an existing clone's card no longer carries them.
 
 - Imported APKs are now analysed from the archive itself (`analyzeApk`), so they no longer
   fall back to a clean bill of health. If analysis genuinely fails the sheet says

@@ -51,8 +51,8 @@ Flutter / Dart
                             files/diagnostics/native-<process>.jsonl
                         ▲
       ┌─────────────────┼──────────────────┬───────────────┬──────────────┐
-   Slog (55 sites)  RealVirtualization  PermissionBridge  CrashCapture  Probes
-                    Engine phases                          (uncaught)   (on demand)
+   Slog (55 sites)  RealVirtualization  CrashCapture  Probes
+                    Engine phases       (uncaught)   (on demand)
 ```
 
 ### Why native events are persisted natively
@@ -236,13 +236,10 @@ refused is recorded as refused, with its code and reason.
 
 ### Permissions
 
-`PermissionBridge` records `PERMISSION_CHECK`, `PERMISSION_ALREADY_GRANTED`,
-`PERMISSION_REQUEST_SHOWN`, `PERMISSION_REQUEST_BUSY`, `PERMISSION_REQUEST_CANCELLED`,
-`PERMISSION_RESULT` (with granted/denied lists). A denial is the user's decision and is
-respected, so it is a `WARNING`, not an `ERROR` — but it is visible, because it is the
-reason a feature inside the clone will not work.
-
-Nothing here requests anything. No permission is ever requested for logging.
+Permission bridging was removed: the `PermissionBridge` native class, its
+`PERMISSION_*` events and the in-app grant action are gone. Nothing in the app requests a
+runtime permission for a guest any more, so there is no permission lifecycle to record. No
+permission is ever requested for logging.
 
 ### Crashes
 
@@ -521,7 +518,6 @@ android/.../CloneLauncherActivity.kt            shortcut operation
 android/.../native/Slog.kt                      forwards to DiagnosticLogger; BCORE tag
 android/.../native/NativeBridge.kt              operation scope across threads
 android/.../native/RealVirtualizationEngine.kt  named lifecycle phases
-android/.../native/PermissionBridge.kt          permission lifecycle events
 android/.../native/blackbox/BlackBoxEngineAdapter.kt  re-tagged to BCORE (tags only)
 android/app/src/main/AndroidManifest.xml        FileProvider
 android/app/build.gradle.kts                    buildConfig = true, androidx.core

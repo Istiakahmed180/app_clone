@@ -505,8 +505,6 @@ void main() {
             'blocking': false,
           },
         ],
-        'bridgeablePermissions': <Object?>[],
-        'missingPermissions': <Object?>[],
         'requiresGms': true,
       };
 

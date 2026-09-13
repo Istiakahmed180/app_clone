@@ -229,7 +229,7 @@ class ApkImportTest {
 
     @Test
     fun parsesIdentityFromARealApkFile() {
-        val info = importer.inspect(testAppApkPath())
+        val info = importer.inspect(listOf(testAppApkPath()))
 
         assertTrue(info is ApkImporter.ApkInfo.Parsed)
         info as ApkImporter.ApkInfo.Parsed
@@ -244,7 +244,7 @@ class ApkImportTest {
             writeText("definitely not a package archive")
         }
 
-        val info = importer.inspect(notAnApk.absolutePath)
+        val info = importer.inspect(listOf(notAnApk.absolutePath))
 
         assertTrue(info is ApkImporter.ApkInfo.Invalid)
         assertEquals(EngineErrorCodes.APK_INVALID, (info as ApkImporter.ApkInfo.Invalid).code)
@@ -253,7 +253,7 @@ class ApkImportTest {
 
     @Test
     fun rejectsAMissingFile() {
-        val info = importer.inspect("${context.filesDir}/nope.apk")
+        val info = importer.inspect(listOf("${context.filesDir}/nope.apk"))
 
         assertTrue(info is ApkImporter.ApkInfo.Invalid)
         assertEquals(EngineErrorCodes.APK_UNREADABLE, (info as ApkImporter.ApkInfo.Invalid).code)
@@ -306,8 +306,9 @@ class ApkImportTest {
         try {
             val result = engine.installApkToProfile(
                 profileId,
-                testAppApkPath(),
+                listOf(testAppApkPath()),
                 TestAppManager.TEST_APP_PACKAGE,
+                provisionGms = false,
             )
 
             assertTrue("install returned $result", result is EngineResult.Success)
@@ -361,25 +362,6 @@ class AppCompatibilityAnalyzerTest {
         assertEquals(EngineErrorCodes.APP_NOT_FOUND, report.findings.single().code)
     }
 
-    @Test
-    fun missingPermissionsAreASubsetOfBridgeableOnes() {
-        val installed = InstalledAppsProvider(context)
-            .listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
-
-        for (packageName in installed.take(12)) {
-            val report = analyzer.analyze(packageName)
-            assertTrue(
-                "$packageName: missing must be a subset of bridgeable",
-                report.bridgeablePermissions.containsAll(report.missingPermissions),
-            )
-            // Anything reported as missing must genuinely not be held.
-            for (permission in report.missingPermissions) {
-                assertFalse(analyzer.isGrantedToHost(permission))
-            }
-        }
-    }
-
     /**
      * Guards against a false "unsupported" verdict. Real apps commonly ship
      * `extractNativeLibs=false`, so the per-ABI directory can be empty even though the app
@@ -422,6 +404,6 @@ class AppCompatibilityAnalyzerTest {
         assertEquals(TestAppManager.TEST_APP_PACKAGE, map["packageName"])
         assertEquals("SUPPORTED", map["verdict"])
         assertTrue(map["findings"] is List<*>)
-        assertTrue(map["bridgeablePermissions"] is List<*>)
+        assertTrue(map["requiresGms"] is Boolean)
     }
 }

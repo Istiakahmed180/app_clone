@@ -49,8 +49,6 @@ class CompatibilityReport {
     required this.packageName,
     required this.verdict,
     required this.findings,
-    required this.bridgeablePermissions,
-    required this.missingPermissions,
     required this.requiresGms,
     this.abi,
     this.analysed = true,
@@ -71,8 +69,6 @@ class CompatibilityReport {
                     f.map((Object? k, Object? v) => MapEntry<String, dynamic>('$k', v)),
                   ))
               .toList(growable: false),
-      bridgeablePermissions: _strings(map['bridgeablePermissions']),
-      missingPermissions: _strings(map['missingPermissions']),
       requiresGms: map['requiresGms'] as bool? ?? false,
       abi: map['abi'] as String?,
     );
@@ -86,25 +82,13 @@ class CompatibilityReport {
     packageName: '',
     verdict: CompatibilityVerdict.limited,
     findings: <CompatibilityFinding>[],
-    bridgeablePermissions: <String>[],
-    missingPermissions: <String>[],
     requiresGms: false,
     analysed: false,
   );
 
-  static List<String> _strings(Object? raw) => raw is List
-      ? raw.map((Object? e) => '$e').toList(growable: false)
-      : const <String>[];
-
   final String packageName;
   final CompatibilityVerdict verdict;
   final List<CompatibilityFinding> findings;
-
-  /// Dangerous permissions the guest declares that the host is able to hold.
-  final List<String> bridgeablePermissions;
-
-  /// Of those, the ones the host has not been granted yet.
-  final List<String> missingPermissions;
 
   final bool requiresGms;
   final String? abi;
@@ -114,27 +98,7 @@ class CompatibilityReport {
 
   bool get canClone => verdict != CompatibilityVerdict.unsupported;
 
-  bool get needsPermissions => missingPermissions.isNotEmpty;
-
   /// The first blocking reason, which is what stops the app being cloned.
   CompatibilityFinding? get blocker =>
       findings.where((CompatibilityFinding f) => f.blocking).firstOrNull;
-}
-
-/// Outcome of asking the user for the permissions a guest needs.
-@immutable
-class PermissionRequestResult {
-  const PermissionRequestResult({required this.granted, required this.stillMissing});
-
-  factory PermissionRequestResult.fromMap(Map<String, dynamic> map) {
-    return PermissionRequestResult(
-      granted: CompatibilityReport._strings(map['granted']),
-      stillMissing: CompatibilityReport._strings(map['stillMissing']),
-    );
-  }
-
-  final List<String> granted;
-  final List<String> stillMissing;
-
-  bool get allGranted => stillMissing.isEmpty;
 }

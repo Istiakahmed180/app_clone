@@ -196,23 +196,6 @@ class NativeBridge {
     return CompatibilityReport.fromMap(response.data);
   }
 
-  /// Asks the user for the runtime permissions a guest needs.
-  ///
-  /// Guests run under the host's identity, so Android checks the host's grants; this is
-  /// the ordinary system dialog and a denial is respected.
-  Future<PermissionRequestResult> requestGuestPermissions(
-    String packageName,
-  ) async {
-    final EngineResponse response = await _invokeEngine(
-      'requestGuestPermissions',
-      <String, dynamic>{'packageName': packageName},
-    );
-    if (!response.success) {
-      throw VirtualizationException(response.message, code: response.code);
-    }
-    return PermissionRequestResult.fromMap(response.data);
-  }
-
   /// Whether the current launcher can pin shortcuts at all.
   Future<bool> areShortcutsSupported() async {
     final EngineResponse response = await _invokeEngine(

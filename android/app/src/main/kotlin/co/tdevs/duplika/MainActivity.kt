@@ -36,16 +36,6 @@ class MainActivity : FlutterFragmentActivity() {
         )
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        if (nativeBridge?.onRequestPermissionsResult(requestCode, permissions, grantResults) != true) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        }
-    }
-
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         nativeBridge?.unbindActivity()
         nativeBridge?.detach()

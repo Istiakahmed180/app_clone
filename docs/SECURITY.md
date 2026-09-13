@@ -116,7 +116,7 @@ Deliberately **kept**:
 
 | Kept | Count | Reason |
 | --- | --- | --- |
-| Dangerous | 38 | `PermissionBridge` can only request what the host declares. Removing one would silently and permanently deny that capability to every clone. |
+| Dangerous | 38 | Guests run under the host's identity, so a clone can only use a dangerous permission the host declares and holds. Removing one would silently and permanently deny that capability to every clone. |
 | Normal | 60 | Cheap, and the engine or guests may rely on them |
 | Still declared by the shipping competitor | 13 | Conservative: assume they are there for a reason |
 

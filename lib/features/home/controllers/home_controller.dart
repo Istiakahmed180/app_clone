@@ -5,12 +5,11 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
-import '../../../data/models/compatibility_report.dart';
+import '../../../data/models/clone_budget.dart';
+import '../../../data/models/device_capacity.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/space_identity.dart';
-import '../../../data/models/clone_budget.dart';
-import '../../../data/models/device_capacity.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
@@ -47,8 +46,6 @@ class HomeController extends GetxController {
   final RxMap<String, VirtualProfileState> profileStates =
       <String, VirtualProfileState>{}.obs;
   final RxMap<String, Uint8List> appIcons = <String, Uint8List>{}.obs;
-  final RxMap<String, CompatibilityReport> compatibility =
-      <String, CompatibilityReport>{}.obs;
 
   bool get isTestAppInstalled => testApp.value?.installed ?? false;
 
@@ -107,49 +104,6 @@ class HomeController extends GetxController {
       _privateSpace.setHidden(profile.id, hidden);
 
   Future<void> unhideAll() => _privateSpace.unhideAll();
-
-  /// Compatibility problems worth showing on an existing clone's card.
-  ///
-  /// `APP_NOT_FOUND` is filtered out deliberately: it only means the package is not
-  /// installed on the host, which is the normal state for a clone created from an imported
-  /// APK. That clone has its own container and works fine, so flagging it would be a false
-  /// alarm about the very feature that put it there.
-  List<CompatibilityFinding> warningsFor(VirtualProfileModel profile) {
-    final CompatibilityReport? report = compatibility[profile.packageName];
-    if (report == null || !report.analysed) {
-      return const <CompatibilityFinding>[];
-    }
-    return report.findings
-        .where(
-          (CompatibilityFinding f) => f.code != AppConstants.errorAppNotFound,
-        )
-        .toList(growable: false);
-  }
-
-  /// Whether this clone's app still needs runtime permissions the host does not hold.
-  ///
-  /// Read from the same analysis the warning text comes from, so the menu entry appears
-  /// exactly when the warning does.
-  bool needsPermissions(VirtualProfileModel profile) =>
-      compatibility[profile.packageName]?.needsPermissions ?? false;
-
-  /// Asks the user to grant the guest's outstanding permissions to Duplika.
-  ///
-  /// Guests run under the host's identity, so the grant has to land on the host. Without
-  /// this the card could only state the problem: a clone whose app needs media access would
-  /// sit there with nothing to show and no way to fix it.
-  ///
-  /// Returns null on success, or a user-facing message.
-  Future<String?> grantPermissions(VirtualProfileModel profile) async {
-    try {
-      await _nativeBridge.requestGuestPermissions(profile.packageName);
-      // The grant changes the verdict, so re-analyse rather than trusting the cached one.
-      await _loadCompatibility();
-      return null;
-    } on AppException catch (error) {
-      return error.message;
-    }
-  }
 
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
@@ -211,7 +165,6 @@ class HomeController extends GetxController {
     await Future.wait<void>(<Future<void>>[
       _loadProfileStates(),
       _loadIcons(),
-      _loadCompatibility(),
     ]);
     isLoading.value = false;
   }
@@ -273,32 +226,6 @@ class HomeController extends GetxController {
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not load app icons', error, stackTrace);
     }
-  }
-
-  /// Analyses each distinct cloned package once, not once per clone.
-  Future<void> _loadCompatibility() async {
-    final Set<String> packages = profiles
-        .map((VirtualProfileModel p) => p.packageName)
-        .toSet();
-    if (packages.isEmpty) {
-      compatibility.clear();
-      return;
-    }
-
-    final Map<String, CompatibilityReport> reports =
-        <String, CompatibilityReport>{};
-    for (final String packageName in packages) {
-      try {
-        reports[packageName] = await _nativeBridge.analyzeApp(packageName);
-      } on AppException catch (error, stackTrace) {
-        _logger.error(
-          'Compatibility analysis failed for $packageName',
-          error,
-          stackTrace,
-        );
-      }
-    }
-    compatibility.assignAll(reports);
   }
 
   Future<void> _loadProfiles() async {

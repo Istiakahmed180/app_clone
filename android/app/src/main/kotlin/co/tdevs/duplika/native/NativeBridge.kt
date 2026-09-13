@@ -27,7 +27,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val engine = RealVirtualizationEngine(appContext, DuplikaApplication.engine)
     private val analyzer = AppCompatibilityAnalyzer(appContext)
     private val shortcuts = CloneShortcutManager(appContext)
-    private val permissionBridge = PermissionBridge()
     private val battery = BatteryOptimization(appContext)
     private val appDetails = AppDetailsReader(appContext)
     private val deviceCapacity = DeviceCapacity(appContext)
@@ -40,14 +39,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     fun unbindActivity() {
         activity = null
-        permissionBridge.cancelPending()
     }
-
-    fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ): Boolean = permissionBridge.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
     // Engine calls can install packages and wait out the backend's service backoff, so they
     // must never run on the platform thread. Results are posted back to the main looper,
@@ -111,7 +103,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     }
 
     fun detach() {
-        permissionBridge.cancelPending()
         channel?.setMethodCallHandler(null)
         channel = null
         engineExecutor.shutdown()
@@ -166,22 +157,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         "Compatibility analysed.",
                         analyzer.analyze(packageName).toMap(),
                     )
-                }
-            }
-
-            "requestGuestPermissions" -> {
-                val packageName = call.requiredPackage(result) ?: return
-                val host = activity
-                if (host == null) {
-                    result.success(
-                        failure("NO_ACTIVITY", "Permissions can only be requested while the app is open."),
-                    )
-                    return
-                }
-
-                val report = analyzer.analyze(packageName)
-                permissionBridge.request(host, report.missingPermissions) { outcome ->
-                    reply(result, permissionEnvelope(report, outcome))
                 }
             }
 
@@ -456,36 +431,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             else -> result.notImplemented()
         }
-    }
-
-    /**
-     * "The user answered" and "we never asked" must not look the same to the UI, or it
-     * would report a decision the user never made.
-     */
-    @androidx.annotation.VisibleForTesting
-    internal fun permissionEnvelope(
-        report: AppCompatibilityAnalyzer.Report,
-        outcome: PermissionBridge.Outcome,
-    ): Map<String, Any?> = when (outcome) {
-        is PermissionBridge.Outcome.Answered -> success(
-            "PERMISSIONS_REQUESTED",
-            "Permission request finished.",
-            mapOf(
-                "granted" to outcome.grants.filterValues { it }.keys.toList(),
-                "denied" to outcome.grants.filterValues { !it }.keys.toList(),
-                "stillMissing" to report.bridgeablePermissions.filterNot(analyzer::isGrantedToHost),
-            ),
-        )
-
-        PermissionBridge.Outcome.Busy -> failure(
-            "PERMISSION_REQUEST_IN_PROGRESS",
-            "Another permission request is already open.",
-        )
-
-        PermissionBridge.Outcome.Cancelled -> failure(
-            "PERMISSION_REQUEST_CANCELLED",
-            "The permission request was interrupted.",
-        )
     }
 
     private fun MethodCall.requiredProfile(result: MethodChannel.Result): String? =

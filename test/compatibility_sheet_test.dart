@@ -36,8 +36,6 @@ void main() {
             blocking: true,
           ),
         ],
-        bridgeablePermissions: <String>[],
-        missingPermissions: <String>[],
         requiresGms: false,
       ),
     );
@@ -56,8 +54,6 @@ void main() {
         packageName: 'org.example',
         verdict: CompatibilityVerdict.supported,
         findings: <CompatibilityFinding>[],
-        bridgeablePermissions: <String>[],
-        missingPermissions: <String>[],
         requiresGms: false,
       ),
     );
@@ -163,8 +159,6 @@ void main() {
               blocking: false,
             ),
           ],
-          bridgeablePermissions: <String>[],
-          missingPermissions: <String>[],
           requiresGms: true,
         ),
       );
@@ -188,8 +182,6 @@ void main() {
         blocking: false,
       ),
     ],
-    bridgeablePermissions: <String>[],
-    missingPermissions: <String>[],
     requiresGms: true,
   );
 
