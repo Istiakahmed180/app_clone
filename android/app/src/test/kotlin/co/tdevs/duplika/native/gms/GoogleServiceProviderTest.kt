@@ -78,6 +78,11 @@ class GoogleServiceProviderTest {
         override fun isRunning(packageName: String, virtualUserId: Int): Boolean = unreachable()
         override fun deleteVirtualUser(virtualUserId: Int): EngineResult<Unit> = unreachable()
         override fun listVirtualUserIds(): List<Int> = unreachable()
+        override fun guestSharedPreferencesFile(
+            packageName: String,
+            virtualUserId: Int,
+            preferenceName: String,
+        ): java.io.File? = unreachable()
 
         private fun unreachable(): Nothing =
             throw AssertionError("the GMS provider layer must not call this engine method")

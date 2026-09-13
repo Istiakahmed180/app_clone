@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Environment
 
 /**
  * Works out, before anything is cloned, what will and will not work for a target app —
@@ -89,6 +91,10 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
 
+        storageFinding(packageInfo.requestedPermissions?.toSet().orEmpty())?.let {
+            findings += it
+        }
+
         val verdict = when {
             findings.any { it.blocking } -> Verdict.UNSUPPORTED
             findings.isNotEmpty() -> Verdict.LIMITED
@@ -148,6 +154,8 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (usesPush(requested)) {
             findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
         }
+
+        storageFinding(requested)?.let { findings += it }
 
         return Report(
             packageName = packageName,
@@ -218,6 +226,40 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     private fun usesPush(requestedPermissions: Set<String>): Boolean =
         PUSH_PERMISSION in requestedPermissions
 
+    /**
+     * The `MANAGE_EXTERNAL_STORAGE` fallback, and the honest answer when it cannot be used.
+     *
+     * Guests run under the host's identity, so a guest that touches shared storage can only
+     * reach it if **Duplika** holds All files access. That permission is special-access: the
+     * user grants it in Settings, never through a runtime dialog, so the app cannot ask for
+     * it and must instead say what is wrong. The decision itself is
+     * [storageFindingFor] — a pure function, so it is unit-tested without a device.
+     */
+    private fun storageFinding(requestedPermissions: Set<String>): Finding? =
+        storageFindingFor(
+            requestedPermissions = requestedPermissions,
+            hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess(),
+            hostHoldsAllFilesAccess = hostHoldsAllFilesAccess(),
+        )
+
+    private fun hostDeclaresAllFilesAccess(): Boolean = try {
+        context.packageManager
+            .getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+            .requestedPermissions
+            ?.contains(ALL_FILES_ACCESS) == true
+    } catch (_: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    private fun hostHoldsAllFilesAccess(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            // All files access is an API 30+ concept. Before Android 11 the legacy storage
+            // grant is what matters and the engine's app-op check does not apply.
+            true
+        }
+
     private fun hasNativeCode(info: ApplicationInfo): Boolean =
         !info.nativeLibraryDir.isNullOrEmpty() && java.io.File(info.nativeLibraryDir).let {
             it.isDirectory && (it.list()?.isNotEmpty() == true)
@@ -239,6 +281,8 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     companion object {
         const val CODE_REQUIRES_GMS = "REQUIRES_GMS"
         const val CODE_PUSH_UNSUPPORTED = "PUSH_UNSUPPORTED"
+        const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
+        const val CODE_STORAGE_NOT_GRANTED = "STORAGE_NOT_GRANTED"
 
         /**
          * Note what this no longer says: "other Google features are unaffected". Push is a
@@ -264,6 +308,62 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                 "cannot succeed."
 
         private const val PUSH_PERMISSION = "com.google.android.c2dm.permission.RECEIVE"
+
+        private const val ALL_FILES_ACCESS = "android.permission.MANAGE_EXTERNAL_STORAGE"
+
+        /**
+         * Broad shared-storage declarations. A guest that asks for one of these wants the
+         * whole shared tree, which only exists for it when the host holds All files access.
+         * `READ_MEDIA_*` is deliberately absent: it is media-scoped, and an app that declares
+         * only those reaches media through MediaStore, which does not need this.
+         */
+        private val STORAGE_PERMISSIONS = setOf(
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            ALL_FILES_ACCESS,
+        )
+
+        private const val STORAGE_UNAVAILABLE_MESSAGE =
+            "This app uses shared storage, and this build of Duplika does not declare All " +
+                "files access. A clone of it cannot reach your files and will not work."
+
+        private const val STORAGE_NOT_GRANTED_MESSAGE =
+            "This app uses shared storage. Grant Duplika \"All files access\" in Settings → " +
+                "Special app access before launching the clone, or it may be refused at launch."
+
+        /**
+         * The pure half of the storage fallback, with every Android lookup passed in.
+         *
+         * Two cases, and they are different: the host does not declare All files access at
+         * all (the Play-rejection fallback — blocking, because no clone can ever reach shared
+         * storage), versus the host declares it but the user has not granted it yet
+         * (non-blocking, with the Settings path).
+         */
+        @JvmStatic
+        internal fun storageFindingFor(
+            requestedPermissions: Set<String>,
+            hostDeclaresAllFilesAccess: Boolean,
+            hostHoldsAllFilesAccess: Boolean,
+        ): Finding? {
+            if (STORAGE_PERMISSIONS.none { it in requestedPermissions }) {
+                return null
+            }
+            return when {
+                !hostDeclaresAllFilesAccess -> Finding(
+                    CODE_STORAGE_UNAVAILABLE,
+                    STORAGE_UNAVAILABLE_MESSAGE,
+                    blocking = true,
+                )
+
+                !hostHoldsAllFilesAccess -> Finding(
+                    CODE_STORAGE_NOT_GRANTED,
+                    STORAGE_NOT_GRANTED_MESSAGE,
+                    blocking = false,
+                )
+
+                else -> null
+            }
+        }
 
         private val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
 

@@ -115,7 +115,11 @@ This is the highest-risk declaration of the three. Cloning is not a permitted us
 this goes in as an exception, judged on the "no viable alternative" argument above — which
 is genuine: the constraint is Android's UID model, not a design preference. **Fallback if
 rejected:** remove the declaration and treat storage-dependent guests as a blocked
-compatibility finding instead (the analyzer already has that machinery). That trades a
+compatibility finding instead. That machinery is now implemented, not just planned:
+`AppCompatibilityAnalyzer` checks whether Duplika declares and holds All files access, and a
+guest declaring broad storage (`READ`/`WRITE_EXTERNAL_STORAGE`, `MANAGE_EXTERNAL_STORAGE`)
+gets `STORAGE_NOT_GRANTED` (non-blocking, points to Settings) or `STORAGE_UNAVAILABLE`
+(blocking — the removed-declaration case) instead of a clone that hangs. That trades a
 policy rejection for a real feature loss, so appeal first.
 
 ---
