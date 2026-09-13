@@ -6,7 +6,8 @@ Companion to `level10-gms-provider-audit.md` (what existed before) and
 ## Why this exists
 
 To let a second Google-service backend be added later without touching the Real GMS path
-that works. No microG is implemented.
+that works. The second backend now exists: a bundled microG, verified on a device
+(`docs/microg-container-spike.md`); the Real GMS path is unchanged.
 
 **Updated by Phase 7 (provisioning retirement).** The abstraction phase itself changed no
 behaviour. Phase 7 then retired the legacy container-GMS-provisioning opt-in that this
@@ -42,7 +43,8 @@ Flutter (Dart, GetX)
         +--> RealGmsProvider ------> VirtualizationEngineAdapter ---> bcore.aar
         |      (default; works)        .isGmsSupported()
         |                              .installGms(userId)
-        +--> MicroGProvider            (placeholder; no implementation)
+        +--> MicroGProvider            (implemented; bundled artefact, opt-in)
+        |                                .provisionContainerGms(userId)
         |
         +--> UnsupportedProvider       (deterministic refusals)
 ```
@@ -104,7 +106,7 @@ query.
 | --- | --- |
 | `AUTO` (default) | Real GMS if the host genuinely has it → else a real microG implementation if one ever exists → else `UnsupportedProvider`. |
 | `REAL_GMS` | Real GMS if genuinely available; else `UnsupportedProvider` with a stated reason. **No fallback.** |
-| `MICROG` | microG if genuinely available (never, today); else `UnsupportedProvider` saying it is not implemented. **Never falls back to Real GMS** — someone who asked for microG and quietly got Google's Play services has been given the opposite of what they asked for. |
+| `MICROG` | The bundled microG if an artefact is present; else `UnsupportedProvider` naming that none is bundled. **Never falls back to Real GMS** — someone who asked for microG and quietly got Google's Play services has been given the opposite of what they asked for. |
 | `DISABLED` | `UnsupportedProvider`, always. |
 
 A provider is selected only on the strength of its **own** report, and every mode is checked
@@ -171,37 +173,37 @@ One defensive detail: `isGmsSupported()` is wrapped so an engine surprise cannot
 into selection. An unreadable answer is treated as "no host GMS", which declines
 provisioning rather than attempting it blind.
 
-## microG placeholder
+## microG (implemented)
 
-`MicroGProvider` reports `NOT_IMPLEMENTED`, **no** capabilities, and
-`ProviderResult.NotImplemented` for every operation.
+`MicroGProvider` is now a real implementation, verified end to end on an emulator: a cloned
+Firebase app in a Duplika container got a real FCM token. See
+`docs/microg-container-spike.md`.
 
-`availability()` is **unconditional — not a detection**. Detecting microG would imply the
-rest of the class could serve it, and it cannot; a provider reporting `AVAILABLE` while
-every operation returns `NotImplemented` is exactly the "pretend the APIs work" failure the
-phase forbids. Because it reports no capabilities, `AUTO` can never select it.
+- `availability()` is a real detection: `AVAILABLE` only when a microG artefact is bundled
+  in `assets/microg/`.
+- `capabilities()` is `{ CONTAINER_GMS_PROVISIONING }` only when that artefact is present,
+  and empty otherwise — so `AUTO` can never select a microG with nothing to install.
+- `hostGmsPresence()` is `Unsupported`: microG says nothing about the host's Play services.
+- `provisionContainerGms(userId)` materialises the bundled artefact, installs it through the
+  engine's ordinary APK path, and seeds microG's checkin/GCM switches
+  (`MicroGCheckinSeeder`), which default to off.
 
-Nothing is bundled, downloaded, installed or referenced. No proprietary Google component is
-copied.
+It spoofs no signature, identity, UID or account and does not touch Play Integrity. The guest
+trusts the container's microG because the engine already returns the **host package's**
+certificate for a same-named container package (`PackageManagerCompat.generatePackageInfo`) —
+the earlier "signature wall" conclusion in `docs/microg-integration.md` does not hold in a
+container and is superseded.
 
-A real attempt to implement this — a bundled microG provisioned into a container — was made
-and then **parked**, because guest apps' signature verification rejects an honestly-signed
-microG. The implementation, the three measured blockers and what would have to change are
-recorded in `docs/microg-integration.md`; the branch is `spike/microg-provider` (`f9fb159`).
+Selection is opt-in: `GmsProviderMode.MICROG` asks for it; `AUTO` still prefers Real GMS when
+the host has it. `RealVirtualizationEngine.provisionMicroG(profileId)` and the
+`provisionMicroG` bridge method are the entry points. The artefact is the official microG
+GmsCore (Apache-2.0), ABI-trimmed to arm64 and re-signed only because the trim requires it;
+the attribution obligation goes in the repository `NOTICE`.
 
-## Future microG implementation plan
-
-The order matters, and it is the opposite of what is tempting:
-
-1. Make `availability()` a real detection of an actually-installed microG.
-2. Implement **one** capability, and add it to `capabilities()` **only after it is verified
-   on a device**.
-3. Leave every unimplemented capability returning `NotImplemented`.
-4. Add a Flutter-facing mode toggle only once there is a second backend that genuinely
-   works — until then it is UI for a choice with one legitimate answer.
-
-**The single most damaging possible change to that file** is adding a capability to
-`capabilities()` before it works: `AUTO` would then prefer a backend that cannot serve.
+The order the plan prescribed was followed: detection first, one capability added only after
+device verification, unimplemented operations left honest. The remaining work is regression
+coverage of the two engine provider overrides and the product/policy decision about shipping
+microG.
 
 ## Adding a new capability
 

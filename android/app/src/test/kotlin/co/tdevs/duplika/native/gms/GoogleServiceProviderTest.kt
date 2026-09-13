@@ -88,9 +88,31 @@ class GoogleServiceProviderTest {
             throw AssertionError("the GMS provider layer must not call this engine method")
     }
 
+    /** An artefact source backed by no real APK, for tests that only need the seam. */
+    private class FakeArtifactSource(private val bundled: Boolean) : MicroGArtifactSource {
+        override fun apkAssetNames(): List<String> =
+            if (bundled) listOf("com.google.android.gms.apk") else emptyList()
+
+        override fun open(name: String) = java.io.ByteArrayInputStream(byteArrayOf(1))
+    }
+
+    private fun microGProvider(
+        bundled: Boolean = true,
+        installOutcome: EngineResult<Unit> = EngineResult.ok(),
+        seedResult: Boolean = true,
+        installed: MutableList<Pair<String, Int>> = mutableListOf(),
+    ): MicroGProvider = MicroGProvider(
+        artifactSource = FakeArtifactSource(bundled),
+        materialize = { name ->
+            java.io.File.createTempFile("microg-$name", ".apk").apply { writeBytes(byteArrayOf(1)) }
+        },
+        installApk = { path, userId -> installed += path to userId; installOutcome },
+        seedCheckin = { seedResult },
+    )
+
     private fun resolver(
         engine: FakeEngine,
-        microG: GoogleServiceProvider = MicroGProvider(),
+        microG: GoogleServiceProvider = microGProvider(bundled = false),
         log: GmsProviderLog = GmsProviderLog.NONE,
     ) = GoogleServiceProviderResolver(RealGmsProvider(engine), microG, log)
 
@@ -169,31 +191,67 @@ class GoogleServiceProviderTest {
     // ----------------------------------------------------------------- MicroGProvider
 
     @Test
-    fun `microg provider is a placeholder that reports not implemented and no capabilities`() {
-        val provider = MicroGProvider()
+    fun `microg provider is unavailable and reports no capabilities when nothing is bundled`() {
+        val provider = microGProvider(bundled = false)
 
         assertEquals(MicroGProvider.NAME, provider.providerName)
-        assertEquals(ProviderAvailability.NOT_IMPLEMENTED, provider.availability())
+        assertEquals(ProviderAvailability.UNAVAILABLE, provider.availability())
         assertTrue(provider.capabilities().isEmpty())
     }
 
     @Test
-    fun `microg provider returns not implemented for every capability`() {
-        val provider = MicroGProvider()
+    fun `microg provider is available and offers provisioning when an artefact is bundled`() {
+        val provider = microGProvider(bundled = true)
 
-        val presence = provider.hostGmsPresence()
-        val provisioning = provider.provisionContainerGms(virtualUserId = 2)
+        assertEquals(ProviderAvailability.AVAILABLE, provider.availability())
+        assertEquals(setOf(GmsCapability.CONTAINER_GMS_PROVISIONING), provider.capabilities())
+    }
 
-        assertTrue(presence is ProviderResult.NotImplemented)
-        assertTrue(provisioning is ProviderResult.NotImplemented)
-        assertEquals("NOT_IMPLEMENTED", presence.outcome)
-        // Never a plausible-looking default that could be mistaken for a real answer.
+    @Test
+    fun `microg provider never reports host gms presence`() {
+        // microG says nothing about the host's Play services, and reporting a value there
+        // would be fabrication.
+        val presence = microGProvider(bundled = true).hostGmsPresence()
+
+        assertTrue(presence is ProviderResult.Unsupported)
+        assertEquals("UNSUPPORTED", presence.outcome)
         assertFalse(presence.isSuccess)
-        assertFalse(provisioning.isSuccess)
-        assertEquals(
-            MicroGProvider.IMPLEMENTATION_STATUS,
-            provisioning.rawDiagnostics["implementationStatus"],
+    }
+
+    @Test
+    fun `microg provisioning installs each bundled artefact and seeds checkin`() {
+        val installed = mutableListOf<Pair<String, Int>>()
+        val provider = microGProvider(bundled = true, installed = installed)
+
+        val result = provider.provisionContainerGms(virtualUserId = 5)
+
+        assertTrue(result.isSuccess)
+        assertEquals(1, installed.size)
+        assertEquals(5, installed.first().second)
+        assertEquals("true", (result as ProviderResult.Success).diagnostics["checkinSeeded"])
+        assertEquals("1", result.diagnostics["artifactsInstalled"])
+    }
+
+    @Test
+    fun `microg provisioning maps an engine failure to a structured error`() {
+        val provider = microGProvider(
+            bundled = true,
+            installOutcome = EngineResult.Failure("APP_INSTALL_FAILED", "engine refused"),
         )
+
+        val result = provider.provisionContainerGms(virtualUserId = 5)
+
+        assertTrue(result is ProviderResult.Error)
+        val error = result as ProviderResult.Error
+        assertEquals("APP_INSTALL_FAILED", error.code)
+        assertEquals("ERROR", error.outcome)
+    }
+
+    @Test
+    fun `microg provisioning is unavailable when nothing is bundled`() {
+        val result = microGProvider(bundled = false).provisionContainerGms(virtualUserId = 1)
+
+        assertTrue(result is ProviderResult.Unavailable)
     }
 
     // ------------------------------------------------------------ UnsupportedProvider
@@ -233,13 +291,22 @@ class GoogleServiceProviderTest {
     }
 
     @Test
-    fun `auto never selects the microg placeholder`() {
-        // The placeholder must be unselectable even when Real GMS is unavailable, or AUTO
-        // would prefer a backend that cannot serve anything.
-        val provider = resolver(FakeEngine(gmsOnHost = false), microG = MicroGProvider())
+    fun `auto never selects an unbundled microg`() {
+        // With no artefact bundled, microG offers no capability and must be unselectable
+        // even when Real GMS is unavailable, or AUTO would prefer a backend that cannot serve.
+        val provider = resolver(FakeEngine(gmsOnHost = false), microG = microGProvider(bundled = false))
             .resolve(GmsProviderMode.AUTO)
 
         assertEquals(UnsupportedProvider.NAME, provider.providerName)
+    }
+
+    @Test
+    fun `microg mode selects the bundled provider`() {
+        // The second backend now genuinely works, so an explicit MICROG request gets it.
+        val provider = resolver(FakeEngine(gmsOnHost = true), microG = microGProvider(bundled = true))
+            .resolve(GmsProviderMode.MICROG)
+
+        assertEquals(MicroGProvider.NAME, provider.providerName)
     }
 
     @Test
@@ -289,12 +356,13 @@ class GoogleServiceProviderTest {
     fun `microg mode does not silently fall back to real gms`() {
         // Someone who asked for microG and quietly got Google's Play services has been
         // given the opposite of what they asked for.
-        val provider = resolver(FakeEngine(gmsOnHost = true)).resolve(GmsProviderMode.MICROG)
+        val provider = resolver(FakeEngine(gmsOnHost = true), microG = microGProvider(bundled = false))
+            .resolve(GmsProviderMode.MICROG)
 
         assertEquals(UnsupportedProvider.NAME, provider.providerName)
         val reason = (provider.hostGmsPresence() as ProviderResult.Unavailable).reason
         assertTrue(reason.contains("microG"))
-        assertTrue(reason.contains(MicroGProvider.IMPLEMENTATION_STATUS))
+        assertTrue(reason.contains("bundled"))
     }
 
     @Test

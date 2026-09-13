@@ -3,9 +3,9 @@ package co.tdevs.duplika.native.gms
 /**
  * A backend that can answer Duplika's Google-service questions.
  *
- * Three implementations exist: [RealGmsProvider] (the host's genuine Play services, and the
- * only one that works), [MicroGProvider] (a declared placeholder, no implementation) and
- * [UnsupportedProvider] (deterministic refusals). Selection is
+ * Three implementations exist: [RealGmsProvider] (the host's genuine Play services, the
+ * default), [MicroGProvider] (a bundled microG provisioned into the container, opt-in and
+ * device-verified) and [UnsupportedProvider] (deterministic refusals). Selection is
  * [GoogleServiceProviderResolver]'s job, not a caller's.
  *
  * ## Contract

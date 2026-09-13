@@ -198,6 +198,16 @@ class NativeBridge {
     'installGms': installGms,
   });
 
+  /// Provisions the bundled microG into a profile's container as its
+  /// `com.google.android.gms`.
+  ///
+  /// Explicit, not automatic: choosing microG changes which implementation the clone sees
+  /// for every Google API, so it is a deliberate action rather than something a clone
+  /// silently gets. The native [MicroGProvider] is the only thing that can do this, and it
+  /// reports a structured failure when no artefact is bundled.
+  Future<EngineResponse> provisionMicroG(String profileId) =>
+      _invokeEngine('provisionMicroG', <String, dynamic>{'profileId': profileId});
+
   /// Launchable apps on the device, for the clone picker.
   ///
   /// Raises on failure rather than returning an empty list: the picker renders an empty

@@ -4,6 +4,7 @@ import android.content.Context
 import co.tdevs.duplika.native.gms.GmsProviderLog
 import co.tdevs.duplika.native.gms.GmsProviderMode
 import co.tdevs.duplika.native.gms.GoogleServiceProviderResolver
+import co.tdevs.duplika.native.gms.MicroGProvider
 import co.tdevs.duplika.native.gms.ProviderResult
 import co.tdevs.duplika.native.gms.RealGmsProvider
 
@@ -30,6 +31,7 @@ class VirtualAppInstaller(
     private val providerResolver: GoogleServiceProviderResolver =
         GoogleServiceProviderResolver(
             realGms = RealGmsProvider(adapter),
+            microG = MicroGProvider.forEngine(context, adapter),
             log = GmsProviderLog { line -> Slog.i(Slog.INSTALL, line) },
         ),
     /** Requested provider mode. AUTO reproduces the pre-abstraction behaviour. */

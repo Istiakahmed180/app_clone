@@ -54,6 +54,17 @@ NewBlackbox (Bcore, black-reflection)
     commit 89b59836c66f173756a4ae258cf379a957649820
     See "Engine provenance" below: this declaration is disputed.
 
+microG (GmsCore)
+    Copyright (C) microG Project Team
+    Apache License 2.0 -- licenses/microG-Apache-2.0.txt
+    https://github.com/microg/GmsCore
+    Bundled as android/app/src/main/assets/microg/com.google.android.gms.apk,
+    unmodified except for an ABI trim (arm64 only) and a re-sign, both required to
+    reduce its size. Required notice, reproduced per the Apache-2.0 terms:
+        "This app includes software developed by the microG Project.
+         Copyright (c) 2017 microG Team. Licensed under the Apache License,
+         Version 2.0."
+
 androidx.appcompat, com.google.android.material
     Apache License 2.0. Standard Android dependencies, resolved from Google's
     Maven repository and not vendored.

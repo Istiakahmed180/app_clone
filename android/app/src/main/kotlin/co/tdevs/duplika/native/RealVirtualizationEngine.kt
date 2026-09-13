@@ -6,6 +6,8 @@ import co.tdevs.duplika.diagnostics.DiagLevel
 import co.tdevs.duplika.diagnostics.DiagRedactor
 import co.tdevs.duplika.diagnostics.DiagSource
 import co.tdevs.duplika.diagnostics.DiagnosticLogger
+import co.tdevs.duplika.native.gms.MicroGProvider
+import co.tdevs.duplika.native.gms.ProviderResult
 import java.io.File
 
 /**
@@ -29,6 +31,7 @@ class RealVirtualizationEngine(
     private val installedApps = InstalledAppsProvider(context)
     private val apkImporter = ApkImporter(context)
     private val spaceIdentity = SpaceIdentityStore(context)
+    private val microGProvider = MicroGProvider.forEngine(context, adapter)
 
     val backendName: String get() = adapter.backendName
 
@@ -281,6 +284,24 @@ class RealVirtualizationEngine(
      * Mirrors [installAppToProfile], including releasing the mapping when the install
      * fails so a profile is never left pointing at an empty container.
      */
+    /**
+     * Provisions the bundled microG into an existing profile's container as its
+     * `com.google.android.gms`.
+     *
+     * Separate from the retired host-GMS provisioning on purpose: this installs Duplika's
+     * own Apache-2.0 microG artefact, not a copy of the host's Play services. It is exposed
+     * as an explicit action rather than an AUTO-selected behaviour, because choosing microG
+     * changes which implementation a guest sees for *every* Google API.
+     */
+    fun provisionMicroG(profileId: String): EngineResult<Unit> {
+        val virtualUserId = profileManager.getOrCreate(profileId)
+        return when (val result = microGProvider.provisionContainerGms(virtualUserId)) {
+            is ProviderResult.Success -> EngineResult.ok()
+            is ProviderResult.Error -> EngineResult.Failure(result.code, result.message)
+            else -> EngineResult.Failure("MICROG_PROVISIONING_FAILED", result.reasonOrEmpty)
+        }
+    }
+
     fun installApkToProfile(
         profileId: String,
         apkPaths: List<String>,

@@ -13,7 +13,7 @@ package co.tdevs.duplika.native.gms
  * | --- | --- |
  * | `AUTO` | Real GMS if the host genuinely has it; else a real microG implementation if one ever exists; else unsupported. |
  * | `REAL_GMS` | Real GMS if genuinely available; else unsupported with a stated reason. **No fallback.** |
- * | `MICROG` | microG if genuinely available (never, today); else unsupported saying it is not implemented. **Never falls back to Real GMS.** |
+ * | `MICROG` | The bundled microG if an artefact is genuinely present; else unsupported naming that no artefact is bundled. **Never falls back to Real GMS.** |
  * | `DISABLED` | Unsupported, always. |
  *
  * A provider is only ever selected on the strength of its **own** report of what it can
@@ -23,7 +23,7 @@ package co.tdevs.duplika.native.gms
  */
 class GoogleServiceProviderResolver(
     private val realGms: GoogleServiceProvider,
-    private val microG: GoogleServiceProvider = MicroGProvider(),
+    private val microG: GoogleServiceProvider,
     private val log: GmsProviderLog = GmsProviderLog.NONE,
 ) {
 
@@ -70,14 +70,13 @@ class GoogleServiceProviderResolver(
         }
 
         GmsProviderMode.MICROG -> if (canServe(microG)) {
-            Selection(microG, "microG was requested and is available")
+            Selection(microG, "microG was requested and is available (artefact bundled)")
         } else {
             Selection(
                 UnsupportedProvider(
-                    "microG was requested but no microG implementation exists in this " +
-                        "build (implementationStatus=${MicroGProvider.IMPLEMENTATION_STATUS})"
+                    "microG was requested but no microG artefact is bundled in this build"
                 ),
-                "microG requested but not implemented; deliberately not falling back to Real GMS",
+                "microG requested but not bundled; deliberately not falling back to Real GMS",
             )
         }
 
@@ -92,7 +91,7 @@ class GoogleServiceProviderResolver(
             else -> Selection(
                 UnsupportedProvider(
                     "no Google service backend is available: the host has no usable Google " +
-                        "Play services and no microG implementation exists in this build"
+                        "Play services and no microG artefact is bundled in this build"
                 ),
                 "AUTO found no available backend",
             )

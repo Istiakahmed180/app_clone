@@ -1,0 +1,40 @@
+# microG provider layer — bundled-asset provisioning, FCM success
+# Device: emulator-5554, Android 15 / API 35, arm64
+# Branch: spike/microg-container
+# Date: 2026-09-13
+#
+# This run used the real shipping-shaped path, not the adb install hack:
+#   bundled asset  android/app/src/main/assets/microg/com.google.android.gms.apk
+#   provider       co.tdevs.duplika.native.gms.MicroGProvider
+#   entry point    RealVirtualizationEngine.provisionMicroG(profileId) / bridge "provisionMicroG"
+# The checkin switch was seeded by MicroGCheckinSeeder, not hand-edited.
+
+## 1. Provisioning through the provider layer succeeded
+I MicroGSpike: op=install profile=spike-mg package=com.moneyin.cabex.fx
+I MicroGSpike: provisioned microG into profile spike-mg
+# (a transient DeadObjectException from the engine's :black process was logged and retried
+#  by BlackBoxEngineAdapter.withServiceRetry; the outcome was success.)
+
+## 2. Seeded checkin succeeded (container data, user 1)
+# .../com.google.android.gms/shared_prefs/checkin.xml
+<map>
+    <long name="securityToken" value="7762388135943256628" />
+    <string name="digest">1-929a0dca0eee55513280171a8585da7dcd3700f8</string>
+    <long name="lastCheckin" value="1789298348272" />
+    ...
+</map>
+
+## 3. The clone registered with Google FCM and the app persisted a fresh token
+D GmsHttpFormClient: token=ceoHGcM5QGuAEr7tZhqESV:APA91bGPKrUvYARei89QDkqgFLn0Th7mrGwve5tWBZD4yqfvCNumL3bzi7PwlhJsrD216HsxSWC-Bn9FnSDVlGcqbqwCCBhjVmoOm4zA5sZ98XR_byKwTf4
+W GmsGcmRegister: completeRegisterRequest error: null
+
+# .../com.moneyin.cabex.fx/shared_prefs/com.google.android.gms.appid.xml
+<map>
+    <string name="|T|876317137724|*">{"token":"ceoHGcM5QGuAEr7tZhqESV:APA91bGPKrUvYARei89QDkqgFLn0Th7mrGwve5tWBZD4yqfvCNumL3bzi7PwlhJsrD216HsxSWC-Bn9FnSDVlGcqbqwCCBhjVmoOm4zA5sZ98XR_byKwTf4","appVersion":"8","timestamp":1789298421130}</string>
+</map>
+
+## 4. Regression check for a normal app (no microG)
+# Cloned com.example.duplikabaseline into a fresh profile and launched it:
+#   UI reported "provider=provider-ok"; no "Failed to find provider" and no
+#   ContentProviderStub UID-mismatch warnings appeared. The two engine fixes do not regress
+#   the ordinary provider path.

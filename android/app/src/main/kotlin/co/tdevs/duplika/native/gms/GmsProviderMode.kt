@@ -7,10 +7,11 @@ package co.tdevs.duplika.native.gms
  * provider serve a capability it does not have. `REAL_GMS` on a device without Play services
  * yields [UnsupportedProvider] with a stated reason, not a Real GMS provider pretending.
  *
- * No user-facing toggle is wired to this yet, deliberately. All four modes are implemented
- * and honoured, but exposing a switch while only one provider actually works would be a UI
- * for a choice with one legitimate answer. [AUTO] is the default and reproduces exactly the
- * behaviour Duplika had before this phase.
+ * There is still no user-facing toggle. All four modes are implemented and honoured, and the
+ * microG backend now genuinely works (device-verified; see
+ * `docs/microg-container-spike.md`), but choosing it is currently an explicit native action
+ * (`RealVirtualizationEngine.provisionMicroG`) rather than a UI switch. [AUTO] is the default
+ * and reproduces exactly the behaviour Duplika had before this phase.
  */
 enum class GmsProviderMode {
 
@@ -24,8 +25,8 @@ enum class GmsProviderMode {
     REAL_GMS,
 
     /**
-     * microG only. Today this always resolves to a not-implemented state, because
-     * [MicroGProvider] is a placeholder.
+     * microG only: the bundled artefact provisioned into the container. Resolves to an
+     * unsupported provider when no artefact is bundled.
      *
      * It does **not** silently fall back to Real GMS: someone who asked for microG and
      * quietly got Google's Play services instead has been given the opposite of what they

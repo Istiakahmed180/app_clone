@@ -385,6 +385,14 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "provisionMicroG" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                async(result) {
+                    engine.provisionMicroG(profileId)
+                        .toEnvelope("MICROG_PROVISIONED", "microG provisioned into the profile.")
+                }
+            }
+
             "uninstallAppFromProfile" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return

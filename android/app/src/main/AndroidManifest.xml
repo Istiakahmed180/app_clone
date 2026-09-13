@@ -62,6 +62,25 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
+        <!-- SPIKE ONLY (spike/microg-container): adb-triggerable entry point that installs a
+             bundled microG artefact into every existing virtual profile, bypassing the
+             AppSecurityChecker admission policy on purpose so the container behaviour can be
+             measured. The receiver itself refuses to run outside a debug build. -->
+        <receiver
+            android:name=".native.spike.MicroGSpikeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="co.tdevs.duplika.spike.MICROG" />
+            </intent-filter>
+        </receiver>
+        <activity
+            android:name=".native.spike.MicroGSpikeActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <!-- Hands exported diagnostics reports to the Android share sheet.
 
              Not exported, no permission required, and scoped by res/xml/diagnostics_paths.xml
