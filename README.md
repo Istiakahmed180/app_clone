@@ -78,9 +78,12 @@ not the platform itself.
 | Delivered | Explicitly NOT delivered |
 | --- | --- |
 | Compatibility verdict per app before cloning | Making GMS-dependent apps actually work |
-| Permission bridging via the system dialog | Per-clone permission scoping |
+| Honest warnings in the picker and the clone's long-press sheet | Per-clone permission scoping |
 | ABI / secure-env / system-component blocking | Any permission or security bypass |
-| Honest warnings in the picker and clone sheet | Verified support for banking/anti-cheat apps |
+
+Permission bridging — the sheet's "Grant N permission(s)" action — was part of Phase 4 and
+has since been removed; see `docs/PHASE_4_COMPATIBILITY.md`. Verified support for banking
+and anti-cheat apps remains out of scope.
 
 ## 3. Phase 3 scope
 
