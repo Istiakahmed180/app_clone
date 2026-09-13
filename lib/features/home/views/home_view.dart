@@ -15,6 +15,7 @@ import '../../private_space/views/private_space_settings_view.dart';
 import '../../private_space/widgets/private_space_tile.dart';
 import '../../private_space/widgets/unlock_dialog.dart';
 import '../controllers/home_controller.dart';
+import 'clone_permissions_view.dart';
 import '../widgets/add_clone_tile.dart';
 import '../widgets/clone_action_sheet.dart';
 import '../widgets/clone_count_dialog.dart';
@@ -676,6 +677,15 @@ class HomeView extends GetView<HomeController> {
         if (error != null && context.mounted) {
           await _showFailure(context, error);
         }
+      case CloneAction.permissions:
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => ClonePermissionsView(
+              controller: controller,
+              profile: profile,
+            ),
+          ),
+        );
       case CloneAction.delete:
         final bool confirmed = await showUninstallCloneDialog(
           context,

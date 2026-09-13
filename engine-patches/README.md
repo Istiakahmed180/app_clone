@@ -56,6 +56,24 @@ The label is applied when a guest creates its channel. Channels that already exi
 before this override is built keep their old name until the guest recreates them (Android
 allows a name update on re-create; not every app re-calls `createNotificationChannel`).
 
+## `overrides/…/IActivityManagerProxy$checkPermission.java` — UID mapping and per-clone policy
+
+Two jobs. It maps the Android 15 `checkPermissionForDevice` UID from the guest's virtual UID to
+the host UID, so a permission the host genuinely holds is reported as held. It also applies the
+app's **per-clone permission policy**: a permission the user denied for a container is answered
+DENIED before any of the grant shortcuts below it.
+
+The policy is read as a plain file, `filesDir/clone_permissions.txt`, by absolute path — the
+container redirects a guest's own storage, so a `getSharedPreferences` read there comes back
+empty (measured), which is why this is not a prefs lookup. The file name and the
+`"<userId> <permission>"` line format are a contract with
+`co.tdevs.duplika.native.ClonePermissionPolicy`; keep the two in step.
+
+What it is: per-clone permission scoping for apps that ask before they use a permission, which
+is virtually all of them. What it is not: a sandbox. Guests run under the host UID, so the
+camera/mic/location services in `system_server` check the host's grants, and an app that
+reaches a service without checking first is not stopped.
+
 ## 0005 — Permission-gated public media paths
 
 `IOCore` previously redirected the complete shared-storage tree into each clone's private

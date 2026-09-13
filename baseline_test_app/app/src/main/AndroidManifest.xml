@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Declared so the app can ask about its own camera permission. The per-clone
+         permission control is exercised against it. -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:label="Duplika Baseline"
         android:theme="@style/AppTheme">

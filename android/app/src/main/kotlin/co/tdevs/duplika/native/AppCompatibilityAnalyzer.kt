@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PermissionInfo
 import android.os.Build
 import android.os.Environment
 
@@ -190,6 +191,38 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     } catch (error: Exception) {
         Slog.w(Slog.INSTALL, "Could not read ABIs from $apkPath: ${error.message}")
         null
+    }
+
+    /**
+     * The dangerous permissions an installed app declares, sorted.
+     *
+     * The per-clone permission control offers exactly these. Returns an empty list for a
+     * package that is not installed (an imported-APK clone) — there is no manifest to read.
+     */
+    fun declaredDangerousPermissions(packageName: String): List<String> {
+        val requested = try {
+            context.packageManager
+                .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+                .requestedPermissions
+                ?.toSet()
+                .orEmpty()
+        } catch (_: PackageManager.NameNotFoundException) {
+            return emptyList()
+        }
+        return requested.filter(::isDangerous).sorted()
+    }
+
+    private fun isDangerous(permission: String): Boolean = try {
+        val info = context.packageManager.getPermissionInfo(permission, 0)
+        val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.protection
+        } else {
+            @Suppress("DEPRECATION")
+            info.protectionLevel and PermissionInfo.PROTECTION_MASK_BASE
+        }
+        level == PermissionInfo.PROTECTION_DANGEROUS
+    } catch (_: PackageManager.NameNotFoundException) {
+        false
     }
 
     /**

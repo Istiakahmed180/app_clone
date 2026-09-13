@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:duplika/core/constants/app_constants.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/data/models/clone_budget.dart';
+import 'package:duplika/data/models/clone_permissions.dart';
 import 'package:duplika/data/models/virtual_profile_model.dart';
 import 'package:duplika/core/services/private_space_store.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
@@ -291,6 +292,32 @@ void main() {
     final String? error = await controller.openNotificationSettings();
 
     expect(error, contains('no notification settings'));
+  });
+
+  test('clone permissions are read and a denial is forwarded', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['getClonePermissions'] = ok('CLONE_PERMISSIONS_READ', <String, Object?>{
+      'virtualUserId': 0,
+      'permissions': <Object?>['android.permission.CAMERA', 'android.permission.RECORD_AUDIO'],
+      'denied': <Object?>['android.permission.RECORD_AUDIO'],
+    });
+    responses['setClonePermission'] =
+        ok('CLONE_PERMISSION_SET', <String, Object?>{'denied': <Object?>[]});
+
+    final ClonePermissions permissions =
+        await controller.clonePermissions(profile);
+
+    expect(permissions.permissions, hasLength(2));
+    expect(permissions.allowed('android.permission.CAMERA'), isTrue);
+    expect(permissions.allowed('android.permission.RECORD_AUDIO'), isFalse);
+
+    final String? error = await controller.setClonePermission(
+      profile,
+      'android.permission.RECORD_AUDIO',
+      true,
+    );
+
+    expect(error, isNull);
   });
 
   // The clone budget. Figures are chosen against the controller's own constants:

@@ -16,6 +16,7 @@ public final class MainActivity extends Activity {
 
     private android.content.SharedPreferences state;
     private TextView stateView;
+    private TextView permView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +57,28 @@ public final class MainActivity extends Activity {
         postNotification.setOnClickListener(view -> postNotification());
         root.addView(postNotification);
 
+        permView = new TextView(this);
+        permView.setTextSize(18);
+        root.addView(permView);
+
+        Button checkCamera = new Button(this);
+        checkCamera.setText("Check camera permission");
+        checkCamera.setOnClickListener(view -> updatePermission());
+        root.addView(checkCamera);
+
         setContentView(root);
         updateState();
+        updatePermission();
+    }
+
+    /**
+     * Reports what this process is told about its own camera permission. Used to see the
+     * per-clone policy: the same app in two containers can answer differently.
+     */
+    private void updatePermission() {
+        boolean granted = checkSelfPermission(android.Manifest.permission.CAMERA)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED;
+        permView.setText("camera=" + (granted ? "GRANTED" : "DENIED"));
     }
 
     /**

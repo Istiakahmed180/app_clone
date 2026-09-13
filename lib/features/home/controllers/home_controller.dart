@@ -6,6 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/clone_budget.dart';
+import '../../../data/models/clone_permissions.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/device_capacity.dart';
 import '../../../data/models/engine_result.dart';
@@ -144,6 +145,32 @@ class HomeController extends GetxController {
   Future<String?> openNotificationSettings() async {
     try {
       await _nativeBridge.openCloneNotificationSettings();
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
+  /// The dangerous permissions this clone's app declares, and the ones denied for it.
+  Future<ClonePermissions> clonePermissions(VirtualProfileModel profile) =>
+      _nativeBridge.getClonePermissions(
+        profileId: profile.id,
+        packageName: profile.packageName,
+      );
+
+  /// Allows or denies one permission for this clone. Returns null on success, or a
+  /// user-facing message.
+  Future<String?> setClonePermission(
+    VirtualProfileModel profile,
+    String permission,
+    bool allowed,
+  ) async {
+    try {
+      await _nativeBridge.setClonePermission(
+        profileId: profile.id,
+        permission: permission,
+        allowed: allowed,
+      );
       return null;
     } on AppException catch (error) {
       return error.message;

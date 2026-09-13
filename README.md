@@ -317,7 +317,9 @@ It does **not** provide:
 - guaranteed support for arbitrary apps. Verified working: the test app, VLC, Telegram and
   WhatsApp (launch + container isolation) on one device; other apps may still fail
 - an independent Android UID — guests run under the **host's** UID and inherit its permission
-  grants; isolation is at the container/storage level, not the kernel UID level
+  grants; isolation is at the container/storage level, not the kernel UID level. A clone's
+  **Permissions** action can deny a dangerous permission for that clone, but that is a
+  check-layer policy, not a sandbox — see `docs/PHASE_4_COMPATIBILITY.md`
 - **caller-scoped Google APIs.** Superseded measurement, and the direction matters: the
   Phase 4 statement that `isGooglePlayServicesAvailable` returns `SERVICE_MISSING` and that
   `com.google.android.gms` is invisible to a guest was fixed by engine patch 0002 and is no

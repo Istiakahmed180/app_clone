@@ -32,6 +32,8 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val deviceCapacity = DeviceCapacity(appContext)
     private val disguise = AppDisguise(appContext)
     private val notifications = NotificationControl(appContext)
+    private val profiles = VirtualProfileManager(appContext)
+    private val permissionPolicy = ClonePermissionPolicy(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
 
@@ -169,6 +171,50 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                             "This device has no notification settings screen to open.",
                         )
                     },
+                )
+            }
+
+            "getClonePermissions" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                val virtualUserId = profiles.virtualUserIdFor(profileId)
+                if (virtualUserId == null) {
+                    result.success(
+                        failure("NO_CONTAINER", "This clone has no container yet."),
+                    )
+                    return
+                }
+                result.success(
+                    success(
+                        "CLONE_PERMISSIONS_READ",
+                        "Clone permission policy read.",
+                        mapOf(
+                            "virtualUserId" to virtualUserId,
+                            "permissions" to analyzer.declaredDangerousPermissions(packageName),
+                            "denied" to permissionPolicy.denied(virtualUserId).toList(),
+                        ),
+                    ),
+                )
+            }
+
+            "setClonePermission" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val permission = call.requiredArg("permission", result) ?: return
+                val allowed = call.argument<Boolean>("allowed") ?: false
+                val virtualUserId = profiles.virtualUserIdFor(profileId)
+                if (virtualUserId == null) {
+                    result.success(
+                        failure("NO_CONTAINER", "This clone has no container yet."),
+                    )
+                    return
+                }
+                permissionPolicy.setDenied(virtualUserId, permission, !allowed)
+                result.success(
+                    success(
+                        "CLONE_PERMISSION_SET",
+                        "Clone permission updated.",
+                        mapOf("denied" to permissionPolicy.denied(virtualUserId).toList()),
+                    ),
                 )
             }
             "isTestAppInstalled" -> result.success(testAppManager.isTestAppInstalled())

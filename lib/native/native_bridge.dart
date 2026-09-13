@@ -10,6 +10,7 @@ import '../core/utils/app_logger.dart';
 import '../data/models/app_details.dart';
 import '../data/models/app_disguise_mode.dart';
 import '../data/models/battery_prompt_screen.dart';
+import '../data/models/clone_permissions.dart';
 import '../data/models/compatibility_report.dart';
 import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
@@ -80,6 +81,39 @@ class NativeBridge {
   /// normally when a screen opened; throws otherwise.
   Future<void> openCloneNotificationSettings() async {
     final EngineResponse response = await _invokeEngine('openCloneNotificationSettings');
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+  }
+
+  /// The dangerous permissions a clone's app declares, and which the user has denied for
+  /// this clone. Throws when the clone has no container yet.
+  Future<ClonePermissions> getClonePermissions({
+    required String profileId,
+    required String packageName,
+  }) async {
+    final EngineResponse response = await _invokeEngine(
+      'getClonePermissions',
+      <String, dynamic>{'profileId': profileId, 'packageName': packageName},
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return ClonePermissions.fromMap(response.data);
+  }
+
+  /// Allows or denies [permission] for one clone. See [ClonePermissions] for what this does
+  /// and does not enforce.
+  Future<void> setClonePermission({
+    required String profileId,
+    required String permission,
+    required bool allowed,
+  }) async {
+    final EngineResponse response = await _invokeEngine('setClonePermission', <String, dynamic>{
+      'profileId': profileId,
+      'permission': permission,
+      'allowed': allowed,
+    });
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }

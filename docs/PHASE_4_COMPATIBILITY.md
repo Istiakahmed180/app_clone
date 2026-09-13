@@ -372,6 +372,16 @@ Two consequences worth stating plainly rather than discovering later:
   permissions. A guest can therefore only use a dangerous permission the host already holds.
   The old host-wide caveat (granting for one clone granted for all) is moot: there is no
   grant action any more.
+- **Per-clone permission scoping is a check-layer policy, not a sandbox.** A clone's
+  **Permissions** action lets the user deny a dangerous permission for that container. The
+  engine's `IActivityManagerProxy$checkPermission` override consults the policy (a plain file
+  at `filesDir/clone_permissions.txt`, read by absolute path because the container redirects
+  the guest's own storage) and answers DENIED before any grant path. It scopes an app that
+  asks before it uses a permission — which is virtually all of them — but it is **not** a hard
+  boundary: guests run under the host UID, so the camera/mic/location services in
+  `system_server` check the **host's** grants, and an app that reaches a service without
+  checking first is not stopped. True per-clone enforcement would need a real UID per clone,
+  which this container architecture does not provide.
 - Compatibility findings are shown **before cloning** (the picker's compatibility sheet) and,
   after cloning, in the existing clone's long-press sheet (`showCloneActionSheet`, fed by
   `HomeController.warningsFor`). The tile itself deliberately carries no warning badge: the
