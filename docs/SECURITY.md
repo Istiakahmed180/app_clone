@@ -11,6 +11,9 @@ implemented, and none should be added without an explicit decision recorded here
 - credential, cookie, token or private-app-data extraction
 - stealth execution or hiding the container from the apps running inside it
 - screenshot or `FLAG_SECURE` defeat
+- remote code download or self-update — the app has no HTTP client and no network egress, and
+  never installs executable code from outside the store. Importing an APK the user already has
+  is a local operation and is supported; fetching one from a URL is not
 - camera, microphone or location **spoofing** — synthetic frames, audio or coordinates.
   Turning a permission *off* for a clone is a different thing and is supported through the
   clone's Permissions action; fabricating the data a permission-granted app then reads is not,

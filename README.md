@@ -94,7 +94,7 @@ and anti-cheat apps remains out of scope.
 | Import and run an APK that is not installed | Camera / mic / location **data** virtualization (per-clone denial is supported — see §13) |
 | Multiple independent instances of one app | Device-fingerprint or location spoofing |
 | Isolated per-clone application storage | Any security bypass, VPN mode or anti-detection |
-| `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK download or code update |
+| `REQUIRE_SECURE_ENV` admission, incl. imported APKs | Remote APK **download** or **code update** (deliberate non-goal — import is local; see §13) |
 | Self-healing containers (rebuild on failed launch) | Verified support for games, banking/anti-cheat/GMS apps |
 
 ## 4. Directory structure
@@ -343,6 +343,11 @@ It does **not** provide:
 - **multi-account game support.** No game that uses anti-cheat or Play Integrity was tested,
   and bypassing either is on the forbidden list (`docs/SECURITY.md`). A game that detects the
   container and refuses to run is behaving correctly — that is a boundary, not a defect to fix
+- **remote APK download or code update** — a deliberate non-goal, not a gap. The app has no
+  HTTP client and no network egress; import is **local** (the file picker, a share, or a
+  `.papk.bin` package), and the app's own code is updated only through the store. Downloading
+  and installing executable code from a remote source, or self-updating outside the store, is
+  a security and Play-policy decision this build deliberately does not make
 - a working "Running" indicator (a Bcore defect; see `docs/VIRTUALIZATION_ENGINE.md`)
 - any verified compatibility beyond the one device tested (OnePlus CPH2605, Android 15, arm64)
 
