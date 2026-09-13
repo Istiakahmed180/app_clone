@@ -14,6 +14,7 @@ import '../data/models/engine_result.dart';
 import '../data/models/installed_app_model.dart';
 import '../data/models/platform_info.dart';
 import '../data/models/space_identity.dart';
+import '../data/models/storage_status.dart';
 import '../data/models/test_app_model.dart';
 
 /// The only place in the Dart codebase that talks to the platform channel.
@@ -32,6 +33,15 @@ class NativeBridge {
   Future<PlatformInfo> getPlatformInfo() async {
     final Map<String, dynamic> result = await _invokeMap('getPlatformInfo');
     return PlatformInfo.fromMap(result);
+  }
+
+  /// Free and total space on the volume clone containers are written to.
+  ///
+  /// Read on demand rather than cached with [getPlatformInfo]: free space moves, and a
+  /// figure from app start would be the wrong one by the time a clone is requested.
+  Future<StorageStatus> storageStatus() async {
+    final Map<String, dynamic> result = await _invokeMap('getStorageStatus');
+    return StorageStatus.fromMap(result);
   }
 
   Future<bool> isTestAppInstalled() async {

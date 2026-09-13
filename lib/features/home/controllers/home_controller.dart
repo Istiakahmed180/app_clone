@@ -5,10 +5,12 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
+import '../../../data/models/app_details.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
 import '../../../data/models/space_identity.dart';
+import '../../../data/models/storage_status.dart';
 import '../../../data/models/test_app_model.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
@@ -390,12 +392,21 @@ class HomeController extends GetxController {
   /// would leave the user with an unexplained partial result; carrying on gets them as
   /// many as the engine will give and then says exactly what happened.
   ///
+  /// A batch that cannot fit on the device is refused before any of it is attempted:
+  /// filling the disk one container at a time takes a minute to arrive at a failure
+  /// the free-space figure already knew about.
+  ///
   /// Returns null when every clone was created, or a user-facing message otherwise.
   Future<String?> createClones(
     VirtualProfileModel profile,
     int count, {
     void Function(int created, int total)? onProgress,
   }) async {
+    final String? refusal = await _storageRefusal(profile, count);
+    if (refusal != null) {
+      return refusal;
+    }
+
     int created = 0;
     String? firstFailure;
 
@@ -425,6 +436,55 @@ class HomeController extends GetxController {
       return firstFailure;
     }
     return 'Created $created of $count. $firstFailure';
+  }
+
+  /// Space the device keeps for itself, held back from the clone estimate.
+  ///
+  /// Android starts refusing writes and running its own cleanup well before a volume
+  /// reaches zero, so a batch sized to the last free byte would fail anyway — and take
+  /// the user's other apps down with it.
+  static const int _storageHeadroomBytes = 512 * 1024 * 1024;
+
+  /// Why [count] more clones of [profile] will not fit, or null to go ahead.
+  ///
+  /// The estimate is the app's own archive size, which is deliberately optimistic: a
+  /// container install writes optimised dex on top of a copy of the APK, so the real
+  /// cost is higher. Refusing only what fails the optimistic figure means a refusal
+  /// here is one no device could have satisfied, and a borderline batch is still let
+  /// through to try — [createClones] reports honestly if it then runs out.
+  ///
+  /// Returns null whenever the numbers cannot be read. A diagnostic that fails must
+  /// not stand between the user and a clone that would have worked.
+  Future<String?> _storageRefusal(VirtualProfileModel profile, int count) async {
+    final StorageStatus storage;
+    final AppDetails details;
+    try {
+      storage = await _nativeBridge.storageStatus();
+      details = await _nativeBridge.appDetails(profile.packageName);
+    } on AppException catch (error) {
+      _logger.warning('Skipped the clone space check: ${error.message}');
+      return null;
+    }
+
+    final int perClone = details.totalSizeBytes;
+    if (storage.isUnknown || perClone <= 0) {
+      return null;
+    }
+
+    final int usable = storage.freeBytes - _storageHeadroomBytes;
+    final int fits = usable <= 0 ? 0 : usable ~/ perClone;
+    if (fits >= count) {
+      return null;
+    }
+
+    final String each = AppDetails.formatBytes(perClone);
+    if (fits == 0) {
+      return 'Not enough space for another ${profile.appName} clone. '
+          'Each one needs about $each and ${storage.freeLabel} is free.';
+    }
+    return 'Not enough space for $count more ${profile.appName} clones. '
+        'Each one needs about $each and ${storage.freeLabel} is free — '
+        'room for $fits.';
   }
 
   /// Stops the guest if it is running. Returns null on success.

@@ -256,4 +256,85 @@ void main() {
     expect(controller.compatibility[profile.packageName]?.analysed, isFalse);
     expect(controller.warningsFor(profile), isEmpty);
   });
+
+  // The clone space check. Sizes are chosen against the controller's own 512 MB
+  // headroom: `usable = free - 512 MB`, and a clone is estimated at its APK size.
+  const int mb = 1024 * 1024;
+
+  void withSpace({required int freeMb, required int appMb}) {
+    responses['getStorageStatus'] = <Object?, Object?>{
+      'freeBytes': freeMb * mb,
+      'totalBytes': 64 * 1024 * mb,
+    };
+    responses['getAppDetails'] = ok('APP_DETAILS', <String, Object?>{
+      'packageName': AppConstants.testAppPackage,
+      'appName': 'Virtual Test App',
+      'apkCount': 1,
+      'totalSizeBytes': appMb * mb,
+      'abis': <Object?>[],
+      'components': <Object?>[],
+    });
+  }
+
+  test('a batch that cannot fit is refused before anything is created', () async {
+    final VirtualProfileModel profile = await seedClone();
+    // 250 MB usable, 100 MB each: two fit, five were asked for.
+    withSpace(freeMb: 512 + 250, appMb: 100);
+    await controller.refreshAll();
+
+    final String? error = await controller.createClones(profile, 5);
+
+    expect(error, contains('Not enough space for 5 more'));
+    expect(error, contains('room for 2'));
+    // Refused up front: the one seeded clone is still the only one.
+    expect(await repository.getProfiles(), hasLength(1));
+  });
+
+  test('the refusal names the app when not even one more fits', () async {
+    final VirtualProfileModel profile = await seedClone();
+    // 10 MB usable against a 100 MB app: nothing fits.
+    withSpace(freeMb: 512 + 10, appMb: 100);
+    await controller.refreshAll();
+
+    final String? error = await controller.createClones(profile, 3);
+
+    expect(error, contains('another Virtual Test App clone'));
+    expect(await repository.getProfiles(), hasLength(1));
+  });
+
+  test('a batch that fits is created', () async {
+    final VirtualProfileModel profile = await seedClone();
+    // 400 MB usable, 100 MB each: four fit, two were asked for.
+    withSpace(freeMb: 512 + 400, appMb: 100);
+    await controller.refreshAll();
+
+    final String? error = await controller.createClones(profile, 2);
+
+    expect(error, isNull);
+    expect(await repository.getProfiles(), hasLength(3));
+  });
+
+  test('clones are still created when the space check cannot run', () async {
+    // `getStorageStatus` is absent from `responses`, so the bridge throws. A failed
+    // diagnostic must not stand between the user and a clone that would have worked.
+    final VirtualProfileModel profile = await seedClone();
+    await controller.refreshAll();
+
+    final String? error = await controller.createClones(profile, 2);
+
+    expect(error, isNull);
+    expect(await repository.getProfiles(), hasLength(3));
+  });
+
+  test('an app whose size is unknown is not refused', () async {
+    final VirtualProfileModel profile = await seedClone();
+    // Plenty free, but a zero size is "could not read", not "costs nothing".
+    withSpace(freeMb: 512 + 400, appMb: 0);
+    await controller.refreshAll();
+
+    final String? error = await controller.createClones(profile, 2);
+
+    expect(error, isNull);
+    expect(await repository.getProfiles(), hasLength(3));
+  });
 }

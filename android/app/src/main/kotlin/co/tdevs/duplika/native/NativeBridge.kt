@@ -30,6 +30,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val permissionBridge = PermissionBridge()
     private val battery = BatteryOptimization(appContext)
     private val appDetails = AppDetailsReader(appContext)
+    private val deviceStorage = DeviceStorage(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
 
@@ -140,6 +141,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private fun dispatch(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "getPlatformInfo" -> result.success(testAppManager.getPlatformInfo())
+            "getStorageStatus" -> result.success(deviceStorage.status())
             "isTestAppInstalled" -> result.success(testAppManager.isTestAppInstalled())
             "getTestAppInfo" -> result.success(testAppManager.getTestAppInfo())
 
