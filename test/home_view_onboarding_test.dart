@@ -531,7 +531,7 @@ void main() {
       // The reason stands in for the bare range: a ceiling with nothing beside it
       // reads as arbitrary rather than as this device's answer.
       expect(
-        find.text('Up to 4 on a device with 8.0 GB of memory'),
+        find.text('Up to 4 at a time on a device with 8.0 GB of memory'),
         findsOneWidget,
       );
       expect(find.text('Choose from 1 to 20'), findsNothing);

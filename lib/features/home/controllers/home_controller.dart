@@ -521,9 +521,16 @@ class HomeController extends GetxController {
         reason: 'Up to $maximum — ${capacity.freeLabel} of space left',
       );
     }
+    // "at a time", because that is all this bound is. Memory does not shrink as idle
+    // containers pile up, so repeating the action reaches any total the storage floor
+    // allows — and a reason that read as a device ceiling would be promising otherwise.
+    // The storage wording above needs no such qualifier: free space really does fall
+    // with every clone made, so that figure is a ceiling and corrects itself.
     return CloneBudget(
       maximum: maximum,
-      reason: 'Up to $maximum on a device with ${capacity.totalMemLabel} of memory',
+      reason:
+          'Up to $maximum at a time on a device with '
+          '${capacity.totalMemLabel} of memory',
     );
   }
 
@@ -533,6 +540,11 @@ class HomeController extends GetxController {
   /// bound how many clones can exist. It bounds how many are usable at once — which is
   /// what someone who made twenty of them is about to try. These tiers are a judgement
   /// about that, not a measurement of anything: tune them, do not trust them.
+  ///
+  /// It caps a batch, not a total. Nothing here counts the clones already made, so
+  /// repeating the action reaches any number the storage floor permits. That is
+  /// deliberate — locking someone out of their own device on a guessed tier would be
+  /// worse than the friction — and it is why the offer says "at a time".
   int _memoryCap(DeviceCapacity capacity) {
     if (capacity.isLowRamDevice ?? false) {
       return 4;
@@ -565,8 +577,10 @@ class HomeController extends GetxController {
       return 'There is no room for another ${profile.appName} clone. '
           '${budget.reason}';
     }
-    return 'Not enough room for $count more ${profile.appName} clones — '
-        'this device can take ${budget.maximum} right now.';
+    // Quotes the budget rather than paraphrasing it, so the sentence the user is
+    // refused with is the one the stepper already showed them.
+    return 'Not enough room for $count more ${profile.appName} clones. '
+        '${budget.reason}.';
   }
 
   /// Stops the guest if it is running. Returns null on success.

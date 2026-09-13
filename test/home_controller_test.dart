@@ -324,6 +324,9 @@ void main() {
 
       expect(budget.maximum, 4);
       expect(budget.reason, contains('memory'));
+      // Memory does not fall as idle clones pile up, so this bound is per batch. The
+      // wording has to say so, or it promises a device ceiling that is not enforced.
+      expect(budget.reason, contains('at a time'));
     });
 
     test('a modest phone is offered fewer than a large one', () async {
@@ -371,7 +374,9 @@ void main() {
       final String? error = await controller.createClones(profile, 9);
 
       expect(error, contains('Not enough room for 9 more'));
-      expect(error, contains('can take 4'));
+      // The refusal repeats the stepper's own sentence rather than inventing a second
+      // way of saying the same number.
+      expect(error, contains('Up to 4 at a time'));
       // Refused up front: the one seeded clone is still the only one.
       expect(await repository.getProfiles(), hasLength(1));
     });
