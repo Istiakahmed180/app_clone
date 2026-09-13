@@ -52,6 +52,7 @@ state is faked in Flutter.
 | `docs/RELEASE_BUILD.md` | Why release builds minify, and what the engine needs to survive it |
 | `docs/ONBOARDING.md` | First-launch data disclosure (gates the app), the Doze exemption; what must change before release |
 | `docs/PLAY_PERMISSION_DECLARATIONS.md` | Paste-ready Play Console declarations for the three restricted permissions |
+| `docs/microg-integration.md` | The parked microG spike, and why signature verification blocks it |
 
 > **Attribution:** the root `NOTICE` and `licenses/` now carry the required notices for xDL,
 > Dobby, FreeReflection and toml4j, whose copies inside the vendored engine had none. That

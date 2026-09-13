@@ -184,6 +184,11 @@ phase forbids. Because it reports no capabilities, `AUTO` can never select it.
 Nothing is bundled, downloaded, installed or referenced. No proprietary Google component is
 copied.
 
+A real attempt to implement this — a bundled microG provisioned into a container — was made
+and then **parked**, because guest apps' signature verification rejects an honestly-signed
+microG. The implementation, the three measured blockers and what would have to change are
+recorded in `docs/microg-integration.md`; the branch is `spike/microg-provider` (`f9fb159`).
+
 ## Future microG implementation plan
 
 The order matters, and it is the opposite of what is tempting:
