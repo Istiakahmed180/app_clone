@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 ///
 /// Status here is not one axis. A clone can be settled and fine, or working but
 /// degraded, or blocked — and Material's scheme only names `error`. Before this
-/// existed both "Ready" and "needs a permission it does not have" were painted with
-/// `tertiary`, which meant the palette could not be changed without one of them
-/// coming out wrong.
+/// existed both "Ready" and "working but degraded (a clone whose app cannot receive
+/// push, say)" were painted with `tertiary`, which meant the palette could not be
+/// changed without one of them coming out wrong.
 @immutable
 class StatusColors extends ThemeExtension<StatusColors> {
   const StatusColors({required this.positive, required this.warning});

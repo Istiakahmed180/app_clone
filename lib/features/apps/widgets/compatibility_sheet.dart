@@ -142,11 +142,6 @@ class _SheetBodyState extends State<_SheetBody> {
               ),
             ],
 
-            // The "Grant N permission(s)" action was removed at the product owner's
-            // request. What remains is the warning itself: the app's declaration list is
-            // shown in the finding above, but there is no in-sheet route to ask for the
-            // host grants.
-
             // No Google Play services opt-in here any more. A GMS-dependent app still
             // gets its REQUIRES_GMS warning through the findings list above; what is gone
             // is the checkbox that provisioned a container-local copy of Play services,
