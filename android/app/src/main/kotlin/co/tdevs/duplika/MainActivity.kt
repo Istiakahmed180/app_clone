@@ -8,7 +8,7 @@ import co.tdevs.duplika.native.NativeBridge
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity : FlutterFragmentActivity() {
+open class MainActivity : FlutterFragmentActivity() {
 
     private var nativeBridge: NativeBridge? = null
     private var diagnosticsBridge: DiagnosticsBridge? = null

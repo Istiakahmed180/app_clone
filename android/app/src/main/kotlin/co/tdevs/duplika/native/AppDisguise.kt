@@ -5,17 +5,22 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 /**
- * Switches which launcher alias the app presents.
+ * Switches which launcher entry the app presents.
  *
- * The launcher entry is not `MainActivity` itself but one of two `activity-alias` entries in
- * the manifest — [NORMAL_ALIAS] (label "Duplika") and [CALCULATOR_ALIAS] (label "Calculator").
- * Exactly one is enabled at any time; [setMode] never leaves both disabled, because a build
- * with no enabled launcher entry is an app the user cannot open again from the launcher.
+ * There are two entries in the manifest — [NORMAL_ALIAS] (a real activity, subclass of
+ * `MainActivity`, label "Duplika") and [CALCULATOR_ALIAS] (an `activity-alias` targeting
+ * `MainActivity`, label "Calculator"). Exactly one is enabled at any time; [setMode] never
+ * leaves both disabled, because a build with no enabled launcher entry is an app the user
+ * cannot open again from the launcher.
  *
- * The aliases target the same activity, so both launch the same Flutter app. Which UI it
- * shows is decided in Dart; this class only changes the icon and label the launcher draws.
+ * The normal entry is a real activity rather than an alias because Flutter's tooling only
+ * recognises a real `<activity>` with a MAIN/LAUNCHER filter; the calculator alias targets
+ * `MainActivity`, which is never disabled, so it keeps working while the normal entry is off.
  *
- * `DONT_KILL_APP` matters: the component being toggled is the alias, not the running target
+ * Both host the same Flutter app. Which UI it shows is decided in Dart; this class only
+ * changes the icon and label the launcher draws.
+ *
+ * `DONT_KILL_APP` matters: the components being toggled are launcher entries, not the running
  * activity, so the process survives the switch and the user does not see the app vanish
  * mid-toggle.
  */
