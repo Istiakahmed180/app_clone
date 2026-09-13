@@ -385,6 +385,9 @@ void main() {
     ) async {
       await openSheet(tester);
 
+      // The sheet is draggable, so the bottom rows can start below the fold.
+      await tester.ensureVisible(find.text('Uninstall'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Uninstall'));
       await tester.pumpAndSettle();
 
@@ -417,6 +420,9 @@ void main() {
 
     testWidgets('Cancel keeps the clone', (WidgetTester tester) async {
       await openSheet(tester);
+      // The sheet is draggable, so the bottom rows can start below the fold.
+      await tester.ensureVisible(find.text('Uninstall'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Uninstall'));
       await tester.pumpAndSettle();
 
@@ -431,6 +437,9 @@ void main() {
       WidgetTester tester,
     ) async {
       await openSheet(tester);
+      // The sheet is draggable, so the bottom rows can start below the fold.
+      await tester.ensureVisible(find.text('Uninstall'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Uninstall'));
       await tester.pumpAndSettle();
       await tester.tap(
@@ -467,6 +476,9 @@ void main() {
 
     testWidgets('confirming removes it', (WidgetTester tester) async {
       await openSheet(tester);
+      // The sheet is draggable, so the bottom rows can start below the fold.
+      await tester.ensureVisible(find.text('Uninstall'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Uninstall'));
       await tester.pumpAndSettle();
 

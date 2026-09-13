@@ -51,10 +51,12 @@ Future<CloneAction?> showCloneActionSheet(
 }) {
   return showModalBottomSheet<CloneAction>(
     context: context,
-    // Scroll-controlled and scrollable inside: nine actions plus a header do not fit a
-    // bottom sheet's default half-screen budget, and fit even less at a large text
-    // scale or in landscape.
+    // Scroll-controlled and draggable, like the filter sheet: the content grows with the
+    // warnings it has to show, and a sheet fixed at half the screen would make the user
+    // scroll a small window instead of growing it. Dragging or scrolling up takes it to
+    // full height; dragging down past the minimum dismisses it.
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (BuildContext context) => _CloneActionSheet(
       profile: profile,
       state: state,
@@ -88,37 +90,61 @@ class _CloneActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _header(context),
-            SizedBox(height: 20.h),
-            _primaryRow(),
-            if (findings.isNotEmpty) ...<Widget>[
-              SizedBox(height: 24.h),
-              Text('Compatibility', style: Theme.of(context).textTheme.titleSmall),
-              SizedBox(height: 10.h),
-              _findings(context),
-            ],
-            SizedBox(height: 24.h),
-            Text('Manage', style: Theme.of(context).textTheme.titleSmall),
-            SizedBox(height: 10.h),
-            _manageGrid(),
-            SizedBox(height: 18.h),
-            const Divider(height: 1),
-            SizedBox(height: 14.h),
-            const _ActionRow(
-              action: CloneAction.delete,
-              icon: Icons.delete_outline,
-              label: 'Uninstall',
-              destructive: true,
+    return DraggableScrollableSheet(
+      // Same shape as the filter sheet: it opens part-way, grows to the top as the user
+      // scrolls past the content, and can be dragged down to dismiss. A plain
+      // scroll-controlled sheet sized to this much content instead pinned itself to the
+      // top of the screen and could not be dragged away.
+      initialChildSize: 0.72,
+      minChildSize: 0.4,
+      maxChildSize: 1,
+      snap: true,
+      snapSizes: const <double>[0.72],
+      expand: false,
+      builder: (BuildContext context, ScrollController scrollController) => Column(
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              // The sheet's own controller, so dragging/scrolling past the top moves the
+              // sheet rather than stopping dead at the content's edge.
+              controller: scrollController,
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                8.h,
+                20.w,
+                16.h + MediaQuery.viewPaddingOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const _DragHandle(),
+                  _header(context),
+                  SizedBox(height: 20.h),
+                  _primaryRow(),
+                  if (findings.isNotEmpty) ...<Widget>[
+                    SizedBox(height: 24.h),
+                    Text('Compatibility', style: Theme.of(context).textTheme.titleSmall),
+                    SizedBox(height: 10.h),
+                    _findings(context),
+                  ],
+                  SizedBox(height: 24.h),
+                  Text('Manage', style: Theme.of(context).textTheme.titleSmall),
+                  SizedBox(height: 10.h),
+                  _manageGrid(),
+                  SizedBox(height: 18.h),
+                  const Divider(height: 1),
+                  SizedBox(height: 14.h),
+                  const _ActionRow(
+                    action: CloneAction.delete,
+                    icon: Icons.delete_outline,
+                    label: 'Uninstall',
+                    destructive: true,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -424,6 +450,27 @@ class _ActionRow extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The pill at the top of a draggable sheet, so it reads as something that can be pulled.
+class _DragHandle extends StatelessWidget {
+  const _DragHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Center(
+      child: Container(
+        width: 40.w,
+        height: 4.h,
+        margin: EdgeInsets.only(bottom: 18.h),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.outlineVariant,
+          borderRadius: BorderRadius.circular(2.r),
         ),
       ),
     );

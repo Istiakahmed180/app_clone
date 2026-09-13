@@ -388,6 +388,10 @@ void main() {
             ('Uninstall', CloneAction.delete),
           ]) {
         await _openSheet(tester);
+        // The sheet is a DraggableScrollableSheet, so lower actions can start below the
+        // fold; scroll the one under test into view before tapping it.
+        await tester.ensureVisible(find.text(label));
+        await tester.pumpAndSettle();
         await tester.tap(find.text(label));
         await tester.pumpAndSettle();
         expect(_lastChoice, expected, reason: label);
