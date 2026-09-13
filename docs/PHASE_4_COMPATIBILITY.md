@@ -41,6 +41,21 @@
 > `com.example.virtualspacedemo` and the old app label. Nothing else about them changed; the
 > host package is now `co.tdevs.duplika`.
 
+> ## ⚠️ Permission bridging was removed after this phase
+>
+> The `PermissionBridge` native class, the bridge method `requestGuestPermissions`, the Dart
+> `PermissionRequestResult` model, and the compatibility sheet's **"Grant N permission(s)"**
+> action have all been **deleted**. Every present-tense description of them below — section 2,
+> the review passes, the consent-path coverage, and the device results table — is the phase
+> record, not current behaviour. The analyzer no longer reports a permissions finding at all,
+> and nothing in the app asks for or grants the host's permissions; a guest can only use a
+> dangerous permission the host already holds.
+>
+> What is current instead: findings appear **before cloning** in the picker's compatibility
+> sheet and, after cloning, in the clone's long-press sheet (`showCloneActionSheet`, fed by
+> `HomeController.warningsFor`). The tile itself carries **no** warning badge — the grid is
+> meant to read as a home screen, not a list of faults.
+
 Device of record: **OnePlus CPH2605, Android 15 (API 35), arm64-v8a**.
 
 ## Why this phase exists
@@ -109,9 +124,10 @@ This is not a privilege escalation and contains no bypass:
 ### 3. Honest UI
 
 The compatibility sheet appears **before** a clone is created, for both installed apps and
-imported APKs. It shows the verdict badge, every finding in plain language, a "Grant N
-permission(s)" action, and disables "Add clone" outright when the app is unsupported. The app
-list shows a per-row badge for anything not fully supported.
+imported APKs. It shows the verdict badge, every finding in plain language, and disables
+"Add clone" outright when the app is unsupported. (It also offered a "Grant N permission(s)"
+action at the time; that was removed with the permission bridge — see the note at the top.)
+The app list shows a per-row badge for anything not fully supported.
 
 ## Results on device
 
@@ -353,10 +369,12 @@ Two consequences worth stating plainly rather than discovering later:
   permissions. A guest can therefore only use a dangerous permission the host already holds.
   The old host-wide caveat (granting for one clone granted for all) is moot: there is no
   grant action any more.
-- Compatibility findings are shown **before cloning** (the picker's compatibility sheet) and
-  for **imported APKs**. The home-side display this phase added — a badge on `CloneTile` and
-  findings in the long-press sheet via `HomeController.warningsFor` — was later removed along
-  with the permission-bridge UI, so an existing clone's card no longer carries them.
+- Compatibility findings are shown **before cloning** (the picker's compatibility sheet) and,
+  after cloning, in the existing clone's long-press sheet (`showCloneActionSheet`, fed by
+  `HomeController.warningsFor`). The tile itself deliberately carries no warning badge: the
+  grid is meant to read as a home screen, not a list of faults. Findings for an app that is
+  not installed on the host are filtered out (`APP_NOT_FOUND`), because that is the normal
+  state for a clone made from an imported APK.
 
 - Imported APKs are now analysed from the archive itself (`analyzeApk`), so they no longer
   fall back to a clean bill of health. If analysis genuinely fails the sheet says

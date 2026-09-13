@@ -1,4 +1,5 @@
 import 'package:duplika/app/theme/app_theme.dart';
+import 'package:duplika/data/models/compatibility_report.dart';
 import 'package:duplika/data/models/engine_result.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/data/models/space_identity.dart';
@@ -97,6 +98,7 @@ Future<CloneAction?> _openSheet(
   VirtualProfileState state = _ready,
   int siblingCount = 1,
   int instanceIndex = 1,
+  List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
 }) async {
   _lastChoice = null;
   CloneAction? chosen;
@@ -115,6 +117,7 @@ Future<CloneAction?> _openSheet(
                   state: state,
                   siblingCount: siblingCount,
                   instanceIndex: instanceIndex,
+                  findings: findings,
                 );
               },
               child: const Text('open'),
@@ -321,6 +324,45 @@ void main() {
       await _openSheet(tester);
 
       expect(find.text('Launch'), findsNothing);
+    });
+
+    testWidgets('shows the compatibility findings for an existing clone', (
+      WidgetTester tester,
+    ) async {
+      // The tile itself stays clean; holding it is where what-will-not-work is said.
+      await _openSheet(
+        tester,
+        findings: const <CompatibilityFinding>[
+          CompatibilityFinding(
+            code: 'PUSH_UNSUPPORTED',
+            message: 'Push notifications will not arrive in this clone.',
+            blocking: false,
+          ),
+          CompatibilityFinding(
+            code: 'SECURE_ENV_REQUIRED',
+            message: 'This application requires a secure environment.',
+            blocking: true,
+          ),
+        ],
+      );
+
+      expect(find.text('Compatibility'), findsOneWidget);
+      expect(
+        find.text('Push notifications will not arrive in this clone.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('This application requires a secure environment.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no Compatibility section when there is nothing to say', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(tester);
+
+      expect(find.text('Compatibility'), findsNothing);
     });
 
     testWidgets('names the space rather than repeating the app name', (

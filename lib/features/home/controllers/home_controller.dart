@@ -6,6 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/clone_budget.dart';
+import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/device_capacity.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/platform_info.dart';
@@ -46,6 +47,13 @@ class HomeController extends GetxController {
   final RxMap<String, VirtualProfileState> profileStates =
       <String, VirtualProfileState>{}.obs;
   final RxMap<String, Uint8List> appIcons = <String, Uint8List>{}.obs;
+
+  /// Compatibility reports for the cloned packages, keyed by package name.
+  ///
+  /// Read by the clone action sheet so holding a tile says what will not work inside it.
+  /// The tile itself stays clean on purpose — see `CloneTile`.
+  final RxMap<String, CompatibilityReport> compatibility =
+      <String, CompatibilityReport>{}.obs;
 
   bool get isTestAppInstalled => testApp.value?.installed ?? false;
 
@@ -104,6 +112,24 @@ class HomeController extends GetxController {
       _privateSpace.setHidden(profile.id, hidden);
 
   Future<void> unhideAll() => _privateSpace.unhideAll();
+
+  /// Compatibility problems worth showing for an existing clone.
+  ///
+  /// `APP_NOT_FOUND` is filtered out deliberately: it only means the package is not
+  /// installed on the host, which is the normal state for a clone created from an imported
+  /// APK. That clone has its own container and works fine, so flagging it would be a false
+  /// alarm about the feature that put it there.
+  List<CompatibilityFinding> warningsFor(VirtualProfileModel profile) {
+    final CompatibilityReport? report = compatibility[profile.packageName];
+    if (report == null || !report.analysed) {
+      return const <CompatibilityFinding>[];
+    }
+    return report.findings
+        .where(
+          (CompatibilityFinding f) => f.code != AppConstants.errorAppNotFound,
+        )
+        .toList(growable: false);
+  }
 
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
@@ -165,6 +191,7 @@ class HomeController extends GetxController {
     await Future.wait<void>(<Future<void>>[
       _loadProfileStates(),
       _loadIcons(),
+      _loadCompatibility(),
     ]);
     isLoading.value = false;
   }
@@ -226,6 +253,36 @@ class HomeController extends GetxController {
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not load app icons', error, stackTrace);
     }
+  }
+
+  /// Analyses each distinct cloned package once, not once per clone.
+  ///
+  /// The result is read by [warningsFor], which the clone action sheet shows. It does not
+  /// power a badge on the tile: the grid is meant to read as a home screen, not a list of
+  /// faults.
+  Future<void> _loadCompatibility() async {
+    final Set<String> packages = profiles
+        .map((VirtualProfileModel p) => p.packageName)
+        .toSet();
+    if (packages.isEmpty) {
+      compatibility.clear();
+      return;
+    }
+
+    final Map<String, CompatibilityReport> reports =
+        <String, CompatibilityReport>{};
+    for (final String packageName in packages) {
+      try {
+        reports[packageName] = await _nativeBridge.analyzeApp(packageName);
+      } on AppException catch (error, stackTrace) {
+        _logger.error(
+          'Compatibility analysis failed for $packageName',
+          error,
+          stackTrace,
+        );
+      }
+    }
+    compatibility.assignAll(reports);
   }
 
   Future<void> _loadProfiles() async {

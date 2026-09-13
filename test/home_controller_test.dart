@@ -29,6 +29,13 @@ void main() {
         'data': data,
       };
 
+  Map<String, Object?> reportWith(List<Map<String, Object?>> findings) => <String, Object?>{
+        'packageName': AppConstants.testAppPackage,
+        'verdict': findings.isEmpty ? 'SUPPORTED' : 'UNSUPPORTED',
+        'findings': findings,
+        'requiresGms': false,
+      };
+
   setUp(() {
     storage = InMemoryProfileStorage();
     repository = VirtualProfileRepository(storage: storage);
@@ -202,6 +209,64 @@ void main() {
           .firstWhere((VirtualProfileModel p) => p.id == second.id);
       expect(controller.shortcutLabel(renamed), 'Work camera');
     });
+  });
+
+  test('a real problem is surfaced for an existing clone', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['analyzeApp'] = ok('APP_ANALYZED', reportWith(<Map<String, Object?>>[
+      <String, Object?>{
+        'code': AppConstants.errorSecureEnvRequired,
+        'message': 'This application requires a secure environment.',
+        'blocking': true,
+      },
+    ]));
+
+    await controller.refreshAll();
+
+    expect(controller.warningsFor(profile), hasLength(1));
+    expect(controller.warningsFor(profile).single.blocking, isTrue);
+  });
+
+  test('a clone of an app that is not installed on the host is not flagged', () async {
+    // The normal state for a clone created from an imported APK: the container exists and
+    // works, the package simply is not installed here. Reporting that would be a false
+    // alarm about the import feature itself.
+    final VirtualProfileModel profile = await seedClone();
+    responses['analyzeApp'] = ok('APP_ANALYZED', reportWith(<Map<String, Object?>>[
+      <String, Object?>{
+        'code': AppConstants.errorAppNotFound,
+        'message': 'This application is not installed on the device.',
+        'blocking': true,
+      },
+    ]));
+
+    await controller.refreshAll();
+
+    expect(controller.warningsFor(profile), isEmpty);
+  });
+
+  test('a healthy app produces no warnings', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['analyzeApp'] = ok('APP_ANALYZED', reportWith(<Map<String, Object?>>[]));
+
+    await controller.refreshAll();
+
+    expect(controller.warningsFor(profile), isEmpty);
+  });
+
+  test('an analysis that could not run produces no warnings', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['analyzeApp'] = <Object?, Object?>{
+      'success': false,
+      'code': 'BRIDGE_ERROR',
+      'message': 'failed',
+      'data': <Object?, Object?>{},
+    };
+
+    await controller.refreshAll();
+
+    expect(controller.compatibility[profile.packageName]?.analysed, isFalse);
+    expect(controller.warningsFor(profile), isEmpty);
   });
 
   // The clone budget. Figures are chosen against the controller's own constants:
