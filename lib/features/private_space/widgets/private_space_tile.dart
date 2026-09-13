@@ -42,63 +42,69 @@ class PrivateSpaceTile extends StatelessWidget {
               borderRadius: radius,
               border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
-            child: Stack(
-              children: <Widget>[
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        width: 46.r,
-                        height: 46.r,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.lock_outline,
-                          size: 24.r,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4.w),
-                        child: Text(
-                          'Private space',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface,
+            child: Padding(
+              // Keeps the count clear of the rounded corner, as on the clone tiles.
+              padding: EdgeInsets.all(8.w),
+              child: Stack(
+                children: <Widget>[
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          width: 46.r,
+                          height: 46.r,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            shape: BoxShape.circle,
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          child: Icon(
+                            Icons.lock_outline,
+                            size: 24.r,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 6.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Text(
+                            'Private space',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (hiddenCount > 0)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      alignment: Alignment.center,
-                      constraints: BoxConstraints(minWidth: 18.r, minHeight: 18.r),
-                      padding: EdgeInsets.symmetric(horizontal: 5.w),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(9.r),
-                      ),
-                      child: Text(
-                        '$hiddenCount',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                  if (hiddenCount > 0)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        alignment: Alignment.center,
+                        constraints:
+                            BoxConstraints(minWidth: 18.r, minHeight: 18.r),
+                        padding: EdgeInsets.symmetric(horizontal: 5.w),
+                        decoration: BoxDecoration(
+                          color:
+                              theme.colorScheme.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(9.r),
+                        ),
+                        child: Text(
+                          '$hiddenCount',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
