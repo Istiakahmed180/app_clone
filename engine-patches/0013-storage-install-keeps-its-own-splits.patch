@@ -1,0 +1,127 @@
+Stop a storage install from borrowing the host's split APKs.
+
+SYMPTOM
+    A cloned Firebase app could reach its login screen but never obtained an FCM
+    token on the OnePlus CPH2605 (Android 15). The container's microG -- installed
+    by MicroGProvider through the storage path -- was recorded with *Google Play
+    services'* split APKs: the 37 MB microG base.apk sat next to
+    split_AdsDynamite_installtime.apk, split_MapsDynamite_installtime.apk,
+    split_config.xxhdpi.apk and the rest of the host GMS split set. Both spots
+    below fell back to the host's splitSourceDirs whenever a package brought no
+    splitCodePaths of its own, which for a storage install is exactly the case
+    that means "this APK has no splits".
+
+    With that mixed package the guest bind failed. Logcat showed:
+
+        W BActivityThread: makeApplication returned null, attempting fallback creation
+        E BActivityThread: Error creating application: null
+        E BActivityThread: Fallback application creation failed: null
+        D BActivityThread: Creating minimal application wrapper
+        E BActivityThread: Unable to instantiate service
+            org.microg.gms.gcm.PushRegisterService: java.lang.NullPointerException:
+            Attempt to invoke virtual method 'java.lang.Class
+            java.lang.ClassLoader.loadClass(java.lang.String)' on a null object reference
+
+    after which no microG service could start, so checkin never completed and no
+    FCM token was issued. Deleting the stray split files instead made
+    createPackageContext return null and the bind abort on
+    "assert packageContext != null".
+
+FIX
+    CopyExecutor: only a FLAG_SYSTEM install (by name, from the host) borrows the
+    host's split set. A storage install owns its splits; when it brought none, it
+    has none.
+
+    PackageManagerCompat.generateApplicationInfo: same rule for what the guest is
+    told. A storage install also drops recorded split paths whose files are gone
+    (the polluted containers repair themselves on the next scan), and with no
+    usable splits the splitDir fields are explicitly cleared -- they are part of
+    the persisted ApplicationInfo, so leaving them would keep feeding the guest a
+    split path that no longer exists.
+
+MEASURED
+    Physical device, OnePlus CPH2605 / Android 15, minified app + this AAR:
+    a fresh Cabex FX clone completed microG checkin (checkin.xml written) and
+    stored a real FCM token in the guest app's preferences
+    (flutter.current_fcm_token, f...:APA91b...). Evidence:
+    evidence/physical-android15/fcm-cabexfx-fixed/.
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/installer/CopyExecutor.java
+@@ -33,7 +33,14 @@
+                 // File.listFiles() on it returns null for us, which is why a directory scan
+                 // finds nothing at all.
+                 String[] splits = ps.pkg.splitCodePaths;
+-                if (splits == null || splits.length == 0) {
++                // Only a FLAG_SYSTEM install (by name, from the host) may borrow the host's
++                // split set. A storage install owns its splits: when it brought none, it has
++                // none, and borrowing the host's mixes another APK's splits into this
++                // package -- microG provisioning inherited Google Play services' Dynamite
++                // splits, which broke the guest class loader and stopped every service,
++                // including microG's push registration.
++                if ((splits == null || splits.length == 0)
++                        && option.isFlag(InstallOption.FLAG_SYSTEM)) {
+                     try {
+                         splits = BlackBoxCore.getPackageManager()
+                                 .getApplicationInfo(ps.pkg.packageName, 0).splitSourceDirs;
+===PMC===
+--- a/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java
++++ b/Bcore/src/main/java/top/niunaijun/blackbox/core/system/pm/PackageManagerCompat.java
+@@ -17,7 +17,10 @@
+ import android.content.res.Resources;
+ import android.os.Build;
+ 
++import java.io.File;
++import java.util.ArrayList;
+ import java.util.HashSet;
++import java.util.List;
+ import java.util.Set;
+ 
+ import black.android.content.pm.BRApplicationInfoL;
+@@ -313,16 +316,42 @@
+         if (splitPaths == null || splitPaths.length == 0) {
+             // Apps installed on the host go through the FLAG_SYSTEM path, which never fills
+             // splitCodePaths in, so read them from the host package manager instead.
+-            try {
+-                splitPaths = BlackBoxCore.getPackageManager()
+-                        .getApplicationInfo(p.packageName, 0).splitSourceDirs;
+-            } catch (Throwable ignored) {
+-                // Imported APK with no host install: it genuinely has no splits.
++            //
++            // Only for FLAG_SYSTEM installs: a storage install that brought no splits of its
++            // own must never be handed the host's. Doing so mixed Google Play services'
++            // Dynamite splits into a container-installed microG, and the guest class loader
++            // then failed to create the guest Application at all -- services (microG's push
++            // registration among them) could not start.
++            if (p.installOption.isFlag(InstallOption.FLAG_SYSTEM)) {
++                try {
++                    splitPaths = BlackBoxCore.getPackageManager()
++                            .getApplicationInfo(p.packageName, 0).splitSourceDirs;
++                } catch (Throwable ignored) {
++                    // Imported APK with no host install: it genuinely has no splits.
++                }
++            }
++        } else if (p.installOption.isFlag(InstallOption.FLAG_STORAGE)) {
++            // A storage install's recorded splits are files copied into its own container.
++            // A recorded path whose file is gone must be dropped rather than handed to the
++            // guest: a missing split path makes the framework refuse the package context.
++            List<String> present = new ArrayList<>(splitPaths.length);
++            for (String splitPath : splitPaths) {
++                if (splitPath != null && new File(splitPath).isFile()) {
++                    present.add(splitPath);
++                }
+             }
++            splitPaths = present.isEmpty() ? null : present.toArray(new String[0]);
+         }
+         if (splitPaths != null && splitPaths.length > 0) {
+             ai.splitSourceDirs = splitPaths;
+             ai.splitPublicSourceDirs = splitPaths;
++        } else {
++            // The stored ApplicationInfo is a persisted copy, so a split set recorded by an
++            // earlier install survives into this one. With no usable splits, clear the
++            // fields rather than leaving the previous values in place: a split path that no
++            // longer exists makes the framework refuse the package context outright.
++            ai.splitSourceDirs = null;
++            ai.splitPublicSourceDirs = null;
+         }
+         ai.uid = p.mExtras.appId;
+ 
