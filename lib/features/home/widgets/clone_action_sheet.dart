@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../app/theme/status_colors.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/virtual_profile_model.dart';
@@ -36,8 +37,9 @@ enum CloneAction {
 /// * **three primary tiles** — things done *with* a clone: make another, put it on the
 ///   home screen, look at what it is;
 /// * **Manage** — things done *to* it, ordered by cost: harmless (rename), recoverable
-///   (force stop, clear cache), then costly (clear storage). Install Google services
-///   appears here only for a clone that needs them and does not have them yet;
+///   (force stop, clear cache), then costly (clear storage). Google services appear here
+///   only for a clone whose app needs them: the state when microG is in place, the
+///   install row when it is not;
 /// * **Uninstall**, alone below a divider, because it is the only one that destroys the
 ///   clone itself.
 ///
@@ -51,7 +53,8 @@ Future<CloneAction?> showCloneActionSheet(
   int instanceIndex = 1,
   bool hidden = false,
   List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
-  bool offerInstallGoogleServices = false,
+  bool requiresGoogleServices = false,
+  bool googleServicesInstalled = false,
 }) {
   return showModalBottomSheet<CloneAction>(
     context: context,
@@ -69,7 +72,8 @@ Future<CloneAction?> showCloneActionSheet(
       instanceIndex: instanceIndex,
       hidden: hidden,
       findings: findings,
-      offerInstallGoogleServices: offerInstallGoogleServices,
+      requiresGoogleServices: requiresGoogleServices,
+      googleServicesInstalled: googleServicesInstalled,
     ),
   );
 }
@@ -83,7 +87,8 @@ class _CloneActionSheet extends StatelessWidget {
     required this.instanceIndex,
     required this.hidden,
     required this.findings,
-    required this.offerInstallGoogleServices,
+    required this.requiresGoogleServices,
+    required this.googleServicesInstalled,
   });
 
   final VirtualProfileModel profile;
@@ -94,10 +99,13 @@ class _CloneActionSheet extends StatelessWidget {
   final bool hidden;
   final List<CompatibilityFinding> findings;
 
-  /// Only for a clone whose app depends on Google services and whose container does not
-  /// have microG yet — see `HomeController.requiresGoogleServices` and
-  /// `HomeController.googleServicesInstalled`.
-  final bool offerInstallGoogleServices;
+  /// Whether this clone's app depends on Google services. Only then is the microG state
+  /// shown at all — see `HomeController.requiresGoogleServices`.
+  final bool requiresGoogleServices;
+
+  /// Whether the container already carries microG. When it does the sheet reports that
+  /// state; when it does not, the row that installs it is offered instead.
+  final bool googleServicesInstalled;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +149,7 @@ class _CloneActionSheet extends StatelessWidget {
                   SizedBox(height: 24.h),
                   Text('Manage', style: Theme.of(context).textTheme.titleSmall),
                   SizedBox(height: 10.h),
-                  _manageGrid(),
+                  _manageGrid(context),
                   SizedBox(height: 18.h),
                   const Divider(height: 1),
                   SizedBox(height: 14.h),
@@ -275,7 +283,7 @@ class _CloneActionSheet extends StatelessWidget {
     );
   }
 
-  Widget _manageGrid() {
+  Widget _manageGrid(BuildContext context) {
     return Column(
       children: <Widget>[
         Row(
@@ -361,13 +369,20 @@ class _CloneActionSheet extends StatelessWidget {
         ),
         // Full width on its own line: the label names a provider, and squeezing it into
         // the two-column grid would have it ellipsised for no gain.
-        if (offerInstallGoogleServices) ...<Widget>[
+        if (requiresGoogleServices) ...<Widget>[
           SizedBox(height: 12.h),
-          const _ActionRow(
-            action: CloneAction.installGoogleServices,
-            icon: Icons.cloud_download_outlined,
-            label: 'Install Google services (microG)',
-          ),
+          if (googleServicesInstalled)
+            _StatusRow(
+              icon: Icons.check_circle_outline,
+              color: StatusColors.of(context).positive,
+              label: 'Google services (microG) installed',
+            )
+          else
+            const _ActionRow(
+              action: CloneAction.installGoogleServices,
+              icon: Icons.cloud_download_outlined,
+              label: 'Install Google services (microG)',
+            ),
         ],
       ],
     );
@@ -486,6 +501,51 @@ class _ActionRow extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A bordered row that reports a state rather than offering an action.
+///
+/// Styled like [_ActionRow] so the Manage section keeps one visual grammar, but with no
+/// ink: there is nothing here to tap.
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius.r),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, size: 20.r, color: color),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(color: theme.colorScheme.onSurface),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

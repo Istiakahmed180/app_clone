@@ -99,7 +99,8 @@ Future<CloneAction?> _openSheet(
   int siblingCount = 1,
   int instanceIndex = 1,
   List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
-  bool offerInstallGoogleServices = false,
+  bool requiresGoogleServices = false,
+  bool googleServicesInstalled = false,
 }) async {
   _lastChoice = null;
   CloneAction? chosen;
@@ -119,7 +120,8 @@ Future<CloneAction?> _openSheet(
                   siblingCount: siblingCount,
                   instanceIndex: instanceIndex,
                   findings: findings,
-                  offerInstallGoogleServices: offerInstallGoogleServices,
+                  requiresGoogleServices: requiresGoogleServices,
+                  googleServicesInstalled: googleServicesInstalled,
                 );
               },
               child: const Text('open'),
@@ -324,12 +326,13 @@ void main() {
       // microG is not a generic action: it is only offered for a clone that needs
       // Google services and does not have them yet, so it is absent here.
       expect(find.text('Install Google services (microG)'), findsNothing);
+      expect(find.text('Google services (microG) installed'), findsNothing);
     });
 
     testWidgets('offers microG only when asked, and closes with its own answer', (
       WidgetTester tester,
     ) async {
-      await _openSheet(tester, offerInstallGoogleServices: true);
+      await _openSheet(tester, requiresGoogleServices: true);
 
       expect(find.text('Install Google services (microG)'), findsOneWidget);
 
@@ -341,6 +344,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_lastChoice, CloneAction.installGoogleServices);
+    });
+
+    testWidgets('reports installed Google services instead of offering them', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(
+        tester,
+        requiresGoogleServices: true,
+        googleServicesInstalled: true,
+      );
+
+      expect(find.text('Google services (microG) installed'), findsOneWidget);
+      expect(find.text('Install Google services (microG)'), findsNothing);
     });
 
     testWidgets('does not offer launch, which tapping the tile already does', (

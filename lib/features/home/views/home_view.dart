@@ -345,11 +345,12 @@ class HomeView extends GetView<HomeController> {
     VirtualProfileModel profile, {
     bool hidden = false,
   }) async {
-    // Asked before the sheet opens: the action is only offered when this clone's app
-    // depends on Google services and its container does not already carry microG.
-    final bool offerInstallGoogleServices =
-        controller.requiresGoogleServices(profile) &&
-        !await controller.googleServicesInstalled(profile);
+    // Asked before the sheet opens: a clone whose app depends on Google services reports
+    // whether microG is in its container, and offers to install it when it is not.
+    final bool requiresGoogleServices =
+        controller.requiresGoogleServices(profile);
+    final bool googleServicesInstalled = requiresGoogleServices &&
+        await controller.googleServicesInstalled(profile);
     if (!context.mounted) {
       return;
     }
@@ -363,7 +364,8 @@ class HomeView extends GetView<HomeController> {
       instanceIndex: controller.instanceIndex(profile),
       hidden: hidden || profile.hidden,
       findings: controller.warningsFor(profile),
-      offerInstallGoogleServices: offerInstallGoogleServices,
+      requiresGoogleServices: requiresGoogleServices,
+      googleServicesInstalled: googleServicesInstalled,
     );
     if (action == null || !context.mounted) {
       return;

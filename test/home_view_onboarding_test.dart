@@ -405,6 +405,25 @@ void main() {
       await openSheet(tester);
 
       expect(find.text('Install Google services (microG)'), findsNothing);
+      expect(find.text('Google services (microG) installed'), findsNothing);
+    });
+
+    testWidgets('are reported as installed once the clone has them', (
+      WidgetTester tester,
+    ) async {
+      overrides['isAppInstalledInProfile'] = ok(<String, Object?>{
+        'installed': true,
+        'running': false,
+        'virtualUserId': 0,
+      });
+      await openSheetForGmsApp(tester);
+      await tester.ensureVisible(
+        find.text('Google services (microG) installed'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Google services (microG) installed'), findsOneWidget);
+      expect(find.text('Install Google services (microG)'), findsNothing);
     });
 
     testWidgets('are confirmed before anything is installed', (
