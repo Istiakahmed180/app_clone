@@ -2,6 +2,7 @@ package co.tdevs.duplika.native.gms
 
 import android.content.Context
 import co.tdevs.duplika.native.EngineResult
+import co.tdevs.duplika.native.Slog
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import java.io.File
 
@@ -39,7 +40,36 @@ class MicroGProvider(
     private val installApk: (path: String, virtualUserId: Int) -> EngineResult<Unit>,
     private val seedCheckin: (virtualUserId: Int) -> Boolean,
     private val triggerCheckin: (virtualUserId: Int) -> Boolean,
+    private val startReceiveChannel: (virtualUserId: Int) -> Boolean,
 ) : GoogleServiceProvider {
+
+    /**
+     * Opens microG's MCS receive connection in the container.
+     *
+     * microG only connects to `mtalk.google.com` when something starts its MCS service, and
+     * without that connection Google accepts a message but never delivers it — measured:
+     * `GmsGcmMcsInput: Incoming message …` only appears after this runs. Called on every
+     * clone launch, because the connection dies with the guest process.
+     *
+     * Returns true when the service start was accepted; a container without microG simply
+     * reports false and is unaffected.
+     */
+    fun wakeReceiveChannel(virtualUserId: Int): Boolean {
+        if (!artifactSource.isPresent()) return false
+        // The first start can lose a race with the engine's package service coming up right
+        // after a launch (measured: it returned false and the channel only opened on the next
+        // attempt), so a failed start is retried once before giving up.
+        var started = startReceiveChannel(virtualUserId)
+        if (!started) {
+            Thread.sleep(RECEIVE_CHANNEL_RETRY_DELAY_MS)
+            started = startReceiveChannel(virtualUserId)
+        }
+        Slog.i(
+            Slog.LAUNCH,
+            "microG receive channel wake for user $virtualUserId: started=$started",
+        )
+        return started
+    }
 
     override val providerName: String = NAME
 
@@ -135,6 +165,12 @@ class MicroGProvider(
     companion object {
         const val NAME: String = "MICROG"
 
+        /** microG's MCS service and the action that makes it connect to `mtalk.google.com`. */
+        const val MCS_SERVICE: String = "org.microg.gms.gcm.McsService"
+        const val MCS_CONNECT_ACTION: String = "org.microg.gms.gcm.mcs.CONNECT"
+
+        private const val RECEIVE_CHANNEL_RETRY_DELAY_MS = 1500L
+
         /** Builds the provider wired to the app's assets, the engine and the cache dir. */
         fun forEngine(context: Context, adapter: VirtualizationEngineAdapter): MicroGProvider {
             val source = AssetMicroGArtifactSource(context)
@@ -149,6 +185,15 @@ class MicroGProvider(
                         MicroGCheckinSeeder.CHECKIN_SERVICE,
                         userId,
                         requireForeground = true,
+                    ) is EngineResult.Success
+                },
+                startReceiveChannel = { userId ->
+                    adapter.startContainerService(
+                        MicroGCheckinSeeder.GMS_PACKAGE,
+                        MCS_SERVICE,
+                        userId,
+                        requireForeground = false,
+                        action = MCS_CONNECT_ACTION,
                     ) is EngineResult.Success
                 },
             )

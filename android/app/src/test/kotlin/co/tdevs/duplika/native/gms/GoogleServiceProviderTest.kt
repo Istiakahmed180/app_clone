@@ -108,6 +108,7 @@ class GoogleServiceProviderTest {
         installOutcome: EngineResult<Unit> = EngineResult.ok(),
         seedResult: Boolean = true,
         checkinTriggered: Boolean = true,
+        receiveChannelStarted: Boolean = true,
         installed: MutableList<Pair<String, Int>> = mutableListOf(),
     ): MicroGProvider = MicroGProvider(
         artifactSource = FakeArtifactSource(bundled),
@@ -117,6 +118,7 @@ class GoogleServiceProviderTest {
         installApk = { path, userId -> installed += path to userId; installOutcome },
         seedCheckin = { seedResult },
         triggerCheckin = { checkinTriggered },
+        startReceiveChannel = { receiveChannelStarted },
     )
 
     private fun resolver(

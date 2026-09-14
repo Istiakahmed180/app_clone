@@ -633,7 +633,13 @@ class RealVirtualizationEngine(
             // The clone now owns the foreground, so the host is about to go background and
             // an aggressive OEM would otherwise kill it — measured on OnePlus. The service
             // stops when the user comes back to Duplika.
-            CloneKeepAliveService.start(context, packageName)
+            CloneKeepAliveService.start(context, packageName, virtualUserId)
+            // Open microG's push receive connection for this container. microG only connects
+            // to mtalk.google.com when its MCS service is started, and without that
+            // connection Google accepts a message but never delivers it. Done on every
+            // launch because the connection dies with the guest process; a container with no
+            // microG simply reports false and is unaffected.
+            microGProvider.wakeReceiveChannel(virtualUserId)
             return first
         }
 

@@ -8,13 +8,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import co.tdevs.duplika.DuplikaApplication
 import co.tdevs.duplika.R
+import co.tdevs.duplika.native.gms.MicroGCheckinSeeder
+import co.tdevs.duplika.native.gms.MicroGProvider
 
 /**
- * Keeps the host process alive while a clone the user opened is running.
+ * Keeps the host process alive while a clone the user opened is running, and keeps that
+ * clone's microG receive channel connected.
+ *
+ * ## Why the host needs keeping alive
  *
  * On aggressive OEM builds the host process is killed as soon as it stops being the
  * foreground activity — which is exactly the moment a clone takes the foreground. Measured on
@@ -23,21 +31,44 @@ import co.tdevs.duplika.R
  * it). The clone itself keeps running in its own process, but the host being killed
  * cold-starts Duplika when the user returns and drops an attached debugger.
  *
- * A foreground service raises this process's importance for as long as a clone the user
- * opened is running. It adds no persistence of its own: it is started by the launch the user
- * performed and stopped when they come back to Duplika ([stop], called from the host
- * activity's `onResume`).
+ * ## Why it also reconnects microG
+ *
+ * The same OEM killer ends the container's microG process (`exited due to signal 9`), and
+ * microG's MCS connection to `mtalk.google.com` dies with it, so FCM messages stop arriving.
+ * While a clone is open this service re-wakes that connection every [WAKE_INTERVAL_MS] — FCM
+ * stores undelivered messages, so they arrive at the next reconnect. A closed clone is
+ * covered by [ClonePushRefreshWorker] instead.
+ *
+ * It keeps *Duplika* alive; it does not run the clone. The guest runs in its own process
+ * either way.
  *
  * **Why it does not poll the engine's `isRunning`.** That call is broken on API 35
  * (`isRunningApplication failed: BActivityManagerService cannot be cast to ActivityStack`),
  * so a poll-based stop ended the service 15 s after every launch while the clone was plainly
  * still on screen. "The host activity resumed" is the reliable signal: the host only resumes
  * when the clone has left the foreground.
- *
- * It keeps *Duplika* alive; it does not run the clone. The guest runs in its own process
- * either way.
  */
 class CloneKeepAliveService : Service() {
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var userId: Int = -1
+
+    private val reconnect = object : Runnable {
+        override fun run() {
+            val user = userId
+            if (user < 0) return
+            runCatching {
+                DuplikaApplication.engine.startContainerService(
+                    packageName = MicroGCheckinSeeder.GMS_PACKAGE,
+                    serviceClassName = MicroGProvider.MCS_SERVICE,
+                    virtualUserId = user,
+                    requireForeground = false,
+                    action = MicroGProvider.MCS_CONNECT_ACTION,
+                )
+            }
+            handler.postDelayed(this, WAKE_INTERVAL_MS)
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -50,9 +81,22 @@ class CloneKeepAliveService : Service() {
             return START_NOT_STICKY
         }
 
+        userId = intent.getIntExtra(EXTRA_USER_ID, -1)
         startForegroundCompat()
-        Slog.i(Slog.LAUNCH, "Keeping the host alive while $packageName is open")
+        handler.removeCallbacks(reconnect)
+        if (userId >= 0) {
+            handler.postDelayed(reconnect, WAKE_INTERVAL_MS)
+        }
+        Slog.i(
+            Slog.LAUNCH,
+            "Keeping the host alive while $packageName is open (user $userId)",
+        )
         return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(reconnect)
+        super.onDestroy()
     }
 
     private fun startForegroundCompat() {
@@ -90,8 +134,10 @@ class CloneKeepAliveService : Service() {
     companion object {
         private const val CHANNEL_ID = "clone_keepalive"
         private const val NOTIFICATION_ID = 4711
+        private const val WAKE_INTERVAL_MS = 30_000L
 
         const val EXTRA_PACKAGE = "package_name"
+        const val EXTRA_USER_ID = "virtual_user_id"
 
         /**
          * Starts the keep-alive for a clone the user just launched. Callers are in the
@@ -99,9 +145,10 @@ class CloneKeepAliveService : Service() {
          * Failure is logged, never fatal: a device that refuses the service still gets a
          * working clone, only without the protection.
          */
-        fun start(context: Context, packageName: String) {
+        fun start(context: Context, packageName: String, virtualUserId: Int) {
             val intent = Intent(context, CloneKeepAliveService::class.java)
                 .putExtra(EXTRA_PACKAGE, packageName)
+                .putExtra(EXTRA_USER_ID, virtualUserId)
             runCatching {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(intent)

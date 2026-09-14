@@ -47,6 +47,22 @@ whitelist did not stop it), which cold-starts Duplika when the user comes back. 
 keeps running in its own process either way; the service only keeps the *host* alive. It
 touches no identity, permission or container state.
 
+### Push reconnect — the one background job
+
+The same OEM killer ends a container's microG process (`exited due to signal 9`), and with it
+microG's connection to `mtalk.google.com`, so push notifications stop arriving. Two bounded
+mechanisms reconnect it:
+
+- while a clone is open, `CloneKeepAliveService` re-wakes microG's MCS service every 30 s;
+- while nothing is open, `ClonePushRefreshWorker` (WorkManager, minimum 15-minute interval,
+  network-constrained) does the same for every virtual user that exists.
+
+Both only start a service inside a container that the user already created; they do nothing
+when no clone exists, and neither touches identity, permission, signatures or container data.
+The worker is ordinary Android background work — no persistent connection and no daemon —
+which is why it is recorded here rather than treated as another exception. Its cost is
+battery, and its limit is that delivery is *batched* at the next reconnect, not instant.
+
 ## REQUIRE_SECURE_ENV
 
 Google requires on-device Android containers to honour an application's declaration that it

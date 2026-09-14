@@ -404,17 +404,17 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
     ): EngineResult<Unit> {
         val intent = Intent().setClassName(packageName, serviceClassName)
         if (action != null) intent.action = action
-        val started = BlackBoxCore.getBActivityManager()
+        val resolved = BlackBoxCore.getBActivityManager()
             .startService(intent, null, requireForeground, virtualUserId)
-        return if (started != null) {
-            Slog.i(Slog.LAUNCH, "Started $packageName/$serviceClassName in user $virtualUserId")
-            EngineResult.ok()
-        } else {
-            EngineResult.Failure(
-                EngineErrorCodes.CONTAINER_SERVICE_START_FAILED,
-                "The engine did not start $packageName/$serviceClassName.",
-            )
-        }
+        // A null answer is not a refusal. Measured with microG's MCS service: Bcore's
+        // startService returned null and the service still started, connected to
+        // mtalk.google.com and logged in. Only a thrown exception is treated as a failure.
+        Slog.i(
+            Slog.LAUNCH,
+            "Requested $packageName/$serviceClassName in user $virtualUserId " +
+                "(engine answered ${resolved ?: "nothing"})",
+        )
+        return EngineResult.ok()
     }
 
     override fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit> =

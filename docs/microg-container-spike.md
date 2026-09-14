@@ -99,27 +99,41 @@ Enabling microG's checkin (`checkin_enable_service`) produced a successful Googl
 (`androidId`, `securityToken`, `lastCheckin` in `checkin.xml`), after which
 `PushRegisterService` registered and received the FCM token above.
 
-### Push *delivery* does not work yet — measured limitation
+### Push *delivery* — works on the emulator, blocked by the OEM on OnePlus
 
-Registration is not delivery. Sending an actual message with the app's service account
+Registration is not delivery. Sending an actual message with the app's own service account
 (Firebase HTTP v1) is accepted by Google every time — a valid token returns a message name,
-an unregistered one returns `UNREGISTERED` — but the message is never received in the clone.
-Two independent blockers, both measured on the OnePlus CPH2605 and recorded in
-`evidence/physical-oneplus-cph2605/microg-push-delivery/limitation.txt`:
+an unregistered one returns `UNREGISTERED`.
 
-1. **The container's microG process is SIGKILLed by the OEM.** It starts (woken via
-   `org.microg.gms.gcm.McsService` + `org.microg.gms.gcm.mcs.CONNECT`), publishes its
-   providers, and is killed ~30 s later (`Process ... exited due to signal 9 (Killed)`).
-   The engine daemon (`isEnableDaemonService=true`) only stretched that to ~70 s; it was
-   tried on a branch and reverted, because it did not fix delivery and contradicts
-   `docs/SECURITY.md`. The host's own `CloneKeepAliveService` does not help either — it
-   protects the host process, and the OEM kills the guest microG process separately.
-2. **microG's MCS connection never logs in inside the container.** The host-installed
-   ReVanced microG prints `GmsGcmMcsSvc: Logged in`; the container's microG never does in any
-   run. Without that connection Google cannot deliver to the token.
+**The missing piece was microG's MCS receive connection.** microG only opens it (to
+`mtalk.google.com:5228`) when something starts its MCS service. `RealVirtualizationEngine
+.launchProfile` now does exactly that on every successful clone launch
+(`MicroGProvider.wakeReceiveChannel` → `org.microg.gms.gcm.McsService` with
+`org.microg.gms.gcm.mcs.CONNECT`), because the connection dies with the guest process.
 
-Neither is app logic; both are engine/OS level. **Known limitation**: a clone can register
-for push and use its in-app notifications, but background push notifications do not arrive.
+Measured on the emulator (Android 15): MCS `Logged in`, and a message sent from the app's
+project was delivered in real time —
+`GmsGcmMcsInput: Incoming message: DataMessageStanza{… title=Final product test …}` →
+`Deliver message to all receivers in package com.digibank.mobile`, with the notification in
+the shade. Evidence: `evidence/emulator-api35/microg-container-spike/push-delivery-success.txt`.
+
+**On the OnePlus CPH2605 it still fails at first**, for an OEM reason recorded in
+`evidence/physical-oneplus-cph2605/microg-push-delivery/limitation.txt`: the container's
+microG process is SIGKILLed by the OEM's process manager (`exited due to signal 9`), so the
+MCS connection does not survive long enough to receive. Two bounded reconnect mechanisms were
+added for this: `CloneKeepAliveService` re-wakes the MCS every 30 s while a clone is open,
+and `ClonePushRefreshWorker` (WorkManager, ≥15 min) does the same while nothing is open — FCM
+stores undelivered messages, so they arrive in a batch at the next reconnect rather than
+instantly. These are recorded in `docs/SECURITY.md`; on this OEM even the reconnect may be
+deferred by the system's background restrictions. The engine daemon
+(`isEnableDaemonService=true`) stretched survival from ~30 s to ~70 s but did not fix
+delivery; it was tried on a branch and reverted, because it contradicts `docs/SECURITY.md`.
+The host's own `CloneKeepAliveService` does not help either — it protects the host process,
+and the OEM kills the guest microG process separately.
+
+**Status:** push registration works everywhere; push delivery works on a device that does not
+kill the container's microG process (emulator verified) and is unreliable on aggressive OEM
+builds. In-app notifications are unaffected.
 
 **Checkin is warmed during provisioning.** microG only checks in when something asks it to,
 and the push registration that does ask has a 10 s timeout — so on a fresh container the
@@ -198,11 +212,11 @@ not identity or signature manipulation.
    universal artefact.
 3. **Checkin is seeded, not user-configurable.** `MicroGCheckinSeeder` writes microG's
    prefs directly. If microG's own settings UI is ever exposed, the two should not fight.
-4. **Push delivery is measured and blocked** (see "Push *delivery* does not work yet" above).
-   Registration is verified on the emulator and a physical OnePlus CPH2605, on the first
-   launch, but a sent message is never received in the clone: the OEM SIGKILLs the container's
-   microG process, and microG's MCS connection never logs in inside the container. Reopening
-   this needs engine/OS-level work, not app logic.
+4. **Push delivery is measured** (see "Push *delivery*" above). It works on the emulator —
+   `launchProfile` opens microG's MCS connection and a message sent from the app's project
+   arrives in real time — and remains blocked on an OnePlus CPH2605 because the OEM SIGKILLs
+   the container's microG process. Closing that gap needs engine/OS-level work (keeping the
+   guest process alive), not app logic.
 
 ## Bottom line
 
@@ -212,8 +226,9 @@ real FCM token on its first launch. The work that got there was two small, ident
 engine provider fixes plus microG's own checkin configuration and warm-up — not signature
 spoofing.
 
-**Push *delivery* is a measured limitation, not a claim.** A registered clone logs in and its
-in-app notifications work, but a message sent from the app's own Firebase project is never
-received, because the OEM kills the container's microG process and microG's MCS connection
-does not log in inside the container. What remains is regression testing, packaging, the
-push-delivery limitation, and the product/policy decision.
+**Push *delivery* is measured too.** `launchProfile` now opens microG's MCS receive
+connection on every clone launch, and on the emulator a message sent from the app's own
+Firebase project is delivered in real time and shown as a notification. On an aggressive OEM
+build (OnePlus CPH2605) the same attempt still fails because the OEM SIGKILLs the container's
+microG process; that is an engine/OS-level limitation, not app logic. What remains is
+regression testing, packaging, that OEM gap, and the product/policy decision.

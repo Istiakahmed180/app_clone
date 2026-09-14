@@ -6,6 +6,7 @@ import co.tdevs.duplika.diagnostics.CrashCapture
 import co.tdevs.duplika.diagnostics.DiagCategory
 import co.tdevs.duplika.diagnostics.DiagSource
 import co.tdevs.duplika.diagnostics.DiagnosticLogger
+import co.tdevs.duplika.native.ClonePushRefreshWorker
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import co.tdevs.duplika.native.blackbox.BlackBoxEngineAdapter
 
@@ -49,6 +50,9 @@ class DuplikaApplication : Application() {
             DiagCategory.APP_LIFECYCLE,
             "Process onCreate: ${DiagnosticLogger.currentProcessName()}",
         )
+        // Idempotent (KEEP): reconnects each clone's microG push channel while the app is in
+        // the background, which a closed clone cannot do for itself on aggressive OEM builds.
+        ClonePushRefreshWorker.schedule(this)
     }
 
     companion object {

@@ -119,6 +119,10 @@ dependencies {
     // as an appcompat transitive.
     implementation("androidx.core:core:1.13.1")
     implementation("com.google.android.material:material:1.12.0")
+    // Periodic refresh that reconnects microG's push receive channel while Duplika is in the
+    // background (see ClonePushRefreshWorker). WorkManager is the platform-blessed way to do
+    // this without holding a connection open ourselves.
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // JVM unit tests. The GMS provider layer is deliberately free of Android framework
     // types so its selection logic can be tested without a device or Robolectric.
