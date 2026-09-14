@@ -99,6 +99,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
+  String get settingsBackgroundActivityCheck => '检查';
+
+  @override
+  String get backgroundGuideTitle => '后台活动';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android 可能会在后台暂停 Duplika；此时克隆的应用将收不到通知，直到你再次打开 Duplika。';
+
+  @override
+  String get backgroundGuideStepsOem => '在“应用信息”中点按“电池使用情况”，然后开启“允许后台活动”。';
+
+  @override
+  String get backgroundGuideStepsStock => '在打开的系统询问中点按“允许”，让它可以在后台运行。';
+
+  @override
+  String get backgroundGuideStepsUnknown => '在“应用信息”中允许后台活动。';
+
+  @override
+  String get backgroundGuideOpenAppInfo => '打开应用信息';
+
+  @override
+  String get backgroundGuideAllow => '允许';
+
+  @override
+  String get backgroundGuideLater => '以后再说';
+
+  @override
   String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
 
   @override
@@ -333,6 +361,34 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityCheck => '检查';
+
+  @override
+  String get backgroundGuideTitle => '后台活动';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android 可能会在后台暂停 Duplika；此时克隆的应用将收不到通知，直到你再次打开 Duplika。';
+
+  @override
+  String get backgroundGuideStepsOem => '在“应用信息”中点按“电池使用情况”，然后开启“允许后台活动”。';
+
+  @override
+  String get backgroundGuideStepsStock => '在打开的系统询问中点按“允许”，让它可以在后台运行。';
+
+  @override
+  String get backgroundGuideStepsUnknown => '在“应用信息”中允许后台活动。';
+
+  @override
+  String get backgroundGuideOpenAppInfo => '打开应用信息';
+
+  @override
+  String get backgroundGuideAllow => '允许';
+
+  @override
+  String get backgroundGuideLater => '以后再说';
 
   @override
   String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
@@ -571,6 +627,34 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
+  String get settingsBackgroundActivityCheck => '檢查';
+
+  @override
+  String get backgroundGuideTitle => '背景活動';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android 可能會在背景暫停 Duplika；此時複製的應用程式將收不到通知，直到你再次開啟 Duplika。';
+
+  @override
+  String get backgroundGuideStepsOem => '在「應用程式資訊」中點一下「電池使用情況」，然後開啟「允許背景活動」。';
+
+  @override
+  String get backgroundGuideStepsStock => '在開啟的系統詢問中點一下「允許」，讓它可以在背景運行。';
+
+  @override
+  String get backgroundGuideStepsUnknown => '在「應用程式資訊」中允許背景活動。';
+
+  @override
+  String get backgroundGuideOpenAppInfo => '開啟應用程式資訊';
+
+  @override
+  String get backgroundGuideAllow => '允許';
+
+  @override
+  String get backgroundGuideLater => '稍後';
+
+  @override
   String get settingsBackgroundActivityFix => '點此並允許背景活動';
 
   @override
@@ -805,6 +889,34 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityCheck => '檢查';
+
+  @override
+  String get backgroundGuideTitle => '背景活動';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android 可能會在背景暫停 Duplika；此時複製的應用程式將收不到通知，直到你再次開啟 Duplika。';
+
+  @override
+  String get backgroundGuideStepsOem => '在「應用程式資訊」中點一下「電池使用情況」，然後開啟「允許背景活動」。';
+
+  @override
+  String get backgroundGuideStepsStock => '在開啟的系統詢問中點一下「允許」，讓它可以在背景運行。';
+
+  @override
+  String get backgroundGuideStepsUnknown => '在「應用程式資訊」中允許背景活動。';
+
+  @override
+  String get backgroundGuideOpenAppInfo => '開啟應用程式資訊';
+
+  @override
+  String get backgroundGuideAllow => '允許';
+
+  @override
+  String get backgroundGuideLater => '稍後';
 
   @override
   String get settingsBackgroundActivityFix => '點此並允許背景活動';

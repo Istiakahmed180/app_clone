@@ -13,6 +13,8 @@ class SettingsStore {
 
   static const String themeModeKey = 'duplika.settings.theme_mode';
   static const String languageKey = 'duplika.settings.language';
+  static const String backgroundNudgeKey =
+      'duplika.settings.background_activity_nudge_dismissed';
 
   final ProfileStorage _storage;
 
@@ -47,4 +49,15 @@ class SettingsStore {
   Future<void> setLanguage(AppLanguage? language) => language == null
       ? _storage.delete(languageKey)
       : _storage.write(languageKey, language.tag);
+
+  /// Whether the user has waved away the home screen's background-activity nudge.
+  ///
+  /// Permanent by design, and unlike the nudge that used to sit here it is not the only
+  /// way to act: the Settings row keeps the state and the fix, so a dismissal costs the
+  /// user nothing but the reminder.
+  Future<bool> backgroundNudgeDismissed() async =>
+      await _storage.read(backgroundNudgeKey) == 'true';
+
+  Future<void> dismissBackgroundNudge() =>
+      _storage.write(backgroundNudgeKey, 'true');
 }

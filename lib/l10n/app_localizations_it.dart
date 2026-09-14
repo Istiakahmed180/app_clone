@@ -100,6 +100,37 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Limitata';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Controlla';
+
+  @override
+  String get backgroundGuideTitle => 'Attività in background';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android può sospendere Duplika in background; le app clonate non ricevono più notifiche finché non riapri Duplika.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'In Info app, tocca Utilizzo batteria e attiva Consenti attività in background.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Tocca Consenti nella domanda di sistema che si apre, così può funzionare in background.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'In Info app, consenti l\'attività in background.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Apri Info app';
+
+  @override
+  String get backgroundGuideAllow => 'Consenti';
+
+  @override
+  String get backgroundGuideLater => 'Non ora';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Tocca qui e consenti l\'attività in background';
 

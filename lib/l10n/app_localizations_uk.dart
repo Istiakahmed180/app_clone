@@ -100,6 +100,37 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Обмежено';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Перевірити';
+
+  @override
+  String get backgroundGuideTitle => 'Фонова активність';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android може призупинити Duplika у фоні; тоді клоновані застосунки не отримуватимуть сповіщення, доки ви знову не відкриєте Duplika.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'У розділі «Про застосунок» натисніть «Використання батареї» й увімкніть «Дозволити фонову активність».';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Натисніть «Дозволити» в системному запиті, щоб застосунок міг працювати у фоні.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'У розділі «Про застосунок» дозвольте фонову активність.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Відкрити «Про застосунок»';
+
+  @override
+  String get backgroundGuideAllow => 'Дозволити';
+
+  @override
+  String get backgroundGuideLater => 'Не зараз';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Натисніть тут і дозвольте фонову активність';
 

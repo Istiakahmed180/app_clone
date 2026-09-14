@@ -100,6 +100,37 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Restringida';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Verificar';
+
+  @override
+  String get backgroundGuideTitle => 'Atividade em segundo plano';
+
+  @override
+  String get backgroundGuideWhy =>
+      'O Android pode pausar o Duplika em segundo plano; as apps clonadas deixam de receber notificações até voltares a abrir o Duplika.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Em Informações da app, toca em Utilização da bateria e ativa Permitir atividade em segundo plano.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Toca em Permitir na pergunta do sistema que abre, para que possa ser executada em segundo plano.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Em Informações da app, permite a atividade em segundo plano.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Abrir informações da app';
+
+  @override
+  String get backgroundGuideAllow => 'Permitir';
+
+  @override
+  String get backgroundGuideLater => 'Agora não';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Toque aqui e permita a atividade em segundo plano';
 
@@ -340,6 +371,37 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get settingsBackgroundActivityRestricted => 'Restringida';
+
+  @override
+  String get settingsBackgroundActivityCheck => 'Verificar';
+
+  @override
+  String get backgroundGuideTitle => 'Atividade em segundo plano';
+
+  @override
+  String get backgroundGuideWhy =>
+      'O Android pode pausar o Duplika em segundo plano; os apps clonados deixam de receber notificações até você abrir o Duplika novamente.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Em Informações do app, toque em Uso de bateria e ative Permitir atividade em segundo plano.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Toque em Permitir na pergunta do sistema que abrir, para que ele possa rodar em segundo plano.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Em Informações do app, permita a atividade em segundo plano.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Abrir informações do app';
+
+  @override
+  String get backgroundGuideAllow => 'Permitir';
+
+  @override
+  String get backgroundGuideLater => 'Agora não';
 
   @override
   String get settingsBackgroundActivityFix =>

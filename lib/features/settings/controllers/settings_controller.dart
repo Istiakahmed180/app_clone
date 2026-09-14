@@ -73,6 +73,10 @@ class SettingsController extends GetxController with WidgetsBindingObserver {
   final Rxn<BackgroundActivityState> backgroundActivity =
       Rxn<BackgroundActivityState>();
 
+  /// Whether the user has waved away the home screen's nudge. Its own flag, so dismissing
+  /// the reminder does not hide the state the Settings row exists to report.
+  final RxBool backgroundNudgeDismissed = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -84,6 +88,7 @@ class SettingsController extends GetxController with WidgetsBindingObserver {
     unawaited(restoreLanguage());
     unawaited(loadSystemInfo());
     unawaited(refreshBackgroundActivity());
+    unawaited(loadBackgroundNudgeDismissal());
   }
 
   @override
@@ -152,10 +157,40 @@ class SettingsController extends GetxController with WidgetsBindingObserver {
 
   // --- Background activity -------------------------------------------------
 
+  /// Whether the home screen should offer the background-activity fix.
+  ///
+  /// Only once it is actually a problem: not while the app cannot read the state, and not
+  /// while both of Android's controls are open. Read inside an `Obx`, which is what keeps
+  /// both the read and the dismissal live.
+  bool get backgroundNudgeVisible =>
+      !backgroundNudgeDismissed.value &&
+      backgroundActivity.value?.allowed == false;
+
   /// Re-reads Duplika's standing in the background. Called at launch and on every resume,
   /// because both switches this reports are changed in system screens, not here.
   Future<void> refreshBackgroundActivity() async {
     backgroundActivity.value = await _bridge.backgroundActivityState();
+  }
+
+  Future<void> loadBackgroundNudgeDismissal() async {
+    backgroundNudgeDismissed.value = await _store.backgroundNudgeDismissed();
+  }
+
+  /// The user acted on the nudge.
+  ///
+  /// It has done its job either way, so it does not come back -- including on the builds
+  /// whose switch the app cannot read afterwards. The guide the caller opens next is the
+  /// answer there, which is why this does not open a system screen itself.
+  Future<void> acceptBackgroundNudge() => dismissBackgroundNudge();
+
+  /// The reminder was waved away. It does not come back; the row in Settings remains.
+  Future<void> dismissBackgroundNudge() async {
+    backgroundNudgeDismissed.value = true;
+    try {
+      await _store.dismissBackgroundNudge();
+    } on Object catch (error, stackTrace) {
+      _logger.error('Could not record the nudge dismissal', error, stackTrace);
+    }
   }
 
   /// Opens the control this device actually has for running in the background.

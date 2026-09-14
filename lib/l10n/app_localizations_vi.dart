@@ -100,6 +100,37 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Bị hạn chế';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Kiểm tra';
+
+  @override
+  String get backgroundGuideTitle => 'Hoạt động nền';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android có thể tạm dừng Duplika khi chạy nền; các ứng dụng nhân bản sẽ không nhận được thông báo cho đến khi bạn mở lại Duplika.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Trong Thông tin ứng dụng, nhấn vào Mức dùng pin và bật Cho phép hoạt động nền.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Nhấn Cho phép ở hộp thoại hệ thống hiện ra để ứng dụng chạy nền.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Trong Thông tin ứng dụng, hãy cho phép hoạt động nền.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Mở thông tin ứng dụng';
+
+  @override
+  String get backgroundGuideAllow => 'Cho phép';
+
+  @override
+  String get backgroundGuideLater => 'Để sau';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Nhấn vào đây và cho phép hoạt động nền';
 

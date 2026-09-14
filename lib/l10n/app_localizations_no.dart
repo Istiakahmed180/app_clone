@@ -100,6 +100,37 @@ class AppLocalizationsNo extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Begrenset';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Sjekk';
+
+  @override
+  String get backgroundGuideTitle => 'Bakgrunnsaktivitet';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android kan stanse Duplika i bakgrunnen; klonede apper får da ikke varsler før du åpner Duplika igjen.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'I Appinformasjon, trykk på Batteribruk og slå på Tillat bakgrunnsaktivitet.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Trykk Tillat i systemspørsmålet som åpnes, så den kan kjøre i bakgrunnen.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Tillat bakgrunnsaktivitet i Appinformasjon.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Åpne appinformasjon';
+
+  @override
+  String get backgroundGuideAllow => 'Tillat';
+
+  @override
+  String get backgroundGuideLater => 'Ikke nå';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Trykk her og tillat bakgrunnsaktivitet';
 

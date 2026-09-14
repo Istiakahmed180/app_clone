@@ -50,6 +50,11 @@ class BackgroundActivity(context: Context) {
             "exempt" to exempt,
             "restricted" to backgroundRestricted(),
             "standbyBucket" to standbyBucket(),
+            // Which build this is has to travel with the state: on the ones that have their
+            // own switch, the switch decides more than these two controls do and nothing in
+            // the public API exposes it -- so the caller cannot call the app "allowed" from
+            // here, and the row has to say so rather than guess.
+            "nextStep" to nextStep(),
         )
     }
 

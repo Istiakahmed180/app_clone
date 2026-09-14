@@ -100,6 +100,37 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'प्रतिबंधित';
 
   @override
+  String get settingsBackgroundActivityCheck => 'जाँचें';
+
+  @override
+  String get backgroundGuideTitle => 'पृष्ठभूमि गतिविधि';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android Duplika को पृष्ठभूमि में रोक सकता है; तब तक क्लोन किए गए ऐप सूचनाएँ नहीं पाएँगे जब तक आप Duplika दोबारा नहीं खोलते।';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'ऐप जानकारी में ‘बैटरी उपयोग’ पर टैप करें और ‘पृष्ठभूमि गतिविधि की अनुमति दें’ चालू करें।';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'खुलने वाले सिस्टम सवाल में ‘अनुमति दें’ टैप करें, ताकि यह पृष्ठभूमि में चल सके।';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'ऐप जानकारी में पृष्ठभूमि गतिविधि की अनुमति दें।';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'ऐप जानकारी खोलें';
+
+  @override
+  String get backgroundGuideAllow => 'अनुमति दें';
+
+  @override
+  String get backgroundGuideLater => 'अभी नहीं';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'यहाँ टैप करें और पृष्ठभूमि गतिविधि की अनुमति दें';
 

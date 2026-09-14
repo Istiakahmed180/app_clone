@@ -11,6 +11,7 @@ import '../../private_space/views/private_space_settings_view.dart';
 import '../controllers/settings_controller.dart';
 import '../../../l10n/l10n_context.dart';
 import '../widgets/appearance_labels.dart';
+import '../widgets/background_activity_guide.dart';
 import '../widgets/settings_row.dart';
 import '../widgets/settings_status.dart';
 import '../widgets/settings_section.dart';
@@ -70,7 +71,13 @@ class SettingsView extends StatelessWidget {
                   title: l10n.settingsBackgroundActivity,
                   subtitle: _backgroundActivitySubtitle(l10n, controller),
                   value: _backgroundActivityValue(l10n, controller),
-                  onTap: controller.openBackgroundActivitySettings,
+                  // The row alone cannot say which of Android's backgrounds this is, so a
+                  // tap explains before it sends anyone into a system screen.
+                  onTap: () => showBackgroundActivityGuide(
+                    context,
+                    variant: _backgroundActivityGuideVariant(controller),
+                    onOpen: controller.openBackgroundActivitySettings,
+                  ),
                 ),
               ],
             ),
@@ -166,7 +173,8 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  /// `Allowed` / `Restricted`, or `unavailable` while the read has not landed.
+  /// `Allowed`, `Restricted`, or `Check` on the builds where the switch that decides it
+  /// cannot be read -- or `unavailable` while the read has not landed.
   String _backgroundActivityValue(
     AppLocalizations l10n,
     SettingsController controller,
@@ -175,9 +183,14 @@ class SettingsView extends StatelessWidget {
     if (state == null) {
       return l10n.commonUnavailable;
     }
-    return state.allowed
+    // A problem Android can see is reported as one, even on the builds where the switch
+    // itself is invisible; only the unreadable-and-nothing-known case is a `Check`.
+    if (state.hasKnownProblem) {
+      return l10n.settingsBackgroundActivityRestricted;
+    }
+    return state.verifiable
         ? l10n.settingsBackgroundActivityAllowed
-        : l10n.settingsBackgroundActivityRestricted;
+        : l10n.settingsBackgroundActivityCheck;
   }
 
   /// Why the setting matters, and — when it is off — which taps turn it back on.
@@ -196,6 +209,19 @@ class SettingsView extends StatelessWidget {
     return state.nextStep == 'batteryUsage'
         ? l10n.settingsBackgroundActivityFixBatteryUsage
         : l10n.settingsBackgroundActivityFix;
+  }
+
+  /// Which set of instructions fits this device, for the guide the row opens.
+  BackgroundActivityGuideVariant _backgroundActivityGuideVariant(
+    SettingsController controller,
+  ) {
+    final BackgroundActivityState? state = controller.backgroundActivity.value;
+    if (state == null) {
+      return BackgroundActivityGuideVariant.unknown;
+    }
+    return state.verifiable
+        ? BackgroundActivityGuideVariant.stock
+        : BackgroundActivityGuideVariant.oem;
   }
 
   /// `64-bit · arm64-v8a`, said in the user's language.

@@ -300,6 +300,60 @@ abstract class AppLocalizations {
   /// **'Restricted'**
   String get settingsBackgroundActivityRestricted;
 
+  /// No description provided for @settingsBackgroundActivityCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get settingsBackgroundActivityCheck;
+
+  /// No description provided for @backgroundGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background activity'**
+  String get backgroundGuideTitle;
+
+  /// No description provided for @backgroundGuideWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Android can pause Duplika while it is in the background, and cloned apps then miss notifications until you open Duplika again.'**
+  String get backgroundGuideWhy;
+
+  /// No description provided for @backgroundGuideStepsOem.
+  ///
+  /// In en, this message translates to:
+  /// **'In App info, tap Battery usage and turn on Allow background activity.'**
+  String get backgroundGuideStepsOem;
+
+  /// No description provided for @backgroundGuideStepsStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Allow on the system question that opens, so it may run in the background.'**
+  String get backgroundGuideStepsStock;
+
+  /// No description provided for @backgroundGuideStepsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'In App info, allow background activity.'**
+  String get backgroundGuideStepsUnknown;
+
+  /// No description provided for @backgroundGuideOpenAppInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Open App info'**
+  String get backgroundGuideOpenAppInfo;
+
+  /// No description provided for @backgroundGuideAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get backgroundGuideAllow;
+
+  /// No description provided for @backgroundGuideLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get backgroundGuideLater;
+
   /// No description provided for @settingsBackgroundActivityFix.
   ///
   /// In en, this message translates to:

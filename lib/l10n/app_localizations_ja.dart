@@ -99,6 +99,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '制限あり';
 
   @override
+  String get settingsBackgroundActivityCheck => '確認';
+
+  @override
+  String get backgroundGuideTitle => 'バックグラウンド動作';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android が Duplika をバックグラウンドで停止すると、Duplika を開くまで複製したアプリは通知を受け取れなくなります。';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'アプリ情報で「バッテリー使用量」をタップし、「バックグラウンド動作を許可」をオンにします。';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      '表示されるシステムの確認で「許可」をタップすると、バックグラウンドで動作できます。';
+
+  @override
+  String get backgroundGuideStepsUnknown => 'アプリ情報でバックグラウンド動作を許可してください。';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'アプリ情報を開く';
+
+  @override
+  String get backgroundGuideAllow => '許可';
+
+  @override
+  String get backgroundGuideLater => '後で';
+
+  @override
   String get settingsBackgroundActivityFix => 'ここをタップしてバックグラウンド動作を許可';
 
   @override

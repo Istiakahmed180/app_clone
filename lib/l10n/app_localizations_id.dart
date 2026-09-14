@@ -100,6 +100,37 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Dibatasi';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Periksa';
+
+  @override
+  String get backgroundGuideTitle => 'Aktivitas latar belakang';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android dapat menghentikan sementara Duplika di latar belakang; aplikasi klon lalu tidak menerima notifikasi sampai Anda membuka Duplika lagi.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Di Info aplikasi, ketuk Penggunaan baterai lalu aktifkan Izinkan aktivitas latar belakang.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Ketuk Izinkan pada pertanyaan sistem yang muncul, agar dapat berjalan di latar belakang.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Di Info aplikasi, izinkan aktivitas latar belakang.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Buka info aplikasi';
+
+  @override
+  String get backgroundGuideAllow => 'Izinkan';
+
+  @override
+  String get backgroundGuideLater => 'Nanti saja';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Ketuk di sini dan izinkan aktivitas latar belakang';
 

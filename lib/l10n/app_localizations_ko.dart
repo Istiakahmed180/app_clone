@@ -99,6 +99,36 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '제한됨';
 
   @override
+  String get settingsBackgroundActivityCheck => '확인';
+
+  @override
+  String get backgroundGuideTitle => '백그라운드 활동';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android가 Duplika를 백그라운드에서 중지하면 Duplika를 다시 열기 전까지 복제한 앱이 알림을 받지 못합니다.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      '앱 정보에서 \'배터리 사용량\'을 누르고 \'백그라운드 활동 허용\'을 켜세요.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      '열리는 시스템 질문에서 \'허용\'을 누르면 백그라운드에서 실행할 수 있습니다.';
+
+  @override
+  String get backgroundGuideStepsUnknown => '앱 정보에서 백그라운드 활동을 허용하세요.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => '앱 정보 열기';
+
+  @override
+  String get backgroundGuideAllow => '허용';
+
+  @override
+  String get backgroundGuideLater => '나중에';
+
+  @override
   String get settingsBackgroundActivityFix => '여기를 눌러 백그라운드 활동을 허용하세요';
 
   @override

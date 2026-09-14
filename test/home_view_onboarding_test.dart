@@ -4,18 +4,26 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:duplika/core/constants/app_constants.dart';
+import 'package:duplika/core/diagnostics/diagnostics_repository.dart';
 import 'package:duplika/core/services/onboarding_store.dart';
+import 'package:duplika/core/services/settings_store.dart';
+import 'package:duplika/data/models/background_activity_state.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/core/virtualization/virtualization_engine.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/home/controllers/home_controller.dart';
 import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/features/home/views/home_view.dart';
+import 'package:duplika/features/home/widgets/background_activity_nudge.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/widgets/virtualization_warning.dart';
 import 'package:duplika/features/onboarding/controllers/onboarding_controller.dart';
+import 'package:duplika/l10n/app_localizations.dart';
+import 'package:duplika/features/settings/controllers/settings_controller.dart';
 import 'package:duplika/native/native_bridge.dart';
 
+import 'fakes/fake_background_activity_bridge.dart';
+import 'fakes/fake_native_diagnostics.dart';
 import 'fakes/in_memory_profile_storage.dart';
 
 /// Covers the wiring the analyzer cannot: that the home screen still builds with the
@@ -28,6 +36,7 @@ void main() {
   late InMemoryProfileStorage onboardingStorage;
   late VirtualProfileRepository repository;
   late bool virtualizationAvailable;
+  late FakeBackgroundActivityBridge background;
   late List<String> calls;
 
   /// Per-test replies that win over the defaults below, for driving a failure.
@@ -105,6 +114,14 @@ void main() {
       ),
     );
     Get.put<OnboardingController>(onboarding);
+    background = FakeBackgroundActivityBridge();
+    Get.put<SettingsController>(
+      SettingsController(
+        diagnostics: DiagnosticsRepository(native: FakeNativeDiagnostics()),
+        bridge: background,
+        store: SettingsStore(storage: InMemoryProfileStorage()),
+      ),
+    );
   });
 
   tearDown(() {
@@ -117,8 +134,13 @@ void main() {
     await tester.pumpWidget(
       ScreenUtilInit(
         designSize: const Size(390, 844),
-        builder: (BuildContext context, Widget? child) =>
-            const GetMaterialApp(home: HomeView()),
+        builder: (BuildContext context, Widget? child) => GetMaterialApp(
+          // The background-activity guide reads the app's own strings, so the harness has
+          // to carry the delegates the real app mounts.
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const HomeView(),
+        ),
       ),
     );
     await tester.pump();
@@ -190,6 +212,110 @@ void main() {
       expect(find.text('This device cannot host containers.'), findsOneWidget);
     },
   );
+
+  group('background activity nudge', () {
+    const BackgroundActivityState restricted = BackgroundActivityState(
+      exempt: false,
+      restricted: true,
+      standbyBucket: 'rare',
+    );
+
+    /// Puts one clone on the grid with Android restricting the app, which is the only
+    /// state the nudge is for.
+    Future<void> withRestrictedClone(WidgetTester tester) async {
+      background.state = restricted;
+      await Get.find<SettingsController>().refreshBackgroundActivity();
+      await repository.createProfile(
+        packageName: 'com.example.app',
+        appName: 'Example',
+        profileName: 'Example',
+      );
+      await Get.find<HomeController>().refreshAll();
+      await pumpHome(tester);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('waits until there is a clone to lose notifications for', (
+      WidgetTester tester,
+    ) async {
+      // A reminder before there is anything to remind about is how the banner this
+      // replaces earned its dismissal.
+      background.state = restricted;
+      await Get.find<SettingsController>().refreshBackgroundActivity();
+      await pumpHome(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BackgroundActivityNudge), findsNothing);
+    });
+
+    testWidgets('appears on the grid and says what it costs', (
+      WidgetTester tester,
+    ) async {
+      await withRestrictedClone(tester);
+
+      expect(find.byType(BackgroundActivityNudge), findsOneWidget);
+      expect(
+        find.text('Clones may miss notifications while they are closed.'),
+        findsOneWidget,
+      );
+      expect(find.text('Allow'), findsOneWidget);
+      expect(
+        find.text(
+          'Make sure background activity is allowed so they keep receiving them.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('stays away while both switches are open', (
+      WidgetTester tester,
+    ) async {
+      background.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'active',
+      );
+      await Get.find<SettingsController>().refreshBackgroundActivity();
+      await repository.createProfile(
+        packageName: 'com.example.app',
+        appName: 'Example',
+        profileName: 'Example',
+      );
+      await Get.find<HomeController>().refreshAll();
+      await pumpHome(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BackgroundActivityNudge), findsNothing);
+    });
+
+    testWidgets('Allow explains before it asks the system for anything', (
+      WidgetTester tester,
+    ) async {
+      await withRestrictedClone(tester);
+
+      await tester.tap(find.text('Allow'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Android can pause Duplika'), findsOneWidget);
+      expect(background.prompts, 0, reason: 'the guide comes first');
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Allow'));
+      await tester.pumpAndSettle();
+
+      expect(background.prompts, 1);
+    });
+
+    testWidgets('dismissing it takes it off the screen', (
+      WidgetTester tester,
+    ) async {
+      await withRestrictedClone(tester);
+
+      await tester.tap(find.byTooltip('Dismiss'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BackgroundActivityNudge), findsNothing);
+    });
+  });
 
   /// Puts one running clone on the grid and opens its action sheet.
   Future<void> openSheet(WidgetTester tester) async {

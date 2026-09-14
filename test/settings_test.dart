@@ -1,13 +1,7 @@
-import 'package:duplika/core/diagnostics/diagnostic_event.dart';
 import 'package:duplika/core/diagnostics/diagnostics_repository.dart';
-import 'package:duplika/core/diagnostics/native_diagnostics.dart';
-import 'package:duplika/core/diagnostics/system_info.dart';
-import 'package:duplika/core/errors/app_exception.dart';
 import 'package:duplika/core/services/settings_store.dart';
 import 'package:duplika/data/models/app_language.dart';
 import 'package:duplika/data/models/background_activity_state.dart';
-import 'package:duplika/data/models/battery_prompt_screen.dart';
-import 'package:duplika/native/native_bridge.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/l10n/app_localizations.dart';
@@ -24,66 +18,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'fakes/fake_background_activity_bridge.dart';
+import 'fakes/fake_native_diagnostics.dart';
 import 'fakes/in_memory_profile_storage.dart';
-
-/// A native side that answers from a map instead of a platform channel.
-class _FakeNative extends NativeDiagnostics {
-  _FakeNative({this.payload = const <String, dynamic>{}});
-
-  Map<String, dynamic> payload;
-  bool fails = false;
-
-  @override
-  Future<List<DiagnosticEvent>> readHistory({int limit = 2000}) async =>
-      const <DiagnosticEvent>[];
-
-  @override
-  Future<SystemInfoSnapshot> systemInfo() async {
-    if (fails) {
-      throw StateError('channel is not answering');
-    }
-    return SystemInfoSnapshot.from(payload);
-  }
-}
-
-/// The background activity call answered from a field instead of a platform channel, with
-/// the opens counted: the row's job is to report this state and to hand the user to the
-/// system screen, and both are assertable without Android.
-class _FakeBridge extends NativeBridge {
-  BackgroundActivityState? state;
-  int opened = 0;
-  int prompts = 0;
-  bool openFails = false;
-  bool promptFails = false;
-  BatteryPromptScreen promptScreen = BatteryPromptScreen.dialog;
-
-  @override
-  Future<BackgroundActivityState?> backgroundActivityState() async => state;
-
-  @override
-  Future<BatteryPromptScreen> requestIgnoreBatteryOptimizations() async {
-    if (promptFails) {
-      throw const VirtualizationException(
-        'no battery screen',
-        code: 'BATTERY_PROMPT_UNAVAILABLE',
-      );
-    }
-    prompts += 1;
-    return promptScreen;
-  }
-
-  @override
-  Future<BackgroundActivityScreen> openBackgroundActivitySettings() async {
-    if (openFails) {
-      throw const VirtualizationException(
-        'no screen can handle it',
-        code: 'NO_ACTIVITY',
-      );
-    }
-    opened += 1;
-    return BackgroundActivityScreen.appInfo;
-  }
-}
 
 /// An exempt, unrestricted Duplika: the state the row reads as `Allowed`.
 const BackgroundActivityState _allowedState = BackgroundActivityState(
@@ -129,12 +66,23 @@ void main() {
 
       expect(await SettingsStore(storage: storage).themeMode(), ThemeMode.system);
     });
+
+    test('the background nudge remembers being waved away', () async {
+      final InMemoryProfileStorage storage = InMemoryProfileStorage();
+      final SettingsStore store = SettingsStore(storage: storage);
+
+      expect(await store.backgroundNudgeDismissed(), isFalse);
+
+      await store.dismissBackgroundNudge();
+
+      expect(await store.backgroundNudgeDismissed(), isTrue);
+    });
   });
 
   group('SettingsController', () {
     late InMemoryProfileStorage storage;
-    late _FakeNative native;
-    late _FakeBridge bridge;
+    late FakeNativeDiagnostics native;
+    late FakeBackgroundActivityBridge bridge;
     late List<Uri> opened;
     late bool openSucceeds;
 
@@ -152,8 +100,8 @@ void main() {
 
     setUp(() {
       storage = InMemoryProfileStorage();
-      native = _FakeNative(payload: _payload);
-      bridge = _FakeBridge();
+      native = FakeNativeDiagnostics(payload: _payload);
+      bridge = FakeBackgroundActivityBridge();
       opened = <Uri>[];
       openSucceeds = true;
     });
@@ -321,6 +269,91 @@ void main() {
       expect(controller.status.value, SettingsStatus.backgroundActivityFailed);
     });
 
+    test('the nudge offers itself only while Android actually restricts us', () async {
+      final SettingsController controller = build();
+
+      bridge.state = _allowedState;
+      await controller.refreshBackgroundActivity();
+      expect(controller.backgroundNudgeVisible, isFalse);
+
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'rare',
+      );
+      await controller.refreshBackgroundActivity();
+      expect(controller.backgroundNudgeVisible, isTrue);
+    });
+
+    test('an unreadable OEM switch still asks the user to look', () async {
+      // The switch decides more than the two readable controls, so an OEM build is never
+      // "allowed" from here -- and the reminder is the only place that says so before the
+      // user notices the notifications missing.
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'unknown(5)',
+        nextStep: 'batteryUsage',
+      );
+      final SettingsController controller = build();
+
+      await controller.refreshBackgroundActivity();
+
+      expect(controller.backgroundActivity.value?.allowed, isFalse);
+      expect(controller.backgroundNudgeVisible, isTrue);
+    });
+
+    test('acting on the nudge keeps it away, readable or not', () async {
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'unknown(5)',
+        nextStep: 'batteryUsage',
+      );
+      final SettingsController controller = build();
+      await controller.refreshBackgroundActivity();
+
+      await controller.acceptBackgroundNudge();
+
+      expect(controller.backgroundNudgeVisible, isFalse);
+      expect(
+        bridge.opened,
+        0,
+        reason: 'the guide the view opens next is the answer, not a silent jump',
+      );
+    });
+
+    test('a state the platform cannot report is not treated as a problem', () async {
+      // Null means "the platform could not say". Nudging on it would send every user of
+      // an old release to a screen that cannot help them.
+      final SettingsController controller = build();
+
+      bridge.state = null;
+      await controller.refreshBackgroundActivity();
+
+      expect(controller.backgroundNudgeVisible, isFalse);
+    });
+
+    test('dismissing the nudge hides the reminder and keeps it hidden', () async {
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'rare',
+      );
+      final SettingsController controller = build();
+      await controller.refreshBackgroundActivity();
+
+      await controller.dismissBackgroundNudge();
+
+      expect(controller.backgroundNudgeVisible, isFalse);
+      expect(storage.values[SettingsStore.backgroundNudgeKey], 'true');
+      expect(
+        controller.backgroundActivity.value?.allowed,
+        isFalse,
+        reason: 'the Settings row still reports the state',
+      );
+    });
+
     test('an unmet exemption is asked for where the system can grant it', () async {
       // On the builds whose switch is not under Battery usage, the system's own one-tap
       // exemption prompt is the control that matters, and a dialog no OEM page can offer
@@ -417,9 +450,9 @@ void main() {
   });
 
   group('SettingsView', () {
-    late _FakeNative native;
+    late FakeNativeDiagnostics native;
 
-    late _FakeBridge bridge;
+    late FakeBackgroundActivityBridge bridge;
 
     /// Settings reads the Private space controller for its one privacy row, so the
     /// graph has to hold one before the screen is built.
@@ -498,10 +531,10 @@ void main() {
     }
 
     setUp(() {
-      native = _FakeNative(payload: _payload);
+      native = FakeNativeDiagnostics(payload: _payload);
       // Allowed by default, so the rows that read 'unavailable' stay the ones about the
       // build facts rather than picking up the background row as well.
-      bridge = _FakeBridge()..state = _allowedState;
+      bridge = FakeBackgroundActivityBridge()..state = _allowedState;
     });
 
     testWidgets('groups every row under the heading it belongs to', (
@@ -582,29 +615,104 @@ void main() {
     testWidgets('a restricted row says which taps turn it back on', (
       WidgetTester tester,
     ) async {
-      // On the OEM builds that keep the switch under Battery usage, the info page alone
-      // leaves the user on a screen that never mentions background activity.
       bridge.state = const BackgroundActivityState(
         exempt: false,
         restricted: true,
         standbyBucket: 'restricted',
-        nextStep: 'batteryUsage',
       );
       await open(tester);
 
       expect(find.text('Restricted'), findsOneWidget);
+      expect(find.text('Tap here and allow background activity'), findsOneWidget);
+    });
+
+    testWidgets('an unreadable OEM switch is a Check, not a claim', (
+      WidgetTester tester,
+    ) async {
+      // Measured on a OnePlus with its switch off: none of Android's readable controls
+      // move. A green `Allowed` over a switch the app never read is worse than saying so.
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'unknown(5)',
+        nextStep: 'batteryUsage',
+      );
+      await open(tester);
+
+      expect(find.text('Check'), findsOneWidget);
+      expect(find.text('Allowed'), findsNothing);
       expect(
         find.text('Tap here, then Battery usage, then Allow background activity'),
         findsOneWidget,
       );
     });
 
-    testWidgets('tapping the row asks the system for its settings page', (
+    testWidgets('a problem it can see is Restricted even beside that switch', (
       WidgetTester tester,
     ) async {
+      // The exemption is readable, and it is missing: that is a fact worth stating, not
+      // something to soften into a check.
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: false,
+        standbyBucket: 'unknown(5)',
+        nextStep: 'batteryUsage',
+      );
+      await open(tester);
+
+      expect(find.text('Restricted'), findsOneWidget);
+      expect(find.text('Check'), findsNothing);
+      expect(
+        find.text('Tap here, then Battery usage, then Allow background activity'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the row explains before it sends anyone to a system screen', (
+      WidgetTester tester,
+    ) async {
+      // The word "background" means five different things in Android settings, so the row
+      // has to say which one it means before it points at a screen that uses none of them.
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'rare',
+      );
       await open(tester);
 
       await tester.tap(find.text('Background activity'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Android can pause Duplika'),
+        findsOneWidget,
+        reason: 'the guide says what the setting is for',
+      );
+      expect(bridge.prompts, 0, reason: 'nothing opens until the user asks');
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Allow'));
+      await tester.pumpAndSettle();
+
+      expect(bridge.prompts, 1);
+    });
+
+    testWidgets('an OEM guide names the sub-page and opens app info', (
+      WidgetTester tester,
+    ) async {
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'unknown(5)',
+        nextStep: 'batteryUsage',
+      );
+      await open(tester);
+
+      await tester.tap(find.text('Background activity'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Battery usage'), findsWidgets);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Open App info'));
       await tester.pumpAndSettle();
 
       expect(bridge.opened, 1);
@@ -728,7 +836,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       controller = SettingsController(
-        diagnostics: DiagnosticsRepository(native: _FakeNative()),
+        diagnostics: DiagnosticsRepository(native: FakeNativeDiagnostics()),
         store: SettingsStore(storage: storage),
         openUrl: (Uri _) async => true,
       );
@@ -857,7 +965,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       controller = SettingsController(
-        diagnostics: DiagnosticsRepository(native: _FakeNative()),
+        diagnostics: DiagnosticsRepository(native: FakeNativeDiagnostics()),
         store: SettingsStore(storage: InMemoryProfileStorage()),
         openUrl: (Uri url) async {
           opened.add(url);
@@ -994,7 +1102,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       controller = SettingsController(
-        diagnostics: DiagnosticsRepository(native: _FakeNative()),
+        diagnostics: DiagnosticsRepository(native: FakeNativeDiagnostics()),
         store: SettingsStore(storage: storage),
         openUrl: (Uri _) async => true,
       );

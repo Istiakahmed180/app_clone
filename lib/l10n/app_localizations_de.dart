@@ -100,6 +100,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Eingeschränkt';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Prüfen';
+
+  @override
+  String get backgroundGuideTitle => 'Hintergrundaktivität';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android kann Duplika im Hintergrund pausieren; geklonte Apps verpassen dann Benachrichtigungen, bis du Duplika wieder öffnest.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Tippe in den App-Infos auf Akkuverbrauch und aktiviere Hintergrundaktivität.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Tippe in der Systemfrage auf Zulassen, damit die App im Hintergrund laufen darf.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Erlaube in den App-Infos die Hintergrundaktivität.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'App-Infos öffnen';
+
+  @override
+  String get backgroundGuideAllow => 'Zulassen';
+
+  @override
+  String get backgroundGuideLater => 'Später';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Hier tippen und Hintergrundaktivität erlauben';
 

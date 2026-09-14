@@ -26,11 +26,26 @@ class BackgroundActivityState {
   /// story.
   final String? nextStep;
 
-  /// Whether both of Android's background controls are open.
+  /// Whether Android's own controls are all there is to check.
+  ///
+  /// False on the builds that keep a switch of their own ([nextStep] is the extra tap that
+  /// finds it). That switch is read by nothing: measured on a OnePlus with it off,
+  /// [`isBackgroundRestricted`], the `RUN_ANY_IN_BACKGROUND` app-op and the standby bucket
+  /// all keep reading as if nothing had changed. So on those builds the state cannot be
+  /// called allowed -- not because it is broken, but because the app cannot see it, and a
+  /// green `Allowed` over a switch it never read is how a user ends up trusting a setting
+  /// that is off.
+  bool get verifiable => nextStep == null;
+
+  /// A problem Android can actually see: Doze is not exempting the app, or the platform
+  /// says its background running is restricted.
   ///
   /// A restriction Android cannot report is not held against the user: [restricted] is null
   /// on old releases, and treating that as "restricted" would nag every one of them.
-  bool get allowed => exempt && restricted != true;
+  bool get hasKnownProblem => !exempt || restricted == true;
+
+  /// Whether both of Android's background controls are provably open.
+  bool get allowed => verifiable && !hasKnownProblem;
 
   factory BackgroundActivityState.fromMap(Map<String, dynamic> map) {
     return BackgroundActivityState(

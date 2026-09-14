@@ -100,6 +100,37 @@ class AppLocalizationsMs extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Disekat';
 
   @override
+  String get settingsBackgroundActivityCheck => 'Semak';
+
+  @override
+  String get backgroundGuideTitle => 'Aktiviti latar belakang';
+
+  @override
+  String get backgroundGuideWhy =>
+      'Android boleh menghentikan Duplika di latar belakang; aplikasi klon kemudian tidak menerima pemberitahuan sehingga anda membuka Duplika semula.';
+
+  @override
+  String get backgroundGuideStepsOem =>
+      'Dalam Maklumat apl, ketik Penggunaan bateri dan hidupkan Benarkan aktiviti latar belakang.';
+
+  @override
+  String get backgroundGuideStepsStock =>
+      'Ketik Benarkan pada soalan sistem yang muncul, supaya ia boleh berjalan di latar belakang.';
+
+  @override
+  String get backgroundGuideStepsUnknown =>
+      'Dalam Maklumat apl, benarkan aktiviti latar belakang.';
+
+  @override
+  String get backgroundGuideOpenAppInfo => 'Buka maklumat apl';
+
+  @override
+  String get backgroundGuideAllow => 'Benarkan';
+
+  @override
+  String get backgroundGuideLater => 'Bukan sekarang';
+
+  @override
   String get settingsBackgroundActivityFix =>
       'Ketik di sini dan benarkan aktiviti latar belakang';
 
