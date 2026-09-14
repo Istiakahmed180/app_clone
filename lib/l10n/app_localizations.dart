@@ -300,11 +300,23 @@ abstract class AppLocalizations {
   /// **'Restricted'**
   String get settingsBackgroundActivityRestricted;
 
-  /// No description provided for @settingsBackgroundActivityCheck.
+  /// No description provided for @settingsBackgroundActivityNotAllowed.
   ///
   /// In en, this message translates to:
-  /// **'Check'**
-  String get settingsBackgroundActivityCheck;
+  /// **'Not allowed'**
+  String get settingsBackgroundActivityNotAllowed;
+
+  /// No description provided for @backgroundGuideAllowedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Background activity is allowed, so clones keep receiving notifications while they are closed.'**
+  String get backgroundGuideAllowedStatus;
+
+  /// No description provided for @backgroundGuideDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get backgroundGuideDone;
 
   /// No description provided for @backgroundGuideTitle.
   ///

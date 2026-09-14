@@ -37,15 +37,18 @@ class BackgroundActivityState {
   /// that is off.
   bool get verifiable => nextStep == null;
 
-  /// A problem Android can actually see: Doze is not exempting the app, or the platform
-  /// says its background running is restricted.
+  /// Whether the user has allowed it: Doze exempts the app and Android has not been told
+  /// to restrict it.
   ///
-  /// A restriction Android cannot report is not held against the user: [restricted] is null
-  /// on old releases, and treating that as "restricted" would nag every one of them.
-  bool get hasKnownProblem => !exempt || restricted == true;
-
-  /// Whether both of Android's background controls are provably open.
-  bool get allowed => verifiable && !hasKnownProblem;
+  /// Two states by product decision, because the honest middle ground is worse UX than it
+  /// is information: Android's own "Optimised" is the default the fresh-install flow lands
+  /// in, and showing it beside a green system toggle reads as a fault. Anything that is
+  /// not this state is `Not allowed`, and the guide is what turns it into this state.
+  ///
+  /// On the OEM builds whose second switch cannot be read, this is as far as the app can
+  /// see: the switch itself is invisible ([verifiable] is false), so a user who turns it
+  /// off is not detected here. That is a measured platform limit, not a bug.
+  bool get allowed => exempt && restricted != true;
 
   factory BackgroundActivityState.fromMap(Map<String, dynamic> map) {
     return BackgroundActivityState(

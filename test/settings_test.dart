@@ -285,10 +285,10 @@ void main() {
       expect(controller.backgroundNudgeVisible, isTrue);
     });
 
-    test('an unreadable OEM switch still asks the user to look', () async {
-      // The switch decides more than the two readable controls, so an OEM build is never
-      // "allowed" from here -- and the reminder is the only place that says so before the
-      // user notices the notifications missing.
+    test('an OEM switch the app cannot read does not become a third state', () async {
+      // Two states by product decision. The switch is invisible, so the readable half is
+      // the answer here -- and the reminder is not parked on screen for a state the app
+      // could not verify either way.
       bridge.state = const BackgroundActivityState(
         exempt: true,
         restricted: false,
@@ -299,8 +299,8 @@ void main() {
 
       await controller.refreshBackgroundActivity();
 
-      expect(controller.backgroundActivity.value?.allowed, isFalse);
-      expect(controller.backgroundNudgeVisible, isTrue);
+      expect(controller.backgroundActivity.value?.allowed, isTrue);
+      expect(controller.backgroundNudgeVisible, isFalse);
     });
 
     test('acting on the nudge keeps it away, readable or not', () async {
@@ -612,7 +612,7 @@ void main() {
       );
     });
 
-    testWidgets('a restricted row says which taps turn it back on', (
+    testWidgets('a restricted row reads Not allowed, with the taps that fix it', (
       WidgetTester tester,
     ) async {
       bridge.state = const BackgroundActivityState(
@@ -622,36 +622,13 @@ void main() {
       );
       await open(tester);
 
-      expect(find.text('Restricted'), findsOneWidget);
+      expect(find.text('Not allowed'), findsOneWidget);
       expect(find.text('Tap here and allow background activity'), findsOneWidget);
     });
 
-    testWidgets('an unreadable OEM switch is a Check, not a claim', (
+    testWidgets('a missing exemption reads Not allowed too', (
       WidgetTester tester,
     ) async {
-      // Measured on a OnePlus with its switch off: none of Android's readable controls
-      // move. A green `Allowed` over a switch the app never read is worse than saying so.
-      bridge.state = const BackgroundActivityState(
-        exempt: true,
-        restricted: false,
-        standbyBucket: 'unknown(5)',
-        nextStep: 'batteryUsage',
-      );
-      await open(tester);
-
-      expect(find.text('Check'), findsOneWidget);
-      expect(find.text('Allowed'), findsNothing);
-      expect(
-        find.text('Tap here, then Battery usage, then Allow background activity'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('a problem it can see is Restricted even beside that switch', (
-      WidgetTester tester,
-    ) async {
-      // The exemption is readable, and it is missing: that is a fact worth stating, not
-      // something to soften into a check.
       bridge.state = const BackgroundActivityState(
         exempt: false,
         restricted: false,
@@ -660,12 +637,35 @@ void main() {
       );
       await open(tester);
 
-      expect(find.text('Restricted'), findsOneWidget);
-      expect(find.text('Check'), findsNothing);
+      expect(find.text('Not allowed'), findsOneWidget);
       expect(
         find.text('Tap here, then Battery usage, then Allow background activity'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('an allowed row offers the guide without asking to allow again', (
+      WidgetTester tester,
+    ) async {
+      // The sheet used to reopen with the same Allow button that had already been pressed.
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'active',
+      );
+      await open(tester);
+
+      await tester.tap(find.text('Background activity'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Background activity is allowed'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
+      expect(find.text('Allow'), findsNothing);
+      expect(bridge.prompts, 0);
+      expect(bridge.opened, 0);
     });
 
     testWidgets('the row explains before it sends anyone to a system screen', (

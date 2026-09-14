@@ -99,7 +99,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '制限あり';
 
   @override
-  String get settingsBackgroundActivityCheck => '確認';
+  String get settingsBackgroundActivityNotAllowed => '未許可';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'バックグラウンド動作は許可されているため、複製したアプリは閉じていても通知を受け取れます。';
+
+  @override
+  String get backgroundGuideDone => '完了';
 
   @override
   String get backgroundGuideTitle => 'バックグラウンド動作';

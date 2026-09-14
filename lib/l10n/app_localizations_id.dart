@@ -100,7 +100,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Dibatasi';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Periksa';
+  String get settingsBackgroundActivityNotAllowed => 'Tidak diizinkan';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'Aktivitas latar belakang diizinkan, sehingga aplikasi klon tetap menerima notifikasi saat ditutup.';
+
+  @override
+  String get backgroundGuideDone => 'Selesai';
 
   @override
   String get backgroundGuideTitle => 'Aktivitas latar belakang';

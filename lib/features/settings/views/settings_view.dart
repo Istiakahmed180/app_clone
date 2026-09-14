@@ -76,6 +76,8 @@ class SettingsView extends StatelessWidget {
                   onTap: () => showBackgroundActivityGuide(
                     context,
                     variant: _backgroundActivityGuideVariant(controller),
+                    allowed:
+                        controller.backgroundActivity.value?.allowed ?? false,
                     onOpen: controller.openBackgroundActivitySettings,
                   ),
                 ),
@@ -183,14 +185,9 @@ class SettingsView extends StatelessWidget {
     if (state == null) {
       return l10n.commonUnavailable;
     }
-    // A problem Android can see is reported as one, even on the builds where the switch
-    // itself is invisible; only the unreadable-and-nothing-known case is a `Check`.
-    if (state.hasKnownProblem) {
-      return l10n.settingsBackgroundActivityRestricted;
-    }
-    return state.verifiable
+    return state.allowed
         ? l10n.settingsBackgroundActivityAllowed
-        : l10n.settingsBackgroundActivityCheck;
+        : l10n.settingsBackgroundActivityNotAllowed;
   }
 
   /// Why the setting matters, and — when it is off — which taps turn it back on.

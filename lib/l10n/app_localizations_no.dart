@@ -100,7 +100,14 @@ class AppLocalizationsNo extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Begrenset';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Sjekk';
+  String get settingsBackgroundActivityNotAllowed => 'Ikke tillatt';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'Bakgrunnsaktivitet er tillatt, så klonede apper får varsler selv når de er lukket.';
+
+  @override
+  String get backgroundGuideDone => 'Ferdig';
 
   @override
   String get backgroundGuideTitle => 'Bakgrunnsaktivitet';

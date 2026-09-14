@@ -21,6 +21,7 @@ enum BackgroundActivityGuideVariant { oem, stock, unknown }
 Future<void> showBackgroundActivityGuide(
   BuildContext context, {
   required BackgroundActivityGuideVariant variant,
+  required bool allowed,
   required VoidCallback onOpen,
 }) {
   final AppLocalizations l10n = context.l10n;
@@ -54,49 +55,65 @@ Future<void> showBackgroundActivityGuide(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Icon(
-                    Icons.checklist_outlined,
+                    allowed
+                        ? Icons.check_circle_outline
+                        : Icons.checklist_outlined,
                     size: 20.r,
                     color: theme.colorScheme.primary,
                   ),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      switch (variant) {
-                        BackgroundActivityGuideVariant.oem =>
-                          l10n.backgroundGuideStepsOem,
-                        BackgroundActivityGuideVariant.stock =>
-                          l10n.backgroundGuideStepsStock,
-                        BackgroundActivityGuideVariant.unknown =>
-                          l10n.backgroundGuideStepsUnknown,
-                      },
+                      // Nothing left to do, so nothing left to ask: the sheet states it
+                      // and offers a way out rather than the button that opened it again.
+                      allowed
+                          ? l10n.backgroundGuideAllowedStatus
+                          : switch (variant) {
+                              BackgroundActivityGuideVariant.oem =>
+                                l10n.backgroundGuideStepsOem,
+                              BackgroundActivityGuideVariant.stock =>
+                                l10n.backgroundGuideStepsStock,
+                              BackgroundActivityGuideVariant.unknown =>
+                                l10n.backgroundGuideStepsUnknown,
+                            },
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.of(sheetContext).pop();
-                    onOpen();
-                  },
-                  child: Text(
-                    opensAppInfo
-                        ? l10n.backgroundGuideOpenAppInfo
-                        : l10n.backgroundGuideAllow,
+              if (allowed)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: Text(l10n.backgroundGuideDone),
+                  ),
+                )
+              else ...<Widget>[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      onOpen();
+                    },
+                    child: Text(
+                      opensAppInfo
+                          ? l10n.backgroundGuideOpenAppInfo
+                          : l10n.backgroundGuideAllow,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 4.h),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => Navigator.of(sheetContext).pop(),
-                  child: Text(l10n.backgroundGuideLater),
+                SizedBox(height: 4.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: Text(l10n.backgroundGuideLater),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

@@ -100,7 +100,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Bị hạn chế';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Kiểm tra';
+  String get settingsBackgroundActivityNotAllowed => 'Không được phép';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'Hoạt động nền được phép, nên các ứng dụng nhân bản vẫn nhận thông báo khi đã đóng.';
+
+  @override
+  String get backgroundGuideDone => 'Xong';
 
   @override
   String get backgroundGuideTitle => 'Hoạt động nền';

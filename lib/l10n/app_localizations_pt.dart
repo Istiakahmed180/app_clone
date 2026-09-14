@@ -100,7 +100,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Restringida';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Verificar';
+  String get settingsBackgroundActivityNotAllowed => 'Não permitida';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'A atividade em segundo plano está permitida, por isso as apps clonadas continuam a receber notificações enquanto estão fechadas.';
+
+  @override
+  String get backgroundGuideDone => 'Concluído';
 
   @override
   String get backgroundGuideTitle => 'Atividade em segundo plano';
@@ -373,7 +380,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get settingsBackgroundActivityRestricted => 'Restringida';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Verificar';
+  String get settingsBackgroundActivityNotAllowed => 'Não permitido';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'A atividade em segundo plano está permitida, então os apps clonados continuam recebendo notificações enquanto estão fechados.';
+
+  @override
+  String get backgroundGuideDone => 'Concluído';
 
   @override
   String get backgroundGuideTitle => 'Atividade em segundo plano';

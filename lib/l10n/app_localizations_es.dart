@@ -100,7 +100,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Restringida';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Comprobar';
+  String get settingsBackgroundActivityNotAllowed => 'No permitida';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'La actividad en segundo plano está permitida, así que las apps clonadas siguen recibiendo notificaciones mientras están cerradas.';
+
+  @override
+  String get backgroundGuideDone => 'Listo';
 
   @override
   String get backgroundGuideTitle => 'Actividad en segundo plano';

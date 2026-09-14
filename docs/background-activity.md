@@ -28,16 +28,42 @@ The screen itself cannot be deep-linked either: starting
 `SecurityException: ... not exported from uid 1000` — Settings may open it, apps may not.
 The app can only open **App info**, one tap above it.
 
-## The rule the UI follows
+## The "Allow background usage" toggle is not the Doze exemption
 
-- `verifiable` = the device has no OEM switch (no `com.oplus.battery`).
-- `hasKnownProblem` = Doze is not exempt, or `isBackgroundRestricted()` is true.
-- **Allowed** — verifiable and nothing known to be wrong. This is the only case worth a
-  green label, and it is only reachable where every control was actually read.
-- **Restricted** — a problem Android reported. Said plainly, including on OEM builds.
-- **Check** — an OEM build with nothing known to be wrong. Not a claim: the row says the
-  switch cannot be read and names the taps that reach it
-  ("Tap here, then Battery usage, then Allow background activity").
+Read off the Settings UI on a Pixel image (API 35), toggling the switch and watching the
+signals:
+
+| Switch | `RUN_ANY_IN_BACKGROUND` | deviceidle whitelist |
+| --- | --- | --- |
+| **on** | `allow` | unchanged (absent here) |
+| **off** | `ignore` | unchanged (absent here) |
+
+So that toggle is the **background-restriction app-op**, the one
+`ActivityManager.isBackgroundRestricted()` reports — not the Doze whitelist. A Pixel shows
+it **on** for a freshly installed, perfectly ordinary app: the app is *optimised*, not
+unrestricted. Calling that state "Restricted" tells the user their green switch is lying.
+
+## The rule the UI follows (two states)
+
+- **Allowed** — Doze exempts the app and `isBackgroundRestricted()` is false.
+- **Not allowed** — anything else.
+
+The technical middle grounds are deliberately not their own labels. Android's "Optimised"
+is the state every freshly installed app is in, and putting that word (or "Restricted")
+beside a green system toggle reads as a fault; a third label for the unreadable OEM switch
+told the user nothing they could act on. Two states, and the guide carries the difference:
+"Not allowed" always leads to the sheet that explains and opens the right screen.
+
+The sheet also knows the state: once allowed it states that and offers **Done**, instead of
+offering the same "Allow" button that was already pressed.
+
+**Known limit, measured.** On the OEM builds with a second switch (`verifiable` is false),
+turning that switch off is not detected: none of the readable controls move, so the row
+keeps saying Allowed. The app cannot see that switch ([measured above](#what-was-measured-oneplus-cph2605-coloros-android-15)); the
+guide still names the taps that reach it.
+
+The nudge follows `allowed`, so it appears whenever the row says `Not allowed` — one
+reminder, dismissed for good by either button.
 
 The home nudge follows the same state (`!allowed`): on OEM builds one reminder per install
 teaches where the switch is, and either **Allow** or dismiss retires it for good. There is

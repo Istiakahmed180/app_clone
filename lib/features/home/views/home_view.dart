@@ -110,6 +110,11 @@ class HomeView extends GetView<HomeController> {
                               showBackgroundActivityGuide(
                                 context,
                                 variant: _backgroundActivityGuideVariant(),
+                                // The nudge is only on screen when this is false, but the
+                                // sheet reads it for itself rather than assuming.
+                                allowed: _backgroundActivity
+                                        .backgroundActivity.value?.allowed ??
+                                    false,
                                 onOpen: _backgroundActivity
                                     .openBackgroundActivitySettings,
                               );

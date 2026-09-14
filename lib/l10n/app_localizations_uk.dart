@@ -100,7 +100,14 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Обмежено';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Перевірити';
+  String get settingsBackgroundActivityNotAllowed => 'Не дозволено';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'Фонову активність дозволено, тому клоновані застосунки отримують сповіщення, навіть коли закриті.';
+
+  @override
+  String get backgroundGuideDone => 'Готово';
 
   @override
   String get backgroundGuideTitle => 'Фонова активність';

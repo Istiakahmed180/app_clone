@@ -99,7 +99,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '제한됨';
 
   @override
-  String get settingsBackgroundActivityCheck => '확인';
+  String get settingsBackgroundActivityNotAllowed => '허용 안 됨';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      '백그라운드 활동이 허용되어 복제한 앱이 닫혀 있어도 알림을 받습니다.';
+
+  @override
+  String get backgroundGuideDone => '완료';
 
   @override
   String get backgroundGuideTitle => '백그라운드 활동';

@@ -100,7 +100,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'प्रतिबंधित';
 
   @override
-  String get settingsBackgroundActivityCheck => 'जाँचें';
+  String get settingsBackgroundActivityNotAllowed => 'अनुमति नहीं';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'पृष्ठभूमि गतिविधि की अनुमति है, इसलिए क्लोन किए गए ऐप बंद रहने पर भी सूचनाएँ पाते रहते हैं।';
+
+  @override
+  String get backgroundGuideDone => 'ठीक है';
 
   @override
   String get backgroundGuideTitle => 'पृष्ठभूमि गतिविधि';

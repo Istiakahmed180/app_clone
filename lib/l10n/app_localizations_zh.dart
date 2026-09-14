@@ -99,7 +99,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
-  String get settingsBackgroundActivityCheck => '检查';
+  String get settingsBackgroundActivityNotAllowed => '未允许';
+
+  @override
+  String get backgroundGuideAllowedStatus => '已允许后台活动，因此克隆的应用在关闭后仍能收到通知。';
+
+  @override
+  String get backgroundGuideDone => '完成';
 
   @override
   String get backgroundGuideTitle => '后台活动';
@@ -363,7 +369,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
-  String get settingsBackgroundActivityCheck => '检查';
+  String get settingsBackgroundActivityNotAllowed => '未允许';
+
+  @override
+  String get backgroundGuideAllowedStatus => '已允许后台活动，因此克隆的应用在关闭后仍能收到通知。';
+
+  @override
+  String get backgroundGuideDone => '完成';
 
   @override
   String get backgroundGuideTitle => '后台活动';
@@ -627,7 +639,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
-  String get settingsBackgroundActivityCheck => '檢查';
+  String get settingsBackgroundActivityNotAllowed => '未允許';
+
+  @override
+  String get backgroundGuideAllowedStatus => '已允許背景活動，因此複製的應用程式在關閉後仍能收到通知。';
+
+  @override
+  String get backgroundGuideDone => '完成';
 
   @override
   String get backgroundGuideTitle => '背景活動';
@@ -891,7 +909,13 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get settingsBackgroundActivityRestricted => '已限制';
 
   @override
-  String get settingsBackgroundActivityCheck => '檢查';
+  String get settingsBackgroundActivityNotAllowed => '未允許';
+
+  @override
+  String get backgroundGuideAllowedStatus => '已允許背景活動，因此複製的應用程式在關閉後仍能收到通知。';
+
+  @override
+  String get backgroundGuideDone => '完成';
 
   @override
   String get backgroundGuideTitle => '背景活動';

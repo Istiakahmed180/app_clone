@@ -100,7 +100,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Limitata';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Controlla';
+  String get settingsBackgroundActivityNotAllowed => 'Non consentita';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'L\'attività in background è consentita, quindi le app clonate continuano a ricevere notifiche mentre sono chiuse.';
+
+  @override
+  String get backgroundGuideDone => 'Fatto';
 
   @override
   String get backgroundGuideTitle => 'Attività in background';

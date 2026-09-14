@@ -100,7 +100,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsBackgroundActivityRestricted => 'Ограничена';
 
   @override
-  String get settingsBackgroundActivityCheck => 'Проверить';
+  String get settingsBackgroundActivityNotAllowed => 'Не разрешена';
+
+  @override
+  String get backgroundGuideAllowedStatus =>
+      'Фоновая активность разрешена, поэтому клонированные приложения получают уведомления, даже когда закрыты.';
+
+  @override
+  String get backgroundGuideDone => 'Готово';
 
   @override
   String get backgroundGuideTitle => 'Фоновая активность';
