@@ -134,7 +134,7 @@ class CloneKeepAliveService : Service() {
     companion object {
         private const val CHANNEL_ID = "clone_keepalive"
         private const val NOTIFICATION_ID = 4711
-        private const val WAKE_INTERVAL_MS = 30_000L
+        private const val WAKE_INTERVAL_MS = 120_000L
 
         const val EXTRA_PACKAGE = "package_name"
         const val EXTRA_USER_ID = "virtual_user_id"

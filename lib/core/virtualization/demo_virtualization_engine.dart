@@ -88,6 +88,12 @@ class DemoVirtualizationEngine implements VirtualizationEngine {
   Future<void> clearProfileCache(String profileId) async =>
       _noContainer("clear a clone's cache");
 
+  /// This engine has no container to provision into, so it refuses rather than
+  /// pretending the packages landed somewhere.
+  @override
+  Future<void> provisionMicroG(String profileId) async =>
+      _noContainer('install Google services into a clone');
+
   Never _noContainer(String action) => throw VirtualizationException(
         'This engine keeps no container, so it cannot $action.',
         code: AppConstants.errorVirtualAppNotInstalled,

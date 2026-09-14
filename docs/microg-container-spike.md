@@ -126,17 +126,27 @@ and `ClonePushRefreshWorker` (WorkManager, ≥15 min) does the same while nothin
 stores undelivered messages, so they arrive in a batch at the next reconnect rather than
 instantly. These are recorded in `docs/SECURITY.md`.
 
-**Measured on the CPH2605 with the reconnect running:** the wake does reach microG — the log
-shows `GmsGcmMcsSvc: Connect initiated, reason: Intent { act=…mcs.CONNECT … }` — and the
-keep-alive foreground service stays alive, the guest app stays alive, and notification
-permission and the clone's channel (`channel_id@black-0`, "… · Clone 1") are correct. But
-microG never reaches `Connected to mtalk.google.com` / `Logged in` on this device: the OEM
-SIGKILLs the container's microG process in bulk (`Zygote: Process … exited due to signal 9`
-for six pids within a second) faster than the connection can complete, and the reconnect
-simply starts the race again. No `DataMessageStanza` was ever received on this device, so on
-this OEM the app-side work described above is necessary but not sufficient — the remaining
-lever is the OEM's own process policy (Auto-launch, battery "Don't optimize", lock in
-recents), which is a user setting Duplika cannot set for itself.
+**Measured on the CPH2605, and the reconnect interval matters.** With a 30 s interval the
+wake reached microG (`Connect initiated`) but `Logged in` never followed: re-issuing CONNECT
+while the handshake was in flight kept aborting it. At **120 s** the connection completes —
+
+```
+D GmsGcmMcsSvc: Connected to mtalk.google.com:5228
+D GmsGcmMcsSvc: Logged in
+D GmsGcmMcsInput: Incoming message: DataMessageStanza{… gcm.notification.title=OnePlus 120s test …}
+D GmsGcmMcsSvc: Deliver message to all receivers in package com.digibank.mobile
+```
+
+— so **push delivery works on the real device too, while the clone is open**. Notification
+permission and the clone's channel (`channel_id@black-0`, "… · Clone 1") are correct.
+
+**What still does not work there is delivery to a *closed* clone.** The OEM also kills the
+guest app's process when it is backgrounded; a message that arrives while the app is dead has
+no receiver, and the FCM notification is not shown. `ClonePushRefreshWorker` reconnects the
+MCS every 15 minutes, so a queued message is delivered once the app is next started, but it is
+not an instant background notification. The remaining lever is the OEM's own process policy
+(Auto-launch, battery "Don't optimize", lock in recents) — settings Duplika cannot apply for
+itself.
 
 The engine daemon
 (`isEnableDaemonService=true`) stretched survival from ~30 s to ~70 s but did not fix
@@ -144,9 +154,11 @@ delivery; it was tried on a branch and reverted, because it contradicts `docs/SE
 The host's own `CloneKeepAliveService` does not help either — it protects the host process,
 and the OEM kills the guest microG process separately.
 
-**Status:** push registration works everywhere; push delivery works on a device that does not
-kill the container's microG process (emulator verified) and is unreliable on aggressive OEM
-builds. In-app notifications are unaffected.
+**Status:** push registration works everywhere. Push delivery works on the emulator and on
+the physical CPH2605 **while the clone is open**, with a 120 s reconnect interval (a 30 s one
+aborts microG's handshake — see above). Delivery to a *closed* clone is limited by the OEM
+killing the guest app's process; queued messages arrive when the app is next started, not as
+an instant background notification. In-app notifications are unaffected.
 
 **Checkin is warmed during provisioning.** microG only checks in when something asks it to,
 and the push registration that does ask has a 10 s timeout — so on a fresh container the

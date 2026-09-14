@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:duplika/core/constants/app_constants.dart';
 import 'package:duplika/core/services/onboarding_store.dart';
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/core/virtualization/virtualization_engine.dart';
@@ -68,9 +69,16 @@ void main() {
             case 'isIgnoringBatteryOptimizations':
               return ok(<String, Object?>{'ignoring': ignoringBattery});
             case 'isAppInstalledInProfile':
+              final Map<Object?, Object?> args =
+                  (call.arguments as Map<Object?, Object?>?) ??
+                      <Object?, Object?>{};
+              // The clone's own package is installed; microG is not, which is the state
+              // of a clone made before Google services could be provisioned.
+              final bool googleServices =
+                  args['packageName'] == AppConstants.googleServicesPackage;
               return ok(<String, Object?>{
-                'installed': true,
-                'running': true,
+                'installed': !googleServices,
+                'running': !googleServices,
                 'virtualUserId': 0,
               });
             default:
@@ -376,6 +384,84 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(calls, contains('clearProfileData'));
+    });
+  });
+
+  group('Google services', () {
+    /// Opens the sheet for a GMS-dependent clone whose container has no microG yet.
+    Future<void> openSheetForGmsApp(WidgetTester tester) async {
+      overrides['analyzeApp'] = ok(<String, Object?>{
+        'packageName': 'com.example.app',
+        'verdict': 'LIMITED',
+        'findings': <Object?>[],
+        'requiresGms': true,
+      });
+      await openSheet(tester);
+    }
+
+    testWidgets('are not offered for an app that does not need them', (
+      WidgetTester tester,
+    ) async {
+      await openSheet(tester);
+
+      expect(find.text('Install Google services (microG)'), findsNothing);
+    });
+
+    testWidgets('are confirmed before anything is installed', (
+      WidgetTester tester,
+    ) async {
+      await openSheetForGmsApp(tester);
+      // The sheet is draggable, so the bottom rows can start below the fold.
+      await tester.ensureVisible(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Install Google services?'), findsOneWidget);
+      expect(
+        find.text(
+          'Duplika will install its bundled microG into this clone as Google Play '
+          'services. The clone keeps its data. This can take a few seconds.',
+        ),
+        findsOneWidget,
+      );
+      expect(calls, isNot(contains('provisionMicroG')));
+    });
+
+    testWidgets('Cancel installs nothing', (WidgetTester tester) async {
+      await openSheetForGmsApp(tester);
+      await tester.ensureVisible(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Install Google services?'), findsNothing);
+      expect(calls, isNot(contains('provisionMicroG')));
+    });
+
+    testWidgets('confirming installs them into the clone', (
+      WidgetTester tester,
+    ) async {
+      await openSheetForGmsApp(tester);
+      await tester.ensureVisible(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+
+      // The dialog's own button, not the sheet row.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Install'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(calls, contains('provisionMicroG'));
     });
   });
 

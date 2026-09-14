@@ -253,6 +253,51 @@ void main() {
     expect(state.virtualUserId, 0);
   });
 
+  group('microG provisioning', () {
+    test('reaches the engine with the profile id and nothing else', () async {
+      final VirtualProfileModel profile = await create('Profile 1');
+      responses['provisionMicroG'] = ok('MICROG_PROVISIONED');
+      calls.clear();
+
+      await engine.provisionMicroG(profile.id);
+
+      expect(calls, <String>['provisionMicroG']);
+      expect(
+        (lastArgs['provisionMicroG']! as Map<Object?, Object?>)['profileId'],
+        profile.id,
+      );
+    });
+
+    test('a refusal is raised with the engine code', () async {
+      final VirtualProfileModel profile = await create('Profile 1');
+      responses['provisionMicroG'] = fail(
+        'MICROG_PROVISIONING_FAILED',
+        'no microG artefact is bundled in this build',
+      );
+
+      await expectLater(
+        engine.provisionMicroG(profile.id),
+        throwsA(
+          isA<VirtualizationException>().having(
+            (VirtualizationException e) => e.code,
+            'code',
+            'MICROG_PROVISIONING_FAILED',
+          ),
+        ),
+      );
+    });
+
+    test('an unknown profile never reaches the engine', () async {
+      calls.clear();
+
+      await expectLater(
+        engine.provisionMicroG('missing-id'),
+        throwsA(isA<ProfileNotFoundException>()),
+      );
+      expect(calls, isEmpty);
+    });
+  });
+
   group('multi-app and APK import', () {
     test(
       'creating a profile from an APK installs it and keeps the metadata',

@@ -7,11 +7,13 @@ package co.tdevs.duplika.native.gms
  * provider serve a capability it does not have. `REAL_GMS` on a device without Play services
  * yields [UnsupportedProvider] with a stated reason, not a Real GMS provider pretending.
  *
- * There is still no user-facing toggle. All four modes are implemented and honoured, and the
- * microG backend now genuinely works (device-verified; see
- * `docs/microg-container-spike.md`), but choosing it is currently an explicit native action
- * (`RealVirtualizationEngine.provisionMicroG`) rather than a UI switch. [AUTO] is the default
- * and reproduces exactly the behaviour Duplika had before this phase.
+ * There is still no global user-facing mode toggle. All four modes are implemented and
+ * honoured, and the microG backend genuinely works (device-verified; see
+ * `docs/microg-container-spike.md`). Choosing it is a per-clone action in the clone sheet
+ * ("Install Google services (microG)"), which calls
+ * `RealVirtualizationEngine.provisionMicroG` for that one container rather than switching
+ * the whole app. [AUTO] is the default and reproduces exactly the behaviour Duplika had
+ * before this phase.
  */
 enum class GmsProviderMode {
 

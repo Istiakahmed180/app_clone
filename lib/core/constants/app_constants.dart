@@ -12,6 +12,10 @@ class AppConstants {
   static const String testAppPackage = 'com.example.duplikabaseline';
   static const String testAppFallbackName = 'Duplika Baseline';
 
+  /// The package microG is provisioned as inside a clone, so its presence can be read
+  /// from engine state like any other installed package.
+  static const String googleServicesPackage = 'com.google.android.gms';
+
   static const String profilesStorageKey = 'duplika.profiles.v1';
 
   static const int maxProfileNameLength = 40;

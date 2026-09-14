@@ -24,6 +24,7 @@ enum CloneAction {
   toggleHidden,
   notifications,
   permissions,
+  installGoogleServices,
   shareApp,
   delete,
 }
@@ -35,7 +36,8 @@ enum CloneAction {
 /// * **three primary tiles** — things done *with* a clone: make another, put it on the
 ///   home screen, look at what it is;
 /// * **Manage** — things done *to* it, ordered by cost: harmless (rename), recoverable
-///   (force stop, clear cache), then costly (clear storage);
+///   (force stop, clear cache), then costly (clear storage). Install Google services
+///   appears here only for a clone that needs them and does not have them yet;
 /// * **Uninstall**, alone below a divider, because it is the only one that destroys the
 ///   clone itself.
 ///
@@ -49,6 +51,7 @@ Future<CloneAction?> showCloneActionSheet(
   int instanceIndex = 1,
   bool hidden = false,
   List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
+  bool offerInstallGoogleServices = false,
 }) {
   return showModalBottomSheet<CloneAction>(
     context: context,
@@ -66,6 +69,7 @@ Future<CloneAction?> showCloneActionSheet(
       instanceIndex: instanceIndex,
       hidden: hidden,
       findings: findings,
+      offerInstallGoogleServices: offerInstallGoogleServices,
     ),
   );
 }
@@ -79,6 +83,7 @@ class _CloneActionSheet extends StatelessWidget {
     required this.instanceIndex,
     required this.hidden,
     required this.findings,
+    required this.offerInstallGoogleServices,
   });
 
   final VirtualProfileModel profile;
@@ -88,6 +93,11 @@ class _CloneActionSheet extends StatelessWidget {
   final int instanceIndex;
   final bool hidden;
   final List<CompatibilityFinding> findings;
+
+  /// Only for a clone whose app depends on Google services and whose container does not
+  /// have microG yet — see `HomeController.requiresGoogleServices` and
+  /// `HomeController.googleServicesInstalled`.
+  final bool offerInstallGoogleServices;
 
   @override
   Widget build(BuildContext context) {
@@ -349,6 +359,16 @@ class _CloneActionSheet extends StatelessWidget {
             ),
           ],
         ),
+        // Full width on its own line: the label names a provider, and squeezing it into
+        // the two-column grid would have it ellipsised for no gain.
+        if (offerInstallGoogleServices) ...<Widget>[
+          SizedBox(height: 12.h),
+          const _ActionRow(
+            action: CloneAction.installGoogleServices,
+            icon: Icons.cloud_download_outlined,
+            label: 'Install Google services (microG)',
+          ),
+        ],
       ],
     );
   }

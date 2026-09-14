@@ -345,6 +345,15 @@ class HomeView extends GetView<HomeController> {
     VirtualProfileModel profile, {
     bool hidden = false,
   }) async {
+    // Asked before the sheet opens: the action is only offered when this clone's app
+    // depends on Google services and its container does not already carry microG.
+    final bool offerInstallGoogleServices =
+        controller.requiresGoogleServices(profile) &&
+        !await controller.googleServicesInstalled(profile);
+    if (!context.mounted) {
+      return;
+    }
+
     final CloneAction? action = await showCloneActionSheet(
       context,
       profile: profile,
@@ -354,6 +363,7 @@ class HomeView extends GetView<HomeController> {
       instanceIndex: controller.instanceIndex(profile),
       hidden: hidden || profile.hidden,
       findings: controller.warningsFor(profile),
+      offerInstallGoogleServices: offerInstallGoogleServices,
     );
     if (action == null || !context.mounted) {
       return;
@@ -538,6 +548,34 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  /// Confirms installing microG into an existing clone.
+  ///
+  /// Not destructive — the clone keeps its data — but it changes which implementation the
+  /// clone sees for every Google API, and it takes several seconds, so it is asked rather
+  /// than done on a mis-tap.
+  Future<bool?> _confirmInstallGoogleServices(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Install Google services?'),
+        content: const Text(
+          'Duplika will install its bundled microG into this clone as Google Play '
+          'services. The clone keeps its data. This can take a few seconds.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Install'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Confirms a storage clear.
   ///
   /// The one dialog here that has to be unambiguous: this is every account, message and
@@ -686,6 +724,34 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
         );
+      case CloneAction.installGoogleServices:
+        final bool confirmed =
+            await _confirmInstallGoogleServices(context) ?? false;
+        if (!confirmed || !context.mounted) {
+          return;
+        }
+        // Installing the bundled artefact takes seconds, so the barrier stays up until
+        // the engine answers rather than letting a second tap queue another install.
+        final ValueNotifier<String> progress = ValueNotifier<String>(
+          'Installing Google services…',
+        );
+        _showProgress(context, profile, progress);
+        final String? error = await controller.installGoogleServices(profile);
+        if (!context.mounted) {
+          progress.dispose();
+          return;
+        }
+        // Closes the barrier, whose route is the top one.
+        Navigator.of(context).pop();
+        progress.dispose();
+        if (error != null) {
+          await _showFailure(context, error);
+        } else {
+          _showMessage(
+            context,
+            'Google services installed in ${profile.profileName}.',
+          );
+        }
       case CloneAction.delete:
         final bool confirmed = await showUninstallCloneDialog(
           context,

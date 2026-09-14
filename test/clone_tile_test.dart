@@ -99,6 +99,7 @@ Future<CloneAction?> _openSheet(
   int siblingCount = 1,
   int instanceIndex = 1,
   List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
+  bool offerInstallGoogleServices = false,
 }) async {
   _lastChoice = null;
   CloneAction? chosen;
@@ -118,6 +119,7 @@ Future<CloneAction?> _openSheet(
                   siblingCount: siblingCount,
                   instanceIndex: instanceIndex,
                   findings: findings,
+                  offerInstallGoogleServices: offerInstallGoogleServices,
                 );
               },
               child: const Text('open'),
@@ -318,6 +320,27 @@ void main() {
 
       // And the one that destroys it.
       expect(find.text('Uninstall'), findsOneWidget);
+
+      // microG is not a generic action: it is only offered for a clone that needs
+      // Google services and does not have them yet, so it is absent here.
+      expect(find.text('Install Google services (microG)'), findsNothing);
+    });
+
+    testWidgets('offers microG only when asked, and closes with its own answer', (
+      WidgetTester tester,
+    ) async {
+      await _openSheet(tester, offerInstallGoogleServices: true);
+
+      expect(find.text('Install Google services (microG)'), findsOneWidget);
+
+      await tester.ensureVisible(
+        find.text('Install Google services (microG)'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Install Google services (microG)'));
+      await tester.pumpAndSettle();
+
+      expect(_lastChoice, CloneAction.installGoogleServices);
     });
 
     testWidgets('does not offer launch, which tapping the tile already does', (

@@ -702,6 +702,43 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Whether this clone's app depends on Google services, per the compatibility
+  /// analysis. The action sheet only offers microG when it does.
+  bool requiresGoogleServices(VirtualProfileModel profile) =>
+      compatibility[profile.packageName]?.requiresGms ?? false;
+
+  /// Whether the clone's container already carries Google services.
+  ///
+  /// Asked of the engine rather than assumed: a clone made before microG was available
+  /// has none. A check that cannot run reads as "not installed", which keeps the install
+  /// action reachable instead of hiding it behind a failed lookup.
+  Future<bool> googleServicesInstalled(VirtualProfileModel profile) async {
+    try {
+      final VirtualProfileState state = await _nativeBridge.profileState(
+        profile.id,
+        AppConstants.googleServicesPackage,
+      );
+      return state.installed;
+    } on AppException catch (error, stackTrace) {
+      _logger.error(
+        'Google-services check failed for ${profile.id}',
+        error,
+        stackTrace,
+      );
+      return false;
+    }
+  }
+
+  /// Installs the bundled microG into this clone without recreating it.
+  Future<String?> installGoogleServices(VirtualProfileModel profile) async {
+    try {
+      await _engine.provisionMicroG(profile.id);
+      return null;
+    } on AppException catch (error) {
+      return error.message;
+    }
+  }
+
   /// Offers this clone's APK to the share sheet.
   ///
   /// Goes straight to the bridge rather than through [VirtualizationEngine]: sharing a

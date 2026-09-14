@@ -95,4 +95,14 @@ void main() {
 
     expect((await engine.getProfiles()).single.profileName, 'Renamed');
   });
+
+  test('refuses to provision Google services without a container', () async {
+    final VirtualProfileModel profile = await create('Profile 1');
+
+    expect(
+      engine.provisionMicroG(profile.id),
+      throwsA(isA<VirtualizationException>()),
+    );
+    expect(nativeCalls, isEmpty);
+  });
 }

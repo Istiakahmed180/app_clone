@@ -43,6 +43,14 @@ abstract class VirtualizationEngine {
   /// Empties only this clone's caches. Logins and settings survive.
   Future<void> clearProfileCache(String profileId);
 
+  /// Installs Duplika's bundled microG into an existing clone's container as its
+  /// `com.google.android.gms`, without recreating the clone.
+  ///
+  /// This is how a clone made before microG was available gets Google services: the
+  /// container and its data are kept. Provisioning also warms microG's checkin, so the
+  /// next launch can register for push without being reopened.
+  Future<void> provisionMicroG(String profileId);
+
   Future<List<VirtualProfileModel>> getProfiles();
 
   /// Whether profiles launched by this engine get isolated runtime state.

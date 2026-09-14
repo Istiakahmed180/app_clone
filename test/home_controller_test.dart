@@ -30,11 +30,14 @@ void main() {
         'data': data,
       };
 
-  Map<String, Object?> reportWith(List<Map<String, Object?>> findings) => <String, Object?>{
+  Map<String, Object?> reportWith(
+    List<Map<String, Object?>> findings, {
+    bool requiresGms = false,
+  }) => <String, Object?>{
         'packageName': AppConstants.testAppPackage,
         'verdict': findings.isEmpty ? 'SUPPORTED' : 'UNSUPPORTED',
         'findings': findings,
-        'requiresGms': false,
+        'requiresGms': requiresGms,
       };
 
   setUp(() {
@@ -268,6 +271,77 @@ void main() {
 
     expect(controller.compatibility[profile.packageName]?.analysed, isFalse);
     expect(controller.warningsFor(profile), isEmpty);
+  });
+
+  test('a GMS-dependent clone is marked as needing Google services', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['analyzeApp'] = ok(
+      'APP_ANALYZED',
+      reportWith(
+        <Map<String, Object?>>[
+          <String, Object?>{
+            'code': 'REQUIRES_GMS',
+            'message': 'This app relies on Google Play Services.',
+            'blocking': false,
+          },
+        ],
+        requiresGms: true,
+      ),
+    );
+
+    await controller.refreshAll();
+
+    expect(controller.requiresGoogleServices(profile), isTrue);
+  });
+
+  test('a clone whose container lacks Google services reports so', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['isAppInstalledInProfile'] = ok(
+      'PROFILE_STATE',
+      <String, Object?>{
+        'installed': false,
+        'running': false,
+        'virtualUserId': 0,
+      },
+    );
+
+    expect(await controller.googleServicesInstalled(profile), isFalse);
+  });
+
+  test('a clone that already carries Google services reports so', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['isAppInstalledInProfile'] = ok(
+      'PROFILE_STATE',
+      <String, Object?>{
+        'installed': true,
+        'running': false,
+        'virtualUserId': 0,
+      },
+    );
+
+    expect(await controller.googleServicesInstalled(profile), isTrue);
+  });
+
+  test('installing Google services forwards the profile to the engine', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['provisionMicroG'] = ok('MICROG_PROVISIONED', <String, Object?>{});
+
+    expect(await controller.installGoogleServices(profile), isNull);
+  });
+
+  test('a refused Google-services install is reported, not swallowed', () async {
+    final VirtualProfileModel profile = await seedClone();
+    responses['provisionMicroG'] = <Object?, Object?>{
+      'success': false,
+      'code': 'MICROG_PROVISIONING_FAILED',
+      'message': 'no microG artefact is bundled in this build',
+      'data': <Object?, Object?>{},
+    };
+
+    expect(
+      await controller.installGoogleServices(profile),
+      'no microG artefact is bundled in this build',
+    );
   });
 
   test('the notifications action opens the system screen', () async {

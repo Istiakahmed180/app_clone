@@ -290,6 +290,38 @@ class RealVirtualizationEngine implements VirtualizationEngine {
   Future<void> clearProfileCache(String profileId) =>
       _mutateContainer(profileId, _nativeBridge.clearProfileCache, 'clear_cache');
 
+  /// Provisions the bundled microG into an existing clone. See
+  /// [VirtualizationEngine.provisionMicroG].
+  @override
+  Future<void> provisionMicroG(String profileId) async {
+    final VirtualProfileModel? profile = await _repository.getProfile(profileId);
+    if (profile == null) {
+      throw ProfileNotFoundException(profileId);
+    }
+
+    return DiagnosticOperation.run<void>(
+      'provision_microg',
+      (DiagnosticOperation operation) async {
+        final EngineResponse response =
+            await _nativeBridge.provisionMicroG(profileId);
+        if (!response.success) {
+          throw VirtualizationException(response.message, code: response.code);
+        }
+        operation.step(
+          'microG provisioned into the container',
+          source: _source,
+          category: DiagnosticCategory.install,
+          level: DiagLevel.success,
+        );
+      },
+      name: 'install Google services into ${profile.profileName}',
+      packageName: profile.packageName,
+      profileId: profileId,
+      source: _source,
+      category: DiagnosticCategory.install,
+    );
+  }
+
   /// Shared shape for the container operations that neither create nor destroy a
   /// profile: resolve it, call the engine, and raise the engine's own verdict.
   Future<void> _mutateContainer(
