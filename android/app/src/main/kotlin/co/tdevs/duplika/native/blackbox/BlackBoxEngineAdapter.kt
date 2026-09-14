@@ -380,10 +380,18 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         packageName: String,
         serviceClassName: String,
         virtualUserId: Int,
+        requireForeground: Boolean,
+        action: String?,
     ): EngineResult<Unit> = guarded(EngineErrorCodes.CONTAINER_SERVICE_START_FAILED) {
         withServiceRetry {
             warmUpPackageService()
-            doStartContainerService(packageName, serviceClassName, virtualUserId)
+            doStartContainerService(
+                packageName,
+                serviceClassName,
+                virtualUserId,
+                requireForeground,
+                action,
+            )
         }
     }
 
@@ -391,10 +399,13 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         packageName: String,
         serviceClassName: String,
         virtualUserId: Int,
+        requireForeground: Boolean,
+        action: String?,
     ): EngineResult<Unit> {
         val intent = Intent().setClassName(packageName, serviceClassName)
+        if (action != null) intent.action = action
         val started = BlackBoxCore.getBActivityManager()
-            .startService(intent, null, true, virtualUserId)
+            .startService(intent, null, requireForeground, virtualUserId)
         return if (started != null) {
             Slog.i(Slog.LAUNCH, "Started $packageName/$serviceClassName in user $virtualUserId")
             EngineResult.ok()

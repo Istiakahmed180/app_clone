@@ -1,6 +1,7 @@
 package co.tdevs.duplika.native.spike
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 
@@ -13,11 +14,25 @@ import android.util.Log
  *   adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op install
  *   adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op status
  *   adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op uninstall
+ *
+ * `launch` deliberately leaves the activity alive so the host stays foreground (Android 15
+ * aborts a background activity launch), which means later commands arrive through
+ * [onNewIntent] rather than [onCreate] — both are handled here.
  */
 class MicroGSpikeActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handle(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handle(intent)
+    }
+
+    private fun handle(intent: Intent?) {
         val op = intent?.getStringExtra("op") ?: "status"
         val onlyUser = intent?.getIntExtra("userId", Int.MIN_VALUE) ?: Int.MIN_VALUE
         val profileId = intent?.getStringExtra("profileId") ?: MicroGSpike.DEFAULT_PROFILE

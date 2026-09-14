@@ -47,6 +47,7 @@ object MicroGSpike {
             "clone" -> clone(engine, profileId, packageName)
             "install" -> install(context, engine, profileId, onlyUser)
             "launch" -> launch(engine, profileId, packageName)
+            "wakegcm" -> wakeGcm(context, profileId)
             "cleardata" -> clearData(engine, profileId, packageName)
             "uninstall" -> uninstall(context, onlyUser)
             else -> status(context)
@@ -61,6 +62,28 @@ object MicroGSpike {
             is EngineResult.Failure -> Log.e(TAG, "clone failed: ${result.code} ${result.message}")
         }
     }
+
+    /**
+     * Starts microG's MCS service in the container so it opens its receive connection
+     * (`mtalk.google.com:5228`). Without it no FCM message can be delivered.
+     */
+    private fun wakeGcm(context: Context, profileId: String) {
+        val userId = VirtualProfileManager(context).virtualUserIdFor(profileId)
+        if (userId == null) {
+            Log.e(TAG, "Profile $profileId has no virtual user")
+            return
+        }
+        val result = engine().startContainerService(
+            packageName = "com.google.android.gms",
+            serviceClassName = "org.microg.gms.gcm.McsService",
+            virtualUserId = userId,
+            requireForeground = false,
+            action = "org.microg.gms.gcm.mcs.CONNECT",
+        )
+        Log.i(TAG, "wakegcm user=$userId -> $result")
+    }
+
+    private fun engine() = DuplikaApplication.engine
 
     private fun clearData(engine: RealVirtualizationEngine, profileId: String, packageName: String) {
         when (val result = engine.clearProfileData(profileId, packageName)) {

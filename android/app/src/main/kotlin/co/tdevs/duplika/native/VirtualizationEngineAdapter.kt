@@ -104,6 +104,8 @@ interface VirtualizationEngineAdapter {
         packageName: String,
         serviceClassName: String,
         virtualUserId: Int,
+        requireForeground: Boolean = false,
+        action: String? = null,
     ): EngineResult<Unit>
 
     fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit>

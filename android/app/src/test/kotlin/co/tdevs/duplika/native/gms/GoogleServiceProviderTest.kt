@@ -78,6 +78,8 @@ class GoogleServiceProviderTest {
             packageName: String,
             serviceClassName: String,
             virtualUserId: Int,
+            requireForeground: Boolean,
+            action: String?,
         ): EngineResult<Unit> = unreachable()
         override fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit> = unreachable()
         override fun isRunning(packageName: String, virtualUserId: Int): Boolean = unreachable()

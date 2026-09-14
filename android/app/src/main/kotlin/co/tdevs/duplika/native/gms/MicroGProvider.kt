@@ -148,6 +148,7 @@ class MicroGProvider(
                         MicroGCheckinSeeder.GMS_PACKAGE,
                         MicroGCheckinSeeder.CHECKIN_SERVICE,
                         userId,
+                        requireForeground = true,
                     ) is EngineResult.Success
                 },
             )
