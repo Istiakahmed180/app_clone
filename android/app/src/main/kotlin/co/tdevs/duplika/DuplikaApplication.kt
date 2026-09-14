@@ -6,6 +6,8 @@ import co.tdevs.duplika.diagnostics.CrashCapture
 import co.tdevs.duplika.diagnostics.DiagCategory
 import co.tdevs.duplika.diagnostics.DiagSource
 import co.tdevs.duplika.diagnostics.DiagnosticLogger
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import co.tdevs.duplika.native.ClonePushRefreshWorker
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import co.tdevs.duplika.native.blackbox.BlackBoxEngineAdapter
@@ -50,6 +52,23 @@ class DuplikaApplication : Application() {
             DiagCategory.APP_LIFECYCLE,
             "Process onCreate: ${DiagnosticLogger.currentProcessName()}",
         )
+        // The engine's own WorkManager hook runs during attachBaseContext, i.e. before
+        // androidx.startup's InitializationProvider can initialise WorkManager (measured: it
+        // logs "Failed to get WorkManager instance"), and in a minified release build the
+        // provider does not leave WorkManager usable by the time this runs. Initialise it
+        // explicitly when it is not already up, so scheduling never depends on the engine's
+        // ordering.
+        if (!WorkManager.isInitialized()) {
+            runCatching { WorkManager.initialize(this, Configuration.Builder().build()) }
+                .onFailure {
+                    DiagnosticLogger.info(
+                        DiagSource.ANDROID,
+                        DiagCategory.APP_LIFECYCLE,
+                        "WorkManager initialisation skipped: ${it.message}",
+                    )
+                }
+        }
+
         // Idempotent (KEEP): reconnects each clone's microG push channel while the app is in
         // the background, which a closed clone cannot do for itself on aggressive OEM builds.
         ClonePushRefreshWorker.schedule(this)

@@ -44,6 +44,20 @@
 -keepattributes EnclosingMethod
 -keepattributes Exceptions
 
+# -- WorkManager --------------------------------------------------------------
+# WorkManager creates its Room database reflectively (`WorkDatabase_Impl`) from
+# the `androidx.work.impl.WorkDatabase` base class and instantiates the periodic
+# worker by name. R8 shrank the generated database away and the release build
+# crashed before Flutter started:
+#   Unable to get provider androidx.startup.InitializationProvider:
+#   Failed to create an instance of class androidx.work.impl.WorkDatabase
+# The engine's rewrite of Context/attachBaseContext does not change that this is
+# ordinary reflective construction, so the whole namespace is kept (measured on
+# the emulator, 2026-09-14).
+-keep class androidx.work.** { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+
 # -- Optimisation off ---------------------------------------------------------
 # Renaming was not the whole problem. With the Google packages provisioned into a
 # container the guest died in Bcore's own bind path --
