@@ -72,7 +72,13 @@ class AppPickerView extends GetView<AppPickerController> {
                   // cost a full layout pass over every installed app on first frame.
                   itemCount: sections.length + 1,
                   itemBuilder: (BuildContext context, int index) {
+                    // Icons are fetched for what the builder is asked to draw, which
+                    // runs for on-screen groups only. That is what keeps opening the
+                    // picker off the "decode every installed app" path.
                     if (index == 0) {
+                      controller.requestIcons(
+                        picks.map((InstalledAppModel app) => app.packageName),
+                      );
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -82,6 +88,11 @@ class AppPickerView extends GetView<AppPickerController> {
                       );
                     }
                     final AppSection section = sections[index - 1];
+                    controller.requestIcons(
+                      section.apps.map(
+                        (InstalledAppModel app) => app.packageName,
+                      ),
+                    );
                     return _SectionGroup(
                       section: section,
                       clonedPackages: cloned,

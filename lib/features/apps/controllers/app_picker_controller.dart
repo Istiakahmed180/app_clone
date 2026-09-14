@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -227,7 +228,12 @@ class AppPickerController extends GetxController {
   Future<void> loadApps() async {
     isLoading.value = true;
     try {
-      apps.assignAll(await _bridge.listInstalledApps());
+      // Metadata only. Decoding every launchable app's icon here took about fifteen
+      // seconds on a real device; the icons arrive afterwards, for the rows that are
+      // actually drawn. See [requestIcons].
+      _requestedIcons.clear();
+      _pendingIcons.clear();
+      apps.assignAll(await _bridge.listInstalledApps(includeIcons: false));
       clonedPackages.assignAll(await _repository.clonedPackageNames());
       errorMessage.value = null;
     } on AppException catch (error, stackTrace) {
@@ -235,6 +241,101 @@ class AppPickerController extends GetxController {
       errorMessage.value = error.message;
     }
     isLoading.value = false;
+  }
+
+  /// How many icons one native round trip decodes.
+  ///
+  /// Small enough that a clone requested mid-load waits behind one batch rather than
+  /// behind the whole list, large enough that the channel is not called per row.
+  static const int _iconBatchSize = 8;
+
+  /// Packages an icon has been asked for; one request per package per load.
+  final Set<String> _requestedIcons = <String>{};
+
+  /// Packages waiting for the next native batch.
+  final Set<String> _pendingIcons = <String>{};
+
+  bool _iconWorkerRunning = false;
+  bool _disposed = false;
+
+  /// Asks for icons for the packages the list is about to draw.
+  ///
+  /// Called from the list's item builder, which runs only for the groups being laid
+  /// out, so icon work tracks what is on screen instead of the whole device. The
+  /// request returns immediately; icons are attached to [apps] as batches arrive.
+  void requestIcons(Iterable<String> packageNames) {
+    if (_disposed) {
+      return;
+    }
+    bool queued = false;
+    for (final String packageName in packageNames) {
+      if (_requestedIcons.contains(packageName)) {
+        continue;
+      }
+      _requestedIcons.add(packageName);
+      _pendingIcons.add(packageName);
+      queued = true;
+    }
+    if (!queued || _iconWorkerRunning) {
+      return;
+    }
+    _iconWorkerRunning = true;
+    unawaited(_pumpIcons());
+  }
+
+  Future<void> _pumpIcons() async {
+    try {
+      while (_pendingIcons.isNotEmpty && !_disposed) {
+        final List<String> batch = _pendingIcons
+            .take(_iconBatchSize)
+            .toList(growable: false);
+        _pendingIcons.removeAll(batch);
+
+        final Map<String, Uint8List> loaded;
+        try {
+          loaded = await _bridge.getAppIcons(batch);
+        } on AppException catch (error, stackTrace) {
+          _logger.error(
+            'Could not load ${batch.length} app icon(s)',
+            error,
+            stackTrace,
+          );
+          // Unmarked, so a later rebuild can retry instead of leaving those rows on
+          // the placeholder for the rest of the session.
+          _requestedIcons.removeAll(batch);
+          return;
+        }
+
+        if (_disposed) {
+          return;
+        }
+        if (loaded.isNotEmpty) {
+          _applyIcons(loaded);
+        }
+      }
+    } finally {
+      _iconWorkerRunning = false;
+    }
+  }
+
+  /// Attaches decoded icons to the list without disturbing its order.
+  ///
+  /// The models are immutable and the picker's sections are derived from [apps], so a
+  /// replacement list is what makes the rows repaint with their icon.
+  void _applyIcons(Map<String, Uint8List> loaded) {
+    apps.assignAll(<InstalledAppModel>[
+      for (final InstalledAppModel app in apps)
+        loaded[app.packageName] != null
+            ? app.copyWith(icon: loaded[app.packageName])
+            : app,
+    ]);
+  }
+
+  @override
+  void onClose() {
+    _disposed = true;
+    _pendingIcons.clear();
+    super.onClose();
   }
 
   /// Reads the full archive detail for one app.

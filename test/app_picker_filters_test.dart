@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:duplika/core/virtualization/real_virtualization_engine.dart';
 import 'package:duplika/data/models/installed_app_model.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
@@ -248,6 +250,101 @@ void main() {
       expect(controller.cloning.contains('com.apple'), isTrue);
       expect(controller.cloning.contains('com.zebra'), isFalse);
     });
+
+    test('lists apps without icons, then fills icons in on request', () async {
+      // The picker used to open 15 seconds after the tap on a real device because the
+      // listing decoded every installed app's icon up front. Metadata first, icons for
+      // the packages the list asks about, is the fix this pins down.
+      const MethodChannel channel = MethodChannel(NativeBridge.channelName);
+      final List<MethodCall> calls = <MethodCall>[];
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+            calls.add(call);
+            switch (call.method) {
+              case 'listInstalledApps':
+                return <Object?, Object?>{
+                  'success': true,
+                  'code': 'APPS_LISTED',
+                  'message': 'ok',
+                  'data': <Object?, Object?>{
+                    'apps': <Object?>[
+                      <Object?, Object?>{
+                        'packageName': 'com.example.one',
+                        'appName': 'One',
+                        'system': false,
+                        'abis': <Object?>['arm64-v8a'],
+                        'apkCount': 1,
+                      },
+                    ],
+                  },
+                };
+              case 'getAppIcons':
+                return <Object?, Object?>{
+                  'success': true,
+                  'code': 'ICONS_LOADED',
+                  'message': 'ok',
+                  'data': <Object?, Object?>{
+                    'icons': <Object?, Object?>{
+                      'com.example.one': base64Encode(<int>[1, 2, 3]),
+                    },
+                  },
+                };
+              default:
+                return <Object?, Object?>{
+                  'success': true,
+                  'code': 'OK',
+                  'message': 'ok',
+                  'data': <Object?, Object?>{},
+                };
+            }
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+
+      final VirtualProfileRepository localRepository = VirtualProfileRepository(
+        storage: InMemoryProfileStorage(),
+      );
+      final NativeBridge bridge = NativeBridge(channel: channel);
+      final AppPickerController local = AppPickerController(
+        bridge: bridge,
+        engine: RealVirtualizationEngine(
+          repository: localRepository,
+          nativeBridge: bridge,
+        ),
+        repository: localRepository,
+      );
+
+      await local.loadApps();
+
+      final MethodCall listing = calls.singleWhere(
+        (MethodCall call) => call.method == 'listInstalledApps',
+      );
+      expect(
+        (listing.arguments! as Map<Object?, Object?>)['includeIcons'],
+        isFalse,
+      );
+      expect(local.apps.single.icon, isNull);
+      expect(
+        calls.where((MethodCall call) => call.method == 'getAppIcons'),
+        isEmpty,
+        reason: 'nothing is on screen yet, so nothing has asked for an icon',
+      );
+
+      local.requestIcons(<String>['com.example.one']);
+      await pumpEventQueue();
+
+      expect(local.apps.single.icon, <int>[1, 2, 3]);
+      final MethodCall icons = calls.singleWhere(
+        (MethodCall call) => call.method == 'getAppIcons',
+      );
+      expect(
+        (icons.arguments! as Map<Object?, Object?>)['packageNames'],
+        <String>['com.example.one'],
+      );
+    });
   });
 
   group('showInstalledAppSheet', () {
@@ -361,6 +458,9 @@ void main() {
     /// What `analyzeApp` answers for the next tap. Empty means "not analysed".
     late Map<String, Object?> analyzeData;
 
+    /// Every call the view and its controller make, in order.
+    late List<MethodCall> calls;
+
     Map<Object?, Object?> ok(Map<String, Object?> data) => <Object?, Object?>{
       'success': true,
       'code': 'OK',
@@ -370,8 +470,10 @@ void main() {
 
     setUp(() {
       analyzeData = <String, Object?>{};
+      calls = <MethodCall>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
+            calls.add(call);
             switch (call.method) {
               case 'analyzeApp':
                 return ok(analyzeData);
@@ -450,6 +552,38 @@ void main() {
       // Three rows plus one Popular card, each with its own mark.
       expect(find.byIcon(Icons.add), findsNWidgets(4));
       expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('loads the list without icons, then asks for the drawn rows', (
+      WidgetTester tester,
+    ) async {
+      // The regression this guards: `listInstalledApps` used to ship every icon with
+      // the list, which took ~15s on a real device before anything was on screen.
+      await pumpPicker(tester);
+
+      final MethodCall listing = calls.firstWhere(
+        (MethodCall call) => call.method == 'listInstalledApps',
+      );
+      expect(
+        (listing.arguments! as Map<Object?, Object?>)['includeIcons'],
+        isFalse,
+      );
+
+      final List<String> requested = calls
+          .where((MethodCall call) => call.method == 'getAppIcons')
+          .expand(
+            (MethodCall call) =>
+                ((call.arguments! as Map<Object?, Object?>)['packageNames']!
+                        as List<Object?>)
+                    .cast<String>(),
+          )
+          .toList();
+      // The three list rows and the Popular card, which are what the viewport holds.
+      expect(
+        requested,
+        containsAll(<String>['com.example.one', 'com.example.two']),
+      );
+      expect(requested, contains('org.telegram.messenger'));
     });
 
     testWidgets('a quick pick being cloned shows a spinner on its card', (

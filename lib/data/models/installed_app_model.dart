@@ -39,6 +39,22 @@ class InstalledAppModel {
       ? DateTime.fromMillisecondsSinceEpoch(millis)
       : null;
 
+  /// A copy with a late-arriving icon attached.
+  ///
+  /// The picker lists apps without icons and fills them in as they are decoded, so the
+  /// list model needs a way to gain one without being rebuilt from native data.
+  InstalledAppModel copyWith({Uint8List? icon}) => InstalledAppModel(
+    packageName: packageName,
+    appName: appName,
+    versionName: versionName,
+    isSystem: isSystem,
+    abis: abis,
+    apkCount: apkCount,
+    installedAt: installedAt,
+    updatedAt: updatedAt,
+    icon: icon ?? this.icon,
+  );
+
   final String packageName;
   final String appName;
   final String? versionName;

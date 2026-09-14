@@ -210,11 +210,16 @@ class NativeBridge {
 
   /// Launchable apps on the device, for the clone picker.
   ///
+  /// Icons are left out unless [includeIcons] is set: decoding every launchable app's
+  /// icon takes about fifteen seconds on a device with a couple of hundred apps, and the
+  /// picker only needs the handful it is about to draw. Ask for those through
+  /// [getAppIcons], in batches, as rows come on screen.
+  ///
   /// Raises on failure rather than returning an empty list: the picker renders an empty
   /// result as "No matching apps", which would tell the user they have no apps when in
   /// fact the call failed. The caller already has an error path for this.
   Future<List<InstalledAppModel>> listInstalledApps({
-    bool includeIcons = true,
+    bool includeIcons = false,
   }) async {
     final EngineResponse response = await _invokeEngine(
       'listInstalledApps',
