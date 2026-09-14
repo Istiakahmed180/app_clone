@@ -44,6 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Local tooling leftovers
+.artifacts/
+.gradle-user-home/
+javac.*.args
+
 # macOS
 .DS_Store
 l10n-untranslated.txt
