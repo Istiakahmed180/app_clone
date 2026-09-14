@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../data/models/background_activity_state.dart';
 import '../../private_space/controllers/private_space_controller.dart';
 import '../../private_space/views/private_space_settings_view.dart';
 import '../controllers/settings_controller.dart';
@@ -54,6 +55,22 @@ class SettingsView extends StatelessWidget {
                   title: l10n.settingsAppearance,
                   value: appearanceLabel(l10n, controller.themeMode.value),
                   onTap: () => Get.toNamed<void>(AppRoutes.appearance),
+                ),
+              ],
+            ),
+            SizedBox(height: 22.h),
+            // What keeps a closed clone reachable. Android owns both switches and neither
+            // has a public API for reading the OEM one, so the row reports what it can and
+            // opens the page that carries the rest.
+            SettingsSection(
+              title: l10n.settingsSectionDelivery,
+              children: <Widget>[
+                SettingsRow(
+                  icon: Icons.power_settings_new,
+                  title: l10n.settingsBackgroundActivity,
+                  subtitle: _backgroundActivitySubtitle(l10n, controller),
+                  value: _backgroundActivityValue(l10n, controller),
+                  onTap: controller.openBackgroundActivitySettings,
                 ),
               ],
             ),
@@ -147,6 +164,38 @@ class SettingsView extends StatelessWidget {
         );
       }),
     );
+  }
+
+  /// `Allowed` / `Restricted`, or `unavailable` while the read has not landed.
+  String _backgroundActivityValue(
+    AppLocalizations l10n,
+    SettingsController controller,
+  ) {
+    final BackgroundActivityState? state = controller.backgroundActivity.value;
+    if (state == null) {
+      return l10n.commonUnavailable;
+    }
+    return state.allowed
+        ? l10n.settingsBackgroundActivityAllowed
+        : l10n.settingsBackgroundActivityRestricted;
+  }
+
+  /// Why the setting matters, and — when it is off — which taps turn it back on.
+  ///
+  /// The instruction is the one the platform named for itself: on the OEM builds that keep
+  /// the switch under a second row, the info page alone would leave the user looking at a
+  /// screen that does not mention background activity at all.
+  String _backgroundActivitySubtitle(
+    AppLocalizations l10n,
+    SettingsController controller,
+  ) {
+    final BackgroundActivityState? state = controller.backgroundActivity.value;
+    if (state == null || state.allowed) {
+      return l10n.settingsBackgroundActivitySubtitle;
+    }
+    return state.nextStep == 'batteryUsage'
+        ? l10n.settingsBackgroundActivityFixBatteryUsage
+        : l10n.settingsBackgroundActivityFix;
   }
 
   /// `64-bit · arm64-v8a`, said in the user's language.

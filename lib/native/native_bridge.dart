@@ -9,6 +9,7 @@ import '../core/errors/app_exception.dart';
 import '../core/utils/app_logger.dart';
 import '../data/models/app_details.dart';
 import '../data/models/app_disguise_mode.dart';
+import '../data/models/background_activity_state.dart';
 import '../data/models/battery_prompt_screen.dart';
 import '../data/models/clone_permissions.dart';
 import '../data/models/compatibility_report.dart';
@@ -529,6 +530,42 @@ class NativeBridge {
       throw VirtualizationException(response.message, code: response.code);
     }
     return BatteryPromptScreen.parse(response.data['screen'] as String?);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Background activity
+  // ---------------------------------------------------------------------------
+
+  /// Duplika's standing in the background: the Doze exemption and Android's background
+  /// restriction.
+  ///
+  /// Answers null rather than throwing when the platform cannot say: this feeds a status
+  /// row, and a device without a power manager should not take Settings down with it. Null
+  /// reads as `unavailable` there, which is the truth -- not as a state the user must fix.
+  Future<BackgroundActivityState?> backgroundActivityState() async {
+    try {
+      final EngineResponse response = await _invokeEngine(
+        'backgroundActivityState',
+      );
+      return BackgroundActivityState.fromMap(response.data);
+    } on NativeBridgeException catch (error, stackTrace) {
+      _logger.error('Background activity state unavailable', error, stackTrace);
+      return null;
+    }
+  }
+
+  /// Opens the page that carries the OEM's "Allow background activity" switch.
+  ///
+  /// Success means a screen opened, not that anything was allowed -- the switch belongs to
+  /// the system and the user. Re-read [backgroundActivityState] after they return.
+  Future<BackgroundActivityScreen> openBackgroundActivitySettings() async {
+    final EngineResponse response = await _invokeEngine(
+      'openBackgroundActivitySettings',
+    );
+    if (!response.success) {
+      throw VirtualizationException(response.message, code: response.code);
+    }
+    return BackgroundActivityScreen.parse(response.data['screen'] as String?);
   }
 
   Map<String, dynamic> _profileArgs(String profileId, String packageName) =>

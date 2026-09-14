@@ -84,6 +84,34 @@ class AppLocalizationsMs extends AppLocalizations {
   String get settingsNotSetUpYet => 'Belum disediakan';
 
   @override
+  String get settingsSectionDelivery => 'Penghantaran';
+
+  @override
+  String get settingsBackgroundActivity => 'Aktiviti latar belakang';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Membolehkan aplikasi klon menerima pemberitahuan semasa ditutup';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Dibenarkan';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Disekat';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Ketik di sini dan benarkan aktiviti latar belakang';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Ketik di sini, kemudian Penggunaan bateri, kemudian Benarkan aktiviti latar belakang';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Tetapan aktiviti latar belakang tidak dapat dibuka.';
+
+  @override
   String get commonUnavailable => 'tidak tersedia';
 
   @override

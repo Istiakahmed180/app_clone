@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import co.tdevs.duplika.BuildConfig
 import co.tdevs.duplika.DuplikaApplication
+import co.tdevs.duplika.native.BackgroundActivity
 import co.tdevs.duplika.native.EngineResult
 import co.tdevs.duplika.native.RealVirtualizationEngine
 import co.tdevs.duplika.native.Slog
@@ -50,6 +51,7 @@ object MicroGSpike {
             "wakegcm" -> wakeGcm(context, profileId)
             "cleardata" -> clearData(engine, profileId, packageName)
             "uninstall" -> uninstall(context, onlyUser)
+            "background" -> backgroundActivity(context)
             else -> status(context)
         }
     }
@@ -134,6 +136,13 @@ object MicroGSpike {
                 Log.i(TAG, "uninstall $pkg from user $userId -> $result")
             }
         }
+    }
+
+    /** Reports the state the Settings row reads, off the same class the row calls. */
+    private fun backgroundActivity(context: Context) {
+        val state = BackgroundActivity(context).state()
+        Log.i(TAG, "background state: $state")
+        Slog.i(Slog.POWER, "MicroGSpike background state: $state")
     }
 
     private fun status(context: Context) {

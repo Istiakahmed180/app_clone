@@ -84,6 +84,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ainda não configurado';
 
   @override
+  String get settingsSectionDelivery => 'Entrega';
+
+  @override
+  String get settingsBackgroundActivity => 'Atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Permite que as apps clonadas recebam notificações enquanto estão fechadas';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Permitida';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Restringida';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Toque aqui e permita a atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Toque aqui, depois Utilização da bateria, depois Permitir atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Não foi possível abrir as definições de atividade em segundo plano.';
+
+  @override
   String get commonUnavailable => 'indisponível';
 
   @override
@@ -296,6 +324,34 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get settingsNotSetUpYet => 'Ainda não configurado';
+
+  @override
+  String get settingsSectionDelivery => 'Entrega';
+
+  @override
+  String get settingsBackgroundActivity => 'Atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Permite que os apps clonados recebam notificações enquanto estão fechados';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Permitida';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Restringida';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Toque aqui e permita a atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Toque aqui, depois Uso de bateria, depois Permitir atividade em segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Não foi possível abrir as configurações de atividade em segundo plano.';
 
   @override
   String get commonUnavailable => 'indisponível';

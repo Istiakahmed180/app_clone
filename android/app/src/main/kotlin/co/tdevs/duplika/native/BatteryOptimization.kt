@@ -62,13 +62,6 @@ class BatteryOptimization(context: Context) {
         )
     }
 
-    private fun start(activity: Activity, intent: Intent): Boolean = try {
-        activity.startActivity(intent)
-        true
-    } catch (error: Throwable) {
-        // ActivityNotFoundException on devices without the screen, SecurityException where
-        // the OEM gates it. Both mean "try the next one", not "crash".
-        Slog.w(Slog.POWER, "Cannot open ${intent.action}: ${error.message}")
-        false
-    }
+    private fun start(activity: Activity, intent: Intent): Boolean =
+        startSettingsPage(activity, intent, Slog.POWER)
 }

@@ -270,6 +270,54 @@ abstract class AppLocalizations {
   /// **'Not set up yet'**
   String get settingsNotSetUpYet;
 
+  /// No description provided for @settingsSectionDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get settingsSectionDelivery;
+
+  /// No description provided for @settingsBackgroundActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Background activity'**
+  String get settingsBackgroundActivity;
+
+  /// No description provided for @settingsBackgroundActivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets cloned apps receive notifications while they are closed'**
+  String get settingsBackgroundActivitySubtitle;
+
+  /// No description provided for @settingsBackgroundActivityAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get settingsBackgroundActivityAllowed;
+
+  /// No description provided for @settingsBackgroundActivityRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restricted'**
+  String get settingsBackgroundActivityRestricted;
+
+  /// No description provided for @settingsBackgroundActivityFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here and allow background activity'**
+  String get settingsBackgroundActivityFix;
+
+  /// No description provided for @settingsBackgroundActivityFixBatteryUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here, then Battery usage, then Allow background activity'**
+  String get settingsBackgroundActivityFixBatteryUsage;
+
+  /// No description provided for @settingsBackgroundActivityFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The background activity settings could not be opened.'**
+  String get settingsBackgroundActivityFailed;
+
   /// No description provided for @commonUnavailable.
   ///
   /// In en, this message translates to:

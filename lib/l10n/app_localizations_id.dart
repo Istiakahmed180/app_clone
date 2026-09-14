@@ -84,6 +84,34 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsNotSetUpYet => 'Belum disiapkan';
 
   @override
+  String get settingsSectionDelivery => 'Pengiriman';
+
+  @override
+  String get settingsBackgroundActivity => 'Aktivitas latar belakang';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Membuat aplikasi klon tetap menerima notifikasi saat ditutup';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Diizinkan';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Dibatasi';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Ketuk di sini dan izinkan aktivitas latar belakang';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Ketuk di sini, lalu Penggunaan baterai, lalu Izinkan aktivitas latar belakang';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Setelan aktivitas latar belakang tidak dapat dibuka.';
+
+  @override
   String get commonUnavailable => 'tidak tersedia';
 
   @override

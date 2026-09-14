@@ -84,6 +84,34 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsNotSetUpYet => 'Chưa thiết lập';
 
   @override
+  String get settingsSectionDelivery => 'Gửi thông báo';
+
+  @override
+  String get settingsBackgroundActivity => 'Hoạt động nền';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Cho phép ứng dụng nhân bản nhận thông báo khi đã đóng';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Được phép';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Bị hạn chế';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Nhấn vào đây và cho phép hoạt động nền';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Nhấn vào đây, sau đó Mức dùng pin, rồi Cho phép hoạt động nền';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Không thể mở cài đặt hoạt động nền.';
+
+  @override
   String get commonUnavailable => 'không có';
 
   @override

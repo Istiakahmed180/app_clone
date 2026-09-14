@@ -84,6 +84,34 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsNotSetUpYet => 'Non ancora configurato';
 
   @override
+  String get settingsSectionDelivery => 'Consegna';
+
+  @override
+  String get settingsBackgroundActivity => 'Attività in background';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Consente alle app clonate di ricevere notifiche mentre sono chiuse';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Consentita';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Limitata';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Tocca qui e consenti l\'attività in background';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Tocca qui, poi Utilizzo batteria, poi Consenti attività in background';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Non è stato possibile aprire le impostazioni dell\'attività in background.';
+
+  @override
   String get commonUnavailable => 'non disponibile';
 
   @override

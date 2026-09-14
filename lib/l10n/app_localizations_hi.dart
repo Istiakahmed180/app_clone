@@ -84,6 +84,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsNotSetUpYet => 'अभी सेट अप नहीं';
 
   @override
+  String get settingsSectionDelivery => 'डिलीवरी';
+
+  @override
+  String get settingsBackgroundActivity => 'पृष्ठभूमि गतिविधि';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'क्लोन किए गए ऐप बंद रहने पर भी सूचनाएँ पाने देता है';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'अनुमत';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'प्रतिबंधित';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'यहाँ टैप करें और पृष्ठभूमि गतिविधि की अनुमति दें';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'यहाँ टैप करें, फिर बैटरी उपयोग, फिर पृष्ठभूमि गतिविधि की अनुमति दें';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'पृष्ठभूमि गतिविधि सेटिंग्स खोली नहीं जा सकीं।';
+
+  @override
   String get commonUnavailable => 'उपलब्ध नहीं';
 
   @override

@@ -2,8 +2,12 @@ import 'package:duplika/core/diagnostics/diagnostic_event.dart';
 import 'package:duplika/core/diagnostics/diagnostics_repository.dart';
 import 'package:duplika/core/diagnostics/native_diagnostics.dart';
 import 'package:duplika/core/diagnostics/system_info.dart';
+import 'package:duplika/core/errors/app_exception.dart';
 import 'package:duplika/core/services/settings_store.dart';
 import 'package:duplika/data/models/app_language.dart';
+import 'package:duplika/data/models/background_activity_state.dart';
+import 'package:duplika/data/models/battery_prompt_screen.dart';
+import 'package:duplika/native/native_bridge.dart';
 import 'package:duplika/data/repositories/virtual_profile_repository.dart';
 import 'package:duplika/features/private_space/controllers/private_space_controller.dart';
 import 'package:duplika/l10n/app_localizations.dart';
@@ -41,6 +45,52 @@ class _FakeNative extends NativeDiagnostics {
     return SystemInfoSnapshot.from(payload);
   }
 }
+
+/// The background activity call answered from a field instead of a platform channel, with
+/// the opens counted: the row's job is to report this state and to hand the user to the
+/// system screen, and both are assertable without Android.
+class _FakeBridge extends NativeBridge {
+  BackgroundActivityState? state;
+  int opened = 0;
+  int prompts = 0;
+  bool openFails = false;
+  bool promptFails = false;
+  BatteryPromptScreen promptScreen = BatteryPromptScreen.dialog;
+
+  @override
+  Future<BackgroundActivityState?> backgroundActivityState() async => state;
+
+  @override
+  Future<BatteryPromptScreen> requestIgnoreBatteryOptimizations() async {
+    if (promptFails) {
+      throw const VirtualizationException(
+        'no battery screen',
+        code: 'BATTERY_PROMPT_UNAVAILABLE',
+      );
+    }
+    prompts += 1;
+    return promptScreen;
+  }
+
+  @override
+  Future<BackgroundActivityScreen> openBackgroundActivitySettings() async {
+    if (openFails) {
+      throw const VirtualizationException(
+        'no screen can handle it',
+        code: 'NO_ACTIVITY',
+      );
+    }
+    opened += 1;
+    return BackgroundActivityScreen.appInfo;
+  }
+}
+
+/// An exempt, unrestricted Duplika: the state the row reads as `Allowed`.
+const BackgroundActivityState _allowedState = BackgroundActivityState(
+  exempt: true,
+  restricted: false,
+  standbyBucket: 'active',
+);
 
 const Map<String, dynamic> _payload = <String, dynamic>{
   'appVersion': '1.0.0',
@@ -84,12 +134,14 @@ void main() {
   group('SettingsController', () {
     late InMemoryProfileStorage storage;
     late _FakeNative native;
+    late _FakeBridge bridge;
     late List<Uri> opened;
     late bool openSucceeds;
 
     SettingsController build() {
       return SettingsController(
         diagnostics: DiagnosticsRepository(native: native),
+        bridge: bridge,
         store: SettingsStore(storage: storage),
         openUrl: (Uri url) async {
           opened.add(url);
@@ -101,6 +153,7 @@ void main() {
     setUp(() {
       storage = InMemoryProfileStorage();
       native = _FakeNative(payload: _payload);
+      bridge = _FakeBridge();
       opened = <Uri>[];
       openSucceeds = true;
     });
@@ -233,6 +286,93 @@ void main() {
       expect(controller.status.value, isNull, reason: 'logged, not shouted');
     });
 
+    test('reads the background standing Android reports', () async {
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'active',
+      );
+      final SettingsController controller = build();
+
+      await controller.refreshBackgroundActivity();
+
+      expect(controller.backgroundActivity.value?.allowed, isTrue);
+      expect(controller.backgroundActivity.value?.standbyBucket, 'active');
+    });
+
+    test('a build that cannot answer says nothing rather than "restricted"', () async {
+      // Null is the honest answer here. Reporting it as restricted would send every user
+      // of a device without the API to a system screen that cannot help them.
+      bridge.state = null;
+      final SettingsController controller = build();
+
+      await controller.refreshBackgroundActivity();
+
+      expect(controller.backgroundActivity.value, isNull);
+    });
+
+    test('a screen that never opened is reported, not swallowed', () async {
+      bridge.state = _allowedState;
+      bridge.openFails = true;
+      final SettingsController controller = build();
+
+      await controller.openBackgroundActivitySettings();
+
+      expect(controller.status.value, SettingsStatus.backgroundActivityFailed);
+    });
+
+    test('an unmet exemption is asked for where the system can grant it', () async {
+      // On the builds whose switch is not under Battery usage, the system's own one-tap
+      // exemption prompt is the control that matters, and a dialog no OEM page can offer
+      // goes unused if it is skipped.
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'rare',
+      );
+      final SettingsController controller = build();
+      await controller.refreshBackgroundActivity();
+
+
+      await controller.openBackgroundActivitySettings();
+
+      expect(bridge.prompts, 1);
+      expect(bridge.opened, 0, reason: 'the prompt is the whole answer there');
+    });
+
+    test('an OEM switch under Battery usage goes straight to its page', () async {
+      // No dialog grants that switch, so the info page -- which carries both it and the
+      // battery control -- is the only destination worth opening.
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'rare',
+        nextStep: 'batteryUsage',
+      );
+      final SettingsController controller = build();
+      await controller.refreshBackgroundActivity();
+
+
+      await controller.openBackgroundActivitySettings();
+
+      expect(bridge.opened, 1);
+      expect(bridge.prompts, 0);
+    });
+
+    test('an exemption already granted means the page, not a dead tap', () async {
+      // The prompt has nothing to ask once the exemption is in place, so tapping the row
+      // must still land the user somewhere.
+      bridge.state = _allowedState;
+      final SettingsController controller = build();
+      await controller.refreshBackgroundActivity();
+
+
+      await controller.openBackgroundActivitySettings();
+
+      expect(bridge.opened, 1);
+      expect(bridge.prompts, 0);
+    });
+
     test('Contact us opens a mail composer naming the build', () async {
       final SettingsController controller = build();
       await controller.loadSystemInfo();
@@ -279,6 +419,8 @@ void main() {
   group('SettingsView', () {
     late _FakeNative native;
 
+    late _FakeBridge bridge;
+
     /// Settings reads the Private space controller for its one privacy row, so the
     /// graph has to hold one before the screen is built.
     void registerPrivateSpace() {
@@ -300,6 +442,7 @@ void main() {
       Get.put<SettingsController>(
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
+          bridge: bridge,
           store: SettingsStore(storage: InMemoryProfileStorage()),
           openUrl: (Uri _) async => true,
         ),
@@ -332,6 +475,7 @@ void main() {
       Get.put<SettingsController>(
         SettingsController(
           diagnostics: DiagnosticsRepository(native: native),
+          bridge: bridge,
           store: SettingsStore(storage: InMemoryProfileStorage()),
           openUrl: (Uri _) async => true,
         ),
@@ -353,7 +497,12 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    setUp(() => native = _FakeNative(payload: _payload));
+    setUp(() {
+      native = _FakeNative(payload: _payload);
+      // Allowed by default, so the rows that read 'unavailable' stay the ones about the
+      // build facts rather than picking up the background row as well.
+      bridge = _FakeBridge()..state = _allowedState;
+    });
 
     testWidgets('groups every row under the heading it belongs to', (
       WidgetTester tester,
@@ -363,6 +512,8 @@ void main() {
       for (final String label in <String>[
         'Language',
         'Appearance',
+        'DELIVERY',
+        'Background activity',
         'SUPPORT',
         'Contact us',
         'Rate us',
@@ -408,6 +559,55 @@ void main() {
       expect(find.text('Appearance'), findsOneWidget);
       // Both default to following the device, so both read the same until changed.
       expect(find.text('System default'), findsNWidgets(2));
+    });
+
+    testWidgets('the Background activity row reports what Android decided', (
+      WidgetTester tester,
+    ) async {
+      bridge.state = const BackgroundActivityState(
+        exempt: true,
+        restricted: false,
+        standbyBucket: 'active',
+      );
+      await open(tester);
+
+      expect(find.text('Background activity'), findsOneWidget);
+      expect(find.text('Allowed'), findsOneWidget);
+      expect(
+        find.text('Lets cloned apps receive notifications while they are closed'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a restricted row says which taps turn it back on', (
+      WidgetTester tester,
+    ) async {
+      // On the OEM builds that keep the switch under Battery usage, the info page alone
+      // leaves the user on a screen that never mentions background activity.
+      bridge.state = const BackgroundActivityState(
+        exempt: false,
+        restricted: true,
+        standbyBucket: 'restricted',
+        nextStep: 'batteryUsage',
+      );
+      await open(tester);
+
+      expect(find.text('Restricted'), findsOneWidget);
+      expect(
+        find.text('Tap here, then Battery usage, then Allow background activity'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tapping the row asks the system for its settings page', (
+      WidgetTester tester,
+    ) async {
+      await open(tester);
+
+      await tester.tap(find.text('Background activity'));
+      await tester.pumpAndSettle();
+
+      expect(bridge.opened, 1);
     });
 
     testWidgets('the Language row opens the language page', (
@@ -506,7 +706,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      // Far enough to reach the About rows at this text scale, one section further down
+      // than it used to be: Delivery sits between the preferences and Privacy.
+      await tester.drag(find.byType(ListView), const Offset(0, -800));
       await tester.pumpAndSettle();
 
       expect(find.text('arm64-v8a, armeabi-v7a, x86_64, x86'), findsOneWidget);

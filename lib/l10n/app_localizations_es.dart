@@ -84,6 +84,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsNotSetUpYet => 'Aún no configurado';
 
   @override
+  String get settingsSectionDelivery => 'Entrega';
+
+  @override
+  String get settingsBackgroundActivity => 'Actividad en segundo plano';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Permite que las apps clonadas reciban notificaciones mientras están cerradas';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Permitida';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Restringida';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Toca aquí y permite la actividad en segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Toca aquí, luego Uso de batería, luego Permitir actividad en segundo plano';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'No se pudieron abrir los ajustes de actividad en segundo plano.';
+
+  @override
   String get commonUnavailable => 'no disponible';
 
   @override

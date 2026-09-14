@@ -28,6 +28,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val analyzer = AppCompatibilityAnalyzer(appContext)
     private val shortcuts = CloneShortcutManager(appContext)
     private val battery = BatteryOptimization(appContext)
+    private val backgroundActivity = BackgroundActivity(appContext)
     private val appDetails = AppDetailsReader(appContext)
     private val deviceCapacity = DeviceCapacity(appContext)
     private val disguise = AppDisguise(appContext)
@@ -274,6 +275,31 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         is EngineResult.Success -> success(
                             "BATTERY_PROMPT_OPENED",
                             "Battery optimisation prompt opened.",
+                            outcome.value,
+                        )
+                        is EngineResult.Failure -> failure(outcome.code, outcome.message)
+                    },
+                )
+            }
+
+            // Read-only state, so it answers off the main thread like any other query; the
+            // screen it describes is opened by the Activity-bound call below.
+            "backgroundActivityState" -> async(result) {
+                success(
+                    "BACKGROUND_ACTIVITY_STATE",
+                    "Background activity state read.",
+                    backgroundActivity.state(),
+                )
+            }
+
+            "openBackgroundActivitySettings" -> {
+                val host = activity
+                    ?: return result.success(noActivity("The background activity settings"))
+                result.success(
+                    when (val outcome = backgroundActivity.open(host)) {
+                        is EngineResult.Success -> success(
+                            "BACKGROUND_ACTIVITY_SETTINGS_OPENED",
+                            "Background activity settings opened.",
                             outcome.value,
                         )
                         is EngineResult.Failure -> failure(outcome.code, outcome.message)

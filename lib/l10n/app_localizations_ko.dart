@@ -84,6 +84,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsNotSetUpYet => '아직 설정되지 않음';
 
   @override
+  String get settingsSectionDelivery => '전달';
+
+  @override
+  String get settingsBackgroundActivity => '백그라운드 활동';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '복제한 앱이 닫혀 있어도 알림을 받도록 합니다';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '허용됨';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '제한됨';
+
+  @override
+  String get settingsBackgroundActivityFix => '여기를 눌러 백그라운드 활동을 허용하세요';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      '여기를 누른 뒤 배터리 사용량, 그다음 백그라운드 활동 허용을 선택하세요';
+
+  @override
+  String get settingsBackgroundActivityFailed => '백그라운드 활동 설정을 열 수 없습니다.';
+
+  @override
   String get commonUnavailable => '확인할 수 없음';
 
   @override

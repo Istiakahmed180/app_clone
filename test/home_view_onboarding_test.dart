@@ -14,14 +14,12 @@ import 'package:duplika/features/home/views/home_view.dart';
 import 'package:duplika/features/home/widgets/clone_tile.dart';
 import 'package:duplika/features/home/widgets/virtualization_warning.dart';
 import 'package:duplika/features/onboarding/controllers/onboarding_controller.dart';
-import 'package:duplika/features/onboarding/widgets/background_permission_banner.dart';
 import 'package:duplika/native/native_bridge.dart';
 
 import 'fakes/in_memory_profile_storage.dart';
 
 /// Covers the wiring the analyzer cannot: that the home screen still builds with the
-/// onboarding host and banner in it, and that the banner is driven by the controller
-/// rather than always being on screen.
+/// onboarding host in it, and that the data disclosure gates the grid.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -29,7 +27,6 @@ void main() {
   late OnboardingController onboarding;
   late InMemoryProfileStorage onboardingStorage;
   late VirtualProfileRepository repository;
-  late bool ignoringBattery;
   late bool virtualizationAvailable;
   late List<String> calls;
 
@@ -44,7 +41,6 @@ void main() {
   };
 
   setUp(() async {
-    ignoringBattery = false;
     virtualizationAvailable = true;
     calls = <String>[];
     overrides = <String, Map<Object?, Object?>>{};
@@ -66,8 +62,6 @@ void main() {
               return <Object?, Object?>{'installed': false, 'packageName': 'x'};
             case 'getPlatformInfo':
               return <Object?, Object?>{};
-            case 'isIgnoringBatteryOptimizations':
-              return ok(<String, Object?>{'ignoring': ignoringBattery});
             case 'isAppInstalledInProfile':
               final Map<Object?, Object?> args =
                   (call.arguments as Map<Object?, Object?>?) ??
@@ -95,7 +89,7 @@ void main() {
     // These tests are about the home screen, not the disclosure gate, so it is accepted
     // before they run. The gate itself is exercised in its own test below.
     await store.acceptDisclosure();
-    onboarding = OnboardingController(nativeBridge: bridge, store: store);
+    onboarding = OnboardingController(store: store);
 
     Get.put<NativeBridge>(bridge);
     Get.put<VirtualProfileRepository>(repository);
@@ -196,37 +190,6 @@ void main() {
       expect(find.text('This device cannot host containers.'), findsOneWidget);
     },
   );
-
-  testWidgets('a device that is not exempt is offered the Doze banner', (
-    WidgetTester tester,
-  ) async {
-    await pumpHome(tester);
-
-    expect(find.byType(BackgroundPermissionBanner), findsOneWidget);
-    expect(find.text('Allow'), findsOneWidget);
-  });
-
-  testWidgets('an already-exempt device is never shown the banner', (
-    WidgetTester tester,
-  ) async {
-    ignoringBattery = true;
-    await onboarding.refreshBackgroundPrompt();
-    await pumpHome(tester);
-
-    expect(find.byType(BackgroundPermissionBanner), findsNothing);
-  });
-
-  testWidgets('dismissing the banner takes it off screen', (
-    WidgetTester tester,
-  ) async {
-    await pumpHome(tester);
-    expect(find.byType(BackgroundPermissionBanner), findsOneWidget);
-
-    await tester.tap(find.byTooltip('Dismiss'));
-    await tester.pump();
-
-    expect(find.byType(BackgroundPermissionBanner), findsNothing);
-  });
 
   /// Puts one running clone on the grid and opens its action sheet.
   Future<void> openSheet(WidgetTester tester) async {

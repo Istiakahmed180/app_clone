@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import co.tdevs.duplika.native.BackgroundActivity
+import co.tdevs.duplika.native.Slog
 
 /**
  * SPIKE ONLY — not production code. Lives on `spike/microg-container`.
@@ -38,6 +40,15 @@ class MicroGSpikeActivity : Activity() {
         val profileId = intent?.getStringExtra("profileId") ?: MicroGSpike.DEFAULT_PROFILE
         val packageName = intent?.getStringExtra("package") ?: MicroGSpike.DEFAULT_PACKAGE
         Log.i(TAG, "activity invoked op=$op")
+        // Needs this Activity, not the application context: the screen it opens belongs to
+        // the foreground task. Reported and finished like the other non-launch ops.
+        if (op == "openbackground") {
+            val outcome = BackgroundActivity(this).open(this)
+            Log.i(TAG, "openbackground -> $outcome")
+            Slog.i(Slog.POWER, "MicroGSpike openbackground -> $outcome")
+            finish()
+            return
+        }
         // Work off the main thread: installs are slow and must not block the launch.
         Thread(
             { MicroGSpike.run(applicationContext, op, onlyUser, profileId, packageName) },

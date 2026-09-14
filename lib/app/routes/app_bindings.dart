@@ -67,7 +67,10 @@ class AppBinding extends Bindings {
     // stored appearance, which has to happen at launch and not the first time someone
     // opens Settings.
     Get.put<SettingsController>(
-      SettingsController(diagnostics: Get.find<DiagnosticsRepository>()),
+      SettingsController(
+        diagnostics: Get.find<DiagnosticsRepository>(),
+        bridge: Get.find<NativeBridge>(),
+      ),
       permanent: true,
     );
   }
@@ -86,9 +89,7 @@ class HomeBinding extends Bindings {
         privateSpace: Get.find<PrivateSpaceController>(),
       ),
     );
-    Get.lazyPut<OnboardingController>(
-      () => OnboardingController(nativeBridge: Get.find<NativeBridge>()),
-    );
+    Get.lazyPut<OnboardingController>(OnboardingController.new);
   }
 }
 

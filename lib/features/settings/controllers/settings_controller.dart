@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/widgets.dart'
+    show AppLifecycleState, WidgetsBinding, WidgetsBindingObserver;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,8 +11,12 @@ import '../../../core/constants/legal_constants.dart';
 import '../../../core/constants/support_constants.dart';
 import '../../../core/diagnostics/diagnostics_repository.dart';
 import '../../../core/diagnostics/system_info.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/services/settings_store.dart';
 import '../../../data/models/app_language.dart';
+import '../../../data/models/background_activity_state.dart';
+import '../../../data/models/battery_prompt_screen.dart';
+import '../../../native/native_bridge.dart';
 import '../../../core/utils/app_logger.dart';
 
 /// Something a settings action could not do.
@@ -25,6 +31,7 @@ enum SettingsStatus {
   playStoreFailed,
   privacyPolicyFailed,
   termsOfServiceFailed,
+  backgroundActivityFailed,
 }
 
 /// App-level preferences, and the build facts the About section reports.
@@ -34,15 +41,18 @@ enum SettingsStatus {
 /// setting one here is what applies it. A controller that only existed while its screen
 /// was open would apply the stored preferences the first time someone opened Settings
 /// and not before.
-class SettingsController extends GetxController {
+class SettingsController extends GetxController with WidgetsBindingObserver {
   SettingsController({
     required this._diagnostics,
+    NativeBridge? bridge,
     SettingsStore? store,
     Future<bool> Function(Uri url)? openUrl,
-  })  : _store = store ?? const SettingsStore(),
+  })  : _bridge = bridge ?? NativeBridge(),
+        _store = store ?? const SettingsStore(),
         _openUrl = openUrl ?? _launch;
 
   final DiagnosticsRepository _diagnostics;
+  final NativeBridge _bridge;
   final SettingsStore _store;
   final Future<bool> Function(Uri url) _openUrl;
   final AppLogger _logger = const AppLogger('SettingsController');
@@ -58,12 +68,35 @@ class SettingsController extends GetxController {
   /// Set when an action could not be carried out. The view reports and clears it.
   final Rxn<SettingsStatus> status = Rxn<SettingsStatus>();
 
+  /// Duplika's standing in the background. Null until the first read lands, which the row
+  /// reports as `unavailable` rather than as a state the user can act on.
+  final Rxn<BackgroundActivityState> backgroundActivity =
+      Rxn<BackgroundActivityState>();
+
   @override
   void onInit() {
     super.onInit();
+    // The background switches live in system screens, so their state only changes while
+    // Settings is away. Watching the lifecycle is what makes the row honest when the user
+    // comes back rather than only when the screen is first built.
+    WidgetsBinding.instance.addObserver(this);
     unawaited(restoreThemeMode());
     unawaited(restoreLanguage());
     unawaited(loadSystemInfo());
+    unawaited(refreshBackgroundActivity());
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(refreshBackgroundActivity());
+    }
   }
 
   /// Applies the stored appearance. Called at launch, before Settings is ever opened.
@@ -114,6 +147,52 @@ class SettingsController extends GetxController {
       // The About rows read 'unavailable' on their own, so this is logged and not
       // surfaced: a failed version lookup is not worth a snack bar over.
       _logger.error('Could not read system information', error, stackTrace);
+    }
+  }
+
+  // --- Background activity -------------------------------------------------
+
+  /// Re-reads Duplika's standing in the background. Called at launch and on every resume,
+  /// because both switches this reports are changed in system screens, not here.
+  Future<void> refreshBackgroundActivity() async {
+    backgroundActivity.value = await _bridge.backgroundActivityState();
+  }
+
+  /// Opens the control this device actually has for running in the background.
+  ///
+  /// Two different controls decide this, and they are granted in different places. On the
+  /// OEM builds whose switch sits under Battery usage, no dialog grants it and the info
+  /// page carries both switches; everywhere else the system's own one-tap exemption prompt
+  /// is the control that matters, with the battery list as its fallback. The info page is
+  /// what is left when neither can be shown.
+  ///
+  /// A failure is recorded for the view to report. Which page opened is logged rather than
+  /// shown: the row's own subtitle already carries the instruction, and a snack bar about a
+  /// screen the user is currently looking at would time out before they came back.
+  Future<void> openBackgroundActivitySettings() async {
+    final BackgroundActivityState? state = backgroundActivity.value;
+    if (state != null && !state.exempt && state.nextStep == null) {
+      try {
+        final BatteryPromptScreen screen =
+            await _bridge.requestIgnoreBatteryOptimizations();
+        _logger.info('Battery optimisation prompt opened: ${screen.name}');
+        // `none` means the exemption turned out to be already granted, so nothing was
+        // shown and there is still nowhere to have sent the user.
+        if (screen != BatteryPromptScreen.none) {
+          return;
+        }
+      } on AppException catch (error, stackTrace) {
+        _logger.error('Battery optimisation prompt failed', error, stackTrace);
+      }
+    }
+
+    try {
+      final BackgroundActivityScreen screen =
+          await _bridge.openBackgroundActivitySettings();
+      _logger.info('Background activity settings opened: ${screen.name}');
+    } on AppException catch (error, stackTrace) {
+      _logger.error('Could not open the background activity settings', error, stackTrace);
+      status.value = SettingsStatus.backgroundActivityFailed;
     }
   }
 

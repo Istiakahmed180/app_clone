@@ -84,6 +84,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotSetUpYet => '尚未设置';
 
   @override
+  String get settingsSectionDelivery => '推送';
+
+  @override
+  String get settingsBackgroundActivity => '后台活动';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '让克隆的应用在关闭后仍能收到通知';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '已允许';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      '点按此处，然后进入“电池使用情况”，再允许后台活动';
+
+  @override
+  String get settingsBackgroundActivityFailed => '无法打开后台活动设置。';
+
+  @override
   String get commonUnavailable => '无法获取';
 
   @override
@@ -293,6 +318,31 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get settingsNotSetUpYet => '尚未设置';
+
+  @override
+  String get settingsSectionDelivery => '推送';
+
+  @override
+  String get settingsBackgroundActivity => '后台活动';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '让克隆的应用在关闭后仍能收到通知';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '已允许';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      '点按此处，然后进入“电池使用情况”，再允许后台活动';
+
+  @override
+  String get settingsBackgroundActivityFailed => '无法打开后台活动设置。';
 
   @override
   String get commonUnavailable => '无法获取';
@@ -506,6 +556,31 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsNotSetUpYet => '尚未設定';
 
   @override
+  String get settingsSectionDelivery => '推送';
+
+  @override
+  String get settingsBackgroundActivity => '背景活動';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '讓複製的應用程式在關閉後仍能收到通知';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '已允許';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityFix => '點此並允許背景活動';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      '點此，然後「電池使用情況」，再允許背景活動';
+
+  @override
+  String get settingsBackgroundActivityFailed => '無法開啟背景活動設定。';
+
+  @override
   String get commonUnavailable => '無法取得';
 
   @override
@@ -715,6 +790,31 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get settingsNotSetUpYet => '尚未設定';
+
+  @override
+  String get settingsSectionDelivery => '推送';
+
+  @override
+  String get settingsBackgroundActivity => '背景活動';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '讓複製的應用程式在關閉後仍能收到通知';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '已允許';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '已限制';
+
+  @override
+  String get settingsBackgroundActivityFix => '點此並允許背景活動';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      '點此，然後「電池使用情況」，再允許背景活動';
+
+  @override
+  String get settingsBackgroundActivityFailed => '無法開啟背景活動設定。';
 
   @override
   String get commonUnavailable => '無法取得';

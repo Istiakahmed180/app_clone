@@ -84,6 +84,34 @@ class AppLocalizationsNo extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ikke satt opp ennå';
 
   @override
+  String get settingsSectionDelivery => 'Levering';
+
+  @override
+  String get settingsBackgroundActivity => 'Bakgrunnsaktivitet';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Lar klonede apper motta varsler mens de er lukket';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Tillatt';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Begrenset';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Trykk her og tillat bakgrunnsaktivitet';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Trykk her, deretter Batteribruk, deretter Tillat bakgrunnsaktivitet';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Innstillingene for bakgrunnsaktivitet kunne ikke åpnes.';
+
+  @override
   String get commonUnavailable => 'utilgjengelig';
 
   @override

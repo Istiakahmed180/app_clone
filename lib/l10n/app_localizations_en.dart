@@ -84,6 +84,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotSetUpYet => 'Not set up yet';
 
   @override
+  String get settingsSectionDelivery => 'Delivery';
+
+  @override
+  String get settingsBackgroundActivity => 'Background activity';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Lets cloned apps receive notifications while they are closed';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Allowed';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Restricted';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Tap here and allow background activity';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Tap here, then Battery usage, then Allow background activity';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'The background activity settings could not be opened.';
+
+  @override
   String get commonUnavailable => 'unavailable';
 
   @override

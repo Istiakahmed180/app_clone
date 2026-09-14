@@ -84,6 +84,34 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ще не налаштовано';
 
   @override
+  String get settingsSectionDelivery => 'Доставка';
+
+  @override
+  String get settingsBackgroundActivity => 'Фонова активність';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Дозволяє клонованим застосункам отримувати сповіщення, коли вони закриті';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Дозволено';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Обмежено';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Натисніть тут і дозвольте фонову активність';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Натисніть тут, потім «Використання батареї», потім «Дозволити фонову активність»';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Не вдалося відкрити налаштування фонової активності.';
+
+  @override
   String get commonUnavailable => 'недоступно';
 
   @override

@@ -7,8 +7,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/empty_state.dart';
-import '../../onboarding/controllers/onboarding_controller.dart';
-import '../../onboarding/widgets/background_permission_banner.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
 import '../../private_space/views/private_space_settings_view.dart';
@@ -50,16 +48,7 @@ class HomeView extends GetView<HomeController> {
           }
         },
         child: Scaffold(
-          bottomNavigationBar: Obx(
-        () => _onboarding.accepted.value == true &&
-                _onboarding.showBackgroundPrompt.value
-            ? BackgroundPermissionBanner(
-                onConfirm: () => _confirmBackgroundPermission(context),
-                onDismiss: _onboarding.dismissBackgroundPrompt,
-              )
-            : const SizedBox.shrink(),
-      ),
-      body: OnboardingHost(
+          body: OnboardingHost(
         child: SafeArea(
           // The header stays put; only the clones scroll. A launcher's title does not
           // slide away when you scroll its icons, and with enough clones to need
@@ -132,8 +121,6 @@ class HomeView extends GetView<HomeController> {
       ),
     );
   }
-
-  OnboardingController get _onboarding => Get.find<OnboardingController>();
 
   /// App-level actions. Kept as one menu so the header stays an identity block rather
   /// than a row of icons.
@@ -305,16 +292,6 @@ class HomeView extends GetView<HomeController> {
             'Hold any app on the main grid and choose Hide to move it in here.',
       ),
     );
-  }
-
-  /// Opens the Doze exemption screen and re-checks the answer when the user returns.
-  Future<void> _confirmBackgroundPermission(BuildContext context) async {
-    final String? message = await _onboarding.requestBackgroundPermission();
-    if (message != null && context.mounted) {
-      await _showFailure(context, message);
-    }
-    // Android owns the answer, so ask it rather than assuming the prompt succeeded.
-    await _onboarding.refreshBackgroundPrompt();
   }
 
   Future<void> _openAddProfile() async {

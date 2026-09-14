@@ -84,6 +84,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNotSetUpYet => '未設定';
 
   @override
+  String get settingsSectionDelivery => '配信';
+
+  @override
+  String get settingsBackgroundActivity => 'バックグラウンド動作';
+
+  @override
+  String get settingsBackgroundActivitySubtitle => '複製したアプリを閉じても通知を受け取れるようにします';
+
+  @override
+  String get settingsBackgroundActivityAllowed => '許可';
+
+  @override
+  String get settingsBackgroundActivityRestricted => '制限あり';
+
+  @override
+  String get settingsBackgroundActivityFix => 'ここをタップしてバックグラウンド動作を許可';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'ここをタップし、「バッテリー使用量」から「バックグラウンド動作を許可」を選びます';
+
+  @override
+  String get settingsBackgroundActivityFailed => 'バックグラウンド動作の設定を開けませんでした。';
+
+  @override
   String get commonUnavailable => '取得できません';
 
   @override

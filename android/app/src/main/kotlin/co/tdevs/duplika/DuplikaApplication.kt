@@ -9,6 +9,7 @@ import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import co.tdevs.duplika.native.ClonePushRefreshWorker
+import co.tdevs.duplika.native.EngineNotificationSilencer
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import co.tdevs.duplika.native.blackbox.BlackBoxEngineAdapter
 
@@ -40,6 +41,12 @@ class DuplikaApplication : Application() {
             metadata = mapOf("buildType" to DiagnosticLogger.buildType()),
         )
 
+        // Before the engine: it starts its daemon foreground service while attaching, and
+        // Android never raises a notification channel's importance after the first creation,
+        // so blocking the channel here is what keeps the engine's "Core services are running"
+        // notice off the shade.
+        EngineNotificationSilencer.blockChannel(this)
+
         WebViewProcessIsolation.configure()
         engine.attachBaseContext(this, base)
     }
@@ -68,6 +75,10 @@ class DuplikaApplication : Application() {
                     )
                 }
         }
+
+        // A notice an earlier launch already posted (before the channel was blocked) is not
+        // removed by changing the channel, so cancel it explicitly.
+        EngineNotificationSilencer.cancelPostedNotification(this)
 
         // Idempotent (KEEP): reconnects each clone's microG push channel while the app is in
         // the background, which a closed clone cannot do for itself on aggressive OEM builds.

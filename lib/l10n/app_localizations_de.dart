@@ -84,6 +84,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsNotSetUpYet => 'Noch nicht eingerichtet';
 
   @override
+  String get settingsSectionDelivery => 'Zustellung';
+
+  @override
+  String get settingsBackgroundActivity => 'Hintergrundaktivität';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Lässt geklonte Apps Benachrichtigungen erhalten, während sie geschlossen sind';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Erlaubt';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Eingeschränkt';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Hier tippen und Hintergrundaktivität erlauben';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Hier tippen, dann Akkuverbrauch, dann Hintergrundaktivität erlauben';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Die Einstellungen für die Hintergrundaktivität konnten nicht geöffnet werden.';
+
+  @override
   String get commonUnavailable => 'nicht verfügbar';
 
   @override

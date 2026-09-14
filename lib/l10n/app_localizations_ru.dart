@@ -84,6 +84,34 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ещё не настроено';
 
   @override
+  String get settingsSectionDelivery => 'Доставка';
+
+  @override
+  String get settingsBackgroundActivity => 'Фоновая активность';
+
+  @override
+  String get settingsBackgroundActivitySubtitle =>
+      'Позволяет клонированным приложениям получать уведомления, когда они закрыты';
+
+  @override
+  String get settingsBackgroundActivityAllowed => 'Разрешена';
+
+  @override
+  String get settingsBackgroundActivityRestricted => 'Ограничена';
+
+  @override
+  String get settingsBackgroundActivityFix =>
+      'Нажмите здесь и разрешите фоновую активность';
+
+  @override
+  String get settingsBackgroundActivityFixBatteryUsage =>
+      'Нажмите здесь, затем «Расход батареи», затем «Разрешить фоновую активность»';
+
+  @override
+  String get settingsBackgroundActivityFailed =>
+      'Не удалось открыть настройки фоновой активности.';
+
+  @override
   String get commonUnavailable => 'недоступно';
 
   @override
