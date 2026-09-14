@@ -46,7 +46,7 @@ object MicroGSpike {
         when (op) {
             "clone" -> clone(engine, profileId, packageName)
             "install" -> install(context, engine, profileId, onlyUser)
-            "launch" -> launch(engine, profileId, packageName)
+            "launch" -> launch(context, engine, profileId, packageName)
             "wakegcm" -> wakeGcm(context, profileId)
             "cleardata" -> clearData(engine, profileId, packageName)
             "uninstall" -> uninstall(context, onlyUser)
@@ -92,11 +92,20 @@ object MicroGSpike {
         }
     }
 
-    private fun launch(engine: RealVirtualizationEngine, profileId: String, packageName: String) {
+    private fun launch(
+        context: Context,
+        engine: RealVirtualizationEngine,
+        profileId: String,
+        packageName: String,
+    ) {
         when (val result = engine.launchProfile(profileId, packageName)) {
             is EngineResult.Success -> Log.i(TAG, "launched $packageName")
             is EngineResult.Failure -> Log.e(TAG, "launch failed: ${result.code} ${result.message}")
         }
+        // Wake microG's MCS receive connection on every launch: broadcasts to a backgrounded
+        // host are skipped by policy and the spike activity's onNewIntent path is unreliable,
+        // while the launch path always runs.
+        wakeGcm(context, profileId)
     }
 
     /**
