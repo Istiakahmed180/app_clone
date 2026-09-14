@@ -27,6 +27,17 @@ class AppTheme {
   /// The accent at ~6% over white. Fills tinted tiles and icon medallions.
   static const Color accentTint = Color(0xFFFFF0EB);
 
+  /// The accent as it has to appear on an *inverted* surface — the banner and the snack
+  /// bar, whose backgrounds run opposite to the rest of the screen. Flat [accent] is
+  /// only legible on one of the two: on the near-white bar dark mode gives them it
+  /// manages 2.6:1, which is below the 4.5:1 an action has to clear.
+  ///
+  /// So there are two: lifted for the near-black bar light mode shows (7.5:1), deepened
+  /// for the near-white one (5.6:1). Reached through `ColorScheme.inversePrimary`, never
+  /// by naming these directly — the scheme is what knows which way round it is.
+  static const Color accentOnDark = Color(0xFFFF8A66);
+  static const Color accentOnLight = Color(0xFFA83208);
+
   static const Color ink = Color(0xFF171A22);
   static const Color inkMuted = Color(0xFF6F7480);
 
@@ -104,6 +115,7 @@ class AppTheme {
     outlineVariant: hairline,
     inverseSurface: ink,
     onInverseSurface: Colors.white,
+    inversePrimary: accentOnDark,
     shadow: Color(0x14000000),
     scrim: Color(0x66000000),
   );
@@ -138,6 +150,7 @@ class AppTheme {
     outlineVariant: darkHairline,
     inverseSurface: Color(0xFFE9EAEE),
     onInverseSurface: Color(0xFF1B1D23),
+    inversePrimary: accentOnLight,
     shadow: Color(0x33000000),
     scrim: Color(0x99000000),
   );
@@ -257,7 +270,9 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: scheme.inverseSurface,
         contentTextStyle: text.bodyMedium?.copyWith(color: scheme.onInverseSurface),
-        actionTextColor: scheme.primary,
+        // Not `scheme.primary`: this sits on `inverseSurface`, where the flat accent
+        // manages 2.6:1 in dark mode. `inversePrimary` is the accent for that surface.
+        actionTextColor: scheme.inversePrimary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
       ),
