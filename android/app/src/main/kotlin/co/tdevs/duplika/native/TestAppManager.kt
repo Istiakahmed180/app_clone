@@ -8,9 +8,9 @@ import android.os.Build
 /**
  * Read-only package metadata for the single controlled test application.
  *
- * Only the public PackageManager surface is used. This class never touches another
- * application's private storage, and it is deliberately restricted to one package so
- * the manifest needs the narrowest possible <queries> declaration.
+ * The controlled app is `baseline_test_app/` in this repository, built as
+ * [TEST_APP_PACKAGE]. Only the public PackageManager surface is used. This class never
+ * touches another application's private storage.
  */
 class TestAppManager(private val context: Context) {
 
@@ -56,6 +56,6 @@ class TestAppManager(private val context: Context) {
         else info.versionCode.toLong()
 
     companion object {
-        const val TEST_APP_PACKAGE = "com.example.virtualtestapp"
+        const val TEST_APP_PACKAGE = "com.example.duplikabaseline"
     }
 }

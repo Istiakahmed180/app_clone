@@ -13,6 +13,7 @@ public final class MainActivity extends Activity {
     private static final String PREFS = "baseline_state";
     private static final String COUNT = "count";
     private static final String NAME = "name";
+    private static final String LAUNCHES = "launches";
 
     private android.content.SharedPreferences state;
     private TextView stateView;
@@ -23,6 +24,11 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         state = getSharedPreferences(PREFS, MODE_PRIVATE);
+        // Persist on every launch: a clone that actually runs the guest writes its own
+        // prefs file, which is what the isolation suite measures.
+        state.edit()
+                .putInt(LAUNCHES, state.getInt(LAUNCHES, 0) + 1)
+                .apply();
         BaselineService.start(this);
 
         LinearLayout root = new LinearLayout(this);
@@ -152,6 +158,7 @@ public final class MainActivity extends Activity {
         }
         stateView.setText("count=" + state.getInt(COUNT, 0) +
                 "\nname=" + state.getString(NAME, "Initial user") +
+                "\nlaunches=" + state.getInt(LAUNCHES, 0) +
                 "\nprovider=" + providerStatus);
     }
 }

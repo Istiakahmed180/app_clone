@@ -100,9 +100,9 @@ and anti-cheat apps remains out of scope.
 ## 4. Directory structure
 
 ```
-Others/
-├── virtual_space_demo/     Flutter host application (this repository)
-└── virtual_test_app/       Native Kotlin test application (separate, not a Flutter package)
+virtual_space_demo/         Flutter host application (this repository)
+├── lib/
+└── baseline_test_app/      Native Kotlin test application (standalone Gradle project)
 ```
 
 ```
@@ -204,18 +204,24 @@ Phase 2 calls return a structured envelope so a native failure can never read as
 Failures are returned as structured results or surfaced as typed Dart exceptions
 (`NativeBridgeException`, `LaunchException`). Nothing is hardcoded to succeed.
 
-Package visibility is declared as narrowly as Android 11+ allows — a single
-`<package android:name="com.example.virtualtestapp" />` entry. `QUERY_ALL_PACKAGES` is not
-requested.
+Package visibility is broader on purpose: the app picker must enumerate every launchable
+app, so Duplika requests `QUERY_ALL_PACKAGES` on Android 11+ and keeps the narrow
+`<queries>` intents Flutter needs. The permission is Play-policy-sensitive and used only
+for the picker — see `docs/SECURITY.md`.
 
 ## 8. Test APK
 
-`../virtual_test_app` — a native Kotlin app, package `com.example.virtualtestapp`, label
-"Virtual Test App". It exists solely as a controlled application whose behaviour we fully know,
-so later phases can measure whether state is genuinely isolated.
+`baseline_test_app/` — a standalone native Kotlin app, package `com.example.duplikabaseline`,
+label "Duplika Baseline". It exists solely as a controlled application whose behaviour we
+fully know, so phases can measure whether state is genuinely isolated and the instrumentation
+suite has a known quantity to assert against.
 
-It shows a counter and a stored name, persisted in `SharedPreferences`
-(`virtual_test_app_state.xml`): counter defaults to `0`, stored name to `Test User`.
+It persists a counter, a name and a launch count in `SharedPreferences`
+(`baseline_state.xml`): counter defaults to `0`, name to `Initial user`, and the launch
+count is written on every start. It also queries its own `ContentProvider`
+(`com.example.duplikabaseline.provider`), starts a background `Service`, opens a second
+`Activity`, reports its camera-permission and Android ID view, and posts a notification whose
+text carries its persisted state.
 
 ## 9. Profile model
 
@@ -256,7 +262,7 @@ is never uninstalled and its own data is never touched — verified on device.
 Build and install the controlled test app first:
 
 ```bash
-cd virtual_test_app && ./gradlew :app:assembleDebug
+cd baseline_test_app && ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -299,13 +305,14 @@ cd virtual_space_demo/android && ./gradlew :app:connectedDebugAndroidTest
 
 Manual acceptance walkthrough:
 
-1. Open Virtual Test App → counter `0`, name `Test User`. Increase, edit the name, Save.
-2. Close and reopen → both values persist. Reset → counter returns to `0`.
-3. Open Duplika → the test app shows as **Installed** with its version.
-4. Add "Profile 1" and "Profile 2". Restart → both persist.
-5. Rename Profile 1, restart → the rename persists.
-6. Delete Profile 2 (a confirmation dialog appears), restart → it stays deleted.
-7. Launch any profile → the normal Virtual Test App opens; the test APK is still installed.
+1. Open Duplika Baseline → `count=0`, `name=Initial user`, `launches=1`,
+   `provider=provider-ok`.
+2. Tap "Increment and persist" → `count=1`, `name=Baseline user`. Close and reopen → count
+   and name persist and `launches` increments.
+3. Add "Profile 1" and "Profile 2". Restart → both persist.
+4. Rename Profile 1, restart → the rename persists.
+5. Delete Profile 2 (a confirmation dialog appears), restart → it stays deleted.
+6. Launch any profile → the normal Duplika Baseline app opens; the test APK is still installed.
 
 ## 13. Current limitations
 
@@ -360,7 +367,8 @@ x86_64 is unsupported: Bcore ships no x86_64 native library.
 - No root, SELinux bypass, signature bypass, PackageManager bypass, Play Integrity or anti-cheat
   workaround, fingerprint spoofing, or stealth behaviour.
 - Only public, documented Android APIs are used.
-- Package visibility is scoped to one package; `QUERY_ALL_PACKAGES` is not requested.
+- Package visibility is broad (`QUERY_ALL_PACKAGES`) solely to enumerate launchable apps for
+  the clone picker; it is Play-policy-sensitive and justified in `docs/SECURITY.md`.
 - The virtualization backend is third-party (NewBlackbox/Bcore, Apache-2.0), vendored as a
   prebuilt AAR and confined behind `VirtualizationEngineAdapter`. See
   `docs/DEPENDENCY_LICENSE_AUDIT.md` for open provenance risk and `docs/SECURITY.md` for the

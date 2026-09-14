@@ -234,7 +234,7 @@ class ApkImportTest {
         assertTrue(info is ApkImporter.ApkInfo.Parsed)
         info as ApkImporter.ApkInfo.Parsed
         assertEquals(TestAppManager.TEST_APP_PACKAGE, info.packageName)
-        assertEquals("Virtual Test App", info.appName)
+        assertEquals("Duplika Baseline", info.appName)
         assertNotNull(info.versionName)
     }
 

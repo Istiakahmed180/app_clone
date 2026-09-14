@@ -110,7 +110,7 @@ override path.
 
 ## Data boundaries
 
-- Duplika never reads `/data/data/com.example.virtualtestapp` — the normally installed
+- Duplika never reads `/data/data/com.example.duplikabaseline` — the normally installed
   app's private directory. Only the package *identity* is passed to the engine, which resolves
   the APK through the platform's own `PackageManager`.
 - Container data lives under the host's own sandbox at

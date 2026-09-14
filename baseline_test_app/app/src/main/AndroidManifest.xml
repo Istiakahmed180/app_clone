@@ -5,6 +5,11 @@
     <application
         android:label="Duplika Baseline"
         android:theme="@style/AppTheme">
+        <!-- Present so the instrumentation suite's manifest reader has a real declaration
+             to find in a real APK; a parser that returned nothing would otherwise pass. -->
+        <meta-data
+            android:name="com.example.duplikabaseline.fixture"
+            android:value="true" />
         <activity
             android:name=".SecondActivity"
             android:exported="false" />

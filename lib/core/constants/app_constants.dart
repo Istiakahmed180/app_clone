@@ -9,8 +9,8 @@ class AppConstants {
   /// Any installed app can be cloned; this one is singled out only because the home
   /// screen reports whether it is present, and the test suite uses it as a known
   /// quantity.
-  static const String testAppPackage = 'com.example.virtualtestapp';
-  static const String testAppFallbackName = 'Virtual Test App';
+  static const String testAppPackage = 'com.example.duplikabaseline';
+  static const String testAppFallbackName = 'Duplika Baseline';
 
   static const String profilesStorageKey = 'duplika.profiles.v1';
 

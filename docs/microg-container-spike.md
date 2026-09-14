@@ -124,8 +124,21 @@ MCS connection does not survive long enough to receive. Two bounded reconnect me
 added for this: `CloneKeepAliveService` re-wakes the MCS every 30 s while a clone is open,
 and `ClonePushRefreshWorker` (WorkManager, ≥15 min) does the same while nothing is open — FCM
 stores undelivered messages, so they arrive in a batch at the next reconnect rather than
-instantly. These are recorded in `docs/SECURITY.md`; on this OEM even the reconnect may be
-deferred by the system's background restrictions. The engine daemon
+instantly. These are recorded in `docs/SECURITY.md`.
+
+**Measured on the CPH2605 with the reconnect running:** the wake does reach microG — the log
+shows `GmsGcmMcsSvc: Connect initiated, reason: Intent { act=…mcs.CONNECT … }` — and the
+keep-alive foreground service stays alive, the guest app stays alive, and notification
+permission and the clone's channel (`channel_id@black-0`, "… · Clone 1") are correct. But
+microG never reaches `Connected to mtalk.google.com` / `Logged in` on this device: the OEM
+SIGKILLs the container's microG process in bulk (`Zygote: Process … exited due to signal 9`
+for six pids within a second) faster than the connection can complete, and the reconnect
+simply starts the race again. No `DataMessageStanza` was ever received on this device, so on
+this OEM the app-side work described above is necessary but not sufficient — the remaining
+lever is the OEM's own process policy (Auto-launch, battery "Don't optimize", lock in
+recents), which is a user setting Duplika cannot set for itself.
+
+The engine daemon
 (`isEnableDaemonService=true`) stretched survival from ~30 s to ~70 s but did not fix
 delivery; it was tried on a branch and reverted, because it contradicts `docs/SECURITY.md`.
 The host's own `CloneKeepAliveService` does not help either — it protects the host process,
@@ -201,12 +214,12 @@ not identity or signature manipulation.
 
 1. **Regression coverage of the two engine overrides is partial.** A normal clone
    (`com.example.duplikabaseline`) launched with its provider working and no provider errors,
-   which exercises both fixes. The Android `connectedDebugAndroidTest` suite cannot currently
-   run green in this repo because it expects `com.example.virtualtestapp`
-   (`TestAppManager.TEST_APP_PACKAGE`) and `baseline_test_app` builds
+   which exercises both fixes. The Android `connectedDebugAndroidTest` suite previously could
+   not run green in this repo because it expected `com.example.virtualtestapp`
+   (`TestAppManager.TEST_APP_PACKAGE`) while `baseline_test_app` builds
    `com.example.duplikabaseline` — a pre-existing mismatch, not a regression from these
-   changes. Wiring the suite to the current test app (or bundling the expected one) is worth
-   doing before this leaves the spike branch.
+   changes. The suite and `AppConstants` are now wired to `baseline_test_app`, so the
+   regressions are measured against the same in-repo test app.
 2. **Attribution and packaging.** The bundled microG needs its Apache-2.0 attribution in the
    repository `NOTICE`. For a real build, consider per-ABI splits rather than the trimmed
    universal artefact.
