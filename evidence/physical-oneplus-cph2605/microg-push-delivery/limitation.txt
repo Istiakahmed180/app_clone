@@ -1,0 +1,42 @@
+# microG FCM push delivery in a Duplika container — measured limitation
+# Device: OnePlus CPH2605 (Android 15), Duplika debug build
+# Date: 2026-09-14
+#
+# What works (measured on this device, in a Digibank clone with microG provisioned):
+#   - FCM token generation            : microG obtained tokens for project 535459240802
+#   - Login                            : the app's login completed (dashboard rendered)
+#   - In-app notification list         : loaded from the app's backend
+#   - FCM send (server side)           : Firebase HTTP v1 accepted the message 4/4 times
+#
+# What does not work: the message is never received on the device.
+
+## 1. The container's microG process is SIGKILLed by the OEM
+# Clone launched, then microG's MCS service was woken (startContainerService ->
+# org.microg.gms.gcm.McsService with action org.microg.gms.gcm.mcs.CONNECT).
+12:29:13  container microG process starts (pid 18292)
+12:29:21  microG providers published; bindService cost 7369 ms
+12:29:56  Process : Sending signal. PID: 18292 SIG: 9
+12:29:56  Zygote  : Process 18292 exited due to signal 9 (Killed)
+
+# Without the engine daemon the same process died after ~30 s; with
+# isEnableDaemonService=true (spike/daemon-push, reverted) it survived ~70 s.
+# The host's own foreground service (CloneKeepAliveService) does not protect it:
+# the FGS is in the host process, microG is a separate process and the OEM kills
+# per process.
+
+## 2. microG's MCS receive connection never logs in inside the container
+# Host-installed ReVanced microG does connect:
+12:28:36  17091 D GmsGcmMcsSvc: Connect initiated ...
+12:28:36  17091 D GmsGcmMcsSvc: Logged in
+# The container's microG pid never produced a `GmsGcmMcsSvc: ... Logged in` line in any
+# run. Without the MCS connection Google cannot deliver a message to the token.
+
+## 3. Server side accepted every send
+{"name":"projects/digi-bank-26384/messages/0:1789367306312066%727ed7a0727ed7a0"}
+# (a valid token: an unregistered token returns UNREGISTERED, not a message name)
+
+## Conclusion
+Push *registration* works. Push *delivery* is blocked by two independent problems —
+OEM process killing of the container's microG, and microG's MCS not establishing a
+connection in the container. Both are engine/OS level, not app logic, and neither is
+addressed by the microG provider work. Recorded as a known limitation.

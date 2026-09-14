@@ -99,6 +99,28 @@ Enabling microG's checkin (`checkin_enable_service`) produced a successful Googl
 (`androidId`, `securityToken`, `lastCheckin` in `checkin.xml`), after which
 `PushRegisterService` registered and received the FCM token above.
 
+### Push *delivery* does not work yet — measured limitation
+
+Registration is not delivery. Sending an actual message with the app's service account
+(Firebase HTTP v1) is accepted by Google every time — a valid token returns a message name,
+an unregistered one returns `UNREGISTERED` — but the message is never received in the clone.
+Two independent blockers, both measured on the OnePlus CPH2605 and recorded in
+`evidence/physical-oneplus-cph2605/microg-push-delivery/limitation.txt`:
+
+1. **The container's microG process is SIGKILLed by the OEM.** It starts (woken via
+   `org.microg.gms.gcm.McsService` + `org.microg.gms.gcm.mcs.CONNECT`), publishes its
+   providers, and is killed ~30 s later (`Process ... exited due to signal 9 (Killed)`).
+   The engine daemon (`isEnableDaemonService=true`) only stretched that to ~70 s; it was
+   tried on a branch and reverted, because it did not fix delivery and contradicts
+   `docs/SECURITY.md`. The host's own `CloneKeepAliveService` does not help either — it
+   protects the host process, and the OEM kills the guest microG process separately.
+2. **microG's MCS connection never logs in inside the container.** The host-installed
+   ReVanced microG prints `GmsGcmMcsSvc: Logged in`; the container's microG never does in any
+   run. Without that connection Google cannot deliver to the token.
+
+Neither is app logic; both are engine/OS level. **Known limitation**: a clone can register
+for push and use its in-app notifications, but background push notifications do not arrive.
+
 **Checkin is warmed during provisioning.** microG only checks in when something asks it to,
 and the push registration that does ask has a 10 s timeout — so on a fresh container the
 first launch used to fail registration once (`No checkin available` →
@@ -176,14 +198,22 @@ not identity or signature manipulation.
    universal artefact.
 3. **Checkin is seeded, not user-configurable.** `MicroGCheckinSeeder` writes microG's
    prefs directly. If microG's own settings UI is ever exposed, the two should not fight.
-4. **Measure push *delivery*** (send an FCM message), not only registration. Registration is
-   now verified on both the emulator and a physical OnePlus CPH2605, on the first launch
-   (checkin is warmed at provisioning time).
+4. **Push delivery is measured and blocked** (see "Push *delivery* does not work yet" above).
+   Registration is verified on the emulator and a physical OnePlus CPH2605, on the first
+   launch, but a sent message is never received in the clone: the OEM SIGKILLs the container's
+   microG process, and microG's MCS connection never logs in inside the container. Reopening
+   this needs engine/OS-level work, not app logic.
 
 ## Bottom line
 
-The microG path is **not blocked by signatures** and is **now demonstrated end to end on an
+The microG path is **not blocked by signatures** and **push registration is demonstrated on an
 emulator and on a physical device**: a cloned Firebase app in a Duplika container obtained a
 real FCM token on its first launch. The work that got there was two small, identity-neutral
 engine provider fixes plus microG's own checkin configuration and warm-up — not signature
-spoofing. What remains is regression testing, packaging, and the product/policy decision.
+spoofing.
+
+**Push *delivery* is a measured limitation, not a claim.** A registered clone logs in and its
+in-app notifications work, but a message sent from the app's own Firebase project is never
+received, because the OEM kills the container's microG process and microG's MCS connection
+does not log in inside the container. What remains is regression testing, packaging, the
+push-delivery limitation, and the product/policy decision.
