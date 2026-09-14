@@ -169,6 +169,23 @@ first launch used to fail registration once (`No checkin available` →
 flow. Measured on the OnePlus CPH2605: checkin completed ~7 s after provisioning, and the
 **first** launch of the clone obtained its FCM token with no relaunch.
 
+### microG's package-uid check needed a third engine fix
+
+microG refuses to register FCM for a package unless
+`getPackagesForUid(callingUid)` contains it. A guest process reports its own virtual uid as the
+caller, and the engine answered that uid with a **single** package, so registration failed with
+
+```
+SecurityException: UID [10001] is not related to packageName [com.digibank.mobile]
+  at org.microg.gms.common.PackageUtils.getPackageByUid(PackageUtils.java:260)
+```
+
+The app then shows "FCM required" at login and never obtains a token. Fixed with
+`engine-patches/overrides/…/IPackageManagerProxy$GetPackagesForUid.java`, which keeps the
+upstream uid translation and merges in the container's installed packages. Measured after the
+fix: `GetPackagesForUid: [com.google.android.gms, com.digibank.mobile]` and two real FCM
+tokens. See `engine-patches/README.md` for the override's contract.
+
 ## The provider layer and the bundle
 
 The artefact is now bundled and provisioned through the real layer, not installed by hand:

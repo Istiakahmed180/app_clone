@@ -12,7 +12,21 @@ mkdir -p "$WORK/classes" "$WORK/src"
 cp "$WORK/aar/classes.jar" "$WORK/classes.jar"
 find "$ROOT/engine-patches/overrides" -name '*.java' -print > "$WORK/sources.txt"
 
-javac -source 8 -target 8 \
+# The vendored classes.jar is built with a newer JDK (class-file version 65 / Java 21), which
+# the default JDK 17 javac cannot read ("class file has wrong version 65.0, should be 61.0").
+# Prefer the Android Studio JDK, which is new enough, and emit Java 17 bytecode so the result
+# stays inside what the Android toolchain expects.
+JAVAC="javac"
+for candidate in \
+  "/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/javac" \
+  "$(command -v javac)"; do
+  if [ -x "$candidate" ]; then
+    JAVAC="$candidate"
+    break
+  fi
+done
+echo "==> Compiling overrides with $JAVAC"
+"$JAVAC" --release 17 \
   -cp "$SDK/platforms/android-35/android.jar:$WORK/classes.jar:$ROOT/android/app/libs/black-reflection.jar" \
   -d "$WORK/classes" \
   $(<"$WORK/sources.txt")

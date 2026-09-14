@@ -37,6 +37,11 @@ services observes: the caller-identity refusals documented in
 **If you edit anything under `overrides/`, run `engine-patches/apply-runtime-overrides.sh`
 and commit the resulting `bcore.aar`, or the change does not exist at runtime.**
 
+The script compiles with the Android Studio JDK when it is present: the vendored `classes.jar`
+is built with a newer JDK (class-file version 65 / Java 21), which a JDK 17 `javac` cannot
+read — it fails with `class file has wrong version 65.0, should be 61.0`. The overrides are
+emitted as Java 17 bytecode (`--release 17`).
+
 ## `overrides/…/BNotificationManager.java` — binder retry, and per-clone channel labels
 
 Two things. The class re-fetches the notification service binder once from the registry
@@ -73,6 +78,27 @@ What it is: per-clone permission scoping for apps that ask before they use a per
 is virtually all of them. What it is not: a sandbox. Guests run under the host UID, so the
 camera/mic/location services in `system_server` check the host's grants, and an app that
 reaches a service without checking first is not stopped.
+
+## `overrides/…/IPackageManagerProxy$GetPackagesForUid.java` — complete the container's uid set
+
+microG verifies that a caller may act for a package with
+`PackageUtils.checkPackageUid(context, packageName, callingUid)`: it asks the package manager
+for `getPackagesForUid(callingUid)` and requires the package to be in that set. A guest
+process inside a container reports its own virtual uid as the caller, and the engine answered
+that uid with a **single** package, so microG refused every FCM registration with
+
+```
+SecurityException: UID [10001] is not related to packageName [com.digibank.mobile]
+  at org.microg.gms.common.PackageUtils.getPackageByUid(PackageUtils.java:260)
+```
+
+and cloned apps reported "FCM required" at login (measured on the emulator, 2026-09-14).
+
+The override keeps the upstream host-uid → guest-uid translation and merges in the packages
+installed in the current container. Every package in a container already runs under the same
+host process identity, so the set is now complete for callers that only need "does this
+package belong to this container". It adds no package, permission, signature or identity —
+only names of packages the container already has.
 
 ## 0005 — Permission-gated public media paths
 
