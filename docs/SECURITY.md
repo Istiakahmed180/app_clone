@@ -32,6 +32,21 @@ pins them explicitly rather than accepting defaults:
 | `isEnableDaemonService` | `false` | No background persistence beyond what the user starts. |
 | `isEnableLauncherActivity` | `false` | The host UI is the only entry point. |
 
+### Clone keep-alive foreground service — scoped, not a daemon
+
+One exception exists, and it is deliberately narrow: while a clone the user opened is
+running, `CloneKeepAliveService` runs as a foreground service with a low-importance
+notification. It does not replace `isEnableDaemonService` (still `false`) and it is not
+background persistence of Duplika's own: it is started by the launch the user performed and
+it is stopped when they return to Duplika (`MainActivity.onResume`).
+
+The reason is measured, not theoretical. On an OnePlus CPH2605 the OS kills the host process
+the moment a clone takes the foreground
+(`UserAwareMgr: process killed: {… flags='bg'}`; adding the app to the battery-optimisation
+whitelist did not stop it), which cold-starts Duplika when the user comes back. The clone
+keeps running in its own process either way; the service only keeps the *host* alive. It
+touches no identity, permission or container state.
+
 ## REQUIRE_SECURE_ENV
 
 Google requires on-device Android containers to honour an application's declaration that it

@@ -630,6 +630,10 @@ class RealVirtualizationEngine(
                 profileId = profileId,
                 virtualUserId = virtualUserId,
             )
+            // The clone now owns the foreground, so the host is about to go background and
+            // an aggressive OEM would otherwise kill it — measured on OnePlus. The service
+            // stops when the user comes back to Duplika.
+            CloneKeepAliveService.start(context, packageName)
             return first
         }
 

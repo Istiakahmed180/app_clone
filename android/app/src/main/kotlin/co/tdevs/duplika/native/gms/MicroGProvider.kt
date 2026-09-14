@@ -38,6 +38,7 @@ class MicroGProvider(
     private val materialize: (String) -> File?,
     private val installApk: (path: String, virtualUserId: Int) -> EngineResult<Unit>,
     private val seedCheckin: (virtualUserId: Int) -> Boolean,
+    private val triggerCheckin: (virtualUserId: Int) -> Boolean,
 ) : GoogleServiceProvider {
 
     override val providerName: String = NAME
@@ -112,6 +113,12 @@ class MicroGProvider(
         // so it is reported through diagnostics rather than as a hard error.
         val checkinSeeded = seedCheckin(virtualUserId)
 
+        // Warm the checkin now, while the user is still in the clone flow. Without this the
+        // first launch of the clone races microG's checkin and the app has to be reopened
+        // once before it can register for push (`No checkin available`). Reported but not
+        // fatal: a missed warm-up degrades to the old two-launch behaviour, not to a failure.
+        val checkinTriggered = triggerCheckin(virtualUserId)
+
         return ProviderResult.Success(
             provider = providerName,
             capability = GmsCapability.CONTAINER_GMS_PROVISIONING,
@@ -120,6 +127,7 @@ class MicroGProvider(
                 "virtualUserId" to virtualUserId.toString(),
                 "artifactsInstalled" to installed.toString(),
                 "checkinSeeded" to checkinSeeded.toString(),
+                "checkinTriggered" to checkinTriggered.toString(),
             ),
         )
     }
@@ -135,6 +143,13 @@ class MicroGProvider(
                 materialize = { name -> materializeAsset(context, source, name) },
                 installApk = { path, userId -> adapter.installApkFiles(listOf(path), userId) },
                 seedCheckin = { userId -> MicroGCheckinSeeder.seed(adapter, userId) },
+                triggerCheckin = { userId ->
+                    adapter.startContainerService(
+                        MicroGCheckinSeeder.GMS_PACKAGE,
+                        MicroGCheckinSeeder.CHECKIN_SERVICE,
+                        userId,
+                    ) is EngineResult.Success
+                },
             )
         }
 

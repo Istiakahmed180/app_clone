@@ -3,7 +3,11 @@
     <application
         android:label="Duplika"
         android:name=".DuplikaApplication"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -79,6 +83,20 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
+        <!-- Keeps the host process alive while a clone the user opened is running. On
+             aggressive OEM builds (measured: OnePlus) the host is killed the moment it stops
+             being the foreground activity — i.e. when the clone takes the foreground — which
+             cold-starts Duplika when the user returns. The service starts with a clone and
+             stops itself once none are running, so it adds no persistence of its own. -->
+        <service
+            android:name=".native.CloneKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="container_host_keepalive" />
+        </service>
+
         <!-- SPIKE ONLY (spike/microg-container): adb-triggerable entry point that installs a
              bundled microG artefact into every existing virtual profile, bypassing the
              AppSecurityChecker admission policy on purpose so the container behaviour can be
@@ -94,9 +112,8 @@
             android:name=".native.spike.MicroGSpikeActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.NoDisplay" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- Hands exported diagnostics reports to the Android share sheet.
 
@@ -167,6 +184,13 @@
          runtime dialog, and requests no user data: Android exposes only a yes/no result
          through BiometricPrompt, never the fingerprint or face itself. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!-- Foreground service used only while a clone the user opened is running; see
+         CloneKeepAliveService and the <service> entry below. The notification is the
+         service's required user-visible part and disappears with the last clone. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- ==========================================================================
          Permissions removed from the virtualization engine's merged manifest.

@@ -99,6 +99,15 @@ Enabling microG's checkin (`checkin_enable_service`) produced a successful Googl
 (`androidId`, `securityToken`, `lastCheckin` in `checkin.xml`), after which
 `PushRegisterService` registered and received the FCM token above.
 
+**Checkin is warmed during provisioning.** microG only checks in when something asks it to,
+and the push registration that does ask has a 10 s timeout — so on a fresh container the
+first launch used to fail registration once (`No checkin available` →
+`SERVICE_NOT_AVAILABLE`) and the app had to be reopened. `MicroGProvider` now starts
+`org.microg.gms.checkin.CheckinService` in the container right after provisioning
+(`VirtualizationEngineAdapter.startContainerService`), while the user is still in the clone
+flow. Measured on the OnePlus CPH2605: checkin completed ~7 s after provisioning, and the
+**first** launch of the clone obtained its FCM token with no relaunch.
+
 ## The provider layer and the bundle
 
 The artefact is now bundled and provisioned through the real layer, not installed by hand:
@@ -121,7 +130,7 @@ flutter build apk --debug && adb install -r build/app/outputs/flutter-apk/app-de
 adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op clone --es profileId spike-mg --es package com.moneyin.cabex.fx
 adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op install --es profileId spike-mg
 adb shell am start -n co.tdevs.duplika/.native.spike.MicroGSpikeActivity --es op launch --es profileId spike-mg --es package com.moneyin.cabex.fx
-# the first launch races checkin (10 s timeout); relaunch once and the token is obtained
+# provisioning warms microG's checkin, so the first launch registers immediately
 ```
 
 `docs/microg-container-spike.md` and
@@ -167,14 +176,14 @@ not identity or signature manipulation.
    universal artefact.
 3. **Checkin is seeded, not user-configurable.** `MicroGCheckinSeeder` writes microG's
    prefs directly. If microG's own settings UI is ever exposed, the two should not fight.
-4. **Measure on a physical device**, and measure push *delivery* (send an FCM message), not
-   only registration. The first launch also races microG's checkin; a shipping flow should
-   provision (and let checkin complete) before the user's first launch, or retry.
+4. **Measure push *delivery*** (send an FCM message), not only registration. Registration is
+   now verified on both the emulator and a physical OnePlus CPH2605, on the first launch
+   (checkin is warmed at provisioning time).
 
 ## Bottom line
 
 The microG path is **not blocked by signatures** and is **now demonstrated end to end on an
-emulator**: a cloned Firebase app in a Duplika container obtained a real FCM token. The work
-that got there was two small, identity-neutral engine provider fixes plus microG's own
-checkin configuration — not signature spoofing. What remains is regression testing,
-packaging, and the product/policy decision.
+emulator and on a physical device**: a cloned Firebase app in a Duplika container obtained a
+real FCM token on its first launch. The work that got there was two small, identity-neutral
+engine provider fixes plus microG's own checkin configuration and warm-up — not signature
+spoofing. What remains is regression testing, packaging, and the product/policy decision.

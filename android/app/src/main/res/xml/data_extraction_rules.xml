@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nothing in Duplika is backed up or transferred to another device.
+
+  Duplika's local state is container state: the clone list, the engine's virtual-user data
+  and the clones' own files. Restoring that onto a fresh install resurrects clones the user
+  no longer has — measured: after uninstall/reinstall, Google auto-backup restored
+  `com.example.duplikaladder.level6` ("Ladder Level 6") into the clone list even though the
+  app was never reinstalled on the device. It is also the wrong place for it: a clone's data
+  must stay on the device, not leave it through a cloud backup.
+
+  `android:allowBackup="false"` disables cloud backup; these rules additionally exclude
+  every domain from Android 12+ device-to-device transfer, so the same resurrection cannot
+  happen through a phone migration.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

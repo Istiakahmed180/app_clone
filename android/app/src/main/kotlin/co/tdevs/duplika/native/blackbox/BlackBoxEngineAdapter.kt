@@ -2,6 +2,7 @@ package co.tdevs.duplika.native.blackbox
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
 import java.io.File
@@ -371,6 +372,36 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             EngineResult.Failure(
                 EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED,
                 "The engine refused to launch the virtual application.",
+            )
+        }
+    }
+
+    override fun startContainerService(
+        packageName: String,
+        serviceClassName: String,
+        virtualUserId: Int,
+    ): EngineResult<Unit> = guarded(EngineErrorCodes.CONTAINER_SERVICE_START_FAILED) {
+        withServiceRetry {
+            warmUpPackageService()
+            doStartContainerService(packageName, serviceClassName, virtualUserId)
+        }
+    }
+
+    private fun doStartContainerService(
+        packageName: String,
+        serviceClassName: String,
+        virtualUserId: Int,
+    ): EngineResult<Unit> {
+        val intent = Intent().setClassName(packageName, serviceClassName)
+        val started = BlackBoxCore.getBActivityManager()
+            .startService(intent, null, true, virtualUserId)
+        return if (started != null) {
+            Slog.i(Slog.LAUNCH, "Started $packageName/$serviceClassName in user $virtualUserId")
+            EngineResult.ok()
+        } else {
+            EngineResult.Failure(
+                EngineErrorCodes.CONTAINER_SERVICE_START_FAILED,
+                "The engine did not start $packageName/$serviceClassName.",
             )
         }
     }

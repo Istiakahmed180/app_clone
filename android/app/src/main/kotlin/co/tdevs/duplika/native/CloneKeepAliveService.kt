@@ -1,0 +1,121 @@
+package co.tdevs.duplika.native
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import co.tdevs.duplika.R
+
+/**
+ * Keeps the host process alive while a clone the user opened is running.
+ *
+ * On aggressive OEM builds the host process is killed as soon as it stops being the
+ * foreground activity — which is exactly the moment a clone takes the foreground. Measured on
+ * an OnePlus CPH2605: `UserAwareMgr: process killed: {… pid=9435, flags='bg'}` within seconds
+ * of the clone opening (adding the app to the battery-optimisation whitelist did not stop
+ * it). The clone itself keeps running in its own process, but the host being killed
+ * cold-starts Duplika when the user returns and drops an attached debugger.
+ *
+ * A foreground service raises this process's importance for as long as a clone the user
+ * opened is running. It adds no persistence of its own: it is started by the launch the user
+ * performed and stopped when they come back to Duplika ([stop], called from the host
+ * activity's `onResume`).
+ *
+ * **Why it does not poll the engine's `isRunning`.** That call is broken on API 35
+ * (`isRunningApplication failed: BActivityManagerService cannot be cast to ActivityStack`),
+ * so a poll-based stop ended the service 15 s after every launch while the clone was plainly
+ * still on screen. "The host activity resumed" is the reliable signal: the host only resumes
+ * when the clone has left the foreground.
+ *
+ * It keeps *Duplika* alive; it does not run the clone. The guest runs in its own process
+ * either way.
+ */
+class CloneKeepAliveService : Service() {
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val packageName = intent?.getStringExtra(EXTRA_PACKAGE)
+        if (packageName == null) {
+            // A restart with no target (e.g. the system recreating the service) has nothing
+            // to keep alive.
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForegroundCompat()
+        Slog.i(Slog.LAUNCH, "Keeping the host alive while $packageName is open")
+        return START_NOT_STICKY
+    }
+
+    private fun startForegroundCompat() {
+        val manager = getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID,
+                    "Running clones",
+                    NotificationManager.IMPORTANCE_LOW,
+                ).apply {
+                    description = "Shown while a cloned app is open"
+                    setShowBadge(false)
+                },
+            )
+        }
+
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_clone)
+            .setContentTitle(getString(R.string.clone_keepalive_title))
+            .setContentText(getString(R.string.clone_keepalive_text))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setSilent(true)
+            .build()
+
+        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        } else {
+            0
+        }
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type)
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "clone_keepalive"
+        private const val NOTIFICATION_ID = 4711
+
+        const val EXTRA_PACKAGE = "package_name"
+
+        /**
+         * Starts the keep-alive for a clone the user just launched. Callers are in the
+         * foreground when they do this, so the background-start restriction does not apply.
+         * Failure is logged, never fatal: a device that refuses the service still gets a
+         * working clone, only without the protection.
+         */
+        fun start(context: Context, packageName: String) {
+            val intent = Intent(context, CloneKeepAliveService::class.java)
+                .putExtra(EXTRA_PACKAGE, packageName)
+            runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            }.onFailure {
+                Slog.w(Slog.LAUNCH, "Could not start clone keep-alive: ${it.message}")
+            }
+        }
+
+        /** Stops the keep-alive; called when the user is back in Duplika. Idempotent. */
+        fun stop(context: Context) {
+            runCatching { context.stopService(Intent(context, CloneKeepAliveService::class.java)) }
+        }
+    }
+}

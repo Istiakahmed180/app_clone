@@ -92,6 +92,20 @@ interface VirtualizationEngineAdapter {
 
     fun launch(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
+    /**
+     * Starts [serviceClassName] declared by [packageName] inside [virtualUserId]'s container.
+     *
+     * Used to warm a provisioned container: microG's checkin service is started right after
+     * provisioning, so the first launch of a clone does not race the checkin. Starting a
+     * guest service is an ordinary container operation — no identity or permission is
+     * touched.
+     */
+    fun startContainerService(
+        packageName: String,
+        serviceClassName: String,
+        virtualUserId: Int,
+    ): EngineResult<Unit>
+
     fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit>
 
     fun isRunning(packageName: String, virtualUserId: Int): Boolean
@@ -158,6 +172,9 @@ object EngineErrorCodes {
     const val SPACE_IDENTITY_INVALID = "SPACE_IDENTITY_INVALID"
     const val VIRTUAL_APP_NOT_INSTALLED = "VIRTUAL_APP_NOT_INSTALLED"
     const val VIRTUAL_APP_LAUNCH_FAILED = "VIRTUAL_APP_LAUNCH_FAILED"
+
+    /** A container service could not be started (e.g. microG's checkin warm-up). */
+    const val CONTAINER_SERVICE_START_FAILED = "CONTAINER_SERVICE_START_FAILED"
 
     /** No activity on this device can handle either battery optimisation screen. */
     const val BATTERY_PROMPT_UNAVAILABLE = "BATTERY_PROMPT_UNAVAILABLE"

@@ -31,6 +31,13 @@ object MicroGCheckinSeeder {
     /** microG's `SettingsContract.Gcm.ENABLE_GCM`. */
     const val GCM_ENABLED: String = "gcm_enable_mcs_service"
 
+    /**
+     * microG's checkin service. Starting it once after provisioning lets checkin complete
+     * *before* the user's first launch, which is what stops the first push registration from
+     * racing it (`No checkin available` → the app has to be reopened).
+     */
+    const val CHECKIN_SERVICE: String = "org.microg.gms.checkin.CheckinService"
+
     /** Returns true when the preferences file was written. */
     fun seed(adapter: VirtualizationEngineAdapter, virtualUserId: Int): Boolean = runCatching {
         val file = adapter.guestSharedPreferencesFile(GMS_PACKAGE, virtualUserId, PREFS_NAME)

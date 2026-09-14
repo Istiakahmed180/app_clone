@@ -74,6 +74,11 @@ class GoogleServiceProviderTest {
             unreachable()
         override fun launch(packageName: String, virtualUserId: Int): EngineResult<Unit> =
             unreachable()
+        override fun startContainerService(
+            packageName: String,
+            serviceClassName: String,
+            virtualUserId: Int,
+        ): EngineResult<Unit> = unreachable()
         override fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit> = unreachable()
         override fun isRunning(packageName: String, virtualUserId: Int): Boolean = unreachable()
         override fun deleteVirtualUser(virtualUserId: Int): EngineResult<Unit> = unreachable()
@@ -100,6 +105,7 @@ class GoogleServiceProviderTest {
         bundled: Boolean = true,
         installOutcome: EngineResult<Unit> = EngineResult.ok(),
         seedResult: Boolean = true,
+        checkinTriggered: Boolean = true,
         installed: MutableList<Pair<String, Int>> = mutableListOf(),
     ): MicroGProvider = MicroGProvider(
         artifactSource = FakeArtifactSource(bundled),
@@ -108,6 +114,7 @@ class GoogleServiceProviderTest {
         },
         installApk = { path, userId -> installed += path to userId; installOutcome },
         seedCheckin = { seedResult },
+        triggerCheckin = { checkinTriggered },
     )
 
     private fun resolver(
@@ -229,6 +236,7 @@ class GoogleServiceProviderTest {
         assertEquals(1, installed.size)
         assertEquals(5, installed.first().second)
         assertEquals("true", (result as ProviderResult.Success).diagnostics["checkinSeeded"])
+        assertEquals("true", result.diagnostics["checkinTriggered"])
         assertEquals("1", result.diagnostics["artifactsInstalled"])
     }
 

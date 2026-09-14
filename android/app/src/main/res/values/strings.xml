@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shown only while a clone the user opened is running. See CloneKeepAliveService. -->
+    <string name="clone_keepalive_title">Duplika</string>
+    <string name="clone_keepalive_text">A cloned app is running</string>
+</resources>

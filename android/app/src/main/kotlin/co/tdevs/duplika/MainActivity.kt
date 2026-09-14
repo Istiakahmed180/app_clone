@@ -36,6 +36,14 @@ open class MainActivity : FlutterFragmentActivity() {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reaching this activity means the user is back in Duplika, so the clone that needed
+        // the host kept alive is no longer in the foreground. Stopping here is what keeps the
+        // keep-alive scoped to a clone the user actually has open.
+        co.tdevs.duplika.native.CloneKeepAliveService.stop(this)
+    }
+
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         nativeBridge?.unbindActivity()
         nativeBridge?.detach()
