@@ -25,19 +25,44 @@ class InstalledAppsProvider(private val context: Context) {
     private val packageManager: PackageManager get() = context.packageManager
 
     /**
-     * Launchable apps, user-installed first, alphabetically within each group.
+     * The same analysis the clone routes run, reused rather than reimplemented here.
+     *
+     * An app is left out of the list on exactly the conditions that would make creating
+     * its clone fail, so the two can never drift apart and say different things about the
+     * same app. Built lazily because a listing is the only thing that needs it.
+     */
+    private val analyzer: AppCompatibilityAnalyzer by lazy { AppCompatibilityAnalyzer(context) }
+
+    /**
+     * Launchable apps that can actually be cloned, user-installed first, alphabetically
+     * within each group.
+     *
+     * An app the engine could never host — one that asks not to be virtualized, a system
+     * component, an app whose native libraries target no ABI the engine can load — is left
+     * out rather than listed and then refused. Offering a row that can only fail is worse
+     * than not offering it.
+     *
+     * The filter runs after the cheap ones, so nothing is analysed that would have been
+     * dropped anyway, and before [describe], so no icon or ABI is decoded for an app that
+     * will not appear.
      *
      * Icons are expensive, so they are only decoded when [includeIcons] is set.
      */
     fun listLaunchableApps(includeIcons: Boolean = true): List<Map<String, Any?>> {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
 
+        var hidden = 0
         val seen = HashSet<String>()
         return packageManager.queryIntentActivities(intent, 0)
             .asSequence()
             .mapNotNull { it.activityInfo?.applicationInfo }
             .filter { seen.add(it.packageName) }
             .filter { it.packageName != context.packageName }
+            .filter { info ->
+                val allowed = canClone(info.packageName)
+                if (!allowed) hidden++
+                allowed
+            }
             .sortedWith(
                 compareBy(
                     { it.isSystemApp() },
@@ -46,7 +71,16 @@ class InstalledAppsProvider(private val context: Context) {
             )
             .map { info -> describe(info, includeIcons) }
             .toList()
+            .also {
+                if (hidden > 0) {
+                    Slog.i(Slog.INSTALL, "Picker: left out $hidden app(s) that cannot be cloned")
+                }
+            }
     }
+
+    /** Whether a clone of this package could be created at all. */
+    private fun canClone(packageName: String): Boolean =
+        analyzer.analyze(packageName).verdict != AppCompatibilityAnalyzer.Verdict.UNSUPPORTED
 
     /**
      * Icons for a specific set of packages.

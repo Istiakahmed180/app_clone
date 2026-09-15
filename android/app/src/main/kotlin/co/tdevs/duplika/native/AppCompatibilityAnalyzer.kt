@@ -240,17 +240,29 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     private fun storageFinding(requestedPermissions: Set<String>): Finding? =
         storageFindingFor(
             requestedPermissions = requestedPermissions,
-            hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess(),
+            hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess,
             hostHoldsAllFilesAccess = hostHoldsAllFilesAccess(),
         )
 
-    private fun hostDeclaresAllFilesAccess(): Boolean = try {
-        context.packageManager
-            .getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
-            .requestedPermissions
-            ?.contains(ALL_FILES_ACCESS) == true
-    } catch (_: PackageManager.NameNotFoundException) {
-        false
+    /**
+     * Cached: this is a fact about Duplika's own manifest, so it cannot change while the
+     * process lives. The picker analyses every launchable app to decide what to list, and
+     * re-reading the host's own permission set once per app was the one part of that pass
+     * that scaled with the number of apps for no reason.
+     *
+     * Deliberately not paired with a cache for [hostHoldsAllFilesAccess]: that one is a
+     * runtime grant the user can change in Settings while Duplika is running, and a stale
+     * answer there would be wrong rather than merely slow.
+     */
+    private val hostDeclaresAllFilesAccess: Boolean by lazy {
+        try {
+            context.packageManager
+                .getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+                .requestedPermissions
+                ?.contains(ALL_FILES_ACCESS) == true
+        } catch (_: PackageManager.NameNotFoundException) {
+            false
+        }
     }
 
     private fun hostHoldsAllFilesAccess(): Boolean =
