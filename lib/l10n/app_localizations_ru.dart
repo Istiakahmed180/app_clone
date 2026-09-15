@@ -306,9 +306,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => 'Совместимость';
-
-  @override
   String get cloneActionsManage => 'Управление';
 
   @override
@@ -755,46 +752,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Менеджер пакетов не сообщил ни об одном файле APK для этого приложения.';
 
   @override
-  String get compatibilityNotAnalysed => 'Не проанализировано';
-
-  @override
-  String get compatibilitySupported => 'Поддерживается';
-
-  @override
-  String get compatibilityLimited => 'Ограниченно';
-
-  @override
-  String get compatibilityUnsupported => 'Не поддерживается';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'Это приложение не удалось проверить, поэтому неизвестно, насколько хорошо оно будет работать. При создании клона оно всё ещё может быть отклонено.';
-
-  @override
-  String get compatibilityNoProblems => 'Известных проблем совместимости нет.';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'У вас уже есть $count клонов этого приложения. Новый начнётся пустым со своими данными.',
-      few:
-          'У вас уже есть $count клона этого приложения. Новый начнётся пустым со своими данными.',
-      one:
-          'У вас уже есть $count клон этого приложения. Новый начнётся пустым со своими данными.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'Добавить клон';
-
-  @override
-  String get compatibilityCannotClone => 'Нельзя клонировать';
-
-  @override
   String get findingAppNotFound =>
       'Это приложение не установлено на устройстве.';
 
@@ -814,15 +771,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Нативные библиотеки этого приложения не собраны под архитектуру, поддерживаемую движком.';
-
-  @override
-  String get findingRequiresGms =>
-      'Сервисы Google Play доступны внутри клона, но функции Google, которым нужно проверить собственную личность этого приложения, не поддерживаются — включая вход и привязанные к личности API, такие как проверка по геопозиции и по SMS.';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'Push-уведомления не будут работать в клоне. Сервисы Google Play не зарегистрируют это приложение для push, пока оно работает под личностью $appName, поэтому отправленные клону сообщения никогда не доходят. В остальном приложение пригодно к работе, но при первом запуске ждите паузы, пока оно ожидает регистрацию push, которая не может завершиться.';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

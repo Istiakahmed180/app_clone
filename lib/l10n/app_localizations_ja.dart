@@ -299,9 +299,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => '互換性';
-
-  @override
   String get cloneActionsManage => '管理';
 
   @override
@@ -736,41 +733,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appDetailsNoApkFiles => 'パッケージマネージャーはこのアプリの APK ファイルを報告しませんでした。';
 
   @override
-  String get compatibilityNotAnalysed => '未解析';
-
-  @override
-  String get compatibilitySupported => '対応';
-
-  @override
-  String get compatibilityLimited => '一部制限';
-
-  @override
-  String get compatibilityUnsupported => '非対応';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'このアプリは検査できなかったため、どの程度動作するかは不明です。クローン作成時に拒否される可能性もあります。';
-
-  @override
-  String get compatibilityNoProblems => '既知の互換性の問題はありません。';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'このアプリのクローンはすでに $count 個あります。新しいものは独自のデータで空の状態から始まります。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'クローンを追加';
-
-  @override
-  String get compatibilityCannotClone => 'クローンできません';
-
-  @override
   String get findingAppNotFound => 'このアプリケーションはデバイスにインストールされていません。';
 
   @override
@@ -787,15 +749,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'このアプリのネイティブライブラリは、エンジンが対応するアーキテクチャ向けにビルドされていません。';
-
-  @override
-  String get findingRequiresGms =>
-      'クローン内でも Google Play サービスは利用できますが、このアプリ自身の身元を確認する必要がある Google の機能は利用できません。サインインや、位置情報・SMS 認証のような身元に紐づく API が含まれます。';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'クローンではプッシュ通知は機能しません。$appName の身元で動作している間、Google Play サービスはこのアプリをプッシュに登録しないため、クローン宛てのメッセージは届きません。それ以外はアプリを使えますが、成功し得ないプッシュ登録を待つあいだ、初回起動で待ち時間が生じます。';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

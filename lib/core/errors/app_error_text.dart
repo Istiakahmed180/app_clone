@@ -34,7 +34,7 @@ String appErrorMessage(AppLocalizations l10n, AppException error) {
     case AppErrorCodes.testAppCheckFailed:
       return l10n.errorTestAppCheckFailed;
 
-    // ── the engine's, shared with the compatibility sheet ─────────────────
+    // ── the engine's, shared with the clone refusal message ───────────────
     case 'APP_NOT_FOUND':
       return l10n.findingAppNotFound;
     case 'SECURE_ENV_REQUIRED':

@@ -297,9 +297,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => '兼容性';
-
-  @override
   String get cloneActionsManage => '管理';
 
   @override
@@ -732,41 +729,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appDetailsNoApkFiles => '包管理器未报告此应用的任何 APK 文件。';
 
   @override
-  String get compatibilityNotAnalysed => '未分析';
-
-  @override
-  String get compatibilitySupported => '支持';
-
-  @override
-  String get compatibilityLimited => '有限支持';
-
-  @override
-  String get compatibilityUnsupported => '不支持';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      '无法检查此应用，因此无从得知它的运行情况。创建分身时仍可能被拒绝。';
-
-  @override
-  String get compatibilityNoProblems => '没有已知的兼容性问题。';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '你已经有 $count 个此应用的分身。新的分身会以自己的数据从空白开始。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => '添加分身';
-
-  @override
-  String get compatibilityCannotClone => '无法克隆';
-
-  @override
   String get findingAppNotFound => '此应用未安装在设备上。';
 
   @override
@@ -782,15 +744,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get findingAbiNotSupported => '此应用的原生库并非为引擎支持的架构构建。';
-
-  @override
-  String get findingRequiresGms =>
-      '分身内可以使用 Google Play 服务，但需要验证此应用自身身份的 Google 功能不受支持——包括登录，以及与身份绑定的 API，例如位置和短信验证。';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return '推送通知在分身中无法工作。当此应用以 $appName 的身份运行时，Google Play 服务不会为它注册推送，因此发给分身的消息永远不会送达。除此之外应用仍可使用，但首次启动时会有一段等待，因为它在等一个不可能成功的推送注册。';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {
@@ -1446,9 +1399,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String get cloneActionsCompatibility => '兼容性';
-
-  @override
   String get cloneActionsManage => '管理';
 
   @override
@@ -1881,41 +1831,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get appDetailsNoApkFiles => '包管理器未报告此应用的任何 APK 文件。';
 
   @override
-  String get compatibilityNotAnalysed => '未分析';
-
-  @override
-  String get compatibilitySupported => '支持';
-
-  @override
-  String get compatibilityLimited => '有限支持';
-
-  @override
-  String get compatibilityUnsupported => '不支持';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      '无法检查此应用，因此无从得知它的运行情况。创建分身时仍可能被拒绝。';
-
-  @override
-  String get compatibilityNoProblems => '没有已知的兼容性问题。';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '你已经有 $count 个此应用的分身。新的分身会以自己的数据从空白开始。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => '添加分身';
-
-  @override
-  String get compatibilityCannotClone => '无法克隆';
-
-  @override
   String get findingAppNotFound => '此应用未安装在设备上。';
 
   @override
@@ -1931,15 +1846,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get findingAbiNotSupported => '此应用的原生库并非为引擎支持的架构构建。';
-
-  @override
-  String get findingRequiresGms =>
-      '分身内可以使用 Google Play 服务，但需要验证此应用自身身份的 Google 功能不受支持——包括登录，以及与身份绑定的 API，例如位置和短信验证。';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return '推送通知在分身中无法工作。当此应用以 $appName 的身份运行时，Google Play 服务不会为它注册推送，因此发给分身的消息永远不会送达。除此之外应用仍可使用，但首次启动时会有一段等待，因为它在等一个不可能成功的推送注册。';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {
@@ -2595,9 +2501,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get cloneActionsCompatibility => '相容性';
-
-  @override
   String get cloneActionsManage => '管理';
 
   @override
@@ -3030,41 +2933,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get appDetailsNoApkFiles => '套件管理員未回報這個應用程式的任何 APK 檔案。';
 
   @override
-  String get compatibilityNotAnalysed => '未分析';
-
-  @override
-  String get compatibilitySupported => '支援';
-
-  @override
-  String get compatibilityLimited => '有限支援';
-
-  @override
-  String get compatibilityUnsupported => '不支援';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      '無法檢查這個應用程式，因此無從得知它的執行情況。建立分身時仍可能被拒絕。';
-
-  @override
-  String get compatibilityNoProblems => '沒有已知的相容性問題。';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '你已經有 $count 個這個應用程式的分身。新的分身會以自己的資料從空白開始。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => '新增分身';
-
-  @override
-  String get compatibilityCannotClone => '無法複製';
-
-  @override
   String get findingAppNotFound => '這個應用程式未安裝在裝置上。';
 
   @override
@@ -3080,15 +2948,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get findingAbiNotSupported => '這個應用程式的原生程式庫並非為引擎支援的架構建置。';
-
-  @override
-  String get findingRequiresGms =>
-      '分身內可以使用 Google Play 服務，但需要驗證這個應用程式自身身分的 Google 功能不受支援——包括登入，以及與身分綁定的 API，例如位置與簡訊驗證。';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return '推播通知在分身中無法運作。當這個應用程式以 $appName 的身分執行時，Google Play 服務不會為它註冊推播，因此傳給分身的訊息永遠不會送達。除此之外應用程式仍可使用，但首次啟動時會有一段等待，因為它在等一個不可能成功的推播註冊。';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {
@@ -3744,9 +3603,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
-  String get cloneActionsCompatibility => '兼容性';
-
-  @override
   String get cloneActionsManage => '管理';
 
   @override
@@ -4179,41 +4035,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get appDetailsNoApkFiles => '套件管理員未回報這個應用程式的任何 APK 檔案。';
 
   @override
-  String get compatibilityNotAnalysed => '未分析';
-
-  @override
-  String get compatibilitySupported => '支援';
-
-  @override
-  String get compatibilityLimited => '有限支援';
-
-  @override
-  String get compatibilityUnsupported => '不支援';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      '無法檢查這個應用程式，因此無從得知它的執行情況。建立分身時仍可能被拒絕。';
-
-  @override
-  String get compatibilityNoProblems => '沒有已知的兼容性問題。';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '你已經有 $count 個這個應用程式的分身。新的分身會以自己的資料從空白開始。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => '新增分身';
-
-  @override
-  String get compatibilityCannotClone => '無法複製';
-
-  @override
   String get findingAppNotFound => '這個應用程式未安裝在裝置上。';
 
   @override
@@ -4229,15 +4050,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get findingAbiNotSupported => '這個應用程式的原生程式庫並非為引擎支援的架構建置。';
-
-  @override
-  String get findingRequiresGms =>
-      '分身內可以使用 Google Play 服務，但需要驗證這個應用程式自身身分的 Google 功能不受支援——包括登入，以及與身分綁定的 API，例如位置與簡訊驗證。';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return '推播通知在分身中無法運作。當這個應用程式以 $appName 的身分執行時，Google Play 服務不會為它註冊推播，因此傳給分身的訊息永遠不會送達。除此之外應用程式仍可使用，但首次啟動時會有一段等待，因為它在等一個不可能成功的推播註冊。';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

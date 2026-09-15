@@ -306,9 +306,6 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => 'Keserasian';
-
-  @override
   String get cloneActionsManage => 'Urus';
 
   @override
@@ -752,43 +749,6 @@ class AppLocalizationsMs extends AppLocalizations {
       'Pengurus pakej tidak melaporkan sebarang fail APK untuk apl ini.';
 
   @override
-  String get compatibilityNotAnalysed => 'Belum dianalisis';
-
-  @override
-  String get compatibilitySupported => 'Disokong';
-
-  @override
-  String get compatibilityLimited => 'Terhad';
-
-  @override
-  String get compatibilityUnsupported => 'Tidak disokong';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'Apl ini tidak dapat diperiksa, jadi tiada apa yang diketahui tentang sebaik mana ia akan berjalan. Ia masih boleh ditolak semasa klon dicipta.';
-
-  @override
-  String get compatibilityNoProblems =>
-      'Tiada masalah keserasian yang diketahui.';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Anda sudah mempunyai $count klon apl ini. Yang baharu bermula kosong dengan datanya sendiri.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'Tambah klon';
-
-  @override
-  String get compatibilityCannotClone => 'Tidak boleh diklon';
-
-  @override
   String get findingAppNotFound => 'Aplikasi ini tidak dipasang pada peranti.';
 
   @override
@@ -806,15 +766,6 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Pustaka natif apl ini tidak dibina untuk seni bina yang disokong oleh enjin.';
-
-  @override
-  String get findingRequiresGms =>
-      'Perkhidmatan Google Play tersedia di dalam klon, tetapi ciri Google yang perlu mengesahkan identiti apl ini sendiri tidak disokong — termasuk log masuk dan API terikat identiti seperti pengesahan lokasi dan SMS.';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'Pemberitahuan tolak tidak akan berfungsi dalam klon. Perkhidmatan Google Play tidak akan mendaftarkan apl ini untuk tolak selagi ia berjalan di bawah identiti $appName, jadi mesej yang dihantar kepada klon tidak pernah sampai. Selain itu apl masih boleh digunakan, tetapi jangkakan jeda pada pembukaan pertama sementara ia menunggu pendaftaran tolak yang tidak mungkin berjaya.';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

@@ -309,9 +309,6 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => 'Compatibilità';
-
-  @override
   String get cloneActionsManage => 'Gestisci';
 
   @override
@@ -758,45 +755,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'Il gestore pacchetti non ha segnalato file APK per questa app.';
 
   @override
-  String get compatibilityNotAnalysed => 'Non analizzata';
-
-  @override
-  String get compatibilitySupported => 'Supportata';
-
-  @override
-  String get compatibilityLimited => 'Limitata';
-
-  @override
-  String get compatibilityUnsupported => 'Non supportata';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'Non è stato possibile esaminare questa app, quindi non si sa come funzionerà. Potrebbe comunque essere rifiutata alla creazione del clone.';
-
-  @override
-  String get compatibilityNoProblems =>
-      'Nessun problema di compatibilità noto.';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Hai già $count cloni di questa app. Quello nuovo parte vuoto con i propri dati.',
-      one:
-          'Hai già 1 clone di questa app. Quello nuovo parte vuoto con i propri dati.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'Aggiungi clone';
-
-  @override
-  String get compatibilityCannotClone => 'Non clonabile';
-
-  @override
   String get findingAppNotFound =>
       'Questa applicazione non è installata sul dispositivo.';
 
@@ -816,15 +774,6 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Le librerie native di questa app non sono compilate per un\'architettura supportata dal motore.';
-
-  @override
-  String get findingRequiresGms =>
-      'I servizi Google Play sono disponibili dentro un clone, ma le funzioni Google che devono verificare l\'identità propria di questa app non sono supportate, incluso l\'accesso e le API legate all\'identità come la verifica per posizione e via SMS.';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'Le notifiche push non funzioneranno in un clone. I servizi Google Play non registreranno questa app per il push mentre gira sotto l\'identità di $appName, quindi i messaggi inviati al clone non arrivano mai. Per il resto l\'app è utilizzabile, ma aspettati una pausa al primo avvio mentre attende una registrazione push che non può riuscire.';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

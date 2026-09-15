@@ -586,6 +586,11 @@ class AppPickerController extends GetxController {
   }
 
   /// Installs a previously inspected APK as a new clone.
+  ///
+  /// Refuses an archive the engine cannot host before anything is created, the same way
+  /// [cloneNow] does for an installed app: the two clone routes behave alike, and an
+  /// impossible clone fails with its reason rather than by installing and then misbehaving.
+  /// The refusal is a message, not a question -- nothing is put in front of the user first.
   Future<AppException?> cloneApk(
     ApkCandidate candidate, {
     bool installGms = false,
@@ -595,6 +600,13 @@ class AppPickerController extends GetxController {
     }
     isWorking.value = true;
     try {
+      final CompatibilityReport report = await analyzeApk(candidate);
+      final CompatibilityFinding? blocker = report.blocker;
+      if (report.verdict == CompatibilityVerdict.unsupported && blocker != null) {
+        // Carries the finding's own code, so the view words it in the user's language
+        // through the same table the installed-app refusal uses.
+        return VirtualizationException(blocker.message, code: blocker.code);
+      }
       final String profileName = await _repository.suggestProfileName(
         appName: candidate.appName,
         packageName: candidate.packageName,

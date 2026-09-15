@@ -16,7 +16,6 @@ import '../../../widgets/empty_state.dart';
 import '../controllers/app_picker_controller.dart';
 import '../widgets/app_facts_text.dart';
 import '../widgets/app_filter_sheet.dart';
-import '../widgets/compatibility_sheet.dart';
 import '../widgets/compatibility_text.dart';
 import '../widgets/installed_app_sheet.dart';
 import 'app_details_view.dart';
@@ -272,39 +271,19 @@ class AppPickerView extends GetView<AppPickerController> {
     );
   }
 
-  /// Clones an installed app, showing what is known about it first.
+  /// Clones an installed app.
   ///
   /// Both routes into cloning an installed app come here — the Popular card and a list
-  /// row's Add clone. The analysis runs before anything is created, and whenever there is
-  /// something to say — a Play services dependency, push that cannot arrive, an
-  /// unsupported ABI, or an app that could not be examined — the compatibility sheet says
-  /// it and the user decides. A clone that is problem-free still gets no sheet, so the
-  /// one-tap path stays one tap for the apps where there is nothing to warn about.
+  /// row's Add clone — and both are one tap: nothing is put in front of the user first.
   ///
-  /// This is deliberately the same sheet the APK-import path uses, so the two ways of
-  /// creating a clone tell the user the same things in the same words.
+  /// Nothing is walked into blindly, though. [AppPickerController.cloneNow] runs the
+  /// compatibility analysis itself and refuses an app the engine cannot host before any
+  /// container is made, so an impossible clone still says why — as a message about what
+  /// just happened rather than a question about what might.
   Future<void> _quickClone(BuildContext context, InstalledAppModel app) async {
-    final CompatibilityReport report = await controller.analyze(app.packageName);
-    if (!context.mounted) {
-      return;
-    }
-
-    if (!report.analysed || report.findings.isNotEmpty) {
-      final int existing = await controller.instanceCount(app.packageName);
-      if (!context.mounted) {
-        return;
-      }
-      final CloneDecision decision = await CompatibilitySheet.show(
-        context,
-        appName: app.appName,
-        report: report,
-        existingClones: existing,
-      );
-      if (!decision.proceed || !context.mounted) {
-        return;
-      }
-    }
-
+    // Straight to the clone. `cloneNow` runs the compatibility analysis itself and refuses
+    // an app the engine cannot host, so an impossible clone still says why -- as a message
+    // about what just happened rather than a sheet about what might.
     final CloneRefusal? refusal = await controller.cloneNow(app);
     if (!context.mounted) {
       return;
@@ -414,25 +393,6 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     if (!context.mounted) {
-      return;
-    }
-
-    // Read from the archive itself, so an APK that is not installed here is still judged
-    // properly instead of being presented as problem-free.
-    final CompatibilityReport report = await controller.analyzeApk(candidate);
-    final int existing = await controller.instanceCount(candidate.packageName);
-    if (!context.mounted) {
-      return;
-    }
-
-    final CloneDecision decision = await CompatibilitySheet.show(
-      context,
-      appName: candidate.appName,
-      report: report,
-      existingClones: existing,
-    );
-
-    if (!decision.proceed || !context.mounted) {
       return;
     }
 

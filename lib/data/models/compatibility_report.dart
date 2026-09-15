@@ -51,7 +51,6 @@ class CompatibilityReport {
     required this.findings,
     required this.requiresGms,
     this.abi,
-    this.analysed = true,
   });
 
   factory CompatibilityReport.fromMap(Map<String, dynamic> map) {
@@ -83,7 +82,6 @@ class CompatibilityReport {
     verdict: CompatibilityVerdict.limited,
     findings: <CompatibilityFinding>[],
     requiresGms: false,
-    analysed: false,
   );
 
   final String packageName;
@@ -92,11 +90,6 @@ class CompatibilityReport {
 
   final bool requiresGms;
   final String? abi;
-
-  /// False when the compatibility layer could not inspect this app at all.
-  final bool analysed;
-
-  bool get canClone => verdict != CompatibilityVerdict.unsupported;
 
   /// The first blocking reason, which is what stops the app being cloned.
   CompatibilityFinding? get blocker =>

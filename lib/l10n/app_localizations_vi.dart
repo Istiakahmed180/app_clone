@@ -304,9 +304,6 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => 'Tương thích';
-
-  @override
   String get cloneActionsManage => 'Quản lý';
 
   @override
@@ -749,43 +746,6 @@ class AppLocalizationsVi extends AppLocalizations {
       'Trình quản lý gói không báo tệp APK nào cho ứng dụng này.';
 
   @override
-  String get compatibilityNotAnalysed => 'Chưa phân tích';
-
-  @override
-  String get compatibilitySupported => 'Được hỗ trợ';
-
-  @override
-  String get compatibilityLimited => 'Hạn chế';
-
-  @override
-  String get compatibilityUnsupported => 'Không hỗ trợ';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'Không kiểm tra được ứng dụng này, nên chưa biết nó sẽ chạy tốt đến đâu. Nó vẫn có thể bị từ chối khi tạo bản sao.';
-
-  @override
-  String get compatibilityNoProblems =>
-      'Không có vấn đề tương thích nào đã biết.';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Bạn đã có $count bản sao của ứng dụng này. Bản mới bắt đầu trống với dữ liệu riêng của nó.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'Thêm bản sao';
-
-  @override
-  String get compatibilityCannotClone => 'Không thể nhân bản';
-
-  @override
   String get findingAppNotFound => 'Ứng dụng này chưa được cài trên thiết bị.';
 
   @override
@@ -804,15 +764,6 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Thư viện native của ứng dụng này không được biên dịch cho kiến trúc mà công cụ hỗ trợ.';
-
-  @override
-  String get findingRequiresGms =>
-      'Dịch vụ Google Play khả dụng bên trong bản sao, nhưng các tính năng Google cần xác minh danh tính của chính ứng dụng này thì không được hỗ trợ — bao gồm đăng nhập và các API gắn với danh tính như xác minh vị trí và SMS.';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'Thông báo đẩy sẽ không hoạt động trong bản sao. Dịch vụ Google Play sẽ không đăng ký đẩy cho ứng dụng này khi nó chạy dưới danh tính của $appName, nên tin nhắn gửi tới bản sao không bao giờ đến nơi. Ngoài ra ứng dụng vẫn dùng được, nhưng hãy chờ một khoảng dừng ở lần mở đầu tiên khi nó đợi một đăng ký đẩy không thể thành công.';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

@@ -648,12 +648,6 @@ abstract class AppLocalizations {
   /// **'Space {index}'**
   String cloneSpaceLabel(int index);
 
-  /// No description provided for @cloneActionsCompatibility.
-  ///
-  /// In en, this message translates to:
-  /// **'Compatibility'**
-  String get cloneActionsCompatibility;
-
   /// No description provided for @cloneActionsManage.
   ///
   /// In en, this message translates to:
@@ -1398,60 +1392,6 @@ abstract class AppLocalizations {
   /// **'The package manager reported no APK files for this app.'**
   String get appDetailsNoApkFiles;
 
-  /// No description provided for @compatibilityNotAnalysed.
-  ///
-  /// In en, this message translates to:
-  /// **'Not analysed'**
-  String get compatibilityNotAnalysed;
-
-  /// No description provided for @compatibilitySupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Supported'**
-  String get compatibilitySupported;
-
-  /// No description provided for @compatibilityLimited.
-  ///
-  /// In en, this message translates to:
-  /// **'Limited'**
-  String get compatibilityLimited;
-
-  /// No description provided for @compatibilityUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Unsupported'**
-  String get compatibilityUnsupported;
-
-  /// No description provided for @compatibilityUnexaminedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This app could not be examined, so nothing is known about how well it will run. It may still be refused when the clone is created.'**
-  String get compatibilityUnexaminedMessage;
-
-  /// No description provided for @compatibilityNoProblems.
-  ///
-  /// In en, this message translates to:
-  /// **'No known compatibility problems.'**
-  String get compatibilityNoProblems;
-
-  /// No description provided for @compatibilityExistingClones.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{You already have 1 clone of this app. The new one starts empty with its own data.} other{You already have {count} clones of this app. The new one starts empty with its own data.}}'**
-  String compatibilityExistingClones(int count);
-
-  /// No description provided for @compatibilityAddClone.
-  ///
-  /// In en, this message translates to:
-  /// **'Add clone'**
-  String get compatibilityAddClone;
-
-  /// No description provided for @compatibilityCannotClone.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot clone'**
-  String get compatibilityCannotClone;
-
   /// No description provided for @findingAppNotFound.
   ///
   /// In en, this message translates to:
@@ -1481,18 +1421,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This app\'s native libraries are not built for an architecture the engine supports.'**
   String get findingAbiNotSupported;
-
-  /// No description provided for @findingRequiresGms.
-  ///
-  /// In en, this message translates to:
-  /// **'Google Play services is available inside a clone, but Google features that must verify this app\'s own identity are not supported — including sign-in and identity-bound APIs such as location and SMS verification.'**
-  String get findingRequiresGms;
-
-  /// No description provided for @findingPushUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Push notifications will not work in a clone. Google Play services will not register this app for push while it runs under {appName}\'s identity, so messages sent to the clone never arrive. The app is otherwise usable, but expect a pause on first launch while it waits for a push registration that cannot succeed.'**
-  String findingPushUnsupported(String appName);
 
   /// No description provided for @findingStorageUnavailable.
   ///

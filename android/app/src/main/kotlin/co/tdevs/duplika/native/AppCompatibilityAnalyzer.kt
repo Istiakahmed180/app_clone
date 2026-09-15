@@ -9,13 +9,16 @@ import android.os.Build
 import android.os.Environment
 
 /**
- * Works out, before anything is cloned, what will and will not work for a target app —
- * and says so plainly.
+ * Works out, before anything is cloned, whether a target app can be hosted at all.
  *
- * This layer does not make incompatible apps work. It exists so Duplika stops
- * pretending every app is equally supported: an app that needs Google Play Services, or
- * ships no ABI the engine can load, is reported as such instead of failing mysteriously
- * after the user has already created a clone.
+ * This layer does not make incompatible apps work. It exists so an app the engine cannot
+ * run — one that ships no ABI the engine can load, a system component, an app that demands
+ * a secure environment — is refused up front instead of failing mysteriously after the
+ * user has already created a clone.
+ *
+ * What it deliberately does **not** report is how well a clone will work once it runs.
+ * Findings about Google Play services and push were removed: they described the container
+ * to the user, and nothing about the engine behind a clone is shown to them.
  */
 class AppCompatibilityAnalyzer(private val context: Context) {
 
@@ -79,18 +82,10 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             )
         }
 
+        // Still computed -- the action sheet uses it to decide whether to offer the Google
+        // services install -- but no longer reported as a finding: what a clone can and
+        // cannot do with Google's services is not something the user is shown.
         val requiresGms = requiresGooglePlayServices(packageName, packageInfo)
-        if (requiresGms) {
-            findings += Finding(
-                CODE_REQUIRES_GMS,
-                GMS_MESSAGE,
-                blocking = false,
-            )
-        }
-
-        if (usesPush(packageInfo.requestedPermissions?.toSet().orEmpty())) {
-            findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
-        }
 
         storageFinding(packageInfo.requestedPermissions?.toSet().orEmpty())?.let {
             findings += it
@@ -143,18 +138,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         val requiresGms = GMS_PERMISSION_MARKERS.any { it in requested } ||
             ApkManifestReader.readDeclarations(apkPath)
                 .any { it.element == "meta-data" && it.name == GMS_VERSION_META }
-
-        if (requiresGms) {
-            findings += Finding(
-                CODE_REQUIRES_GMS,
-                GMS_MESSAGE,
-                blocking = false,
-            )
-        }
-
-        if (usesPush(requested)) {
-            findings += Finding(CODE_PUSH_UNSUPPORTED, PUSH_MESSAGE, blocking = false)
-        }
 
         storageFinding(requested)?.let { findings += it }
 
@@ -246,20 +229,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     }
 
     /**
-     * Whether the app uses Firebase Cloud Messaging / GCM push.
-     *
-     * The permission is the marker: an app cannot receive push without requesting
-     * `com.google.android.c2dm.permission.RECEIVE`, and it is declared in the manifest, so
-     * the same check works for an installed package and for an uninstalled archive.
-     *
-     * This is a subset of [GMS_PERMISSION_MARKERS] rather than a separate signal, and it is
-     * reported separately on purpose: "sign-in may not work" and "notifications will never
-     * arrive" are very different things to a user about to clone a messaging app.
-     */
-    private fun usesPush(requestedPermissions: Set<String>): Boolean =
-        PUSH_PERMISSION in requestedPermissions
-
-    /**
      * The `MANAGE_EXTERNAL_STORAGE` fallback, and the honest answer when it cannot be used.
      *
      * Guests run under the host's identity, so a guest that touches shared storage can only
@@ -312,35 +281,8 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     }
 
     companion object {
-        const val CODE_REQUIRES_GMS = "REQUIRES_GMS"
-        const val CODE_PUSH_UNSUPPORTED = "PUSH_UNSUPPORTED"
         const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
         const val CODE_STORAGE_NOT_GRANTED = "STORAGE_NOT_GRANTED"
-
-        /**
-         * Note what this no longer says: "other Google features are unaffected". Push is a
-         * Google feature and it is affected, so that sentence was an overclaim once push was
-         * measured. Push now has its own finding rather than being folded in here.
-         */
-        private const val GMS_MESSAGE =
-            "Google Play services is available inside a clone, but Google features that must " +
-                "verify this app's own identity are not supported — including sign-in and " +
-                "identity-bound APIs such as location and SMS verification."
-
-        /**
-         * Measured on a physical Android 15 device, not predicted. Play services
-         * logs `GCM: Invalid caller: <package> <host uid>` and the client library surfaces
-         * `SERVICE_NOT_AVAILABLE` about thirty seconds later. The delay is worth warning
-         * about too — without it the clone simply looks like it has hung on first launch.
-         */
-        private const val PUSH_MESSAGE =
-            "Push notifications will not work in a clone. Google Play services will not " +
-                "register this app for push while it runs under Duplika's identity, so " +
-                "messages sent to the clone never arrive. The app is otherwise usable, but " +
-                "expect a pause on first launch while it waits for a push registration that " +
-                "cannot succeed."
-
-        private const val PUSH_PERMISSION = "com.google.android.c2dm.permission.RECEIVE"
 
         private const val ALL_FILES_ACCESS = "android.permission.MANAGE_EXTERNAL_STORAGE"
 

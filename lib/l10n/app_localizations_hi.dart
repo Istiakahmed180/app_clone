@@ -305,9 +305,6 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => 'संगतता';
-
-  @override
   String get cloneActionsManage => 'प्रबंधन';
 
   @override
@@ -751,44 +748,6 @@ class AppLocalizationsHi extends AppLocalizations {
       'पैकेज मैनेजर ने इस ऐप के लिए कोई APK फ़ाइल नहीं बताई।';
 
   @override
-  String get compatibilityNotAnalysed => 'जाँचा नहीं गया';
-
-  @override
-  String get compatibilitySupported => 'समर्थित';
-
-  @override
-  String get compatibilityLimited => 'सीमित';
-
-  @override
-  String get compatibilityUnsupported => 'असमर्थित';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      'इस ऐप की जाँच नहीं हो सकी, इसलिए यह पता नहीं कि यह कितना अच्छा चलेगा। क्लोन बनाते समय इसे फिर भी अस्वीकार किया जा सकता है।';
-
-  @override
-  String get compatibilityNoProblems => 'संगतता की कोई ज्ञात समस्या नहीं।';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'इस ऐप के आपके पास पहले से $count क्लोन हैं। नया अपने ही डेटा के साथ खाली शुरू होगा।',
-      one:
-          'इस ऐप का आपके पास पहले से 1 क्लोन है। नया अपने ही डेटा के साथ खाली शुरू होगा।',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => 'क्लोन जोड़ें';
-
-  @override
-  String get compatibilityCannotClone => 'क्लोन नहीं हो सकता';
-
-  @override
   String get findingAppNotFound => 'यह ऐप्लिकेशन इस डिवाइस पर इंस्टॉल नहीं है।';
 
   @override
@@ -807,15 +766,6 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'इस ऐप की नेटिव लाइब्रेरी इंजन द्वारा समर्थित किसी आर्किटेक्चर के लिए नहीं बनी हैं।';
-
-  @override
-  String get findingRequiresGms =>
-      'क्लोन के अंदर Google Play सेवाएँ उपलब्ध हैं, पर Google की वे सुविधाएँ समर्थित नहीं हैं जिन्हें इस ऐप की अपनी पहचान जाँचनी पड़ती है — इनमें साइन-इन और पहचान से जुड़े API शामिल हैं, जैसे लोकेशन और SMS सत्यापन।';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return 'क्लोन में पुश सूचनाएँ काम नहीं करेंगी। जब तक यह ऐप $appName की पहचान के तहत चलता है, Google Play सेवाएँ इसे पुश के लिए पंजीकृत नहीं करेंगी, इसलिए क्लोन को भेजे संदेश कभी नहीं पहुँचते। बाकी ऐप चल जाता है, पर पहली बार खोलने पर थोड़ी देर रुकावट की उम्मीद रखें, जब वह ऐसे पुश पंजीकरण की प्रतीक्षा करेगा जो सफल नहीं हो सकता।';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

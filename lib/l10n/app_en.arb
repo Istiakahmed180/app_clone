@@ -170,13 +170,11 @@
   "homeEngineInactive": "The virtualization engine is not active on this device, so clones cannot run in isolated containers.",
   "homeEngineUnavailable": "The virtualization engine is unavailable on this device.",
 
-
   "cloneSpaceLabel": "Space {index}",
   "@cloneSpaceLabel": {
     "description": "Which of an app's clones this one is, e.g. Space 2.",
     "placeholders": { "index": { "type": "int" } }
   },
-  "cloneActionsCompatibility": "Compatibility",
   "cloneActionsManage": "Manage",
   "cloneActionUninstall": "Uninstall",
   "cloneActionClone": "Clone",
@@ -373,26 +371,12 @@
   "appDetailsSigningUnreadable": "could not be read",
   "appDetailsNoApkFiles": "The package manager reported no APK files for this app.",
 
-  "compatibilityNotAnalysed": "Not analysed",
-  "compatibilitySupported": "Supported",
-  "compatibilityLimited": "Limited",
-  "compatibilityUnsupported": "Unsupported",
-  "compatibilityUnexaminedMessage": "This app could not be examined, so nothing is known about how well it will run. It may still be refused when the clone is created.",
-  "compatibilityNoProblems": "No known compatibility problems.",
-  "compatibilityExistingClones": "{count, plural, =1{You already have 1 clone of this app. The new one starts empty with its own data.} other{You already have {count} clones of this app. The new one starts empty with its own data.}}",
-  "@compatibilityExistingClones": { "placeholders": { "count": { "type": "int" } } },
-  "compatibilityAddClone": "Add clone",
-  "compatibilityCannotClone": "Cannot clone",
-
   "findingAppNotFound": "This application is not installed on the device.",
   "findingSecureEnvRequired": "This application requires a secure environment and cannot be virtualized.",
   "findingSelfClone": "{appName} cannot clone itself.",
   "@findingSelfClone": { "placeholders": { "appName": { "type": "String" } } },
   "findingSystemComponent": "System components cannot be cloned.",
   "findingAbiNotSupported": "This app's native libraries are not built for an architecture the engine supports.",
-  "findingRequiresGms": "Google Play services is available inside a clone, but Google features that must verify this app's own identity are not supported — including sign-in and identity-bound APIs such as location and SMS verification.",
-  "findingPushUnsupported": "Push notifications will not work in a clone. Google Play services will not register this app for push while it runs under {appName}'s identity, so messages sent to the clone never arrive. The app is otherwise usable, but expect a pause on first launch while it waits for a push registration that cannot succeed.",
-  "@findingPushUnsupported": { "placeholders": { "appName": { "type": "String" } } },
   "findingStorageUnavailable": "This app uses shared storage, and this build of {appName} does not declare All files access. A clone of it cannot reach your files and will not work.",
   "@findingStorageUnavailable": { "placeholders": { "appName": { "type": "String" } } },
   "findingStorageNotGranted": "This app uses shared storage. Grant {appName} \"All files access\" in Settings → Special app access before launching the clone, or it may be refused at launch.",

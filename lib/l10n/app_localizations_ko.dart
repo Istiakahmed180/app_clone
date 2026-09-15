@@ -300,9 +300,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get cloneActionsCompatibility => '호환성';
-
-  @override
   String get cloneActionsManage => '관리';
 
   @override
@@ -737,41 +734,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appDetailsNoApkFiles => '패키지 관리자가 이 앱의 APK 파일을 보고하지 않았습니다.';
 
   @override
-  String get compatibilityNotAnalysed => '분석되지 않음';
-
-  @override
-  String get compatibilitySupported => '지원됨';
-
-  @override
-  String get compatibilityLimited => '제한적';
-
-  @override
-  String get compatibilityUnsupported => '지원되지 않음';
-
-  @override
-  String get compatibilityUnexaminedMessage =>
-      '이 앱을 검사할 수 없어 얼마나 잘 작동할지 알 수 없습니다. 클론을 만들 때 거부될 수도 있습니다.';
-
-  @override
-  String get compatibilityNoProblems => '알려진 호환성 문제가 없습니다.';
-
-  @override
-  String compatibilityExistingClones(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '이 앱의 클론이 이미 $count개 있습니다. 새 클론은 자체 데이터로 비어 있는 상태에서 시작합니다.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get compatibilityAddClone => '클론 추가';
-
-  @override
-  String get compatibilityCannotClone => '복제할 수 없음';
-
-  @override
   String get findingAppNotFound => '이 애플리케이션은 기기에 설치되어 있지 않습니다.';
 
   @override
@@ -788,15 +750,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       '이 앱의 네이티브 라이브러리는 엔진이 지원하는 아키텍처용으로 빌드되지 않았습니다.';
-
-  @override
-  String get findingRequiresGms =>
-      '클론 안에서도 Google Play 서비스는 사용할 수 있지만, 이 앱 자체의 신원을 확인해야 하는 Google 기능은 지원되지 않습니다. 로그인과 위치·SMS 인증처럼 신원에 묶인 API가 여기에 해당합니다.';
-
-  @override
-  String findingPushUnsupported(String appName) {
-    return '클론에서는 푸시 알림이 작동하지 않습니다. 이 앱이 $appName의 신원으로 실행되는 동안 Google Play 서비스는 푸시 등록을 하지 않으므로, 클론으로 보낸 메시지는 도착하지 않습니다. 그 밖에는 앱을 쓸 수 있지만, 성공할 수 없는 푸시 등록을 기다리는 동안 첫 실행에서 잠시 멈출 수 있습니다.';
-  }
 
   @override
   String findingStorageUnavailable(String appName) {

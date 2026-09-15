@@ -121,24 +121,6 @@ class HomeController extends GetxController {
 
   Future<void> unhideAll() => _privateSpace.unhideAll();
 
-  /// Compatibility problems worth showing for an existing clone.
-  ///
-  /// `APP_NOT_FOUND` is filtered out deliberately: it only means the package is not
-  /// installed on the host, which is the normal state for a clone created from an imported
-  /// APK. That clone has its own container and works fine, so flagging it would be a false
-  /// alarm about the feature that put it there.
-  List<CompatibilityFinding> warningsFor(VirtualProfileModel profile) {
-    final CompatibilityReport? report = compatibility[profile.packageName];
-    if (report == null || !report.analysed) {
-      return const <CompatibilityFinding>[];
-    }
-    return report.findings
-        .where(
-          (CompatibilityFinding f) => f.code != AppConstants.errorAppNotFound,
-        )
-        .toList(growable: false);
-  }
-
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
   Uint8List? iconFor(VirtualProfileModel profile) =>

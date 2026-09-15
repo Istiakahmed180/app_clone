@@ -351,7 +351,6 @@ class HomeView extends GetView<HomeController> {
       siblingCount: controller.siblingCount(profile),
       instanceIndex: controller.instanceIndex(profile),
       hidden: hidden || profile.hidden,
-      findings: controller.warningsFor(profile),
       requiresGoogleServices: requiresGoogleServices,
       googleServicesInstalled: googleServicesInstalled,
     );

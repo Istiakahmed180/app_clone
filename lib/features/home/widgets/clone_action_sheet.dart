@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
-import '../../../data/models/compatibility_report.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../data/models/engine_result.dart';
@@ -52,7 +51,6 @@ Future<CloneAction?> showCloneActionSheet(
   int siblingCount = 1,
   int instanceIndex = 1,
   bool hidden = false,
-  List<CompatibilityFinding> findings = const <CompatibilityFinding>[],
   bool requiresGoogleServices = false,
   bool googleServicesInstalled = false,
 }) {
@@ -71,7 +69,6 @@ Future<CloneAction?> showCloneActionSheet(
       siblingCount: siblingCount,
       instanceIndex: instanceIndex,
       hidden: hidden,
-      findings: findings,
       requiresGoogleServices: requiresGoogleServices,
       googleServicesInstalled: googleServicesInstalled,
     ),
@@ -86,7 +83,6 @@ class _CloneActionSheet extends StatelessWidget {
     required this.siblingCount,
     required this.instanceIndex,
     required this.hidden,
-    required this.findings,
     required this.requiresGoogleServices,
     required this.googleServicesInstalled,
   });
@@ -97,7 +93,6 @@ class _CloneActionSheet extends StatelessWidget {
   final int siblingCount;
   final int instanceIndex;
   final bool hidden;
-  final List<CompatibilityFinding> findings;
 
   /// Whether this clone's app depends on Google services. Only then is the install row
   /// ever offered — see `HomeController.requiresGoogleServices`.
@@ -140,15 +135,6 @@ class _CloneActionSheet extends StatelessWidget {
                   _header(context),
                   SizedBox(height: 20.h),
                   _primaryRow(context),
-                  if (findings.isNotEmpty) ...<Widget>[
-                    SizedBox(height: 24.h),
-                    Text(
-                      context.l10n.cloneActionsCompatibility,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    SizedBox(height: 10.h),
-                    _findings(context),
-                  ],
                   SizedBox(height: 24.h),
                   Text(
                     context.l10n.cloneActionsManage,
@@ -248,49 +234,6 @@ class _CloneActionSheet extends StatelessWidget {
   /// Force stop is offered whatever the engine reports about `running`: that flag comes
   /// from the backend and is not always right, so greying it out would leave a stuck
   /// clone with no way to be stopped.
-  /// The findings for this clone, blocking first, worded exactly as the pre-clone sheet
-  /// words them.
-  ///
-  /// Shown here rather than on the tile because the tile deliberately stays clean: the grid
-  /// is meant to read as a home screen, and this is where a held icon says what is wrong.
-  Widget _findings(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final List<CompatibilityFinding> ordered = findings.toList()
-      ..sort(
-        (CompatibilityFinding a, CompatibilityFinding b) =>
-            (b.blocking ? 1 : 0).compareTo(a.blocking ? 1 : 0),
-      );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        for (final CompatibilityFinding finding in ordered)
-          Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Icon(
-                  finding.blocking ? Icons.block : Icons.warning_amber_outlined,
-                  size: 18.r,
-                  color: finding.blocking
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.tertiary,
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    finding.message,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _manageGrid(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
