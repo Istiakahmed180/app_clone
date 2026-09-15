@@ -1,0 +1,119 @@
+# Builds an installable release APK on demand, so a tester (or an assistant with `gh`) can
+# fetch exactly what a commit produces instead of building it themselves.
+#
+# Deliberately not triggered by `push`: this repository is pushed to often, and an APK is
+# only wanted when someone is about to install one. Start it from the Actions tab, with
+# `scripts/build-apk.sh`, or:
+#
+#     gh workflow run build-apk.yml
+#     gh workflow run build-apk.yml --ref <branch>
+#     gh workflow run build-apk.yml -f publish=true
+#
+# Release only, and arm64-v8a only. Debug builds carry the Developer Console and are for
+# working on the app locally, not for handing to anyone.
+#
+# Unsigned in the Play sense: `android/key.properties` is not in the repository, so the
+# build falls back to a debug key -- see `android/app/build.gradle.kts`. Installable for
+# testing, deliberately not uploadable to Play, and not an update path: the key is
+# generated fresh on each runner, so every build's signature differs from the last and
+# installing one over another needs an uninstall, which takes the clones with it.
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: >-
+          Attach the APK to a public "latest-build" release. Off by default: a workflow
+          artifact needs a GitHub login to download, which is the right default for a
+          build only the maintainer installs. Turn it on to hand testers a plain link.
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Matches `compileOptions { sourceCompatibility = VERSION_17 }` in the app module.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      # Pinned to the version this project is developed against, so CI cannot start
+      # producing a different build than the one that was tested locally.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.8
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+      - run: flutter pub get
+
+      # The same checks that gate the work locally, so a broken commit is reported here
+      # rather than discovered on a device.
+      - run: flutter analyze
+
+      - name: Android unit tests
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest
+
+      # Split per ABI rather than one fat APK. Only the arm64-v8a split is kept: it is what
+      # every current device runs, and at ~58 MB against the fat APK's ~75 MB the
+      # difference is worth having in something downloaded and installed by hand.
+      #
+      # The other splits are built and deliberately not published. x86_64 in particular
+      # comes out far smaller because the engine ships no x86_64 native libraries, so it
+      # would install and then fail to run a clone.
+      - name: Build
+        run: flutter build apk --release --split-per-abi
+
+      - name: Name the APK after the commit
+        run: |
+          mkdir -p dist
+          cp "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" \
+             "dist/duplika-arm64-v8a-${GITHUB_SHA::7}.apk"
+          ls -lh build/app/outputs/flutter-apk/*.apk
+          ls -lh dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: duplika-apk
+          path: dist/*.apk
+          retention-days: 14
+          if-no-files-found: error
+
+      # A rolling pre-release, so the link handed to a tester never changes. The asset is
+      # named without the commit for that reason; which commit it is, is in the notes.
+      # Uses `gh` with the job's own token rather than a third-party action.
+      - name: Publish to the latest-build release
+        if: ${{ inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp dist/*.apk duplika-arm64-v8a.apk
+          gh release delete latest-build --yes --cleanup-tag || true
+          gh release create latest-build duplika-arm64-v8a.apk \
+            --title "Latest test build (${GITHUB_SHA::7})" \
+            --prerelease \
+            --notes "Built from \`${GITHUB_SHA}\` on $(date -u +'%Y-%m-%d %H:%M UTC').
+
+          **arm64-v8a only.** It will not install on a 32-bit or x86 device.
+
+          Signed with a throwaway key, because no release keystore is kept in this
+          repository. Each build's signature differs from the last, so installing this
+          over an earlier one needs an uninstall first -- which removes the clones."
