@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Adaptive-icon foreground layer: glyph scaled to 0.74 so it clears the 66dp mask circle. -->
+  <g transform="translate(256 256) scale(.74) translate(-256 -256)">
+    <path fill="#FFFFFF" fill-opacity=".4" fill-rule="evenodd"
+          d="M120 98h92a140 140 0 0 1 0 280h-92zM176 154h36a84 84 0 0 1 0 168h-36z"/>
+    <path fill="#FFFFFF" fill-rule="evenodd"
+          d="M160 134h92a140 140 0 0 1 0 280h-92zM216 190h36a84 84 0 0 1 0 168h-36z"/>
+  </g>
+</svg>

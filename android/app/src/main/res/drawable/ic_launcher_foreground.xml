@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Duplika "Echo D": the brand letter with its own ghost trailing behind it.
+     Scaled to 0.74 so the glyph clears the adaptive-icon mask on every launcher shape. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <group
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.74"
+        android:scaleY="0.74">
+        <path
+            android:fillAlpha="0.4"
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M120,98 L212,98 A140,140 0 0,1 212,378 L120,378 Z M176,154 L212,154 A84,84 0 0,1 212,322 L176,322 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M160,134 L252,134 A140,140 0 0,1 252,414 L160,414 Z M216,190 L252,190 A84,84 0 0,1 252,358 L216,358 Z" />
+    </group>
+</vector>
