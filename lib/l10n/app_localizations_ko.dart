@@ -84,68 +84,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsNotSetUpYet => '아직 설정되지 않음';
 
   @override
-  String get settingsSectionDelivery => '전달';
-
-  @override
-  String get settingsBackgroundActivity => '백그라운드 활동';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '복제한 앱이 닫혀 있어도 알림을 받도록 합니다';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '허용됨';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '제한됨';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '허용 안 됨';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      '백그라운드 활동이 허용되어 복제한 앱이 닫혀 있어도 알림을 받습니다.';
-
-  @override
-  String get backgroundGuideDone => '완료';
-
-  @override
-  String get backgroundGuideTitle => '백그라운드 활동';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android가 Duplika를 백그라운드에서 중지하면 Duplika를 다시 열기 전까지 복제한 앱이 알림을 받지 못합니다.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      '앱 정보에서 \'배터리 사용량\'을 누르고 \'백그라운드 활동 허용\'을 켜세요.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      '열리는 시스템 질문에서 \'허용\'을 누르면 백그라운드에서 실행할 수 있습니다.';
-
-  @override
-  String get backgroundGuideStepsUnknown => '앱 정보에서 백그라운드 활동을 허용하세요.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => '앱 정보 열기';
-
-  @override
-  String get backgroundGuideAllow => '허용';
-
-  @override
-  String get backgroundGuideLater => '나중에';
-
-  @override
-  String get settingsBackgroundActivityFix => '여기를 눌러 백그라운드 활동을 허용하세요';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      '여기를 누른 뒤 배터리 사용량, 그다음 백그라운드 활동 허용을 선택하세요';
-
-  @override
-  String get settingsBackgroundActivityFailed => '백그라운드 활동 설정을 열 수 없습니다.';
-
-  @override
   String get commonUnavailable => '확인할 수 없음';
 
   @override
@@ -355,19 +293,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get homeEngineUnavailable => '이 기기에서는 가상화 엔진을 사용할 수 없습니다.';
-
-  @override
-  String get homeBackgroundNudgeTitle => '클론이 닫혀 있는 동안 알림을 놓칠 수 있습니다.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      '알림을 계속 받을 수 있도록 백그라운드 활동이 허용되어 있는지 확인하세요.';
-
-  @override
-  String get homeBackgroundNudgeAllow => '허용';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '닫기';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1227,15 +1152,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorShareFailed => '앱을 공유하지 못했습니다.';
-
-  @override
-  String get errorNoBatteryScreen => '이 기기에는 열 수 있는 배터리 최적화 화면이 없습니다.';
-
-  @override
-  String get errorNoBackgroundScreen => '이 기기에는 열 수 있는 백그라운드 활동 화면이 없습니다.';
-
-  @override
-  String get errorNeedsAppOpen => '앱이 열려 있는 동안에만 표시할 수 있습니다.';
 
   @override
   String get errorApkUnreadable => '선택한 APK 중 하나를 읽을 수 없습니다.';

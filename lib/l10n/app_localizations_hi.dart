@@ -84,72 +84,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsNotSetUpYet => 'अभी सेट अप नहीं';
 
   @override
-  String get settingsSectionDelivery => 'डिलीवरी';
-
-  @override
-  String get settingsBackgroundActivity => 'पृष्ठभूमि गतिविधि';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'क्लोन किए गए ऐप बंद रहने पर भी सूचनाएँ पाने देता है';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'अनुमत';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'प्रतिबंधित';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'अनुमति नहीं';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'पृष्ठभूमि गतिविधि की अनुमति है, इसलिए क्लोन किए गए ऐप बंद रहने पर भी सूचनाएँ पाते रहते हैं।';
-
-  @override
-  String get backgroundGuideDone => 'ठीक है';
-
-  @override
-  String get backgroundGuideTitle => 'पृष्ठभूमि गतिविधि';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android Duplika को पृष्ठभूमि में रोक सकता है; तब तक क्लोन किए गए ऐप सूचनाएँ नहीं पाएँगे जब तक आप Duplika दोबारा नहीं खोलते।';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'ऐप जानकारी में ‘बैटरी उपयोग’ पर टैप करें और ‘पृष्ठभूमि गतिविधि की अनुमति दें’ चालू करें।';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'खुलने वाले सिस्टम सवाल में ‘अनुमति दें’ टैप करें, ताकि यह पृष्ठभूमि में चल सके।';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'ऐप जानकारी में पृष्ठभूमि गतिविधि की अनुमति दें।';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'ऐप जानकारी खोलें';
-
-  @override
-  String get backgroundGuideAllow => 'अनुमति दें';
-
-  @override
-  String get backgroundGuideLater => 'अभी नहीं';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'यहाँ टैप करें और पृष्ठभूमि गतिविधि की अनुमति दें';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'यहाँ टैप करें, फिर बैटरी उपयोग, फिर पृष्ठभूमि गतिविधि की अनुमति दें';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'पृष्ठभूमि गतिविधि सेटिंग्स खोली नहीं जा सकीं।';
-
-  @override
   String get commonUnavailable => 'उपलब्ध नहीं';
 
   @override
@@ -364,20 +298,6 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'इस डिवाइस पर वर्चुअलाइज़ेशन इंजन उपलब्ध नहीं है।';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'बंद रहने पर क्लोन सूचनाएँ चूक सकते हैं।';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'पक्का करें कि बैकग्राउंड गतिविधि की अनुमति है, ताकि वे सूचनाएँ पाते रहें।';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'अनुमति दें';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'हटाएँ';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1266,18 +1186,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'ऐप शेयर नहीं किया जा सका।';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'इस डिवाइस पर खोलने के लिए बैटरी ऑप्टिमाइज़ेशन स्क्रीन नहीं है।';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'इस डिवाइस पर खोलने के लिए बैकग्राउंड गतिविधि स्क्रीन नहीं है।';
-
-  @override
-  String get errorNeedsAppOpen =>
-      'यह सिर्फ़ तभी दिखाया जा सकता है जब ऐप खुला हो।';
 
   @override
   String get errorApkUnreadable => 'चुनी गई APK में से एक पढ़ी नहीं जा सकी।';

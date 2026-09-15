@@ -84,72 +84,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsNotSetUpYet => 'Non ancora configurato';
 
   @override
-  String get settingsSectionDelivery => 'Consegna';
-
-  @override
-  String get settingsBackgroundActivity => 'Attività in background';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Consente alle app clonate di ricevere notifiche mentre sono chiuse';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Consentita';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Limitata';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Non consentita';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'L\'attività in background è consentita, quindi le app clonate continuano a ricevere notifiche mentre sono chiuse.';
-
-  @override
-  String get backgroundGuideDone => 'Fatto';
-
-  @override
-  String get backgroundGuideTitle => 'Attività in background';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android può sospendere Duplika in background; le app clonate non ricevono più notifiche finché non riapri Duplika.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'In Info app, tocca Utilizzo batteria e attiva Consenti attività in background.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Tocca Consenti nella domanda di sistema che si apre, così può funzionare in background.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'In Info app, consenti l\'attività in background.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Apri Info app';
-
-  @override
-  String get backgroundGuideAllow => 'Consenti';
-
-  @override
-  String get backgroundGuideLater => 'Non ora';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Tocca qui e consenti l\'attività in background';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Tocca qui, poi Utilizzo batteria, poi Consenti attività in background';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'Non è stato possibile aprire le impostazioni dell\'attività in background.';
-
-  @override
   String get commonUnavailable => 'non disponibile';
 
   @override
@@ -368,20 +302,6 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'Il motore di virtualizzazione non è disponibile su questo dispositivo.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'I cloni potrebbero perdere le notifiche mentre sono chiusi.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Assicurati che l\'attività in background sia consentita, così continuano a riceverle.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Consenti';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Ignora';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1280,18 +1200,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'Non è stato possibile condividere l\'app.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'Questo dispositivo non ha una schermata di ottimizzazione della batteria da aprire.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'Questo dispositivo non ha una schermata di attività in background da aprire.';
-
-  @override
-  String get errorNeedsAppOpen =>
-      'Può essere mostrato solo mentre l\'app è aperta.';
 
   @override
   String get errorApkUnreadable =>

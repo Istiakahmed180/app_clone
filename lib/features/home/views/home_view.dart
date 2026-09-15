@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/models/background_activity_state.dart';
 import '../../../core/errors/app_error_text.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/clone_batch_result.dart';
@@ -15,8 +14,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../widgets/empty_state.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
-import '../../settings/controllers/settings_controller.dart';
-import '../../settings/widgets/background_activity_guide.dart';
 import '../../profiles/widgets/profile_dialogs.dart';
 import '../../private_space/views/private_space_settings_view.dart';
 import '../../private_space/widgets/private_space_tile.dart';
@@ -24,7 +21,6 @@ import '../../private_space/widgets/unlock_dialog.dart';
 import '../controllers/home_controller.dart';
 import 'clone_permissions_view.dart';
 import '../widgets/add_clone_tile.dart';
-import '../widgets/background_activity_nudge.dart';
 import '../widgets/clone_action_sheet.dart';
 import '../widgets/clone_budget_text.dart';
 import '../widgets/clone_count_dialog.dart';
@@ -102,32 +98,6 @@ class HomeView extends GetView<HomeController> {
                               controller.providesRuntimeIsolation,
                           problem: controller.virtualizationProblem,
                         ),
-                        // Only on the main grid, and only with a clone to lose push for:
-                        // a reminder before there is anything to remind about is how the
-                        // banner this replaces earned its dismissal.
-                        if (!controller.viewingPrivate.value &&
-                            controller.visibleProfiles.isNotEmpty &&
-                            _backgroundActivity.backgroundNudgeVisible)
-                          BackgroundActivityNudge(
-                            // Explains before it leaves for a system screen, and retires the
-                            // reminder either way: the answer is the guide, not a green tick
-                            // the app cannot read.
-                            onAllow: () {
-                              _backgroundActivity.acceptBackgroundNudge();
-                              showBackgroundActivityGuide(
-                                context,
-                                variant: _backgroundActivityGuideVariant(),
-                                // The nudge is only on screen when this is false, but the
-                                // sheet reads it for itself rather than assuming.
-                                allowed: _backgroundActivity
-                                        .backgroundActivity.value?.allowed ??
-                                    false,
-                                onOpen: _backgroundActivity
-                                    .openBackgroundActivitySettings,
-                              );
-                            },
-                            onDismiss: _backgroundActivity.dismissBackgroundNudge,
-                          ),
                         if (controller.errorMessage.value != null)
                           Padding(
                             padding: EdgeInsets.only(bottom: 12.h),
@@ -160,21 +130,6 @@ class HomeView extends GetView<HomeController> {
         ),
       ),
     );
-  }
-
-  /// The state behind the background-activity nudge. Permanent, like the row it feeds.
-  SettingsController get _backgroundActivity => Get.find<SettingsController>();
-
-  /// Which set of instructions fits this device, for the guide the nudge opens.
-  BackgroundActivityGuideVariant _backgroundActivityGuideVariant() {
-    final BackgroundActivityState? state =
-        _backgroundActivity.backgroundActivity.value;
-    if (state == null) {
-      return BackgroundActivityGuideVariant.unknown;
-    }
-    return state.verifiable
-        ? BackgroundActivityGuideVariant.stock
-        : BackgroundActivityGuideVariant.oem;
   }
 
   /// App-level actions. Kept as one menu so the header stays an identity block rather

@@ -84,72 +84,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ще не налаштовано';
 
   @override
-  String get settingsSectionDelivery => 'Доставка';
-
-  @override
-  String get settingsBackgroundActivity => 'Фонова активність';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Дозволяє клонованим застосункам отримувати сповіщення, коли вони закриті';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Дозволено';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Обмежено';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Не дозволено';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'Фонову активність дозволено, тому клоновані застосунки отримують сповіщення, навіть коли закриті.';
-
-  @override
-  String get backgroundGuideDone => 'Готово';
-
-  @override
-  String get backgroundGuideTitle => 'Фонова активність';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android може призупинити Duplika у фоні; тоді клоновані застосунки не отримуватимуть сповіщення, доки ви знову не відкриєте Duplika.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'У розділі «Про застосунок» натисніть «Використання батареї» й увімкніть «Дозволити фонову активність».';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Натисніть «Дозволити» в системному запиті, щоб застосунок міг працювати у фоні.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'У розділі «Про застосунок» дозвольте фонову активність.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Відкрити «Про застосунок»';
-
-  @override
-  String get backgroundGuideAllow => 'Дозволити';
-
-  @override
-  String get backgroundGuideLater => 'Не зараз';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Натисніть тут і дозвольте фонову активність';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Натисніть тут, потім «Використання батареї», потім «Дозволити фонову активність»';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'Не вдалося відкрити налаштування фонової активності.';
-
-  @override
   String get commonUnavailable => 'недоступно';
 
   @override
@@ -366,20 +300,6 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'Рушій віртуалізації недоступний на цьому пристрої.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'Поки клони закриті, вони можуть пропускати сповіщення.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Переконайтеся, що фонову активність дозволено, щоб вони й далі їх отримували.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Дозволити';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Сховати';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1278,18 +1198,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'Не вдалося поділитися застосунком.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'На цьому пристрої немає екрана оптимізації батареї, який можна відкрити.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'На цьому пристрої немає екрана фонової активності, який можна відкрити.';
-
-  @override
-  String get errorNeedsAppOpen =>
-      'Це можна показати, лише поки застосунок відкрито.';
 
   @override
   String get errorApkUnreadable => 'Один із вибраних APK не вдалося прочитати.';

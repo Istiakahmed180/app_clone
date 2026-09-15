@@ -270,120 +270,6 @@ abstract class AppLocalizations {
   /// **'Not set up yet'**
   String get settingsNotSetUpYet;
 
-  /// No description provided for @settingsSectionDelivery.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery'**
-  String get settingsSectionDelivery;
-
-  /// No description provided for @settingsBackgroundActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'Background activity'**
-  String get settingsBackgroundActivity;
-
-  /// No description provided for @settingsBackgroundActivitySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Lets cloned apps receive notifications while they are closed'**
-  String get settingsBackgroundActivitySubtitle;
-
-  /// No description provided for @settingsBackgroundActivityAllowed.
-  ///
-  /// In en, this message translates to:
-  /// **'Allowed'**
-  String get settingsBackgroundActivityAllowed;
-
-  /// No description provided for @settingsBackgroundActivityRestricted.
-  ///
-  /// In en, this message translates to:
-  /// **'Restricted'**
-  String get settingsBackgroundActivityRestricted;
-
-  /// No description provided for @settingsBackgroundActivityNotAllowed.
-  ///
-  /// In en, this message translates to:
-  /// **'Not allowed'**
-  String get settingsBackgroundActivityNotAllowed;
-
-  /// No description provided for @backgroundGuideAllowedStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Background activity is allowed, so clones keep receiving notifications while they are closed.'**
-  String get backgroundGuideAllowedStatus;
-
-  /// No description provided for @backgroundGuideDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get backgroundGuideDone;
-
-  /// No description provided for @backgroundGuideTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Background activity'**
-  String get backgroundGuideTitle;
-
-  /// No description provided for @backgroundGuideWhy.
-  ///
-  /// In en, this message translates to:
-  /// **'Android can pause Duplika while it is in the background, and cloned apps then miss notifications until you open Duplika again.'**
-  String get backgroundGuideWhy;
-
-  /// No description provided for @backgroundGuideStepsOem.
-  ///
-  /// In en, this message translates to:
-  /// **'In App info, tap Battery usage and turn on Allow background activity.'**
-  String get backgroundGuideStepsOem;
-
-  /// No description provided for @backgroundGuideStepsStock.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap Allow on the system question that opens, so it may run in the background.'**
-  String get backgroundGuideStepsStock;
-
-  /// No description provided for @backgroundGuideStepsUnknown.
-  ///
-  /// In en, this message translates to:
-  /// **'In App info, allow background activity.'**
-  String get backgroundGuideStepsUnknown;
-
-  /// No description provided for @backgroundGuideOpenAppInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Open App info'**
-  String get backgroundGuideOpenAppInfo;
-
-  /// No description provided for @backgroundGuideAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow'**
-  String get backgroundGuideAllow;
-
-  /// No description provided for @backgroundGuideLater.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get backgroundGuideLater;
-
-  /// No description provided for @settingsBackgroundActivityFix.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap here and allow background activity'**
-  String get settingsBackgroundActivityFix;
-
-  /// No description provided for @settingsBackgroundActivityFixBatteryUsage.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap here, then Battery usage, then Allow background activity'**
-  String get settingsBackgroundActivityFixBatteryUsage;
-
-  /// No description provided for @settingsBackgroundActivityFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The background activity settings could not be opened.'**
-  String get settingsBackgroundActivityFailed;
-
   /// No description provided for @commonUnavailable.
   ///
   /// In en, this message translates to:
@@ -755,30 +641,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The virtualization engine is unavailable on this device.'**
   String get homeEngineUnavailable;
-
-  /// No description provided for @homeBackgroundNudgeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Clones may miss notifications while they are closed.'**
-  String get homeBackgroundNudgeTitle;
-
-  /// No description provided for @homeBackgroundNudgeMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Make sure background activity is allowed so they keep receiving them.'**
-  String get homeBackgroundNudgeMessage;
-
-  /// No description provided for @homeBackgroundNudgeAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow'**
-  String get homeBackgroundNudgeAllow;
-
-  /// No description provided for @homeBackgroundNudgeDismiss.
-  ///
-  /// In en, this message translates to:
-  /// **'Dismiss'**
-  String get homeBackgroundNudgeDismiss;
 
   /// Which of an app's clones this one is, e.g. Space 2.
   ///
@@ -2255,24 +2117,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The app could not be shared.'**
   String get errorShareFailed;
-
-  /// No description provided for @errorNoBatteryScreen.
-  ///
-  /// In en, this message translates to:
-  /// **'This device has no battery optimisation screen to open.'**
-  String get errorNoBatteryScreen;
-
-  /// No description provided for @errorNoBackgroundScreen.
-  ///
-  /// In en, this message translates to:
-  /// **'This device has no background activity screen to open.'**
-  String get errorNoBackgroundScreen;
-
-  /// No description provided for @errorNeedsAppOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'That can only be shown while the app is open.'**
-  String get errorNeedsAppOpen;
 
   /// No description provided for @errorApkUnreadable.
   ///

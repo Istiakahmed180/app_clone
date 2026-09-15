@@ -84,65 +84,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotSetUpYet => '尚未设置';
 
   @override
-  String get settingsSectionDelivery => '推送';
-
-  @override
-  String get settingsBackgroundActivity => '后台活动';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '让克隆的应用在关闭后仍能收到通知';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '已允许';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '已限制';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '未允许';
-
-  @override
-  String get backgroundGuideAllowedStatus => '已允许后台活动，因此克隆的应用在关闭后仍能收到通知。';
-
-  @override
-  String get backgroundGuideDone => '完成';
-
-  @override
-  String get backgroundGuideTitle => '后台活动';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android 可能会在后台暂停 Duplika；此时克隆的应用将收不到通知，直到你再次打开 Duplika。';
-
-  @override
-  String get backgroundGuideStepsOem => '在“应用信息”中点按“电池使用情况”，然后开启“允许后台活动”。';
-
-  @override
-  String get backgroundGuideStepsStock => '在打开的系统询问中点按“允许”，让它可以在后台运行。';
-
-  @override
-  String get backgroundGuideStepsUnknown => '在“应用信息”中允许后台活动。';
-
-  @override
-  String get backgroundGuideOpenAppInfo => '打开应用信息';
-
-  @override
-  String get backgroundGuideAllow => '允许';
-
-  @override
-  String get backgroundGuideLater => '以后再说';
-
-  @override
-  String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      '点按此处，然后进入“电池使用情况”，再允许后台活动';
-
-  @override
-  String get settingsBackgroundActivityFailed => '无法打开后台活动设置。';
-
-  @override
   String get commonUnavailable => '无法获取';
 
   @override
@@ -349,18 +290,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get homeEngineUnavailable => '本设备上无法使用虚拟化引擎。';
-
-  @override
-  String get homeBackgroundNudgeTitle => '分身在关闭期间可能会错过通知。';
-
-  @override
-  String get homeBackgroundNudgeMessage => '请确认已允许后台活动，这样它们才能继续收到通知。';
-
-  @override
-  String get homeBackgroundNudgeAllow => '允许';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '关闭';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1213,15 +1142,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorShareFailed => '无法分享该应用。';
-
-  @override
-  String get errorNoBatteryScreen => '此设备没有可打开的电池优化界面。';
-
-  @override
-  String get errorNoBackgroundScreen => '此设备没有可打开的后台活动界面。';
-
-  @override
-  String get errorNeedsAppOpen => '仅在应用打开时才能显示。';
 
   @override
   String get errorApkUnreadable => '无法读取所选 APK 中的一个。';
@@ -1319,65 +1239,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsNotSetUpYet => '尚未设置';
 
   @override
-  String get settingsSectionDelivery => '推送';
-
-  @override
-  String get settingsBackgroundActivity => '后台活动';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '让克隆的应用在关闭后仍能收到通知';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '已允许';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '已限制';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '未允许';
-
-  @override
-  String get backgroundGuideAllowedStatus => '已允许后台活动，因此克隆的应用在关闭后仍能收到通知。';
-
-  @override
-  String get backgroundGuideDone => '完成';
-
-  @override
-  String get backgroundGuideTitle => '后台活动';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android 可能会在后台暂停 Duplika；此时克隆的应用将收不到通知，直到你再次打开 Duplika。';
-
-  @override
-  String get backgroundGuideStepsOem => '在“应用信息”中点按“电池使用情况”，然后开启“允许后台活动”。';
-
-  @override
-  String get backgroundGuideStepsStock => '在打开的系统询问中点按“允许”，让它可以在后台运行。';
-
-  @override
-  String get backgroundGuideStepsUnknown => '在“应用信息”中允许后台活动。';
-
-  @override
-  String get backgroundGuideOpenAppInfo => '打开应用信息';
-
-  @override
-  String get backgroundGuideAllow => '允许';
-
-  @override
-  String get backgroundGuideLater => '以后再说';
-
-  @override
-  String get settingsBackgroundActivityFix => '点按此处并允许后台活动';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      '点按此处，然后进入“电池使用情况”，再允许后台活动';
-
-  @override
-  String get settingsBackgroundActivityFailed => '无法打开后台活动设置。';
-
-  @override
   String get commonUnavailable => '无法获取';
 
   @override
@@ -1584,18 +1445,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get homeEngineUnavailable => '本设备上无法使用虚拟化引擎。';
-
-  @override
-  String get homeBackgroundNudgeTitle => '分身在关闭期间可能会错过通知。';
-
-  @override
-  String get homeBackgroundNudgeMessage => '请确认已允许后台活动，这样它们才能继续收到通知。';
-
-  @override
-  String get homeBackgroundNudgeAllow => '允许';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '关闭';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -2450,15 +2299,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get errorShareFailed => '无法分享该应用。';
 
   @override
-  String get errorNoBatteryScreen => '此设备没有可打开的电池优化界面。';
-
-  @override
-  String get errorNoBackgroundScreen => '此设备没有可打开的后台活动界面。';
-
-  @override
-  String get errorNeedsAppOpen => '仅在应用打开时才能显示。';
-
-  @override
   String get errorApkUnreadable => '无法读取所选 APK 中的一个。';
 
   @override
@@ -2552,65 +2392,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get settingsNotSetUpYet => '尚未設定';
-
-  @override
-  String get settingsSectionDelivery => '推送';
-
-  @override
-  String get settingsBackgroundActivity => '背景活動';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '讓複製的應用程式在關閉後仍能收到通知';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '已允許';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '已限制';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '未允許';
-
-  @override
-  String get backgroundGuideAllowedStatus => '已允許背景活動，因此複製的應用程式在關閉後仍能收到通知。';
-
-  @override
-  String get backgroundGuideDone => '完成';
-
-  @override
-  String get backgroundGuideTitle => '背景活動';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android 可能會在背景暫停 Duplika；此時複製的應用程式將收不到通知，直到你再次開啟 Duplika。';
-
-  @override
-  String get backgroundGuideStepsOem => '在「應用程式資訊」中點一下「電池使用情況」，然後開啟「允許背景活動」。';
-
-  @override
-  String get backgroundGuideStepsStock => '在開啟的系統詢問中點一下「允許」，讓它可以在背景運行。';
-
-  @override
-  String get backgroundGuideStepsUnknown => '在「應用程式資訊」中允許背景活動。';
-
-  @override
-  String get backgroundGuideOpenAppInfo => '開啟應用程式資訊';
-
-  @override
-  String get backgroundGuideAllow => '允許';
-
-  @override
-  String get backgroundGuideLater => '稍後';
-
-  @override
-  String get settingsBackgroundActivityFix => '點此並允許背景活動';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      '點此，然後「電池使用情況」，再允許背景活動';
-
-  @override
-  String get settingsBackgroundActivityFailed => '無法開啟背景活動設定。';
 
   @override
   String get commonUnavailable => '無法取得';
@@ -2819,18 +2600,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get homeEngineUnavailable => '本裝置上無法使用虛擬化引擎。';
-
-  @override
-  String get homeBackgroundNudgeTitle => '分身在關閉期間可能會錯過通知。';
-
-  @override
-  String get homeBackgroundNudgeMessage => '請確認已允許背景活動，這樣它們才能繼續收到通知。';
-
-  @override
-  String get homeBackgroundNudgeAllow => '允許';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '關閉';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -3685,15 +3454,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get errorShareFailed => '無法分享該應用程式。';
 
   @override
-  String get errorNoBatteryScreen => '此裝置沒有可開啟的電池最佳化畫面。';
-
-  @override
-  String get errorNoBackgroundScreen => '此裝置沒有可開啟的背景活動畫面。';
-
-  @override
-  String get errorNeedsAppOpen => '僅在應用程式開啟時才能顯示。';
-
-  @override
   String get errorApkUnreadable => '無法讀取所選 APK 其中之一。';
 
   @override
@@ -3787,65 +3547,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get settingsNotSetUpYet => '尚未設定';
-
-  @override
-  String get settingsSectionDelivery => '推送';
-
-  @override
-  String get settingsBackgroundActivity => '背景活動';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '讓複製的應用程式在關閉後仍能收到通知';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '已允許';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '已限制';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '未允許';
-
-  @override
-  String get backgroundGuideAllowedStatus => '已允許背景活動，因此複製的應用程式在關閉後仍能收到通知。';
-
-  @override
-  String get backgroundGuideDone => '完成';
-
-  @override
-  String get backgroundGuideTitle => '背景活動';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android 可能會在背景暫停 Duplika；此時複製的應用程式將收不到通知，直到你再次開啟 Duplika。';
-
-  @override
-  String get backgroundGuideStepsOem => '在「應用程式資訊」中點一下「電池使用情況」，然後開啟「允許背景活動」。';
-
-  @override
-  String get backgroundGuideStepsStock => '在開啟的系統詢問中點一下「允許」，讓它可以在背景運行。';
-
-  @override
-  String get backgroundGuideStepsUnknown => '在「應用程式資訊」中允許背景活動。';
-
-  @override
-  String get backgroundGuideOpenAppInfo => '開啟應用程式資訊';
-
-  @override
-  String get backgroundGuideAllow => '允許';
-
-  @override
-  String get backgroundGuideLater => '稍後';
-
-  @override
-  String get settingsBackgroundActivityFix => '點此並允許背景活動';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      '點此，然後「電池使用情況」，再允許背景活動';
-
-  @override
-  String get settingsBackgroundActivityFailed => '無法開啟背景活動設定。';
 
   @override
   String get commonUnavailable => '無法取得';
@@ -4054,18 +3755,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get homeEngineUnavailable => '本裝置上無法使用虛擬化引擎。';
-
-  @override
-  String get homeBackgroundNudgeTitle => '分身在關閉期間可能會錯過通知。';
-
-  @override
-  String get homeBackgroundNudgeMessage => '請確認已允許背景活動，這樣它們才能繼續收到通知。';
-
-  @override
-  String get homeBackgroundNudgeAllow => '允許';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '關閉';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -4918,15 +4607,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get errorShareFailed => '無法分享該應用程式。';
-
-  @override
-  String get errorNoBatteryScreen => '此裝置沒有可開啟的電池最佳化畫面。';
-
-  @override
-  String get errorNoBackgroundScreen => '此裝置沒有可開啟的背景活動畫面。';
-
-  @override
-  String get errorNeedsAppOpen => '僅在應用程式開啟時才能顯示。';
 
   @override
   String get errorApkUnreadable => '無法讀取所選 APK 其中之一。';

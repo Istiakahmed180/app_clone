@@ -29,7 +29,6 @@ class ChannelDiagnostics {
     'deleteProfile',
     'inspectApk',
     'pinCloneShortcut',
-    'requestIgnoreBatteryOptimizations',
   };
 
   /// Argument keys never worth writing down: large binary payloads and anything whose

@@ -84,72 +84,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsNotSetUpYet => 'Chưa thiết lập';
 
   @override
-  String get settingsSectionDelivery => 'Gửi thông báo';
-
-  @override
-  String get settingsBackgroundActivity => 'Hoạt động nền';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Cho phép ứng dụng nhân bản nhận thông báo khi đã đóng';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Được phép';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Bị hạn chế';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Không được phép';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'Hoạt động nền được phép, nên các ứng dụng nhân bản vẫn nhận thông báo khi đã đóng.';
-
-  @override
-  String get backgroundGuideDone => 'Xong';
-
-  @override
-  String get backgroundGuideTitle => 'Hoạt động nền';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android có thể tạm dừng Duplika khi chạy nền; các ứng dụng nhân bản sẽ không nhận được thông báo cho đến khi bạn mở lại Duplika.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'Trong Thông tin ứng dụng, nhấn vào Mức dùng pin và bật Cho phép hoạt động nền.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Nhấn Cho phép ở hộp thoại hệ thống hiện ra để ứng dụng chạy nền.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'Trong Thông tin ứng dụng, hãy cho phép hoạt động nền.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Mở thông tin ứng dụng';
-
-  @override
-  String get backgroundGuideAllow => 'Cho phép';
-
-  @override
-  String get backgroundGuideLater => 'Để sau';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Nhấn vào đây và cho phép hoạt động nền';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Nhấn vào đây, sau đó Mức dùng pin, rồi Cho phép hoạt động nền';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'Không thể mở cài đặt hoạt động nền.';
-
-  @override
   String get commonUnavailable => 'không có';
 
   @override
@@ -363,20 +297,6 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'Công cụ ảo hoá không khả dụng trên thiết bị này.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'Bản sao có thể bỏ lỡ thông báo khi đang đóng.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Hãy chắc chắn hoạt động nền được cho phép để chúng tiếp tục nhận thông báo.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Cho phép';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Bỏ qua';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1264,17 +1184,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'Không chia sẻ được ứng dụng.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'Thiết bị này không có màn hình tối ưu hoá pin để mở.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'Thiết bị này không có màn hình hoạt động nền để mở.';
-
-  @override
-  String get errorNeedsAppOpen => 'Chỉ hiển thị được khi ứng dụng đang mở.';
 
   @override
   String get errorApkUnreadable =>

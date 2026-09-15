@@ -73,12 +73,6 @@ String appErrorMessage(AppLocalizations l10n, AppException error) {
       return l10n.errorApkGone;
     case 'SHARE_FAILED':
       return l10n.errorShareFailed;
-    case 'BATTERY_PROMPT_UNAVAILABLE':
-      return l10n.errorNoBatteryScreen;
-    case 'BACKGROUND_ACTIVITY_PROMPT_UNAVAILABLE':
-      return l10n.errorNoBackgroundScreen;
-    case 'NO_ACTIVITY':
-      return l10n.errorNeedsAppOpen;
 
     // ── APK import ────────────────────────────────────────────────────────
     case 'APK_UNREADABLE':

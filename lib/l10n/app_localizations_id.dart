@@ -84,72 +84,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsNotSetUpYet => 'Belum disiapkan';
 
   @override
-  String get settingsSectionDelivery => 'Pengiriman';
-
-  @override
-  String get settingsBackgroundActivity => 'Aktivitas latar belakang';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Membuat aplikasi klon tetap menerima notifikasi saat ditutup';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Diizinkan';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Dibatasi';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Tidak diizinkan';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'Aktivitas latar belakang diizinkan, sehingga aplikasi klon tetap menerima notifikasi saat ditutup.';
-
-  @override
-  String get backgroundGuideDone => 'Selesai';
-
-  @override
-  String get backgroundGuideTitle => 'Aktivitas latar belakang';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android dapat menghentikan sementara Duplika di latar belakang; aplikasi klon lalu tidak menerima notifikasi sampai Anda membuka Duplika lagi.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'Di Info aplikasi, ketuk Penggunaan baterai lalu aktifkan Izinkan aktivitas latar belakang.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Ketuk Izinkan pada pertanyaan sistem yang muncul, agar dapat berjalan di latar belakang.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'Di Info aplikasi, izinkan aktivitas latar belakang.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Buka info aplikasi';
-
-  @override
-  String get backgroundGuideAllow => 'Izinkan';
-
-  @override
-  String get backgroundGuideLater => 'Nanti saja';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Ketuk di sini dan izinkan aktivitas latar belakang';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Ketuk di sini, lalu Penggunaan baterai, lalu Izinkan aktivitas latar belakang';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'Setelan aktivitas latar belakang tidak dapat dibuka.';
-
-  @override
   String get commonUnavailable => 'tidak tersedia';
 
   @override
@@ -363,20 +297,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'Mesin virtualisasi tidak tersedia di perangkat ini.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'Klon bisa melewatkan notifikasi selagi tertutup.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Pastikan aktivitas latar belakang diizinkan agar mereka tetap menerimanya.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Izinkan';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Tutup';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1267,18 +1187,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'Aplikasi tidak dapat dibagikan.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'Perangkat ini tidak punya layar pengoptimalan baterai untuk dibuka.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'Perangkat ini tidak punya layar aktivitas latar belakang untuk dibuka.';
-
-  @override
-  String get errorNeedsAppOpen =>
-      'Itu hanya bisa ditampilkan selagi aplikasi terbuka.';
 
   @override
   String get errorApkUnreadable =>

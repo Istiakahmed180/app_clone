@@ -69,7 +69,6 @@ class AppBinding extends Bindings {
     Get.put<SettingsController>(
       SettingsController(
         diagnostics: Get.find<DiagnosticsRepository>(),
-        bridge: Get.find<NativeBridge>(),
       ),
       permanent: true,
     );

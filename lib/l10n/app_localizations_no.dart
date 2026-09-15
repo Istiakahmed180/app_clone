@@ -84,72 +84,6 @@ class AppLocalizationsNo extends AppLocalizations {
   String get settingsNotSetUpYet => 'Ikke satt opp ennå';
 
   @override
-  String get settingsSectionDelivery => 'Levering';
-
-  @override
-  String get settingsBackgroundActivity => 'Bakgrunnsaktivitet';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Lar klonede apper motta varsler mens de er lukket';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Tillatt';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Begrenset';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Ikke tillatt';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'Bakgrunnsaktivitet er tillatt, så klonede apper får varsler selv når de er lukket.';
-
-  @override
-  String get backgroundGuideDone => 'Ferdig';
-
-  @override
-  String get backgroundGuideTitle => 'Bakgrunnsaktivitet';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android kan stanse Duplika i bakgrunnen; klonede apper får da ikke varsler før du åpner Duplika igjen.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'I Appinformasjon, trykk på Batteribruk og slå på Tillat bakgrunnsaktivitet.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Trykk Tillat i systemspørsmålet som åpnes, så den kan kjøre i bakgrunnen.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'Tillat bakgrunnsaktivitet i Appinformasjon.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Åpne appinformasjon';
-
-  @override
-  String get backgroundGuideAllow => 'Tillat';
-
-  @override
-  String get backgroundGuideLater => 'Ikke nå';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Trykk her og tillat bakgrunnsaktivitet';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Trykk her, deretter Batteribruk, deretter Tillat bakgrunnsaktivitet';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'Innstillingene for bakgrunnsaktivitet kunne ikke åpnes.';
-
-  @override
   String get commonUnavailable => 'utilgjengelig';
 
   @override
@@ -364,20 +298,6 @@ class AppLocalizationsNo extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'Virtualiseringsmotoren er ikke tilgjengelig på denne enheten.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'Kloner kan gå glipp av varsler mens de er lukket.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Sørg for at bakgrunnsaktivitet er tillatt, så de fortsetter å motta dem.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Tillat';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Lukk';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1271,17 +1191,6 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'Appen kunne ikke deles.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'Denne enheten har ingen skjerm for batterioptimalisering å åpne.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'Denne enheten har ingen skjerm for bakgrunnsaktivitet å åpne.';
-
-  @override
-  String get errorNeedsAppOpen => 'Det kan bare vises mens appen er åpen.';
 
   @override
   String get errorApkUnreadable => 'En av de valgte APK-ene kunne ikke leses.';

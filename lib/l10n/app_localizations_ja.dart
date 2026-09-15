@@ -84,68 +84,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNotSetUpYet => '未設定';
 
   @override
-  String get settingsSectionDelivery => '配信';
-
-  @override
-  String get settingsBackgroundActivity => 'バックグラウンド動作';
-
-  @override
-  String get settingsBackgroundActivitySubtitle => '複製したアプリを閉じても通知を受け取れるようにします';
-
-  @override
-  String get settingsBackgroundActivityAllowed => '許可';
-
-  @override
-  String get settingsBackgroundActivityRestricted => '制限あり';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => '未許可';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'バックグラウンド動作は許可されているため、複製したアプリは閉じていても通知を受け取れます。';
-
-  @override
-  String get backgroundGuideDone => '完了';
-
-  @override
-  String get backgroundGuideTitle => 'バックグラウンド動作';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android が Duplika をバックグラウンドで停止すると、Duplika を開くまで複製したアプリは通知を受け取れなくなります。';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'アプリ情報で「バッテリー使用量」をタップし、「バックグラウンド動作を許可」をオンにします。';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      '表示されるシステムの確認で「許可」をタップすると、バックグラウンドで動作できます。';
-
-  @override
-  String get backgroundGuideStepsUnknown => 'アプリ情報でバックグラウンド動作を許可してください。';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'アプリ情報を開く';
-
-  @override
-  String get backgroundGuideAllow => '許可';
-
-  @override
-  String get backgroundGuideLater => '後で';
-
-  @override
-  String get settingsBackgroundActivityFix => 'ここをタップしてバックグラウンド動作を許可';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'ここをタップし、「バッテリー使用量」から「バックグラウンド動作を許可」を選びます';
-
-  @override
-  String get settingsBackgroundActivityFailed => 'バックグラウンド動作の設定を開けませんでした。';
-
-  @override
   String get commonUnavailable => '取得できません';
 
   @override
@@ -354,19 +292,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get homeEngineUnavailable => 'このデバイスでは仮想化エンジンを利用できません。';
-
-  @override
-  String get homeBackgroundNudgeTitle => 'クローンを閉じている間、通知を受け取れないことがあります。';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      '通知を受け取り続けられるよう、バックグラウンド動作が許可されているか確認してください。';
-
-  @override
-  String get homeBackgroundNudgeAllow => '許可';
-
-  @override
-  String get homeBackgroundNudgeDismiss => '閉じる';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1226,15 +1151,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'アプリを共有できませんでした。';
-
-  @override
-  String get errorNoBatteryScreen => 'このデバイスには開ける電池最適化の画面がありません。';
-
-  @override
-  String get errorNoBackgroundScreen => 'このデバイスには開けるバックグラウンド動作の画面がありません。';
-
-  @override
-  String get errorNeedsAppOpen => 'アプリを開いている間だけ表示できます。';
 
   @override
   String get errorApkUnreadable => '選択した APK のひとつを読み取れませんでした。';

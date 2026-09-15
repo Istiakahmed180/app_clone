@@ -84,72 +84,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotSetUpYet => 'Not set up yet';
 
   @override
-  String get settingsSectionDelivery => 'Delivery';
-
-  @override
-  String get settingsBackgroundActivity => 'Background activity';
-
-  @override
-  String get settingsBackgroundActivitySubtitle =>
-      'Lets cloned apps receive notifications while they are closed';
-
-  @override
-  String get settingsBackgroundActivityAllowed => 'Allowed';
-
-  @override
-  String get settingsBackgroundActivityRestricted => 'Restricted';
-
-  @override
-  String get settingsBackgroundActivityNotAllowed => 'Not allowed';
-
-  @override
-  String get backgroundGuideAllowedStatus =>
-      'Background activity is allowed, so clones keep receiving notifications while they are closed.';
-
-  @override
-  String get backgroundGuideDone => 'Done';
-
-  @override
-  String get backgroundGuideTitle => 'Background activity';
-
-  @override
-  String get backgroundGuideWhy =>
-      'Android can pause Duplika while it is in the background, and cloned apps then miss notifications until you open Duplika again.';
-
-  @override
-  String get backgroundGuideStepsOem =>
-      'In App info, tap Battery usage and turn on Allow background activity.';
-
-  @override
-  String get backgroundGuideStepsStock =>
-      'Tap Allow on the system question that opens, so it may run in the background.';
-
-  @override
-  String get backgroundGuideStepsUnknown =>
-      'In App info, allow background activity.';
-
-  @override
-  String get backgroundGuideOpenAppInfo => 'Open App info';
-
-  @override
-  String get backgroundGuideAllow => 'Allow';
-
-  @override
-  String get backgroundGuideLater => 'Not now';
-
-  @override
-  String get settingsBackgroundActivityFix =>
-      'Tap here and allow background activity';
-
-  @override
-  String get settingsBackgroundActivityFixBatteryUsage =>
-      'Tap here, then Battery usage, then Allow background activity';
-
-  @override
-  String get settingsBackgroundActivityFailed =>
-      'The background activity settings could not be opened.';
-
-  @override
   String get commonUnavailable => 'unavailable';
 
   @override
@@ -364,20 +298,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeEngineUnavailable =>
       'The virtualization engine is unavailable on this device.';
-
-  @override
-  String get homeBackgroundNudgeTitle =>
-      'Clones may miss notifications while they are closed.';
-
-  @override
-  String get homeBackgroundNudgeMessage =>
-      'Make sure background activity is allowed so they keep receiving them.';
-
-  @override
-  String get homeBackgroundNudgeAllow => 'Allow';
-
-  @override
-  String get homeBackgroundNudgeDismiss => 'Dismiss';
 
   @override
   String cloneSpaceLabel(int index) {
@@ -1268,18 +1188,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorShareFailed => 'The app could not be shared.';
-
-  @override
-  String get errorNoBatteryScreen =>
-      'This device has no battery optimisation screen to open.';
-
-  @override
-  String get errorNoBackgroundScreen =>
-      'This device has no background activity screen to open.';
-
-  @override
-  String get errorNeedsAppOpen =>
-      'That can only be shown while the app is open.';
 
   @override
   String get errorApkUnreadable =>

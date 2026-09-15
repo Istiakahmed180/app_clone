@@ -19,8 +19,6 @@ String settingsStatusMessage(AppLocalizations l10n, SettingsStatus status) {
       return l10n.contactLegalOpenFailed(l10n.settingsPrivacyPolicy);
     case SettingsStatus.termsOfServiceFailed:
       return l10n.contactLegalOpenFailed(l10n.settingsTermsOfService);
-    case SettingsStatus.backgroundActivityFailed:
-      return l10n.settingsBackgroundActivityFailed;
   }
 }
 
