@@ -430,7 +430,7 @@ class NativeBridge {
       <String, dynamic>{
         'profileId': profileId,
         'action': action,
-        if (values != null) 'values': values,
+        'values': ?values,
       },
     );
     if (!response.success) {

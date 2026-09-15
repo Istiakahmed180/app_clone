@@ -494,14 +494,16 @@ class AppPickerController extends GetxController {
   /// on the device — and a user importing a split set should not see only `.bin`.
   /// The `bin` extension is kept in step with `AppSharer.EXTENSION`.
   Future<ApkCandidate?> pickApk({bool packageFormat = false}) async {
+    // `pickFiles` is the multi-select entry point (`pickFile` is the single-file one),
+    // and it no longer takes the data/stream flags: whether a pick is read into memory or
+    // streamed is decided per file, by whichever of `readAsBytes` and `readAsByteStream`
+    // the caller reaches for. `_materialise` streams, which is what matters here — a
+    // split set runs to hundreds of megabytes and must never be buffered whole.
     final List<PlatformFile> picked = await FilePicker.pickFiles(
-      allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: packageFormat
           ? <String>['bin']
           : <String>['apk', 'bin'],
-      withData: false,
-      withReadStream: true,
     );
     if (picked.isEmpty) {
       return null;
