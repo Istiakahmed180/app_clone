@@ -98,6 +98,36 @@ android {
     }
 }
 
+/**
+ * Keeps x86_64 native libraries out of release builds.
+ *
+ * `bcore.aar` ships `libblackbox.so` for arm64-v8a and armeabi-v7a and nothing else, and
+ * `BlackBoxEngineAdapter.SUPPORTED_ABIS` says the same — on x86_64 the engine reports
+ * itself unavailable and no clone can start. Flutter still builds its own x86_64
+ * libraries, so a release APK carried 19 MB for a device where the app cannot do the one
+ * thing it exists for.
+ *
+ * Release only: a debug build keeps x86_64 so the app still installs on an emulator, where
+ * the engine is expected to be unavailable anyway.
+ *
+ * Done here rather than with `ndk { abiFilters }` on the build type, which governs only
+ * NDK-built output and leaves Flutter's own libraries in place — measured, not assumed.
+ *
+ * Two artefacts are correct with this alone: the fat APK, and the app bundle, whose
+ * manifest then declares arm64-v8a and armeabi-v7a only, so Play never offers the app to
+ * a device it cannot serve. `--split-per-abi` is the exception and needs the ABI set
+ * given to Flutter as well, or it emits an x86_64 APK with no native libraries in it at
+ * all:
+ *
+ *     flutter build apk --release --split-per-abi \
+ *         --target-platform android-arm,android-arm64
+ */
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
