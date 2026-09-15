@@ -14,10 +14,26 @@ import 'system_info_tab.dart';
 /// what went wrong, which operation it belonged to, which subsystem to interrogate, and
 /// what machine it happened on.
 ///
-/// Available in release as well as debug. Release compatibility is the thing this
-/// project most needs to be able to diagnose, so removing the console there would
-/// remove it exactly where it is most useful; instead the destructive and
-/// data-revealing actions are gated (see [DiagnosticsController.isReleaseBuild]).
+/// Not built into a release APK; the route is registered only outside one (see
+/// [AppRoutes.developerTools]).
+///
+/// That is a change of position, and it costs something real. Release behaviour is the
+/// thing this project most needs to be able to diagnose, and this console was the only
+/// way to do it on a device the developer does not have in front of them. Capture is
+/// unaffected — the Flutter logger, the native logger and the crash handler all still
+/// run in a release build, and the native log files are still written — but nothing in
+/// a shipped app can read them back or hand them to the share sheet, because
+/// `DiagnosticsExporter` is reached only from this screen and goes with it. In a
+/// release build the evidence exists on disk and needs adb to collect.
+///
+/// The judgement behind that: a console one tap from the home screen puts raw logs,
+/// subsystem probes and device facts in front of whoever is holding the phone, and a
+/// shipped app has no business offering that. If release diagnostics are wanted back,
+/// the thing to add is a support-flow export, not this screen.
+///
+/// Because it cannot run in a release build, nothing in here gates on one any more.
+/// The self-test's release confirmation went with it rather than being left as a branch
+/// that can no longer be reached.
 class DeveloperConsoleView extends StatefulWidget {
   const DeveloperConsoleView({super.key});
 
@@ -176,16 +192,10 @@ class _DeveloperConsoleViewState extends State<DeveloperConsoleView>
       case _ConsoleAction.export:
         await controller.exportAndShare();
       case _ConsoleAction.selfTest:
-        // The self-test deliberately raises a real exception in Kotlin. In debug that is
-        // unremarkable; in a release build someone may actually be using the app, so it
-        // is confirmed first rather than removed — release capture is one of the things
-        // most worth verifying on a device.
-        if (controller.isReleaseBuild) {
-          final bool confirmed = await _confirmSelfTest() ?? false;
-          if (!confirmed) {
-            return;
-          }
-        }
+        // Unconfirmed. The self-test raises a real exception in Kotlin, which used to be
+        // worth a question because this screen could be opened on a build someone was
+        // actually using. It cannot be any more, and asking a developer to confirm a
+        // button they just pressed on purpose is friction with nothing behind it.
         await controller.runNativeSelfTest();
       case _ConsoleAction.clear:
         // Confirmed always, and worded so it is clear this is not just the screen being
@@ -197,28 +207,6 @@ class _DeveloperConsoleViewState extends State<DeveloperConsoleView>
         }
     }
   }
-
-  Future<bool?> _confirmSelfTest() => showDialog<bool>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Raise a test exception?'),
-          content: const Text(
-            'This throws a real exception inside the native logger so that native '
-            'capture can be verified on this build. It is caught immediately and does '
-            'not affect any clone, but it will appear in the log as an ERROR.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Run'),
-            ),
-          ],
-        ),
-      );
 
   Future<bool?> _confirmClear() => showDialog<bool>(
         context: context,

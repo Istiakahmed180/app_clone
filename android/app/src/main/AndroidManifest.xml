@@ -174,6 +174,23 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Held for the clones, not for Duplika: a clone's credential request reaches the
+         system under this app's uid, so the check is made against this manifest. An app
+         that names which credential providers it will accept — Instagram's sign-in does —
+         is refused without it, and the refusal is fatal to the clone:
+
+             SecurityException: uid 10297 does not have
+             android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS
+
+         Instagram kills its own process on that exception, which takes the pending
+         credential session down with it, so "I already have a profile" landed the user
+         back on the welcome screen instead of the password sheet.
+
+         Normal permission: granted at install, no runtime dialog, and it grants no access
+         to any credential. It only lets the caller restrict which providers may answer —
+         the sheet and the choice stay with the user. -->
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS" />
+
     <!-- ==========================================================================
          Permissions removed from the virtualization engine's merged manifest.
 

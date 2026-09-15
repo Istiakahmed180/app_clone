@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../core/diagnostics/diagnostic_event.dart';
@@ -70,11 +69,6 @@ class DiagnosticsController extends GetxController {
 
   final List<DiagnosticEvent> _heldWhilePaused = <DiagnosticEvent>[];
   StreamSubscription<DiagnosticEvent>? _subscription;
-
-  /// True in a release build. The console stays available — release compatibility is
-  /// exactly what this project needs to test — but actions that could expose more than
-  /// a report does are gated on it.
-  bool get isReleaseBuild => kReleaseMode;
 
   bool get nativeAvailable => repository.nativeAvailable;
 

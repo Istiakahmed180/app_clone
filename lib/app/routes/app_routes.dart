@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../features/apps/views/app_picker_view.dart';
@@ -15,9 +16,12 @@ class AppRoutes {
   static const String home = '/';
   static const String appPicker = '/apps/pick';
 
-  /// The in-app Developer Console. Reachable in release as well as debug, because
-  /// release behaviour is what most needs diagnosing; the destructive and
-  /// data-revealing actions inside it are gated on the build type instead.
+  /// The in-app Developer Console.
+  ///
+  /// Registered only outside a release build. Withholding the menu entry alone would
+  /// leave the screen one `Get.toNamed` away — from a deep link, or from any code that
+  /// still names the route — so the page itself is not registered either, and the name
+  /// resolves to nothing in a shipped app.
   static const String developerTools = '/developer/tools';
 
   /// App-level settings. No binding: [SettingsController] is permanent, because the
@@ -46,11 +50,12 @@ class AppRoutes {
           page: () => const AppPickerView(),
           binding: AppPickerBinding(),
         ),
-        GetPage<dynamic>(
-          name: developerTools,
-          page: () => const DeveloperConsoleView(),
-          binding: DiagnosticsBinding(),
-        ),
+        if (!kReleaseMode)
+          GetPage<dynamic>(
+            name: developerTools,
+            page: () => const DeveloperConsoleView(),
+            binding: DiagnosticsBinding(),
+          ),
         GetPage<dynamic>(
           name: settings,
           page: () => const SettingsView(),

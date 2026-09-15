@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -191,14 +192,20 @@ class HomeView extends GetView<HomeController> {
             title: Text(l10n.homeMenuSettings),
           ),
         ),
-        PopupMenuItem<void>(
-          onTap: () => Get.toNamed<void>(AppRoutes.developerTools),
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.terminal_outlined),
-            title: Text(l10n.homeMenuDeveloperTools),
+        // Not built into a release APK. The console is a developer surface: it puts
+        // raw logs, subsystem probes and device facts one tap from the home screen,
+        // and a shipped app has no reason to offer that to the person using it. The
+        // route is withheld in the same builds (see [AppRoutes.developerTools]), so
+        // hiding the entry is not the only thing standing in the way.
+        if (!kReleaseMode)
+          PopupMenuItem<void>(
+            onTap: () => Get.toNamed<void>(AppRoutes.developerTools),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.terminal_outlined),
+              title: Text(l10n.homeMenuDeveloperTools),
+            ),
           ),
-        ),
       ],
     );
   }
