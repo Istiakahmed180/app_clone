@@ -61,57 +61,11 @@ class AppDetails {
   bool get hasNativeCode => abis.isNotEmpty;
   bool get isSplit => apkCount > 1;
 
-  /// `1.0.7 (8)`, or just one half when the other is missing.
-  String get versionLabel {
-    if (versionName == null && versionCode == null) {
-      return 'unknown';
-    }
-    if (versionCode == null) {
-      return versionName!;
-    }
-    if (versionName == null) {
-      return '($versionCode)';
-    }
-    return '$versionName ($versionCode)';
-  }
-
-  /// `ARM64 · 64-bit`, the same string the picker's chip shows.
-  ///
-  /// Repeats the bitness that has its own row below. Deliberate: the chip in the list
-  /// reads this way, and a details screen that named the ABIs differently from the row
-  /// the user tapped would look like a different app's numbers.
-  String get architectureLabel {
-    if (abis.isEmpty) {
-      return 'No native code';
-    }
-    final String bits = switch ((supports32Bit, supports64Bit)) {
-      (true, true) => '32 + 64',
-      (false, true) => '64-bit',
-      (true, false) => '32-bit',
-      (false, false) => '',
-    };
-    final String names = abiLabel(abis);
-    return bits.isEmpty ? names : '$names · $bits';
-  }
-
-  /// `64-bit`, `32-bit`, `32 + 64`, or the honest answer for pure bytecode.
-  String get bitnessLabel => switch ((supports32Bit, supports64Bit)) {
-    (true, true) => '32 + 64',
-    (false, true) => '64-bit',
-    (true, false) => '32-bit',
-    (false, false) => 'Any — no native code',
-  };
-
-  String get packageTypeLabel =>
-      isSplit ? 'Split APK · $apkCount files' : 'Single APK';
-
-  String get totalSizeLabel => formatBytes(totalSizeBytes);
-
   /// The ABIs under the names people use for them, widest first.
+  ///
+  /// Empty in, empty out: an app with no native code is a sentence rather than a list,
+  /// and only a widget can say that sentence in the user's language.
   static String abiLabel(List<String> abis) {
-    if (abis.isEmpty) {
-      return 'No native code';
-    }
     final List<String> names = <String>[
       for (final String abi in _abiOrder)
         if (abis.contains(abi)) _abiLabels[abi]!,
@@ -135,10 +89,9 @@ class AppDetails {
 
   /// Rounded to whole units above a kilobyte: nobody reading an APK size needs the
   /// third significant figure, and `25 MB` is easier to compare than `25.31 MB`.
+  ///
+  /// Callers word the zero case themselves; see `totalSizeLabel`.
   static String formatBytes(int bytes) {
-    if (bytes <= 0) {
-      return 'unknown';
-    }
     if (bytes < 1024) {
       return '$bytes B';
     }
@@ -184,13 +137,4 @@ class ApkComponent {
 
   final List<String> abis;
   final int sizeBytes;
-
-  /// `Base APK · No native libraries · 25 MB`, or
-  /// `Split APK · config.arm64_v8a · arm64-v8a · 32 MB`.
-  String get summary => <String>[
-    isBase ? 'Base APK' : 'Split APK',
-    if (splitName != null && splitName!.isNotEmpty) splitName!,
-    if (abis.isEmpty) 'No native libraries' else abis.join(', '),
-    AppDetails.formatBytes(sizeBytes),
-  ].join(' · ');
 }

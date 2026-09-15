@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 
 /// The prominent data-and-permissions disclosure Play requires before the app reads the
 /// installed-app inventory that `QUERY_ALL_PACKAGES` makes available.
@@ -24,6 +26,7 @@ class DataDisclosure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
       body: SafeArea(
@@ -48,44 +51,30 @@ class DataDisclosure extends StatelessWidget {
                   ),
                   SizedBox(height: 20.h),
                   Text(
-                    'Before you start',
+                    l10n.disclosureTitle,
                     style: theme.textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    '${AppConstants.appTitle} runs a second copy of apps you choose. '
-                    'Here is exactly what it reads and what it will ask you for.',
+                    l10n.disclosureIntro(AppConstants.appTitle),
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 24.h),
                   _Section(
                     icon: Icons.apps_outlined,
-                    title: 'Your installed apps',
-                    body:
-                        'To show the clone picker, ${AppConstants.appTitle} reads the '
-                        'list of apps installed on this device — their names, icons and '
-                        'versions. This list stays on your device. It is never uploaded, '
-                        'sold or shared, and the app contains no ads, no analytics and '
-                        'no tracker.',
+                    title: l10n.disclosureAppsTitle,
+                    body: l10n.disclosureAppsBody(AppConstants.appTitle),
                   ),
                   _Section(
                     icon: Icons.security_outlined,
-                    title: 'Permissions on behalf of clones',
-                    body:
-                        'Cloned apps run inside ${AppConstants.appTitle}, so some Android '
-                        'permissions apply to it on their behalf. You may be asked once '
-                        'to exempt it from battery optimisation so cloned messengers '
-                        'keep delivering. Only when you clone a file or media app, you '
-                        'may need to grant All files access in Settings.',
+                    title: l10n.disclosurePermissionsTitle,
+                    body: l10n.disclosurePermissionsBody(AppConstants.appTitle),
                   ),
                   _Section(
                     icon: Icons.tune_outlined,
-                    title: 'You stay in control',
-                    body:
-                        'Nothing is requested silently. You can refuse any of these '
-                        'requests and still use the app, and you can change your mind in '
-                        'Android Settings at any time.',
+                    title: l10n.disclosureControlTitle,
+                    body: l10n.disclosureControlBody,
                   ),
                 ],
               ),
@@ -96,7 +85,7 @@ class DataDisclosure extends StatelessWidget {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: onAccept,
-                  child: const Text('Agree and continue'),
+                  child: Text(l10n.disclosureAccept),
                 ),
               ),
             ),

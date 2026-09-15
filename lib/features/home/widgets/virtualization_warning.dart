@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../l10n/l10n_context.dart';
+
 /// Shown only when the engine cannot deliver isolated containers on this device.
 ///
 /// Nothing is drawn on the healthy path: a banner restating that the app works is
@@ -17,6 +19,11 @@ class VirtualizationWarning extends StatelessWidget {
   final bool virtualizationActive;
 
   /// What the native backend said, when it said anything.
+  ///
+  /// Three states, and they are different: null when the engine itself is fine and it
+  /// is the abstraction above it that offers no isolation, the empty string when the
+  /// engine reported itself unavailable but gave no reason, and otherwise the engine's
+  /// own words.
   final String? problem;
 
   @override
@@ -45,9 +52,11 @@ class VirtualizationWarning extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              problem ??
-                  'The virtualization engine is not active on this device, so clones '
-                      'cannot run in isolated containers.',
+              switch (problem) {
+                null => context.l10n.homeEngineInactive,
+                '' => context.l10n.homeEngineUnavailable,
+                final String message => message,
+              },
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: theme.colorScheme.onErrorContainer),
             ),

@@ -85,13 +85,13 @@ class SettingsView extends StatelessWidget {
             ),
             SizedBox(height: 22.h),
             SettingsSection(
-              title: 'Privacy',
+              title: l10n.settingsSectionPrivacy,
               children: <Widget>[
                 SettingsRow(
                   icon: Icons.lock_outline,
-                  title: 'Private space',
-                  subtitle: 'Hide apps behind a PIN',
-                  value: privateSpace.enabled ? 'On' : 'Off',
+                  title: l10n.privateSpaceTitle,
+                  subtitle: l10n.settingsPrivateSpaceSubtitle,
+                  value: privateSpace.enabled ? l10n.settingsOn : l10n.settingsOff,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
                       builder: (BuildContext context) =>

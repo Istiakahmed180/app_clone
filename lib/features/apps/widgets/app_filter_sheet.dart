@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
+
 import '../controllers/app_picker_controller.dart';
 
 /// The picker's sort and filter controls, plus the two ways in that are not a list row.
@@ -79,6 +83,7 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return DraggableScrollableSheet(
       // Opens tall enough to show the sort and most of the filters, and reaches the top
@@ -112,15 +117,15 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                       ),
                     ),
                   ),
-                  Text('Filter and sort', style: theme.textTheme.titleLarge),
+                  Text(l10n.filterTitle, style: theme.textTheme.titleLarge),
                   SizedBox(height: 18.h),
 
-                  _label(theme, 'Sort'),
+                  _label(theme, l10n.filterSort),
                   for (final (AppSort value, String text)
-                      in const <(AppSort, String)>[
-                        (AppSort.name, 'App name'),
-                        (AppSort.recentlyInstalled, 'Recently installed'),
-                        (AppSort.recentlyUpdated, 'Recently updated'),
+                      in <(AppSort, String)>[
+                        (AppSort.name, l10n.filterSortName),
+                        (AppSort.recentlyInstalled, l10n.filterSortRecentlyInstalled),
+                        (AppSort.recentlyUpdated, l10n.filterSortRecentlyUpdated),
                       ])
                     _radio<AppSort>(
                       label: text,
@@ -130,14 +135,14 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                     ),
 
                   SizedBox(height: 12.h),
-                  _label(theme, 'Filter'),
+                  _label(theme, l10n.filterFilter),
                   for (final (AppFilter value, String text)
-                      in const <(AppFilter, String)>[
-                        (AppFilter.all, 'All apps'),
-                        (AppFilter.userApps, 'User apps'),
-                        (AppFilter.systemApps, 'System apps'),
-                        (AppFilter.notAdded, 'Not added'),
-                        (AppFilter.alreadyAdded, 'Already added'),
+                      in <(AppFilter, String)>[
+                        (AppFilter.all, l10n.filterAllApps),
+                        (AppFilter.userApps, l10n.filterUserApps),
+                        (AppFilter.systemApps, l10n.filterSystemApps),
+                        (AppFilter.notAdded, l10n.filterNotAdded),
+                        (AppFilter.alreadyAdded, l10n.filterAlreadyAdded),
                       ])
                     _radio<AppFilter>(
                       label: text,
@@ -148,14 +153,14 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                     ),
 
                   SizedBox(height: 12.h),
-                  _label(theme, 'Architecture'),
+                  _label(theme, l10n.filterArchitecture),
                   for (final (ArchitectureFilter value, String text)
-                      in const <(ArchitectureFilter, String)>[
-                        (ArchitectureFilter.all, 'All apps'),
-                        (ArchitectureFilter.only64Bit, '64-bit'),
-                        (ArchitectureFilter.only32Bit, '32-bit'),
-                        (ArchitectureFilter.both, '32 + 64'),
-                        (ArchitectureFilter.noNativeCode, 'No native code'),
+                      in <(ArchitectureFilter, String)>[
+                        (ArchitectureFilter.all, l10n.filterAllApps),
+                        (ArchitectureFilter.only64Bit, l10n.filterArch64),
+                        (ArchitectureFilter.only32Bit, l10n.filterArch32),
+                        (ArchitectureFilter.both, l10n.filterArchBoth),
+                        (ArchitectureFilter.noNativeCode, l10n.filterArchNoNativeCode),
                       ])
                     _radio<ArchitectureFilter>(
                       label: text,
@@ -166,12 +171,12 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                     ),
 
                   SizedBox(height: 12.h),
-                  _label(theme, 'Package type'),
+                  _label(theme, l10n.filterPackageType),
                   for (final (PackageTypeFilter value, String text)
-                      in const <(PackageTypeFilter, String)>[
-                        (PackageTypeFilter.all, 'All apps'),
-                        (PackageTypeFilter.single, 'Single APK'),
-                        (PackageTypeFilter.split, 'Split APK'),
+                      in <(PackageTypeFilter, String)>[
+                        (PackageTypeFilter.all, l10n.filterAllApps),
+                        (PackageTypeFilter.single, l10n.filterPackageSingle),
+                        (PackageTypeFilter.split, l10n.filterPackageSplit),
                       ])
                     _radio<PackageTypeFilter>(
                       label: text,
@@ -191,7 +196,7 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                         context,
                       ).pop(const AppFilterResult.importFiles()),
                       icon: const Icon(Icons.folder_outlined),
-                      label: const Text('Import by the file manager'),
+                      label: Text(l10n.filterImportFiles),
                     ),
                   ),
                   Center(
@@ -200,7 +205,7 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                         context,
                       ).pop(const AppFilterResult.importPackage()),
                       icon: const Icon(Icons.folder_zip_outlined),
-                      label: const Text('Open Duplika App Package'),
+                      label: Text(l10n.filterImportApk(AppConstants.appTitle)),
                     ),
                   ),
                 ],
@@ -230,7 +235,7 @@ class _AppFilterSheetState extends State<_AppFilterSheet> {
                       ),
                     ),
                   ),
-                  child: const Text('Apply'),
+                  child: Text(l10n.commonApply),
                 ),
               ),
             ),

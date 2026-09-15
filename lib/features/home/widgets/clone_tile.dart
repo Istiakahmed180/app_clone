@@ -3,6 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
+
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/status_colors.dart';
 import '../../../data/models/engine_result.dart';
@@ -90,7 +93,7 @@ class CloneTile extends StatelessWidget {
   Widget _tile(BuildContext context, ThemeData theme, BorderRadius radius) {
     return Semantics(
       button: true,
-      label: _semanticLabel(),
+      label: _semanticLabel(context.l10n),
       // The label already spells out the name, the instance number, the running dot and
       // the problem marker, so the descendants' own semantics are excluded rather than
       // merged — otherwise a screen reader would read the name twice and the badge and
@@ -226,18 +229,18 @@ class CloneTile extends StatelessWidget {
 
   /// Screen readers get everything the tile encodes visually, since a badge and a
   /// coloured dot are invisible to them.
-  String _semanticLabel() {
+  String _semanticLabel(AppLocalizations l10n) {
     final StringBuffer buffer = StringBuffer(profile.profileName);
     if (siblingCount > 1) {
-      buffer.write(', clone $instanceIndex of $siblingCount');
+      buffer.write(l10n.cloneTileSibling(instanceIndex, siblingCount));
     }
     if (isLaunching) {
-      buffer.write(', opening');
+      buffer.write(l10n.cloneTileOpening);
     } else if (state.running) {
-      buffer.write(', running');
+      buffer.write(l10n.cloneTileRunning);
     }
     if (!canLaunch) {
-      buffer.write(', cannot be launched on this device');
+      buffer.write(l10n.cloneTileCannotLaunch);
     }
     return buffer.toString();
   }

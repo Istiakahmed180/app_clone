@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
+
 /// Tells the user why a closed clone goes quiet, while that is still news.
 ///
 /// The Settings row reports the state and offers the fix, but nobody opens Settings to
@@ -21,6 +24,7 @@ class BackgroundActivityNudge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -43,7 +47,7 @@ class BackgroundActivityNudge extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Clones may miss notifications while they are closed.',
+                  l10n.homeBackgroundNudgeTitle,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                     fontWeight: FontWeight.w600,
@@ -54,7 +58,7 @@ class BackgroundActivityNudge extends StatelessWidget {
                   // "Make sure" rather than "Allow": on the builds whose switch the app
                   // cannot read, this may already be on, and an instruction to change a
                   // setting that is already correct reads as a bug.
-                  'Make sure background activity is allowed so they keep receiving them.',
+                  l10n.homeBackgroundNudgeMessage,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
@@ -72,7 +76,7 @@ class BackgroundActivityNudge extends StatelessWidget {
                   minimumSize: Size(0, 32.h),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text('Allow'),
+                child: Text(l10n.homeBackgroundNudgeAllow),
               ),
               IconButton(
                 onPressed: onDismiss,
@@ -80,7 +84,7 @@ class BackgroundActivityNudge extends StatelessWidget {
                 iconSize: 16.sp,
                 visualDensity: VisualDensity.compact,
                 color: theme.colorScheme.onSecondaryContainer,
-                tooltip: 'Dismiss',
+                tooltip: l10n.homeBackgroundNudgeDismiss,
               ),
             ],
           ),

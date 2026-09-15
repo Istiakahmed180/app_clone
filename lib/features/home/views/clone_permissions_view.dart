@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../data/models/clone_permissions.dart';
 import '../../../data/models/virtual_profile_model.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../widgets/empty_state.dart';
 import '../controllers/home_controller.dart';
 
@@ -98,12 +101,16 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Permissions · ${widget.profile.appName}')),
+      appBar: AppBar(
+        title: Text(context.l10n.clonePermissionsTitle(widget.profile.appName)),
+      ),
       body: _body(context, theme),
     );
   }
 
   Widget _body(BuildContext context, ThemeData theme) {
+    final AppLocalizations l10n = context.l10n;
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -112,7 +119,7 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
         padding: EdgeInsets.all(20.w),
         child: EmptyState(
           icon: Icons.error_outline,
-          title: 'Could not read permissions',
+          title: l10n.clonePermissionsErrorTitle,
           message: _error!,
         ),
       );
@@ -124,9 +131,8 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
         padding: EdgeInsets.all(20.w),
         child: EmptyState(
           icon: Icons.lock_open_outlined,
-          title: 'Nothing to scope',
-          message: 'This app declares no dangerous permissions, so there is nothing to '
-              'allow or deny for this clone.',
+          title: l10n.clonePermissionsEmptyTitle,
+          message: l10n.clonePermissionsEmptyMessage,
         ),
       );
     }
@@ -137,9 +143,7 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
         Padding(
           padding: EdgeInsets.fromLTRB(4.w, 0, 4.w, 16.h),
           child: Text(
-            'These apply to this clone only. A cloned app usually asks before it uses a '
-            'permission, and this is where that answer is scoped — an app that skips the '
-            'ask may still reach hardware through Duplika\'s own grant.',
+            l10n.clonePermissionsNote(AppConstants.appTitle),
             style: theme.textTheme.bodySmall
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),

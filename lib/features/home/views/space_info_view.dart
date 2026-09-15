@@ -7,6 +7,8 @@ import '../../../app/theme/status_colors.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/space_identity.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../controllers/home_controller.dart';
 
@@ -78,24 +80,25 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Space Info')),
+      appBar: AppBar(title: Text(l10n.spaceInfoTitle)),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
         children: <Widget>[
-          _headerCard(theme),
+          _headerCard(theme, l10n),
           SizedBox(height: 22.h),
-          Text('Device identifiers', style: theme.textTheme.titleMedium),
+          Text(l10n.spaceInfoIdentifiers, style: theme.textTheme.titleMedium),
           SizedBox(height: 10.h),
-          _identifierCard(theme),
+          _identifierCard(theme, l10n),
         ],
       ),
     );
   }
 
-  Widget _headerCard(ThemeData theme) {
-    final ({String label, Color color}) status = _status(theme);
+  Widget _headerCard(ThemeData theme, AppLocalizations l10n) {
+    final ({String label, Color color}) status = _status(theme, l10n);
 
     return Card(
       child: Padding(
@@ -121,7 +124,7 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Space ${widget.instanceIndex}',
+                    l10n.cloneSpaceLabel(widget.instanceIndex),
                     style: theme.textTheme.titleLarge,
                   ),
                   SizedBox(height: 6.h),
@@ -155,7 +158,7 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
                 border: Border.all(color: theme.colorScheme.primary),
               ),
               child: Text(
-                'ID ${widget.instanceIndex}',
+                l10n.spaceInfoIdLabel(widget.instanceIndex),
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
@@ -167,20 +170,26 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
     );
   }
 
-  ({String label, Color color}) _status(ThemeData theme) {
+  ({String label, Color color}) _status(ThemeData theme, AppLocalizations l10n) {
     if (!widget.engineActive) {
-      return (label: 'Engine unavailable', color: theme.colorScheme.error);
+      return (
+        label: l10n.spaceInfoStateEngineUnavailable,
+        color: theme.colorScheme.error,
+      );
     }
     if (widget.state.running) {
-      return (label: 'Running', color: theme.colorScheme.primary);
+      return (label: l10n.spaceInfoStateRunning, color: theme.colorScheme.primary);
     }
     if (widget.state.installed) {
-      return (label: 'Active', color: StatusColors.of(context).positive);
+      return (
+        label: l10n.spaceInfoStateActive,
+        color: StatusColors.of(context).positive,
+      );
     }
-    return (label: 'Rebuilds on launch', color: theme.colorScheme.outline);
+    return (label: l10n.spaceInfoStateRebuilds, color: theme.colorScheme.outline);
   }
 
-  Widget _identifierCard(ThemeData theme) {
+  Widget _identifierCard(ThemeData theme, AppLocalizations l10n) {
     if (_busy && _identity == null) {
       return Card(
         child: Padding(
@@ -196,9 +205,7 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
         child: Padding(
           padding: EdgeInsets.all(16.w),
           child: Text(
-            _identityError ??
-                'This space has no container yet, so it has no identifiers. Launch it '
-                    'once and they will appear here.',
+            _identityError ?? l10n.spaceInfoNoContainer,
             style: theme.textTheme.bodySmall,
           ),
         ),
@@ -206,11 +213,11 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
     }
 
     final List<(IconData, String, String)> rows = <(IconData, String, String)>[
-      (Icons.smartphone_outlined, 'Device ID', identity.deviceId),
-      (Icons.fingerprint, 'Android ID', identity.androidId),
-      (Icons.tag, 'Serial number', identity.serialNumber),
-      (Icons.wifi, 'Wi-Fi MAC', identity.wifiMac),
-      (Icons.bluetooth, 'Bluetooth MAC', identity.bluetoothMac),
+      (Icons.smartphone_outlined, l10n.spaceInfoDeviceId, identity.deviceId),
+      (Icons.fingerprint, l10n.spaceInfoAndroidId, identity.androidId),
+      (Icons.tag, l10n.spaceInfoSerialNumber, identity.serialNumber),
+      (Icons.wifi, l10n.spaceInfoWifiMac, identity.wifiMac),
+      (Icons.bluetooth, l10n.spaceInfoBluetoothMac, identity.bluetoothMac),
     ];
 
     return Card(
@@ -292,7 +299,7 @@ class _IdentifierRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Copy $label',
+            tooltip: context.l10n.spaceInfoCopy(label),
             icon: Icon(Icons.copy_outlined, size: 20.r),
             onPressed: () => _copy(context),
           ),
@@ -306,7 +313,9 @@ class _IdentifierRow extends StatelessWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('$label copied.')));
+        ..showSnackBar(
+          SnackBar(content: Text(context.l10n.spaceInfoCopied(label))),
+        );
     }
   }
 }

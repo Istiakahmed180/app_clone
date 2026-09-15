@@ -12,10 +12,20 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/app_details.dart';
+import '../../../data/models/clone_refusal.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../../../data/repositories/virtual_profile_repository.dart';
 import '../../../native/native_bridge.dart';
+
+/// A problem the picker diagnosed for itself, rather than one the engine reported.
+///
+/// A value, not a sentence: the controller has no `BuildContext`, so the wording lives
+/// beside the screen that shows it. Mirrors `SettingsStatus`.
+enum PickerStatus {
+  /// The file the user picked could not be read off the device.
+  apkUnreadable,
+}
 
 /// Backs the "add a clone" flow: pick an installed app, or import an APK.
 class AppPickerController extends GetxController {
@@ -34,7 +44,15 @@ class AppPickerController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxBool isWorking = false.obs;
   final RxString query = ''.obs;
+  /// What the native layer said went wrong, in its own words.
+  ///
+  /// Only ever native prose. A problem this app diagnoses itself goes in [status]
+  /// instead, because only a widget can say it in the user's language — the same split
+  /// `SettingsController` makes.
   final RxnString errorMessage = RxnString();
+
+  /// A problem this app found for itself, waiting to be worded and shown once.
+  final Rx<PickerStatus?> status = Rx<PickerStatus?>(null);
 
   /// How the list is ordered.
   final Rx<AppSort> sort = AppSort.name.obs;
@@ -415,8 +433,8 @@ class AppPickerController extends GetxController {
   /// analysis — a second or so of nothing after a tap — and the global bar filled that
   /// gap instead, which is the thing the row spinner replaced.
   ///
-  /// Returns the error message, or null on success.
-  Future<String?> cloneNow(InstalledAppModel app) async {
+  /// Returns why it did not happen, or null on success.
+  Future<CloneRefusal?> cloneNow(InstalledAppModel app) async {
     if (cloning.contains(app.packageName) || isWorking.value) {
       return null;
     }
@@ -426,12 +444,10 @@ class AppPickerController extends GetxController {
       if (report.verdict == CompatibilityVerdict.unsupported) {
         // Refused rather than walked into: the engine has already said this cannot
         // work, so starting the install would only fail later and less clearly.
-        return report.findings
-                .firstWhereOrNull((CompatibilityFinding f) => f.blocking)
-                ?.message ??
-            'This app cannot be cloned on this device.';
+        return CloneRefusal.blocked(report.blocker);
       }
-      return await cloneInstalledApp(app);
+      final String? failure = await cloneInstalledApp(app);
+      return failure == null ? null : CloneRefusal.failed(failure);
     } finally {
       cloning.remove(app.packageName);
     }
@@ -518,7 +534,7 @@ class AppPickerController extends GetxController {
           return null;
         } on IOException catch (error, stackTrace) {
           _logger.error('Could not copy the selected APK', error, stackTrace);
-          errorMessage.value = 'The selected APK could not be read.';
+          status.value = PickerStatus.apkUnreadable;
           return null;
         } finally {
           isWorking.value = false;

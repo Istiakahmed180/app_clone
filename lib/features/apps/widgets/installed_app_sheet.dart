@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../data/models/installed_app_model.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../widgets/app_icon.dart';
+import 'app_facts_text.dart';
 
 /// What a picker row offers when it is tapped.
 enum InstalledAppAction {
@@ -72,18 +74,18 @@ Future<InstalledAppAction?> showInstalledAppSheet(
                           // covers the row it came from, so without them the user has
                           // nothing to check they held the right app.
                           Text(
-                            app.architectureLabel,
+                            installedArchitectureLabel(context.l10n, app),
                             style: theme.textTheme.labelSmall,
                           ),
                           Text(
-                            app.packageTypeLabel,
+                            packageTypeLabel(context.l10n, app.apkCount),
                             style: theme.textTheme.labelSmall,
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Close',
+                      tooltip: context.l10n.commonClose,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
                     ),
@@ -94,19 +96,21 @@ Future<InstalledAppAction?> showInstalledAppSheet(
                 icon: Icons.copy_all_outlined,
                 // Named for what it does to what is already there: "Add another" on an
                 // app with no clones would be describing a clone that does not exist.
-                label: existingClones > 0 ? 'Add another' : 'Add clone',
+                label: existingClones > 0
+                    ? context.l10n.appSheetAddAnother
+                    : context.l10n.appSheetAddClone,
                 action: InstalledAppAction.addClone,
               ),
               SizedBox(height: 10.h),
-              const _ActionRow(
+              _ActionRow(
                 icon: Icons.share_outlined,
-                label: 'Share app',
+                label: context.l10n.appSheetShareApp,
                 action: InstalledAppAction.shareApp,
               ),
               SizedBox(height: 10.h),
-              const _ActionRow(
+              _ActionRow(
                 icon: Icons.info_outline,
-                label: 'App details',
+                label: context.l10n.appSheetAppDetails,
                 action: InstalledAppAction.appDetails,
               ),
             ],

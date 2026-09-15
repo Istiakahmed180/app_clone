@@ -5,6 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/app_details.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
+import '../widgets/app_facts_text.dart';
 import '../../../data/models/installed_app_model.dart';
 import '../controllers/app_picker_controller.dart';
 
@@ -54,9 +57,10 @@ class _AppDetailsViewState extends State<AppDetailsView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('App details')),
+      appBar: AppBar(title: Text(l10n.appDetailsTitle)),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 32.h),
         children: <Widget>[
@@ -70,11 +74,11 @@ class _AppDetailsViewState extends State<AppDetailsView> {
               child: const Center(child: CircularProgressIndicator()),
             )
           else ...<Widget>[
-            _factsCard(theme, _details!),
+            _factsCard(theme, l10n, _details!),
             SizedBox(height: 24.h),
-            Text('Advanced details', style: theme.textTheme.titleLarge),
+            Text(l10n.appDetailsAdvanced, style: theme.textTheme.titleLarge),
             SizedBox(height: 10.h),
-            _componentsCard(theme, _details!),
+            _componentsCard(theme, l10n, _details!),
           ],
         ],
       ),
@@ -102,22 +106,42 @@ class _AppDetailsViewState extends State<AppDetailsView> {
     );
   }
 
-  Widget _factsCard(ThemeData theme, AppDetails details) {
+  Widget _factsCard(ThemeData theme, AppLocalizations l10n, AppDetails details) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _fact(theme, 'Package name', details.packageName),
-          _fact(theme, 'Version', details.versionLabel),
-          _fact(theme, 'Architecture', details.architectureLabel),
-          _fact(theme, 'Bitness', details.bitnessLabel),
-          _fact(theme, 'Package type', details.packageTypeLabel),
-          _fact(theme, 'APK components', '${details.apkCount}'),
-          _fact(theme, 'Total APK size', details.totalSizeLabel),
+          _fact(theme, l10n.appDetailsPackageName, details.packageName),
+          _fact(theme, l10n.appDetailsVersion, versionLabel(l10n, details)),
           _fact(
             theme,
-            'Signing certificate SHA-256',
-            details.signingSha256 ?? 'could not be read',
+            l10n.appDetailsArchitecture,
+            detailsArchitectureLabel(l10n, details),
+          ),
+          _fact(
+            theme,
+            l10n.appDetailsBitness,
+            bitnessLabel(
+              l10n,
+              supports32Bit: details.supports32Bit,
+              supports64Bit: details.supports64Bit,
+            ),
+          ),
+          _fact(
+            theme,
+            l10n.appDetailsPackageType,
+            packageTypeLabel(l10n, details.apkCount),
+          ),
+          _fact(theme, l10n.appDetailsApkComponents, '${details.apkCount}'),
+          _fact(
+            theme,
+            l10n.appDetailsTotalApkSize,
+            totalSizeLabel(l10n, details.totalSizeBytes),
+          ),
+          _fact(
+            theme,
+            l10n.appDetailsSigningSha256,
+            details.signingSha256 ?? l10n.appDetailsSigningUnreadable,
             last: true,
           ),
         ],
@@ -125,11 +149,15 @@ class _AppDetailsViewState extends State<AppDetailsView> {
     );
   }
 
-  Widget _componentsCard(ThemeData theme, AppDetails details) {
+  Widget _componentsCard(
+    ThemeData theme,
+    AppLocalizations l10n,
+    AppDetails details,
+  ) {
     if (details.components.isEmpty) {
       return _card(
         child: Text(
-          'The package manager reported no APK files for this app.',
+          l10n.appDetailsNoApkFiles,
           style: theme.textTheme.bodySmall,
         ),
       );
@@ -202,7 +230,10 @@ class _Component extends StatelessWidget {
       children: <Widget>[
         Text(component.name, style: theme.textTheme.titleSmall),
         SizedBox(height: 2.h),
-        Text(component.summary, style: theme.textTheme.bodySmall),
+        Text(
+          apkComponentSummary(context.l10n, component),
+          style: theme.textTheme.bodySmall,
+        ),
         SizedBox(height: 2.h),
         SelectableText(
           component.path,

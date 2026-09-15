@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
+import '../../../data/models/clone_batch_result.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../data/models/clone_permissions.dart';
 import '../../../data/models/compatibility_report.dart';
@@ -64,13 +65,18 @@ class HomeController extends GetxController {
       _engine.providesRuntimeIsolation &&
       (virtualization.value?.available ?? false);
 
+  /// What the engine said about being unusable, or null when it is fine.
+  ///
+  /// An engine that failed without a message returns the empty string rather than a
+  /// sentence: the caller is a widget, and only it can say "unavailable" in the user's
+  /// language. Null still means "nothing is wrong", which is the distinction that
+  /// matters here.
   String? get virtualizationProblem {
     final VirtualizationAvailability? state = virtualization.value;
     if (state == null || state.available) {
       return null;
     }
-    return state.message ??
-        'The virtualization engine is unavailable on this device.';
+    return state.message ?? '';
   }
 
   VirtualProfileState stateFor(VirtualProfileModel profile) =>
@@ -481,15 +487,19 @@ class HomeController extends GetxController {
   /// filling the disk one container at a time takes a minute to arrive at a failure
   /// [cloneBudget] already knew about.
   ///
-  /// Returns null when every clone was created, or a user-facing message otherwise.
-  Future<String?> createClones(
+  /// Reports what the batch came to; the caller words it.
+  Future<CloneBatchResult> createClones(
     VirtualProfileModel profile,
     int count, {
     void Function(int created, int total)? onProgress,
   }) async {
-    final String? refusal = await _budgetRefusal(profile, count);
-    if (refusal != null) {
-      return refusal;
+    final CloneBudget? refusedBy = await _budgetRefusal(count);
+    if (refusedBy != null) {
+      return CloneBatchResult(
+        requested: count,
+        created: 0,
+        refusedBy: refusedBy,
+      );
     }
 
     int created = 0;
@@ -514,13 +524,11 @@ class HomeController extends GetxController {
 
     await refreshAll();
 
-    if (firstFailure == null) {
-      return null;
-    }
-    if (created == 0) {
-      return firstFailure;
-    }
-    return 'Created $created of $count. $firstFailure';
+    return CloneBatchResult(
+      requested: count,
+      created: created,
+      failure: firstFailure,
+    );
   }
 
   /// The most clones the dialog will ever offer, whatever the device could take.
@@ -562,7 +570,7 @@ class HomeController extends GetxController {
       _logger.warning('Clone budget fell back to the default: ${error.message}');
       return const CloneBudget(
         maximum: _absoluteMaximum,
-        reason: 'Choose from 1 to $_absoluteMaximum',
+        limit: CloneBudgetLimit.appCeiling,
       );
     }
 
@@ -586,16 +594,15 @@ class HomeController extends GetxController {
     if (maximum <= 0) {
       return CloneBudget(
         maximum: 0,
-        reason:
-            'Only ${capacity.freeLabel} is free, and the device keeps half a '
-            'gigabyte spare.',
+        limit: CloneBudgetLimit.storageExhausted,
+        freeLabel: capacity.freeLabel,
       );
     }
 
     if (maximum >= _absoluteMaximum) {
       return const CloneBudget(
         maximum: _absoluteMaximum,
-        reason: 'Choose from 1 to $_absoluteMaximum',
+        limit: CloneBudgetLimit.appCeiling,
       );
     }
     // Name the figure that actually bound the offer, so the number reads as this
@@ -603,7 +610,8 @@ class HomeController extends GetxController {
     if (storageCap <= memoryCap) {
       return CloneBudget(
         maximum: maximum,
-        reason: 'Up to $maximum — ${capacity.freeLabel} of space left',
+        limit: CloneBudgetLimit.storage,
+        freeLabel: capacity.freeLabel,
       );
     }
     // "at a time", because that is all this bound is. Memory does not shrink as idle
@@ -613,9 +621,8 @@ class HomeController extends GetxController {
     // with every clone made, so that figure is a ceiling and corrects itself.
     return CloneBudget(
       maximum: maximum,
-      reason:
-          'Up to $maximum at a time on a device with '
-          '${capacity.totalMemLabel} of memory',
+      limit: CloneBudgetLimit.memory,
+      totalMemLabel: capacity.totalMemLabel,
     );
   }
 
@@ -648,24 +655,17 @@ class HomeController extends GetxController {
     return _absoluteMaximum;
   }
 
-  /// Why [count] more clones of [profile] cannot be made, or null to go ahead.
+  /// The budget that refuses [count] more clones, or null to go ahead.
   ///
   /// A backstop rather than the main guard: the dialog already offers no more than the
   /// budget allows. This catches the case where the device filled up between the offer
   /// and the confirmation.
-  Future<String?> _budgetRefusal(VirtualProfileModel profile, int count) async {
+  ///
+  /// Returns the budget itself rather than a sentence, so the refusal the user reads is
+  /// worded once, in the view, from the same figures the stepper showed.
+  Future<CloneBudget?> _budgetRefusal(int count) async {
     final CloneBudget budget = await cloneBudget();
-    if (count <= budget.maximum) {
-      return null;
-    }
-    if (budget.allowsNone) {
-      return 'There is no room for another ${profile.appName} clone. '
-          '${budget.reason}';
-    }
-    // Quotes the budget rather than paraphrasing it, so the sentence the user is
-    // refused with is the one the stepper already showed them.
-    return 'Not enough room for $count more ${profile.appName} clones. '
-        '${budget.reason}.';
+    return count <= budget.maximum ? null : budget;
   }
 
   /// Stops the guest if it is running. Returns null on success.

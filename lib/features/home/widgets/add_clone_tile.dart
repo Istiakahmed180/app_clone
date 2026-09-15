@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../l10n/l10n_context.dart';
 
 /// The tinted square that starts a new clone.
 ///
@@ -9,14 +10,18 @@ import '../../../app/theme/app_theme.dart';
 /// with the clones and never covers the last one. That is why there is no floating
 /// action button on this screen.
 class AddCloneTile extends StatelessWidget {
-  const AddCloneTile({required this.onTap, this.label = 'Add app', super.key});
+  const AddCloneTile({required this.onTap, this.label, super.key});
 
   final VoidCallback onTap;
-  final String label;
+
+  /// Overrides the default "Add app". Null everywhere so far; kept because the tile is
+  /// the grid's first cell and a caller with a different grid may want a different verb.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final String label = this.label ?? context.l10n.homeAddApp;
     final BorderRadius radius = BorderRadius.circular(AppTheme.tileRadius.r);
 
     return Semantics(

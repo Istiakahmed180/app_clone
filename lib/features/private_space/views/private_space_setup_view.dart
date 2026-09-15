@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/services/private_space_store.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/private_space_controller.dart';
 
 enum PrivateSpaceSetupMode {
@@ -57,14 +59,19 @@ class _PrivateSpaceSetupViewState extends State<PrivateSpaceSetupView> {
     if (_busy) {
       return;
     }
+    final AppLocalizations l10n = context.l10n;
     final String pin = _pin.text;
     if (!PrivateSpaceStore.isValidPin(pin)) {
-      setState(() => _error =
-          'Use ${PrivateSpaceStore.minPinLength} to ${PrivateSpaceStore.maxPinLength} digits.');
+      setState(
+        () => _error = l10n.pinLengthError(
+          PrivateSpaceStore.minPinLength,
+          PrivateSpaceStore.maxPinLength,
+        ),
+      );
       return;
     }
     if (pin != _confirm.text) {
-      setState(() => _error = 'The two PINs do not match.');
+      setState(() => _error = l10n.pinMismatchError);
       return;
     }
 
@@ -91,7 +98,7 @@ class _PrivateSpaceSetupViewState extends State<PrivateSpaceSetupView> {
     if (!changed) {
       setState(() {
         _busy = false;
-        _error = 'Current PIN is incorrect.';
+        _error = l10n.pinCurrentIncorrect;
       });
       return;
     }
@@ -101,19 +108,17 @@ class _PrivateSpaceSetupViewState extends State<PrivateSpaceSetupView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isCreate ? 'Create PIN' : 'Change PIN'),
+        title: Text(_isCreate ? l10n.pinCreateTitle : l10n.pinChangeTitle),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
         children: <Widget>[
           Text(
-            _isCreate
-                ? 'This PIN locks the Private space. Keep it somewhere you will not '
-                    'forget: there is no way to recover a hidden clone without it.'
-                : 'Enter your current PIN, then choose a new one.',
+            _isCreate ? l10n.pinCreateMessage : l10n.pinChangeMessage,
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
@@ -121,20 +126,20 @@ class _PrivateSpaceSetupViewState extends State<PrivateSpaceSetupView> {
           if (!_isCreate) ...<Widget>[
             _field(
               controller: _current,
-              label: 'Current PIN',
+              label: l10n.pinCurrentLabel,
               autofocus: true,
             ),
             SizedBox(height: 14.h),
           ],
           _field(
             controller: _pin,
-            label: 'New PIN',
+            label: l10n.pinNewLabel,
             autofocus: _isCreate,
           ),
           SizedBox(height: 14.h),
           _field(
             controller: _confirm,
-            label: 'Confirm PIN',
+            label: l10n.pinConfirmLabel,
           ),
           if (_error != null) ...<Widget>[
             SizedBox(height: 12.h),
@@ -152,16 +157,14 @@ class _PrivateSpaceSetupViewState extends State<PrivateSpaceSetupView> {
               onChanged: _busy
                   ? null
                   : (bool value) => setState(() => _useBiometric = value),
-              title: const Text('Unlock with fingerprint'),
-              subtitle: const Text(
-                'You can still use your PIN at any time.',
-              ),
+              title: Text(l10n.privateSpaceFingerprint),
+              subtitle: Text(l10n.privateSpaceFingerprintAvailable),
             ),
           ],
           SizedBox(height: 24.h),
           FilledButton(
             onPressed: _busy ? null : _save,
-            child: Text(_isCreate ? 'Create Private space' : 'Save PIN'),
+            child: Text(_isCreate ? l10n.pinCreateConfirm : l10n.pinSaveConfirm),
           ),
         ],
       ),

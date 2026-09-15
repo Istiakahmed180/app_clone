@@ -144,6 +144,15 @@ object EngineErrorCodes {
     const val ABI_NOT_SUPPORTED = "ABI_NOT_SUPPORTED"
     const val APP_NOT_FOUND = "APP_NOT_FOUND"
     const val APP_NOT_SUPPORTED = "APP_NOT_SUPPORTED"
+
+    /**
+     * Split out of [APP_NOT_SUPPORTED] so each refusal has a code of its own.
+     *
+     * The Flutter layer says a finding in the user's language by looking its code up, and
+     * two different sentences sharing one code left it no way to tell which was meant.
+     */
+    const val SELF_CLONE_UNSUPPORTED = "SELF_CLONE_UNSUPPORTED"
+    const val SYSTEM_COMPONENT_UNSUPPORTED = "SYSTEM_COMPONENT_UNSUPPORTED"
     const val SECURE_ENV_REQUIRED = "SECURE_ENV_REQUIRED"
     const val APP_INSTALL_FAILED = "APP_INSTALL_FAILED"
     const val GMS_INSTALL_FAILED = "GMS_INSTALL_FAILED"

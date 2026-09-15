@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../data/models/compatibility_report.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
+import 'compatibility_text.dart';
 
 /// The user's answer from [CompatibilitySheet]: whether to create the clone.
 ///
@@ -83,7 +86,9 @@ class _SheetBodyState extends State<_SheetBody> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ({String label, Color color, IconData icon}) badge = _badge(theme.colorScheme);
+    final AppLocalizations l10n = context.l10n;
+    final ({String label, Color color, IconData icon}) badge =
+        _badge(theme.colorScheme, l10n);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
@@ -114,21 +119,20 @@ class _SheetBodyState extends State<_SheetBody> {
               _Line(
                 icon: Icons.help_outline,
                 color: theme.colorScheme.onSurfaceVariant,
-                text: 'This app could not be examined, so nothing is known about how well '
-                    'it will run. It may still be refused when the clone is created.',
+                text: l10n.compatibilityUnexaminedMessage,
               )
             else if (_report.findings.isEmpty)
               _Line(
                 icon: Icons.check_circle_outline,
                 color: theme.colorScheme.primary,
-                text: 'No known compatibility problems.',
+                text: l10n.compatibilityNoProblems,
               ),
 
             for (final CompatibilityFinding finding in _report.findings)
               _Line(
                 icon: finding.blocking ? Icons.block : Icons.warning_amber_outlined,
                 color: finding.blocking ? theme.colorScheme.error : theme.colorScheme.tertiary,
-                text: finding.message,
+                text: compatibilityFindingMessage(l10n, finding),
               ),
 
             if (widget.existingClones > 0) ...<Widget>[
@@ -136,9 +140,7 @@ class _SheetBodyState extends State<_SheetBody> {
               _Line(
                 icon: Icons.copy_all_outlined,
                 color: theme.colorScheme.onSurfaceVariant,
-                text: 'You already have ${widget.existingClones} clone'
-                    '${widget.existingClones == 1 ? '' : 's'} of this app. '
-                    'The new one starts empty with its own data.',
+                text: l10n.compatibilityExistingClones(widget.existingClones),
               ),
             ],
 
@@ -154,7 +156,7 @@ class _SheetBodyState extends State<_SheetBody> {
                   child: OutlinedButton(
                     onPressed: () =>
                         Navigator.of(context).pop(const CloneDecision.cancelled()),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.commonCancel),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -165,7 +167,11 @@ class _SheetBodyState extends State<_SheetBody> {
                               const CloneDecision(proceed: true),
                             )
                         : null,
-                    child: Text(_report.canClone ? 'Add clone' : 'Cannot clone'),
+                    child: Text(
+                      _report.canClone
+                          ? l10n.compatibilityAddClone
+                          : l10n.compatibilityCannotClone,
+                    ),
                   ),
                 ),
               ],
@@ -176,21 +182,40 @@ class _SheetBodyState extends State<_SheetBody> {
     );
   }
 
-  ({String label, Color color, IconData icon}) _badge(ColorScheme scheme) {
+  ({String label, Color color, IconData icon}) _badge(
+    ColorScheme scheme,
+    AppLocalizations l10n,
+  ) {
     if (!_report.analysed) {
-      return (label: 'Not analysed', color: scheme.onSurfaceVariant, icon: Icons.help_outline);
+      return (
+        label: l10n.compatibilityNotAnalysed,
+        color: scheme.onSurfaceVariant,
+        icon: Icons.help_outline,
+      );
     }
-    return _verdictBadge(scheme);
+    return _verdictBadge(scheme, l10n);
   }
 
-  ({String label, Color color, IconData icon}) _verdictBadge(ColorScheme scheme) =>
+  ({String label, Color color, IconData icon}) _verdictBadge(
+    ColorScheme scheme,
+    AppLocalizations l10n,
+  ) =>
       switch (_report.verdict) {
-        CompatibilityVerdict.supported =>
-          (label: 'Supported', color: scheme.primary, icon: Icons.verified_outlined),
-        CompatibilityVerdict.limited =>
-          (label: 'Limited', color: scheme.tertiary, icon: Icons.info_outline),
-        CompatibilityVerdict.unsupported =>
-          (label: 'Unsupported', color: scheme.error, icon: Icons.block),
+        CompatibilityVerdict.supported => (
+            label: l10n.compatibilitySupported,
+            color: scheme.primary,
+            icon: Icons.verified_outlined,
+          ),
+        CompatibilityVerdict.limited => (
+            label: l10n.compatibilityLimited,
+            color: scheme.tertiary,
+            icon: Icons.info_outline,
+          ),
+        CompatibilityVerdict.unsupported => (
+            label: l10n.compatibilityUnsupported,
+            color: scheme.error,
+            icon: Icons.block,
+          ),
       };
 }
 

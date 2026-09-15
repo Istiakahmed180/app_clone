@@ -40,7 +40,16 @@ class DeviceCapacity {
 
   bool get knowsMemory => (totalMemBytes ?? 0) > 0;
 
-  String get freeLabel => AppDetails.formatBytes(freeBytes);
-  String get totalMemLabel =>
-      knowsMemory ? AppDetails.formatBytes(totalMemBytes!) : 'unknown';
+  /// Free space in words, or null when the volume did not answer.
+  ///
+  /// Null rather than a word, for the same reason [totalMemBytes] is nullable: only a
+  /// widget can say "unavailable" in the user's language. Guarded by [knowsStorage] as
+  /// well, because an unanswered volume reports -1 and "-1 B is free" is worse than
+  /// saying nothing.
+  String? get freeLabel =>
+      knowsStorage ? AppDetails.formatBytes(freeBytes) : null;
+
+  /// Total memory in words, or null on a device that did not answer.
+  String? get totalMemLabel =>
+      knowsMemory ? AppDetails.formatBytes(totalMemBytes!) : null;
 }

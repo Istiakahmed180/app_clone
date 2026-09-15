@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 
 /// Asks how many more copies of an app to make.
 ///
@@ -65,6 +67,7 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return AlertDialog(
       title: Row(
@@ -87,10 +90,10 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Clone app', style: theme.textTheme.titleLarge),
+                Text(l10n.cloneCountTitle, style: theme.textTheme.titleLarge),
                 SizedBox(height: 2.h),
                 Text(
-                  'Create additional copies of ${widget.appName}.',
+                  l10n.cloneCountMessage(widget.appName),
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -102,7 +105,7 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('Number of clones', style: theme.textTheme.titleSmall),
+          Text(l10n.cloneCountLabel, style: theme.textTheme.titleSmall),
           SizedBox(height: 10.h),
           Container(
             decoration: BoxDecoration(
@@ -114,7 +117,7 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
               children: <Widget>[
                 _StepButton(
                   icon: Icons.remove,
-                  tooltip: 'One fewer',
+                  tooltip: l10n.cloneCountDecrease,
                   onPressed: _count > widget.minimum ? () => _by(-1) : null,
                 ),
                 Expanded(
@@ -126,7 +129,7 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
                 ),
                 _StepButton(
                   icon: Icons.add,
-                  tooltip: 'One more',
+                  tooltip: l10n.cloneCountIncrease,
                   onPressed: _count < widget.maximum ? () => _by(1) : null,
                 ),
               ],
@@ -134,8 +137,7 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            widget.reason ??
-                'Choose from ${widget.minimum} to ${widget.maximum}',
+            widget.reason ?? l10n.cloneBudgetRange(widget.maximum),
             style: theme.textTheme.bodySmall,
           ),
         ],
@@ -143,11 +145,11 @@ class _CloneCountDialogState extends State<_CloneCountDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(_count),
-          child: const Text('Clone'),
+          child: Text(l10n.cloneCountConfirm),
         ),
       ],
     );

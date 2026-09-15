@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../widgets/app_icon.dart';
 
 /// Prompts for a new profile name. Returns `null` when the user cancels.
@@ -48,21 +49,21 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Rename profile'),
+      title: Text(context.l10n.renameTitle),
       content: TextField(
         controller: _controller,
         autofocus: true,
         maxLength: AppConstants.maxProfileNameLength,
         textInputAction: TextInputAction.done,
-        decoration: const InputDecoration(labelText: 'Profile name'),
+        decoration: InputDecoration(labelText: context.l10n.renameFieldLabel),
         onSubmitted: (_) => _submit(),
       ),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.commonCancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Save')),
+        FilledButton(onPressed: _submit, child: Text(context.l10n.commonSave)),
       ],
     );
   }
@@ -86,7 +87,7 @@ Future<bool> showUninstallCloneDialog(
       final ThemeData theme = Theme.of(context);
 
       return AlertDialog(
-        title: const Text('Uninstall this clone?'),
+        title: Text(context.l10n.uninstallTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,8 +104,8 @@ Future<bool> showUninstallCloneDialog(
                       SizedBox(height: 2.h),
                       Text(
                         spaceCount > 1
-                            ? 'Space $spaceIndex of $spaceCount'
-                            : 'Space $spaceIndex',
+                            ? context.l10n.uninstallSpaceOf(spaceIndex, spaceCount)
+                            : context.l10n.cloneSpaceLabel(spaceIndex),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -115,19 +116,17 @@ Future<bool> showUninstallCloneDialog(
               ],
             ),
             SizedBox(height: 16.h),
-            const Text(
-              'This will remove the selected app instance and its local data.',
-            ),
+            Text(context.l10n.uninstallMessage),
           ],
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Uninstall'),
+            child: Text(context.l10n.uninstallConfirm),
           ),
         ],
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/disguise_controller.dart';
 
 /// A working calculator that doubles as the way back into a disguised app.
@@ -19,6 +20,14 @@ class CalculatorView extends StatefulWidget {
 }
 
 class _CalculatorViewState extends State<CalculatorView> {
+  /// Stands in for a result that is not a number.
+  ///
+  /// Not the word "Error" itself: [_entry] is arithmetic state that is parsed back and
+  /// pattern-matched against the PIN, so the word belongs to the display, which is the
+  /// only part of this that can say it in the user's language. Never typed, so no entry
+  /// can collide with it.
+  static const String _notANumber = '\u0000';
+
   String _entry = '0';
   String _history = '';
   double? _accumulator;
@@ -127,9 +136,17 @@ class _CalculatorViewState extends State<CalculatorView> {
         _ => b,
       };
 
+  /// A formatted token as the display should show it.
+  ///
+  /// [_format] yields arithmetic state, which may be [_notANumber]; both the entry and
+  /// the history line are built from it, so both have to be read back through here.
+  String _shown(BuildContext context, String token) => token.contains(_notANumber)
+      ? token.replaceAll(_notANumber, context.l10n.calculatorError)
+      : token;
+
   String _format(double value) {
     if (value.isNaN || value.isInfinite) {
-      return 'Error';
+      return _notANumber;
     }
     if (value == value.roundToDouble()) {
       return value.toInt().toString();
@@ -159,7 +176,7 @@ class _CalculatorViewState extends State<CalculatorView> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       Text(
-                        _history,
+                        _shown(context, _history),
                         style: const TextStyle(fontSize: 20, color: Colors.grey),
                       ),
                       const SizedBox(height: 8),
@@ -167,7 +184,7 @@ class _CalculatorViewState extends State<CalculatorView> {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
                         child: Text(
-                          _entry,
+                          _shown(context, _entry),
                           key: const Key('calculator-display'),
                           style: const TextStyle(
                             fontSize: 64,

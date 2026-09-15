@@ -5,8 +5,11 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/background_activity_state.dart';
+import '../../../data/models/clone_batch_result.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../data/models/virtual_profile_model.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../widgets/empty_state.dart';
 import '../../onboarding/widgets/onboarding_host.dart';
 import '../../settings/controllers/settings_controller.dart';
@@ -20,6 +23,7 @@ import 'clone_permissions_view.dart';
 import '../widgets/add_clone_tile.dart';
 import '../widgets/background_activity_nudge.dart';
 import '../widgets/clone_action_sheet.dart';
+import '../widgets/clone_budget_text.dart';
 import '../widgets/clone_count_dialog.dart';
 import '../widgets/clone_tile.dart';
 import '../widgets/home_header.dart';
@@ -64,13 +68,13 @@ class HomeView extends GetView<HomeController> {
                 child: Obx(
                   () => HomeHeader(
                     title: controller.viewingPrivate.value
-                        ? 'Private space'
+                        ? context.l10n.homePrivateSpaceTitle
                         : AppConstants.appTitle,
                     subtitle: controller.viewingPrivate.value
-                        ? _hiddenSubtitle()
-                        : 'Your private space',
+                        ? context.l10n.homeHiddenApps(controller.hiddenCount)
+                        : context.l10n.homeSubtitle,
                     trailing: controller.viewingPrivate.value
-                        ? _privateCloseButton()
+                        ? _privateCloseButton(context)
                         : _overflowMenu(context),
                   ),
                 ),
@@ -134,10 +138,10 @@ class HomeView extends GetView<HomeController> {
                         _grid(context),
                         if (!controller.viewingPrivate.value &&
                             controller.visibleProfiles.isEmpty)
-                          _emptyState(),
+                          _emptyState(context),
                         if (controller.viewingPrivate.value &&
                             controller.hiddenProfiles.isEmpty)
-                          _privateEmptyState(),
+                          _privateEmptyState(context),
                       ],
                     ),
                   );
@@ -174,23 +178,25 @@ class HomeView extends GetView<HomeController> {
   /// the same thing, and a menu item that duplicates a gesture the screen already has
   /// only makes the menu longer.
   Widget _overflowMenu(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+
     return PopupMenuButton<void>(
-      tooltip: 'More',
+      tooltip: l10n.commonMore,
       itemBuilder: (BuildContext context) => <PopupMenuEntry<void>>[
         PopupMenuItem<void>(
           onTap: () => Get.toNamed<void>(AppRoutes.settings),
-          child: const ListTile(
+          child: ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Settings'),
+            leading: const Icon(Icons.settings_outlined),
+            title: Text(l10n.homeMenuSettings),
           ),
         ),
         PopupMenuItem<void>(
           onTap: () => Get.toNamed<void>(AppRoutes.developerTools),
-          child: const ListTile(
+          child: ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.terminal_outlined),
-            title: Text('Developer Tools'),
+            leading: const Icon(Icons.terminal_outlined),
+            title: Text(l10n.homeMenuDeveloperTools),
           ),
         ),
       ],
@@ -242,16 +248,10 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  /// `3 hidden` / `No hidden apps`, in the header while the space is open.
-  String _hiddenSubtitle() {
-    final int count = controller.hiddenCount;
-    return count == 1 ? '1 hidden app' : '$count hidden apps';
-  }
-
   /// Leaves the Private space and relocks it in the same tap.
-  Widget _privateCloseButton() {
+  Widget _privateCloseButton(BuildContext context) {
     return IconButton(
-      tooltip: 'Lock and close',
+      tooltip: context.l10n.homeLockAndClose,
       icon: const Icon(Icons.lock_outline),
       onPressed: () {
         controller.privateSpace.lock();
@@ -280,18 +280,16 @@ class HomeView extends GetView<HomeController> {
     final bool go = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('Set up Private space?'),
-            content: const Text(
-              'Hiding a clone needs a Private space. Create one with a PIN first.',
-            ),
+            title: Text(context.l10n.homeSetUpPrivateSpaceTitle),
+            content: Text(context.l10n.homeSetUpPrivateSpaceMessage),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Not now'),
+                child: Text(context.l10n.commonNotNow),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Set up'),
+                child: Text(context.l10n.homeSetUpPrivateSpaceConfirm),
               ),
             ],
           ),
@@ -314,27 +312,28 @@ class HomeView extends GetView<HomeController> {
   /// A panel rather than a line of text: a first run where the grid holds one tinted
   /// square and nothing else reads as a screen that failed to load. The panel says the
   /// app got here on purpose and names the next step.
-  Widget _emptyState() {
+  Widget _emptyState(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: EmptyState(
-        title: 'Your space is empty',
-        message: 'Add an app to create your first private instance.',
-        actionLabel: 'Add your first app',
+        title: l10n.homeEmptyTitle,
+        message: l10n.homeEmptyMessage,
+        actionLabel: l10n.homeEmptyAction,
         onAction: _openAddProfile,
       ),
     );
   }
 
   /// Shown when the lock is open but nothing is hidden yet.
-  Widget _privateEmptyState() {
+  Widget _privateEmptyState(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: EmptyState(
         icon: Icons.visibility_off_outlined,
-        title: 'Nothing hidden yet',
-        message:
-            'Hold any app on the main grid and choose Hide to move it in here.',
+        title: context.l10n.homePrivateEmptyTitle,
+        message: context.l10n.homePrivateEmptyMessage,
       ),
     );
   }
@@ -411,11 +410,12 @@ class HomeView extends GetView<HomeController> {
     if (!context.mounted) {
       return;
     }
+    final AppLocalizations l10n = context.l10n;
     if (budget.allowsNone) {
       // No stepper: every value it could offer is one that would be refused.
       await _showFailure(
         context,
-        'There is no room for another ${profile.appName} clone. ${budget.reason}',
+        cloneBudgetRefusal(l10n, budget, profile.appName),
       );
       return;
     }
@@ -424,7 +424,7 @@ class HomeView extends GetView<HomeController> {
       context,
       appName: profile.appName,
       maximum: budget.maximum,
-      reason: budget.reason,
+      reason: cloneBudgetReason(l10n, budget),
     );
     if (count == null || !context.mounted) {
       return;
@@ -433,16 +433,16 @@ class HomeView extends GetView<HomeController> {
     // Each clone is a container install of a few seconds. A barrier that reports its
     // progress is the honest thing to show; a frozen grid would read as a hang.
     final ValueNotifier<String> progress = ValueNotifier<String>(
-      'Creating 1 of $count…',
+      l10n.cloneCreating(1, count),
     );
     _showProgress(context, profile, progress);
 
-    final String? error = await controller.createClones(
+    final CloneBatchResult result = await controller.createClones(
       profile,
       count,
       onProgress: (int created, int total) => progress.value = created >= total
-          ? 'Finishing…'
-          : 'Creating ${created + 1} of $total…',
+          ? l10n.cloneCreatingFinishing
+          : l10n.cloneCreating(created + 1, total),
     );
 
     if (!context.mounted) {
@@ -453,16 +453,12 @@ class HomeView extends GetView<HomeController> {
     Navigator.of(context).pop();
     progress.dispose();
 
-    if (error != null) {
-      await _showFailure(context, error);
+    final String? failure = cloneBatchFailure(l10n, result, profile.appName);
+    if (failure != null) {
+      await _showFailure(context, failure);
       return;
     }
-    _showMessage(
-      context,
-      count == 1
-          ? 'Added another ${profile.appName}.'
-          : 'Added $count more copies of ${profile.appName}.',
-    );
+    _showMessage(context, l10n.cloneAdded(count, profile.appName));
   }
 
   void _showProgress(
@@ -529,18 +525,16 @@ class HomeView extends GetView<HomeController> {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Force stop this app?'),
-        content: const Text(
-          'The app will stop running until you open it again.',
-        ),
+        title: Text(context.l10n.cloneForceStopTitle),
+        content: Text(context.l10n.cloneForceStopMessage),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Force stop'),
+            child: Text(context.l10n.cloneForceStopConfirm),
           ),
         ],
       ),
@@ -556,16 +550,16 @@ class HomeView extends GetView<HomeController> {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Clear app cache?'),
-        content: const Text('This will remove temporary files for this clone.'),
+        title: Text(context.l10n.cloneClearCacheTitle),
+        content: Text(context.l10n.cloneClearCacheMessage),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear cache'),
+            child: Text(context.l10n.cloneClearCacheConfirm),
           ),
         ],
       ),
@@ -581,19 +575,18 @@ class HomeView extends GetView<HomeController> {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Install Google services?'),
-        content: const Text(
-          'Duplika will install its bundled microG into this clone as Google Play '
-          'services. The clone keeps its data. This can take a few seconds.',
+        title: Text(context.l10n.cloneInstallGoogleServicesTitle),
+        content: Text(
+          context.l10n.cloneInstallGoogleServicesMessage(AppConstants.appTitle),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Install'),
+            child: Text(context.l10n.cloneInstallGoogleServicesConfirm),
           ),
         ],
       ),
@@ -609,19 +602,16 @@ class HomeView extends GetView<HomeController> {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Clear app storage?'),
-        content: const Text(
-          'This will permanently delete this clone\'s accounts, settings, and local '
-          'data.',
-        ),
+        title: Text(context.l10n.cloneClearStorageTitle),
+        content: Text(context.l10n.cloneClearStorageMessage),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear Storage'),
+            child: Text(context.l10n.cloneClearStorageConfirm),
           ),
         ],
       ),
@@ -633,6 +623,8 @@ class HomeView extends GetView<HomeController> {
     VirtualProfileModel profile,
     CloneAction action,
   ) async {
+    final AppLocalizations l10n = context.l10n;
+
     switch (action) {
       case CloneAction.spaceInfo:
         await _openSpaceInfo(context, profile);
@@ -648,7 +640,7 @@ class HomeView extends GetView<HomeController> {
         if (error != null) {
           await _showFailure(context, error);
         } else {
-          _showMessage(context, 'Stopped ${profile.profileName}.');
+          _showMessage(context, l10n.cloneStopped(profile.profileName));
         }
       case CloneAction.clearCache:
         final bool confirmed = await _confirmClearCache(context) ?? false;
@@ -662,7 +654,7 @@ class HomeView extends GetView<HomeController> {
         if (error != null) {
           await _showFailure(context, error);
         } else {
-          _showMessage(context, 'Cache cleared for ${profile.profileName}.');
+          _showMessage(context, l10n.cloneCacheCleared(profile.profileName));
         }
       case CloneAction.clearStorage:
         // Confirmed: this is every login, message and setting inside the clone, and
@@ -678,10 +670,7 @@ class HomeView extends GetView<HomeController> {
         if (error != null) {
           await _showFailure(context, error);
         } else {
-          _showMessage(
-            context,
-            '${profile.profileName} was reset. Its next launch is a first launch.',
-          );
+          _showMessage(context, l10n.cloneStorageCleared(profile.profileName));
         }
       case CloneAction.toggleHidden:
         if (!controller.privateSpaceEnabled) {
@@ -694,8 +683,8 @@ class HomeView extends GetView<HomeController> {
           _showMessage(
             context,
             willHide
-                ? '${profile.profileName} hidden in Private space.'
-                : '${profile.profileName} is back on the main grid.',
+                ? l10n.cloneHidden(profile.profileName)
+                : l10n.cloneUnhidden(profile.profileName),
           );
         }
       case CloneAction.shareApp:
@@ -727,10 +716,7 @@ class HomeView extends GetView<HomeController> {
         if (error != null) {
           await _showFailure(context, error);
         } else {
-          _showMessage(
-            context,
-            'Confirm the shortcut on your home screen to finish adding it.',
-          );
+          _showMessage(context, l10n.cloneShortcutAdded);
         }
       case CloneAction.notifications:
         // On success the system's own notification screen opens over the app, so there is
@@ -757,7 +743,7 @@ class HomeView extends GetView<HomeController> {
         // Installing the bundled artefact takes seconds, so the barrier stays up until
         // the engine answers rather than letting a second tap queue another install.
         final ValueNotifier<String> progress = ValueNotifier<String>(
-          'Installing Google services…',
+          l10n.cloneGoogleServicesInstalling,
         );
         _showProgress(context, profile, progress);
         final String? error = await controller.installGoogleServices(profile);
@@ -773,7 +759,7 @@ class HomeView extends GetView<HomeController> {
         } else {
           _showMessage(
             context,
-            'Google services installed in ${profile.profileName}.',
+            l10n.cloneGoogleServicesInstalled(profile.profileName),
           );
         }
       case CloneAction.delete:
@@ -814,12 +800,12 @@ class HomeView extends GetView<HomeController> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Couldn\'t do that'),
+        title: Text(context.l10n.commonFailureTitle),
         content: Text(message),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),

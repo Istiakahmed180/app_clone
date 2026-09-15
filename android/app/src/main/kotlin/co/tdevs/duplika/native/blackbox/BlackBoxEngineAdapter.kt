@@ -35,6 +35,10 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         try {
             val core = BlackBoxCore.get()
             core.closeCodeInit()
+            // Registered before the attach so it is in place when a guest process binds:
+            // the callback fires inside the clone and is what carries the alias repair
+            // there. Harmless in the host, where no guest application is ever created.
+            core.addAppLifecycleCallback(GuestAliasLifecycleCallback())
             core.onBeforeMainApplicationAttach(application, base)
             core.doAttachBaseContext(base, hostConfiguration(base))
             core.onAfterMainApplicationAttach(application, base)

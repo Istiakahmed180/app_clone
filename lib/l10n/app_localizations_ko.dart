@@ -275,4 +275,897 @@ class AppLocalizationsKo extends AppLocalizations {
   String contactLegalOpenFailed(String document) {
     return '$document을 열 수 없습니다.';
   }
+
+  @override
+  String get commonCancel => '취소';
+
+  @override
+  String get commonOk => '확인';
+
+  @override
+  String get commonNotNow => '나중에';
+
+  @override
+  String get commonClose => '닫기';
+
+  @override
+  String get commonMore => '더보기';
+
+  @override
+  String get commonFailureTitle => '실행하지 못했습니다';
+
+  @override
+  String get homePrivateSpaceTitle => '프라이빗 스페이스';
+
+  @override
+  String get homeSubtitle => '나만의 프라이빗 스페이스';
+
+  @override
+  String homeHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '숨긴 앱 $count개',
+      zero: '숨긴 앱 없음',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeLockAndClose => '잠그고 닫기';
+
+  @override
+  String get homeMenuSettings => '설정';
+
+  @override
+  String get homeMenuDeveloperTools => '개발자 도구';
+
+  @override
+  String get homeAddApp => '앱 추가';
+
+  @override
+  String get homeEmptyTitle => '스페이스가 비어 있습니다';
+
+  @override
+  String get homeEmptyMessage => '앱을 추가해 첫 번째 프라이빗 인스턴스를 만들어 보세요.';
+
+  @override
+  String get homeEmptyAction => '첫 앱 추가하기';
+
+  @override
+  String get homePrivateEmptyTitle => '아직 숨긴 항목이 없습니다';
+
+  @override
+  String get homePrivateEmptyMessage =>
+      '메인 그리드에서 앱을 길게 누르고 \'숨기기\'를 선택하면 이곳으로 옮겨집니다.';
+
+  @override
+  String get homeSetUpPrivateSpaceTitle => '프라이빗 스페이스를 설정할까요?';
+
+  @override
+  String get homeSetUpPrivateSpaceMessage =>
+      '클론을 숨기려면 프라이빗 스페이스가 필요합니다. 먼저 PIN으로 하나 만드세요.';
+
+  @override
+  String get homeSetUpPrivateSpaceConfirm => '설정';
+
+  @override
+  String get homeEngineInactive =>
+      '이 기기에서는 가상화 엔진이 활성화되어 있지 않아 클론을 격리된 컨테이너에서 실행할 수 없습니다.';
+
+  @override
+  String get homeEngineUnavailable => '이 기기에서는 가상화 엔진을 사용할 수 없습니다.';
+
+  @override
+  String get homeBackgroundNudgeTitle => '클론이 닫혀 있는 동안 알림을 놓칠 수 있습니다.';
+
+  @override
+  String get homeBackgroundNudgeMessage =>
+      '알림을 계속 받을 수 있도록 백그라운드 활동이 허용되어 있는지 확인하세요.';
+
+  @override
+  String get homeBackgroundNudgeAllow => '허용';
+
+  @override
+  String get homeBackgroundNudgeDismiss => '닫기';
+
+  @override
+  String cloneSpaceLabel(int index) {
+    return '스페이스 $index';
+  }
+
+  @override
+  String get cloneActionsCompatibility => '호환성';
+
+  @override
+  String get cloneActionsManage => '관리';
+
+  @override
+  String get cloneActionUninstall => '제거';
+
+  @override
+  String get cloneActionClone => '복제';
+
+  @override
+  String get cloneActionShortcut => '바로가기';
+
+  @override
+  String get cloneActionSpaceInfo => '스페이스 정보';
+
+  @override
+  String get cloneActionEditName => '이름 수정';
+
+  @override
+  String get cloneActionForceStop => '강제 중지';
+
+  @override
+  String get cloneActionClearCache => '캐시 삭제';
+
+  @override
+  String get cloneActionClearStorage => '데이터 삭제';
+
+  @override
+  String get cloneActionHide => '숨기기';
+
+  @override
+  String get cloneActionUnhide => '표시';
+
+  @override
+  String get cloneActionShareApp => '앱 공유';
+
+  @override
+  String get cloneActionNotifications => '알림';
+
+  @override
+  String get cloneActionPermissions => '권한';
+
+  @override
+  String get cloneActionGoogleServicesInstalled => 'Google 서비스(microG) 설치됨';
+
+  @override
+  String get cloneActionInstallGoogleServices => 'Google 서비스(microG) 설치';
+
+  @override
+  String cloneTileSibling(int index, int count) {
+    return ', $count개 중 $index번째 클론';
+  }
+
+  @override
+  String get cloneTileOpening => ', 여는 중';
+
+  @override
+  String get cloneTileRunning => ', 실행 중';
+
+  @override
+  String get cloneTileCannotLaunch => ', 이 기기에서는 실행할 수 없음';
+
+  @override
+  String get cloneForceStopTitle => '이 앱을 강제 중지할까요?';
+
+  @override
+  String get cloneForceStopMessage => '다시 열 때까지 앱이 실행을 멈춥니다.';
+
+  @override
+  String get cloneForceStopConfirm => '강제 중지';
+
+  @override
+  String get cloneClearCacheTitle => '앱 캐시를 삭제할까요?';
+
+  @override
+  String get cloneClearCacheMessage => '이 클론의 임시 파일이 삭제됩니다.';
+
+  @override
+  String get cloneClearCacheConfirm => '캐시 삭제';
+
+  @override
+  String get cloneClearStorageTitle => '앱 데이터를 삭제할까요?';
+
+  @override
+  String get cloneClearStorageMessage => '이 클론의 계정, 설정, 로컬 데이터가 영구히 삭제됩니다.';
+
+  @override
+  String get cloneClearStorageConfirm => '데이터 삭제';
+
+  @override
+  String get cloneInstallGoogleServicesTitle => 'Google 서비스를 설치할까요?';
+
+  @override
+  String cloneInstallGoogleServicesMessage(String appName) {
+    return '$appName이(가) 내장된 microG를 Google Play 서비스로 이 클론에 설치합니다. 클론의 데이터는 유지됩니다. 몇 초 걸릴 수 있습니다.';
+  }
+
+  @override
+  String get cloneInstallGoogleServicesConfirm => '설치';
+
+  @override
+  String cloneStopped(String name) {
+    return '$name을(를) 중지했습니다.';
+  }
+
+  @override
+  String cloneCacheCleared(String name) {
+    return '$name의 캐시를 삭제했습니다.';
+  }
+
+  @override
+  String cloneStorageCleared(String name) {
+    return '$name이(가) 초기화되었습니다. 다음 실행은 첫 실행이 됩니다.';
+  }
+
+  @override
+  String cloneHidden(String name) {
+    return '$name을(를) 프라이빗 스페이스에 숨겼습니다.';
+  }
+
+  @override
+  String cloneUnhidden(String name) {
+    return '$name이(가) 메인 그리드로 돌아왔습니다.';
+  }
+
+  @override
+  String get cloneShortcutAdded => '추가를 마치려면 홈 화면에서 바로가기를 확인하세요.';
+
+  @override
+  String get cloneGoogleServicesInstalling => 'Google 서비스를 설치하는 중…';
+
+  @override
+  String cloneGoogleServicesInstalled(String name) {
+    return '$name에 Google 서비스를 설치했습니다.';
+  }
+
+  @override
+  String get cloneCountTitle => '앱 복제';
+
+  @override
+  String cloneCountMessage(String appName) {
+    return '$appName의 사본을 더 만듭니다.';
+  }
+
+  @override
+  String get cloneCountLabel => '클론 개수';
+
+  @override
+  String get cloneCountDecrease => '하나 줄이기';
+
+  @override
+  String get cloneCountIncrease => '하나 늘리기';
+
+  @override
+  String get cloneCountConfirm => '복제';
+
+  @override
+  String cloneCreating(int created, int total) {
+    return '$total개 중 $created개 생성 중…';
+  }
+
+  @override
+  String get cloneCreatingFinishing => '마무리하는 중…';
+
+  @override
+  String cloneAdded(int count, String appName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$appName 사본을 $count개 더 추가했습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cloneCreatedPartly(int created, int total, String failure) {
+    return '$total개 중 $created개를 만들었습니다. $failure';
+  }
+
+  @override
+  String cloneBudgetRange(int maximum) {
+    return '1부터 $maximum까지 선택';
+  }
+
+  @override
+  String cloneBudgetNoStorage(String free) {
+    return '여유 공간이 $free뿐이며, 기기는 0.5GB를 남겨 둡니다.';
+  }
+
+  @override
+  String cloneBudgetStorage(int maximum, String free) {
+    return '최대 $maximum개 — 남은 공간 $free';
+  }
+
+  @override
+  String cloneBudgetMemory(int maximum, String memory) {
+    return '메모리 $memory인 기기에서는 한 번에 최대 $maximum개';
+  }
+
+  @override
+  String cloneBudgetNoRoom(String appName, String reason) {
+    return '$appName 클론을 하나 더 만들 공간이 없습니다. $reason';
+  }
+
+  @override
+  String cloneBudgetNotEnoughRoom(int count, String appName, String reason) {
+    return '$appName 클론을 $count개 더 만들 공간이 부족합니다. $reason.';
+  }
+
+  @override
+  String clonePermissionsTitle(String appName) {
+    return '권한 · $appName';
+  }
+
+  @override
+  String get clonePermissionsErrorTitle => '권한을 읽을 수 없습니다';
+
+  @override
+  String get clonePermissionsEmptyTitle => '제한할 항목 없음';
+
+  @override
+  String get clonePermissionsEmptyMessage =>
+      '이 앱은 위험 권한을 선언하지 않으므로 이 클론에 대해 허용하거나 거부할 항목이 없습니다.';
+
+  @override
+  String clonePermissionsNote(String appName) {
+    return '이 클론에만 적용됩니다. 복제된 앱은 보통 권한을 쓰기 전에 묻는데, 그 답이 여기서 제한됩니다. 묻지 않고 넘어가는 앱은 $appName 자체의 권한을 통해 하드웨어에 접근할 수도 있습니다.';
+  }
+
+  @override
+  String get spaceInfoTitle => '스페이스 정보';
+
+  @override
+  String get spaceInfoIdentifiers => '기기 식별자';
+
+  @override
+  String spaceInfoIdLabel(int index) {
+    return 'ID $index';
+  }
+
+  @override
+  String get spaceInfoStateEngineUnavailable => '엔진 사용 불가';
+
+  @override
+  String get spaceInfoStateRunning => '실행 중';
+
+  @override
+  String get spaceInfoStateActive => '활성';
+
+  @override
+  String get spaceInfoStateRebuilds => '실행 시 재생성';
+
+  @override
+  String get spaceInfoNoContainer =>
+      '이 스페이스에는 아직 컨테이너가 없어 식별자도 없습니다. 한 번 실행하면 여기에 나타납니다.';
+
+  @override
+  String get spaceInfoDeviceId => '기기 ID';
+
+  @override
+  String get spaceInfoAndroidId => 'Android ID';
+
+  @override
+  String get spaceInfoSerialNumber => '일련번호';
+
+  @override
+  String get spaceInfoWifiMac => 'Wi-Fi MAC';
+
+  @override
+  String get spaceInfoBluetoothMac => '블루투스 MAC';
+
+  @override
+  String spaceInfoCopy(String label) {
+    return '$label 복사';
+  }
+
+  @override
+  String spaceInfoCopied(String label) {
+    return '$label을(를) 복사했습니다.';
+  }
+
+  @override
+  String get commonBack => '뒤로';
+
+  @override
+  String get commonApply => '적용';
+
+  @override
+  String get pickerTitle => '앱 추가';
+
+  @override
+  String get pickerSearchHint => '앱 검색';
+
+  @override
+  String get pickerFilterTooltip => '필터 및 정렬';
+
+  @override
+  String get pickerErrorTitle => '앱 목록을 불러올 수 없습니다';
+
+  @override
+  String get pickerNoMatchesTitle => '일치하는 앱이 없습니다';
+
+  @override
+  String get pickerNoMatchesMessage => '다른 검색어를 시도하거나 APK를 가져오세요.';
+
+  @override
+  String get pickerPopular => '인기';
+
+  @override
+  String get pickerQuickPicks => '빠른 선택';
+
+  @override
+  String get pickerInstalledApps => '설치된 앱';
+
+  @override
+  String pickerAppCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '앱 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pickerSystemChip => '시스템';
+
+  @override
+  String get pickerCannotClone => '이 기기에서는 이 앱을 복제할 수 없습니다.';
+
+  @override
+  String get pickerApkUnreadable => '선택한 APK를 읽을 수 없습니다.';
+
+  @override
+  String get filterTitle => '필터 및 정렬';
+
+  @override
+  String get filterSort => '정렬';
+
+  @override
+  String get filterSortName => '앱 이름';
+
+  @override
+  String get filterSortRecentlyInstalled => '최근 설치';
+
+  @override
+  String get filterSortRecentlyUpdated => '최근 업데이트';
+
+  @override
+  String get filterFilter => '필터';
+
+  @override
+  String get filterAllApps => '모든 앱';
+
+  @override
+  String get filterUserApps => '사용자 앱';
+
+  @override
+  String get filterSystemApps => '시스템 앱';
+
+  @override
+  String get filterNotAdded => '추가되지 않음';
+
+  @override
+  String get filterAlreadyAdded => '이미 추가됨';
+
+  @override
+  String get filterArchitecture => '아키텍처';
+
+  @override
+  String get filterArch64 => '64비트';
+
+  @override
+  String get filterArch32 => '32비트';
+
+  @override
+  String get filterArchNoNativeCode => '네이티브 코드 없음';
+
+  @override
+  String get filterPackageType => '패키지 유형';
+
+  @override
+  String get filterPackageSingle => '단일 APK';
+
+  @override
+  String get filterPackageSplit => '분할 APK';
+
+  @override
+  String filterImportApk(String appName) {
+    return '$appName 앱 패키지 열기';
+  }
+
+  @override
+  String get appSheetAddClone => '클론 추가';
+
+  @override
+  String get appSheetAddAnother => '하나 더 추가';
+
+  @override
+  String get appSheetShareApp => '앱 공유';
+
+  @override
+  String get appSheetAppDetails => '앱 세부정보';
+
+  @override
+  String get appDetailsTitle => '앱 세부정보';
+
+  @override
+  String get appDetailsAdvanced => '고급 정보';
+
+  @override
+  String get appDetailsPackageName => '패키지 이름';
+
+  @override
+  String get appDetailsVersion => '버전';
+
+  @override
+  String get appDetailsArchitecture => '아키텍처';
+
+  @override
+  String get appDetailsBitness => '비트 폭';
+
+  @override
+  String get appDetailsPackageType => '패키지 유형';
+
+  @override
+  String get appDetailsApkComponents => 'APK 구성요소';
+
+  @override
+  String get appDetailsTotalApkSize => '전체 APK 크기';
+
+  @override
+  String get appDetailsSigningSha256 => '서명 인증서 SHA-256';
+
+  @override
+  String get appDetailsSigningUnreadable => '읽을 수 없음';
+
+  @override
+  String get appDetailsNoApkFiles => '패키지 관리자가 이 앱의 APK 파일을 보고하지 않았습니다.';
+
+  @override
+  String get compatibilityNotAnalysed => '분석되지 않음';
+
+  @override
+  String get compatibilitySupported => '지원됨';
+
+  @override
+  String get compatibilityLimited => '제한적';
+
+  @override
+  String get compatibilityUnsupported => '지원되지 않음';
+
+  @override
+  String get compatibilityUnexaminedMessage =>
+      '이 앱을 검사할 수 없어 얼마나 잘 작동할지 알 수 없습니다. 클론을 만들 때 거부될 수도 있습니다.';
+
+  @override
+  String get compatibilityNoProblems => '알려진 호환성 문제가 없습니다.';
+
+  @override
+  String compatibilityExistingClones(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 앱의 클론이 이미 $count개 있습니다. 새 클론은 자체 데이터로 비어 있는 상태에서 시작합니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get compatibilityAddClone => '클론 추가';
+
+  @override
+  String get compatibilityCannotClone => '복제할 수 없음';
+
+  @override
+  String get findingAppNotFound => '이 애플리케이션은 기기에 설치되어 있지 않습니다.';
+
+  @override
+  String get findingSecureEnvRequired => '이 애플리케이션은 보안 환경이 필요해 가상화할 수 없습니다.';
+
+  @override
+  String findingSelfClone(String appName) {
+    return '$appName은(는) 자기 자신을 복제할 수 없습니다.';
+  }
+
+  @override
+  String get findingSystemComponent => '시스템 구성요소는 복제할 수 없습니다.';
+
+  @override
+  String get findingAbiNotSupported =>
+      '이 앱의 네이티브 라이브러리는 엔진이 지원하는 아키텍처용으로 빌드되지 않았습니다.';
+
+  @override
+  String get findingRequiresGms =>
+      '클론 안에서도 Google Play 서비스는 사용할 수 있지만, 이 앱 자체의 신원을 확인해야 하는 Google 기능은 지원되지 않습니다. 로그인과 위치·SMS 인증처럼 신원에 묶인 API가 여기에 해당합니다.';
+
+  @override
+  String findingPushUnsupported(String appName) {
+    return '클론에서는 푸시 알림이 작동하지 않습니다. 이 앱이 $appName의 신원으로 실행되는 동안 Google Play 서비스는 푸시 등록을 하지 않으므로, 클론으로 보낸 메시지는 도착하지 않습니다. 그 밖에는 앱을 쓸 수 있지만, 성공할 수 없는 푸시 등록을 기다리는 동안 첫 실행에서 잠시 멈출 수 있습니다.';
+  }
+
+  @override
+  String findingStorageUnavailable(String appName) {
+    return '이 앱은 공유 저장소를 사용하는데, 이 $appName 빌드는 \'모든 파일 접근\'을 선언하지 않습니다. 이 앱의 클론은 파일에 접근하지 못해 작동하지 않습니다.';
+  }
+
+  @override
+  String findingStorageNotGranted(String appName) {
+    return '이 앱은 공유 저장소를 사용합니다. 클론을 실행하기 전에 설정 → 특별한 앱 접근에서 $appName에 \'모든 파일 접근\'을 허용하세요. 그렇지 않으면 실행 시 거부될 수 있습니다.';
+  }
+
+  @override
+  String get factsNoNativeCode => '네이티브 코드 없음';
+
+  @override
+  String get factsAnyNoNativeCode => '모두 — 네이티브 코드 없음';
+
+  @override
+  String get factsBits32And64 => '32 + 64';
+
+  @override
+  String get factsSingleApk => '단일 APK';
+
+  @override
+  String factsSplitApk(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '분할 APK · 파일 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get factsVersionUnknown => '알 수 없음';
+
+  @override
+  String get filterArchBoth => '32 + 64';
+
+  @override
+  String get filterImportFiles => '파일 관리자로 가져오기';
+
+  @override
+  String get commonSave => '저장';
+
+  @override
+  String get renameTitle => '프로필 이름 변경';
+
+  @override
+  String get renameFieldLabel => '프로필 이름';
+
+  @override
+  String get uninstallTitle => '이 클론을 제거할까요?';
+
+  @override
+  String uninstallSpaceOf(int index, int count) {
+    return '$count개 중 스페이스 $index';
+  }
+
+  @override
+  String get uninstallMessage => '선택한 앱 인스턴스와 로컬 데이터가 삭제됩니다.';
+
+  @override
+  String get uninstallConfirm => '제거';
+
+  @override
+  String get calculatorError => '오류';
+
+  @override
+  String get disclosureTitle => '시작하기 전에';
+
+  @override
+  String disclosureIntro(String appName) {
+    return '$appName은(는) 선택한 앱의 두 번째 사본을 실행합니다. 무엇을 읽고 무엇을 요청하는지 그대로 알려드립니다.';
+  }
+
+  @override
+  String get disclosureAppsTitle => '설치된 앱 목록';
+
+  @override
+  String disclosureAppsBody(String appName) {
+    return '클론 선택 화면을 보여주기 위해 $appName은(는) 이 기기에 설치된 앱 목록(이름, 아이콘, 버전)을 읽습니다. 이 목록은 기기 안에만 남습니다. 업로드하거나 판매하거나 공유하지 않으며, 이 앱에는 광고도 분석도 트래커도 없습니다.';
+  }
+
+  @override
+  String get disclosurePermissionsTitle => '클론을 대신한 권한';
+
+  @override
+  String disclosurePermissionsBody(String appName) {
+    return '복제된 앱은 $appName 안에서 실행되므로 일부 Android 권한이 그들을 대신해 $appName에 적용됩니다. 복제한 메신저가 계속 알림을 받도록 배터리 최적화에서 제외해 달라는 요청을 한 번 받을 수 있습니다. 파일이나 미디어 앱을 복제할 때만 설정에서 \'모든 파일 접근\'을 허용해야 할 수 있습니다.';
+  }
+
+  @override
+  String get disclosureControlTitle => '선택권은 사용자에게 있습니다';
+
+  @override
+  String get disclosureControlBody =>
+      '몰래 요청하는 것은 없습니다. 어떤 요청이든 거부하고도 앱을 계속 쓸 수 있고, 언제든 Android 설정에서 생각을 바꿀 수 있습니다.';
+
+  @override
+  String get disclosureAccept => '동의하고 계속';
+
+  @override
+  String get privateSpaceTitle => '프라이빗 스페이스';
+
+  @override
+  String get privateSpaceOffTitle => '프라이빗 스페이스가 꺼져 있습니다';
+
+  @override
+  String get privateSpaceOffMessage =>
+      '켜면 클론을 PIN 뒤에 숨길 수 있습니다. 숨긴 앱은 메인 그리드에서 사라지고 여기서만 열립니다.';
+
+  @override
+  String get privateSpaceSetUp => '프라이빗 스페이스 설정';
+
+  @override
+  String get privateSpaceChangePin => 'PIN 변경';
+
+  @override
+  String get privateSpaceUnlockSection => '잠금 해제';
+
+  @override
+  String get privateSpaceFingerprint => '지문으로 잠금 해제';
+
+  @override
+  String get privateSpaceFingerprintAvailable => '언제든 PIN도 사용할 수 있습니다.';
+
+  @override
+  String get privateSpaceFingerprintUnavailable =>
+      '이 기기에는 지문이나 얼굴이 설정되어 있지 않습니다.';
+
+  @override
+  String get privateSpaceDisguiseSection => '위장';
+
+  @override
+  String get privateSpaceDisguiseAsCalculator => '계산기로 위장';
+
+  @override
+  String privateSpaceDisguiseSubtitle(String appName) {
+    return '$appName의 아이콘을 계산기로 바꿉니다. 프라이빗 스페이스 PIN을 입력하고 =를 누르면 앱이 열립니다.';
+  }
+
+  @override
+  String get privateSpaceTurnOff => '프라이빗 스페이스 끄기';
+
+  @override
+  String get privateSpaceTurnOffNote =>
+      '끄면 숨긴 앱이 모두 메인 그리드로 돌아옵니다. 클론 자체는 삭제되지 않습니다.';
+
+  @override
+  String get privateSpaceDisguiseOnTitle => '계산기로 위장할까요?';
+
+  @override
+  String privateSpaceDisguiseOffTitle(String appName) {
+    return '$appName을(를) 다시 표시할까요?';
+  }
+
+  @override
+  String privateSpaceDisguiseOnMessage(String appName) {
+    return '$appName의 아이콘이 \'Calculator\'라는 계산기로 바뀝니다. $appName을(를) 열려면 프라이빗 스페이스 PIN을 입력하고 =를 누르세요. PIN을 잊으면 앱을 열 수 없습니다.';
+  }
+
+  @override
+  String privateSpaceDisguiseOffMessage(String appName) {
+    return '$appName이(가) 홈 화면에 원래 아이콘과 이름을 다시 표시합니다.';
+  }
+
+  @override
+  String get privateSpaceDisguiseConfirmOn => '위장';
+
+  @override
+  String get privateSpaceDisguiseConfirmOff => '앱 표시';
+
+  @override
+  String get privateSpaceDisguiseFailed => '앱의 모습을 바꿀 수 없습니다.';
+
+  @override
+  String privateSpaceDisguiseNowCalculator(String appName) {
+    return '이제 홈 화면에서 $appName이(가) 계산기처럼 보입니다.';
+  }
+
+  @override
+  String privateSpaceDisguiseRestored(String appName) {
+    return '$appName이(가) 홈 화면으로 돌아왔습니다.';
+  }
+
+  @override
+  String get privateSpaceTurnOffTitle => '프라이빗 스페이스를 끌까요?';
+
+  @override
+  String get privateSpaceTurnOffMessage =>
+      '숨긴 앱이 모두 메인 그리드로 돌아오고 PIN은 지워집니다. 클론은 그대로 유지됩니다.';
+
+  @override
+  String get privateSpaceTurnOffConfirm => '끄기';
+
+  @override
+  String get privateSpaceTurnedOff => '프라이빗 스페이스를 껐습니다.';
+
+  @override
+  String get pinCreateTitle => 'PIN 만들기';
+
+  @override
+  String get pinChangeTitle => 'PIN 변경';
+
+  @override
+  String get pinCreateMessage =>
+      '이 PIN이 프라이빗 스페이스를 잠급니다. 잊지 않을 곳에 보관하세요. PIN 없이는 숨긴 클론을 되찾을 방법이 없습니다.';
+
+  @override
+  String get pinChangeMessage => '현재 PIN을 입력한 뒤 새 PIN을 선택하세요.';
+
+  @override
+  String get pinCurrentLabel => '현재 PIN';
+
+  @override
+  String get pinNewLabel => '새 PIN';
+
+  @override
+  String get pinConfirmLabel => 'PIN 확인';
+
+  @override
+  String get pinCreateConfirm => '프라이빗 스페이스 만들기';
+
+  @override
+  String get pinSaveConfirm => 'PIN 저장';
+
+  @override
+  String pinLengthError(int minimum, int maximum) {
+    return '$minimum~$maximum자리 숫자를 사용하세요.';
+  }
+
+  @override
+  String get pinMismatchError => '두 PIN이 일치하지 않습니다.';
+
+  @override
+  String get pinCurrentIncorrect => '현재 PIN이 올바르지 않습니다.';
+
+  @override
+  String get unlockTitle => '프라이빗 스페이스 잠금 해제';
+
+  @override
+  String get unlockPinLabel => 'PIN';
+
+  @override
+  String get unlockUseFingerprint => '지문 사용';
+
+  @override
+  String get unlockConfirm => '잠금 해제';
+
+  @override
+  String get unlockIncorrectPin => '잘못된 PIN';
+
+  @override
+  String get unlockFingerprintUnavailable => '지금은 지문 잠금 해제를 사용할 수 없습니다.';
+
+  @override
+  String get unlockFingerprintNotRecognised => '지문을 인식하지 못했습니다.';
+
+  @override
+  String get unlockBiometricReason => '프라이빗 스페이스 잠금 해제';
+
+  @override
+  String get privateTileEmpty => '프라이빗 스페이스, 비어 있음';
+
+  @override
+  String privateTileHidden(int count) {
+    return '프라이빗 스페이스, $count개 숨김';
+  }
+
+  @override
+  String get settingsSectionPrivacy => '개인정보 보호';
+
+  @override
+  String get settingsPrivateSpaceSubtitle => '앱을 PIN 뒤에 숨기기';
+
+  @override
+  String get settingsOn => '켜짐';
+
+  @override
+  String get settingsOff => '꺼짐';
+
+  @override
+  String get componentBaseApk => '기본 APK';
+
+  @override
+  String get componentSplitApk => '분할 APK';
+
+  @override
+  String get componentNoNativeLibraries => '네이티브 라이브러리 없음';
 }

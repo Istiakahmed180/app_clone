@@ -119,13 +119,13 @@ class AppSecurityChecker(private val context: Context) {
     private fun blockedReason(packageName: String): Verdict.Rejected? {
         if (packageName == context.packageName) {
             return Verdict.Rejected(
-                EngineErrorCodes.APP_NOT_SUPPORTED,
+                EngineErrorCodes.SELF_CLONE_UNSUPPORTED,
                 "Duplika cannot clone itself.",
             )
         }
         if (BLOCKED_PREFIXES.any { packageName == it || packageName.startsWith("$it.") }) {
             return Verdict.Rejected(
-                EngineErrorCodes.APP_NOT_SUPPORTED,
+                EngineErrorCodes.SYSTEM_COMPONENT_UNSUPPORTED,
                 "System components cannot be cloned.",
             )
         }

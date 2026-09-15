@@ -100,24 +100,6 @@ class InstalledAppModel {
     'x86': 'x86',
   };
 
-  /// What the picker's first chip says, e.g. `ARM64 + ARMv7 · 32 + 64`.
-  String get architectureLabel {
-    if (abis.isEmpty) {
-      return 'No native code';
-    }
-    final String bits = switch ((supports32Bit, supports64Bit)) {
-      (true, true) => '32 + 64',
-      (false, true) => '64-bit',
-      (true, false) => '32-bit',
-      (false, false) => '',
-    };
-    final String names = abiNames.join(' + ');
-    return bits.isEmpty ? names : '$names · $bits';
-  }
-
-  /// What the picker's second chip says.
-  String get packageTypeLabel =>
-      isSplit ? 'Split APK · $apkCount files' : 'Single APK';
 }
 
 /// Identity read from a standalone APK the user picked, before it is installed.

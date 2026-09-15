@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../l10n/l10n_context.dart';
 
 /// The locked door to the Private space, shown on the main grid once the lock exists.
 ///
@@ -27,8 +28,8 @@ class PrivateSpaceTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: hiddenCount == 0
-          ? 'Private space, empty'
-          : 'Private space, $hiddenCount hidden',
+          ? context.l10n.privateTileEmpty
+          : context.l10n.privateTileHidden(hiddenCount),
       excludeSemantics: true,
       onTap: onTap,
       child: Material(
@@ -68,7 +69,7 @@ class PrivateSpaceTile extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 4.w),
                           child: Text(
-                            'Private space',
+                            context.l10n.privateSpaceTitle,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurface,
                             ),

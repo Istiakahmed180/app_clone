@@ -105,10 +105,13 @@ class PrivateSpaceController extends GetxController with WidgetsBindingObserver 
     return ok;
   }
 
-  Future<BiometricResult> unlockWithBiometric() async {
-    final BiometricResult result = await _biometric.authenticate(
-      reason: 'Unlock your private space',
-    );
+  /// Asks the system to confirm the user, showing them [reason].
+  ///
+  /// The reason is passed in rather than written here: Android shows it inside its own
+  /// prompt, so it is user-facing text, and the controller has nothing to translate it
+  /// with.
+  Future<BiometricResult> unlockWithBiometric({required String reason}) async {
+    final BiometricResult result = await _biometric.authenticate(reason: reason);
     if (result == BiometricResult.success) {
       unlocked.value = true;
     }

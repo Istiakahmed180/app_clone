@@ -5,15 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../data/models/clone_refusal.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../widgets/app_icon.dart';
 import '../../../widgets/empty_state.dart';
 import '../controllers/app_picker_controller.dart';
+import '../widgets/app_facts_text.dart';
 import '../widgets/app_filter_sheet.dart';
 import '../widgets/compatibility_sheet.dart';
-import 'app_details_view.dart';
+import '../widgets/compatibility_text.dart';
 import '../widgets/installed_app_sheet.dart';
+import 'app_details_view.dart';
 
 /// Lets the user clone an installed app, or import an APK that is not installed.
 class AppPickerView extends GetView<AppPickerController> {
@@ -36,7 +40,7 @@ class AppPickerView extends GetView<AppPickerController> {
                 if (controller.errorMessage.value != null) {
                   return _centred(
                     EmptyState(
-                      title: 'Could not list apps',
+                      title: context.l10n.pickerErrorTitle,
                       message: controller.errorMessage.value!,
                       icon: Icons.error_outline,
                     ),
@@ -57,10 +61,9 @@ class AppPickerView extends GetView<AppPickerController> {
 
                 if (sections.isEmpty) {
                   return _centred(
-                    const EmptyState(
-                      title: 'No matching apps',
-                      message:
-                          'Try a different search, or import an APK instead.',
+                    EmptyState(
+                      title: context.l10n.pickerNoMatchesTitle,
+                      message: context.l10n.pickerNoMatchesMessage,
                       icon: Icons.search_off,
                     ),
                   );
@@ -129,11 +132,14 @@ class AppPickerView extends GetView<AppPickerController> {
         children: <Widget>[
           IconButton(
             onPressed: Get.back<void>,
-            tooltip: 'Back',
+            tooltip: context.l10n.commonBack,
             icon: const Icon(Icons.arrow_back_ios_new),
             iconSize: 20.r,
           ),
-          Text('Add app', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            context.l10n.pickerTitle,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
         ],
       ),
     );
@@ -149,9 +155,9 @@ class AppPickerView extends GetView<AppPickerController> {
           Expanded(
             child: TextField(
               onChanged: (String value) => controller.query.value = value,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search apps',
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: context.l10n.pickerSearchHint,
               ),
             ),
           ),
@@ -173,7 +179,7 @@ class AppPickerView extends GetView<AppPickerController> {
                   border: Border.all(color: theme.colorScheme.outline),
                 ),
                 child: Tooltip(
-                  message: 'Filter and sort',
+                  message: context.l10n.pickerFilterTooltip,
                   child: Icon(
                     Icons.tune,
                     size: 22.r,
@@ -209,9 +215,9 @@ class AppPickerView extends GetView<AppPickerController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Popular', style: theme.textTheme.titleLarge),
+        Text(context.l10n.pickerPopular, style: theme.textTheme.titleLarge),
         SizedBox(height: 2.h),
-        Text('Quick picks', style: theme.textTheme.bodySmall),
+        Text(context.l10n.pickerQuickPicks, style: theme.textTheme.bodySmall),
         SizedBox(height: 12.h),
         SizedBox(
           height: 108.h,
@@ -249,9 +255,9 @@ class AppPickerView extends GetView<AppPickerController> {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
-          Text('Installed apps', style: theme.textTheme.titleLarge),
+          Text(context.l10n.pickerInstalledApps, style: theme.textTheme.titleLarge),
           Text(
-            count == 1 ? '1 app' : '$count apps',
+            context.l10n.pickerAppCount(count),
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.primary,
             ),
@@ -294,12 +300,12 @@ class AppPickerView extends GetView<AppPickerController> {
       }
     }
 
-    final String? error = await controller.cloneNow(app);
+    final CloneRefusal? refusal = await controller.cloneNow(app);
     if (!context.mounted) {
       return;
     }
-    if (error != null) {
-      _showMessage(context, error);
+    if (refusal != null) {
+      _showMessage(context, _refusalMessage(context, refusal));
       return;
     }
 
@@ -394,8 +400,11 @@ class AppPickerView extends GetView<AppPickerController> {
       packageFormat: packageFormat,
     );
     if (candidate == null) {
-      if (context.mounted && controller.errorMessage.value != null) {
-        _showMessage(context, controller.errorMessage.value!);
+      if (context.mounted) {
+        final String? message = _takeStatus(context);
+        if (message != null) {
+          _showMessage(context, message);
+        }
       }
       return;
     }
@@ -439,6 +448,32 @@ class AppPickerView extends GetView<AppPickerController> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Why the clone did not happen, in the user's language where there is a translation
+  /// for it and in the engine's own words where there is not.
+  String _refusalMessage(BuildContext context, CloneRefusal refusal) {
+    final CompatibilityFinding? finding = refusal.finding;
+    if (finding != null) {
+      return compatibilityFindingMessage(context.l10n, finding);
+    }
+    return refusal.failure ?? context.l10n.pickerCannotClone;
+  }
+
+  /// The pending problem, cleared as it is taken.
+  ///
+  /// Two sources, in order: one this app diagnosed and can word itself, then whatever
+  /// the native layer last said. Cleared so a refusal the user has seen does not
+  /// reappear the next time they open the file picker and change their mind.
+  String? _takeStatus(BuildContext context) {
+    final PickerStatus? status = controller.status.value;
+    if (status != null) {
+      controller.status.value = null;
+      return switch (status) {
+        PickerStatus.apkUnreadable => context.l10n.pickerApkUnreadable,
+      };
+    }
+    return controller.errorMessage.value;
   }
 }
 
@@ -564,11 +599,11 @@ class _AppRow extends StatelessWidget {
                       // is 32-bit or a split set decides whether it can be cloned at
                       // all on a given device, and the picker's filters are about
                       // exactly these two facts.
-                      _Chip(label: app.architectureLabel),
-                      _Chip(label: app.packageTypeLabel),
+                      _Chip(label: installedArchitectureLabel(context.l10n, app)),
+                      _Chip(label: packageTypeLabel(context.l10n, app.apkCount)),
                       if (app.versionName != null)
                         _Chip(label: 'v${app.versionName}'),
-                      if (app.isSystem) const _Chip(label: 'System'),
+                      if (app.isSystem) _Chip(label: context.l10n.pickerSystemChip),
                     ],
                   ),
                 ],

@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/status_colors.dart';
 import '../../../data/models/compatibility_report.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/app_icon.dart';
@@ -139,24 +141,30 @@ class _CloneActionSheet extends StatelessWidget {
                   const _DragHandle(),
                   _header(context),
                   SizedBox(height: 20.h),
-                  _primaryRow(),
+                  _primaryRow(context),
                   if (findings.isNotEmpty) ...<Widget>[
                     SizedBox(height: 24.h),
-                    Text('Compatibility', style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      context.l10n.cloneActionsCompatibility,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     SizedBox(height: 10.h),
                     _findings(context),
                   ],
                   SizedBox(height: 24.h),
-                  Text('Manage', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    context.l10n.cloneActionsManage,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   SizedBox(height: 10.h),
                   _manageGrid(context),
                   SizedBox(height: 18.h),
                   const Divider(height: 1),
                   SizedBox(height: 14.h),
-                  const _ActionRow(
+                  _ActionRow(
                     action: CloneAction.delete,
                     icon: Icons.delete_outline,
-                    label: 'Uninstall',
+                    label: context.l10n.cloneActionUninstall,
                     destructive: true,
                   ),
                 ],
@@ -189,7 +197,7 @@ class _CloneActionSheet extends StatelessWidget {
               Text(
                 // "Space 2" rather than the app name again: every clone is named after
                 // its app, so this line's only job is to say *which* one this is.
-                'Space $instanceIndex',
+                context.l10n.cloneSpaceLabel(instanceIndex),
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
@@ -197,7 +205,7 @@ class _CloneActionSheet extends StatelessWidget {
           ),
         ),
         IconButton(
-          tooltip: 'Close',
+          tooltip: context.l10n.commonClose,
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -205,30 +213,32 @@ class _CloneActionSheet extends StatelessWidget {
     );
   }
 
-  Widget _primaryRow() {
-    return const Row(
+  Widget _primaryRow(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+
+    return Row(
       children: <Widget>[
         Expanded(
           child: _PrimaryTile(
             action: CloneAction.clone,
             icon: Icons.copy_all_outlined,
-            label: 'Clone',
+            label: l10n.cloneActionClone,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _PrimaryTile(
             action: CloneAction.addShortcut,
             icon: Icons.add_box_outlined,
-            label: 'Shortcut',
+            label: l10n.cloneActionShortcut,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _PrimaryTile(
             action: CloneAction.spaceInfo,
             icon: Icons.info_outline,
-            label: 'Space info',
+            label: l10n.cloneActionSpaceInfo,
           ),
         ),
       ],
@@ -284,23 +294,25 @@ class _CloneActionSheet extends StatelessWidget {
   }
 
   Widget _manageGrid(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.rename,
                 icon: Icons.edit_outlined,
-                label: 'Edit name',
+                label: l10n.cloneActionEditName,
               ),
             ),
             SizedBox(width: 12.w),
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.forceStop,
                 icon: Icons.highlight_off,
-                label: 'Force stop',
+                label: l10n.cloneActionForceStop,
               ),
             ),
           ],
@@ -308,19 +320,19 @@ class _CloneActionSheet extends StatelessWidget {
         SizedBox(height: 12.h),
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.clearCache,
                 icon: Icons.cleaning_services_outlined,
-                label: 'Clear cache',
+                label: l10n.cloneActionClearCache,
               ),
             ),
             SizedBox(width: 12.w),
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.clearStorage,
                 icon: Icons.storage_outlined,
-                label: 'Clear storage',
+                label: l10n.cloneActionClearStorage,
               ),
             ),
           ],
@@ -334,15 +346,15 @@ class _CloneActionSheet extends StatelessWidget {
                 icon: hidden
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
-                label: hidden ? 'Unhide' : 'Hide',
+                label: hidden ? l10n.cloneActionUnhide : l10n.cloneActionHide,
               ),
             ),
             SizedBox(width: 12.w),
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.shareApp,
                 icon: Icons.share_outlined,
-                label: 'Share app',
+                label: l10n.cloneActionShareApp,
               ),
             ),
           ],
@@ -350,19 +362,19 @@ class _CloneActionSheet extends StatelessWidget {
         SizedBox(height: 12.h),
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.notifications,
                 icon: Icons.notifications_outlined,
-                label: 'Notifications',
+                label: l10n.cloneActionNotifications,
               ),
             ),
             SizedBox(width: 12.w),
-            const Expanded(
+            Expanded(
               child: _ActionRow(
                 action: CloneAction.permissions,
                 icon: Icons.admin_panel_settings_outlined,
-                label: 'Permissions',
+                label: l10n.cloneActionPermissions,
               ),
             ),
           ],
@@ -375,13 +387,13 @@ class _CloneActionSheet extends StatelessWidget {
             _StatusRow(
               icon: Icons.check_circle_outline,
               color: StatusColors.of(context).positive,
-              label: 'Google services (microG) installed',
+              label: l10n.cloneActionGoogleServicesInstalled,
             )
           else
-            const _ActionRow(
+            _ActionRow(
               action: CloneAction.installGoogleServices,
               icon: Icons.cloud_download_outlined,
-              label: 'Install Google services (microG)',
+              label: l10n.cloneActionInstallGoogleServices,
             ),
         ],
       ],

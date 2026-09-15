@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/services/biometric_authenticator.dart';
 import '../../../core/services/private_space_store.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/private_space_controller.dart';
 
 /// Asks for the Private space PIN, with the device biometric offered when it is enabled.
@@ -13,15 +15,16 @@ import '../controllers/private_space_controller.dart';
 Future<bool> showPrivateSpaceUnlockDialog(
   BuildContext context,
   PrivateSpaceController privateSpace, {
-  String title = 'Unlock Private space',
+  String? title,
   String? message,
 }) async {
+  final String heading = title ?? context.l10n.unlockTitle;
   final bool? unlocked = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) => _UnlockDialog(
       privateSpace: privateSpace,
-      title: title,
+      title: heading,
       message: message,
     ),
   );
@@ -72,7 +75,7 @@ class _UnlockDialogState extends State<_UnlockDialog> {
     }
     setState(() {
       _busy = false;
-      _error = 'Incorrect PIN';
+      _error = context.l10n.unlockIncorrectPin;
       _pin.clear();
     });
   }
@@ -86,7 +89,9 @@ class _UnlockDialogState extends State<_UnlockDialog> {
       _error = null;
     });
     final BiometricResult result =
-        await widget.privateSpace.unlockWithBiometric();
+        await widget.privateSpace.unlockWithBiometric(
+      reason: context.l10n.unlockBiometricReason,
+    );
     if (!mounted) {
       return;
     }
@@ -98,18 +103,19 @@ class _UnlockDialogState extends State<_UnlockDialog> {
       case BiometricResult.unavailable:
         setState(() {
           _busy = false;
-          _error = 'Fingerprint unlock is not available right now.';
+          _error = context.l10n.unlockFingerprintUnavailable;
         });
       case BiometricResult.failed:
         setState(() {
           _busy = false;
-          _error = 'Fingerprint not recognised.';
+          _error = context.l10n.unlockFingerprintNotRecognised;
         });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     final bool canUseBiometric = widget.privateSpace.biometricEnabled &&
         widget.privateSpace.biometricAvailable.value;
 
@@ -134,7 +140,7 @@ class _UnlockDialogState extends State<_UnlockDialog> {
               FilteringTextInputFormatter.digitsOnly,
             ],
             decoration: InputDecoration(
-              labelText: 'PIN',
+              labelText: l10n.unlockPinLabel,
               counterText: '',
               errorText: _error,
             ),
@@ -147,7 +153,7 @@ class _UnlockDialogState extends State<_UnlockDialog> {
               child: TextButton.icon(
                 onPressed: _busy ? null : _submitBiometric,
                 icon: const Icon(Icons.fingerprint),
-                label: const Text('Use fingerprint'),
+                label: Text(l10n.unlockUseFingerprint),
               ),
             ),
           ],
@@ -156,11 +162,11 @@ class _UnlockDialogState extends State<_UnlockDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: _busy ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _busy ? null : _submitPin,
-          child: const Text('Unlock'),
+          child: Text(l10n.unlockConfirm),
         ),
       ],
     );

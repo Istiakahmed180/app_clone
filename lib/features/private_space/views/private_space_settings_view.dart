@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 
 import '../../settings/widgets/settings_row.dart';
 import '../../settings/widgets/settings_section.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_context.dart';
 import '../controllers/private_space_controller.dart';
 import '../widgets/unlock_dialog.dart';
 import 'private_space_setup_view.dart';
@@ -23,7 +26,7 @@ class PrivateSpaceSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Private space')),
+      appBar: AppBar(title: Text(context.l10n.privateSpaceTitle)),
       body: Obx(
         () => privateSpace.enabled ? _enabled(context) : _disabled(context),
       ),
@@ -32,6 +35,7 @@ class PrivateSpaceSettingsView extends StatelessWidget {
 
   Widget _disabled(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return ListView(
       padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 28.h),
@@ -43,14 +47,13 @@ class PrivateSpaceSettingsView extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         Text(
-          'Private space is off',
+          l10n.privateSpaceOffTitle,
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 8.h),
         Text(
-          'Turn it on to hide clones behind a PIN. Hidden apps disappear from the main '
-          'grid and open only here.',
+          l10n.privateSpaceOffMessage,
           style: theme.textTheme.bodyMedium
               ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           textAlign: TextAlign.center,
@@ -58,13 +61,14 @@ class PrivateSpaceSettingsView extends StatelessWidget {
         SizedBox(height: 24.h),
         FilledButton(
           onPressed: () => _openSetup(context, PrivateSpaceSetupMode.create),
-          child: const Text('Set up Private space'),
+          child: Text(l10n.privateSpaceSetUp),
         ),
       ],
     );
   }
 
   Widget _enabled(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     final bool biometricAvailable = privateSpace.biometricAvailable.value;
     final DisguiseController disguise = Get.find<DisguiseController>();
 
@@ -75,14 +79,14 @@ class PrivateSpaceSettingsView extends StatelessWidget {
           children: <Widget>[
             SettingsRow(
               icon: Icons.password_outlined,
-              title: 'Change PIN',
+              title: l10n.privateSpaceChangePin,
               onTap: () => _openSetup(context, PrivateSpaceSetupMode.change),
             ),
           ],
         ),
         SizedBox(height: 22.h),
         SettingsSection(
-          title: 'Unlock',
+          title: l10n.privateSpaceUnlockSection,
           children: <Widget>[
             SwitchListTile(
               secondary: const Icon(Icons.fingerprint),
@@ -90,27 +94,26 @@ class PrivateSpaceSettingsView extends StatelessWidget {
               onChanged: biometricAvailable
                   ? (bool value) => privateSpace.setBiometricEnabled(value)
                   : null,
-              title: const Text('Unlock with fingerprint'),
+              title: Text(l10n.privateSpaceFingerprint),
               subtitle: Text(
                 biometricAvailable
-                    ? 'You can still use your PIN at any time.'
-                    : 'No fingerprint or face is set up on this device.',
+                    ? l10n.privateSpaceFingerprintAvailable
+                    : l10n.privateSpaceFingerprintUnavailable,
               ),
             ),
           ],
         ),
         SizedBox(height: 22.h),
         SettingsSection(
-          title: 'Disguise',
+          title: l10n.privateSpaceDisguiseSection,
           children: <Widget>[
             SwitchListTile(
               secondary: const Icon(Icons.calculate_outlined),
               value: disguise.disguised,
               onChanged: (bool value) => _setDisguise(context, value),
-              title: const Text('Disguise as Calculator'),
-              subtitle: const Text(
-                'Replaces Duplika\'s icon with a calculator. Type your Private space PIN '
-                'and press = to open the app.',
+              title: Text(l10n.privateSpaceDisguiseAsCalculator),
+              subtitle: Text(
+                l10n.privateSpaceDisguiseSubtitle(AppConstants.appTitle),
               ),
             ),
           ],
@@ -119,15 +122,14 @@ class PrivateSpaceSettingsView extends StatelessWidget {
         TextButton.icon(
           onPressed: () => _turnOff(context),
           icon: const Icon(Icons.lock_open_outlined),
-          label: const Text('Turn off Private space'),
+          label: Text(l10n.privateSpaceTurnOff),
           style: TextButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.error,
           ),
         ),
         SizedBox(height: 6.h),
         Text(
-          'Turning it off brings every hidden app back to the main grid. The clones '
-          'themselves are not deleted.',
+          l10n.privateSpaceTurnOffNote,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -137,26 +139,33 @@ class PrivateSpaceSettingsView extends StatelessWidget {
   }
 
   Future<void> _setDisguise(BuildContext context, bool enable) async {
+    final AppLocalizations l10n = context.l10n;
     final DisguiseController disguise = Get.find<DisguiseController>();
     final bool confirmed = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: Text(enable ? 'Disguise as Calculator?' : 'Show Duplika again?'),
+            title: Text(
+              enable
+                  ? l10n.privateSpaceDisguiseOnTitle
+                  : l10n.privateSpaceDisguiseOffTitle(AppConstants.appTitle),
+            ),
             content: Text(
               enable
-                  ? 'Duplika\'s icon is replaced by a calculator named "Calculator". To '
-                      'open Duplika, type your Private space PIN and press =. If you '
-                      'forget the PIN you will not be able to open the app.'
-                  : 'Duplika will show its own icon and name on the home screen again.',
+                  ? l10n.privateSpaceDisguiseOnMessage(AppConstants.appTitle)
+                  : l10n.privateSpaceDisguiseOffMessage(AppConstants.appTitle),
             ),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(enable ? 'Disguise' : 'Show app'),
+                child: Text(
+                  enable
+                      ? l10n.privateSpaceDisguiseConfirmOn
+                      : l10n.privateSpaceDisguiseConfirmOff,
+                ),
               ),
             ],
           ),
@@ -178,10 +187,10 @@ class PrivateSpaceSettingsView extends StatelessWidget {
         SnackBar(
           content: Text(
             applied == null
-                ? 'Could not change how the app appears.'
+                ? l10n.privateSpaceDisguiseFailed
                 : enable
-                    ? 'Duplika now looks like Calculator on your home screen.'
-                    : 'Duplika is back on your home screen.',
+                    ? l10n.privateSpaceDisguiseNowCalculator(AppConstants.appTitle)
+                    : l10n.privateSpaceDisguiseRestored(AppConstants.appTitle),
           ),
         ),
       );
@@ -202,22 +211,20 @@ class PrivateSpaceSettingsView extends StatelessWidget {
   }
 
   Future<void> _turnOff(BuildContext context) async {
+    final AppLocalizations l10n = context.l10n;
     final bool confirmed = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('Turn off Private space?'),
-            content: const Text(
-              'Every hidden app will return to the main grid, and the PIN will be '
-              'forgotten. The clones themselves are kept.',
-            ),
+            title: Text(l10n.privateSpaceTurnOffTitle),
+            content: Text(l10n.privateSpaceTurnOffMessage),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Turn off'),
+                child: Text(l10n.privateSpaceTurnOffConfirm),
               ),
             ],
           ),
@@ -243,7 +250,7 @@ class PrivateSpaceSettingsView extends StatelessWidget {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Private space turned off.')),
+          SnackBar(content: Text(l10n.privateSpaceTurnedOff)),
         );
     }
   }
