@@ -19,6 +19,6 @@ class GuestAliasLifecycleCallback : AppLifecycleCallback() {
         context: Context?,
         virtualUserId: Int,
     ) {
-        GuestLaunchIntentRepair.install()
+        GuestLaunchIntentRepair.install(context)
     }
 }

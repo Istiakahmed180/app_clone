@@ -4,4 +4,32 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application>
+        <!-- SPIKE ONLY (spike/microg-container): adb-triggerable entry points that install a
+             bundled microG artefact into every existing virtual profile, bypassing the
+             AppSecurityChecker admission policy on purpose so the container behaviour can be
+             measured.
+
+             Declared here, in the debug source set, rather than in the main manifest. The
+             code refuses to run outside a debug build, but a runtime guard is the wrong
+             place for this: an exported receiver and an exported no-UI activity would still
+             ship in every release APK, where they are attack surface that exists only to
+             decline. Building them for debug alone is what makes that structurally true
+             rather than merely intended. The classes live in `src/debug/kotlin` for the same
+             reason, so a release build cannot even link them. -->
+        <receiver
+            android:name=".native.spike.MicroGSpikeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="co.tdevs.duplika.spike.MICROG" />
+            </intent-filter>
+        </receiver>
+        <activity
+            android:name=".native.spike.MicroGSpikeActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    </application>
 </manifest>
