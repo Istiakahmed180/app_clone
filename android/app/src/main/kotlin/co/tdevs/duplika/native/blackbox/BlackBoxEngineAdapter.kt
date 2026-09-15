@@ -9,6 +9,7 @@ import java.io.File
 import co.tdevs.duplika.native.EngineAvailability
 import co.tdevs.duplika.native.EngineErrorCodes
 import co.tdevs.duplika.native.EngineResult
+import co.tdevs.duplika.native.LaunchComponentResolver
 import co.tdevs.duplika.native.Slog
 import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import top.niunaijun.blackbox.BlackBoxCore
@@ -365,6 +366,7 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
      * real result is the only trustworthy signal; the caller repairs on failure.
      */
     private fun doLaunch(packageName: String, virtualUserId: Int): EngineResult<Unit> {
+        launchByResolvedComponent(packageName, virtualUserId)?.let { return it }
         return if (BlackBoxCore.get().launchApk(packageName, virtualUserId)) {
             Slog.i(Slog.LAUNCH, "Launched $packageName in user $virtualUserId")
             EngineResult.ok()
@@ -374,6 +376,42 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
                 "The engine refused to launch the virtual application.",
             )
         }
+    }
+
+    /**
+     * Starts the clone at the component the *platform* would pick, bypassing Bcore's own
+     * resolution — see [LaunchComponentResolver] for the two manifest shapes it gets
+     * wrong and the crash loop that follows.
+     *
+     * Returns null when the component cannot be resolved, which hands the launch back to
+     * [BlackBoxCore.launchApk] unchanged. `launchApk` is otherwise only
+     * `getLaunchIntentForPackage` followed by `startActivity`, so replacing it costs
+     * nothing but the resolution itself; its pre-launch hook is invoked here so guests
+     * still see the callback they would have seen.
+     */
+    private fun launchByResolvedComponent(
+        packageName: String,
+        virtualUserId: Int,
+    ): EngineResult<Unit>? {
+        val core = BlackBoxCore.get()
+        val component = runCatching {
+            LaunchComponentResolver.resolve(
+                BlackBoxCore.getContext().packageManager,
+                packageName,
+            )
+        }.getOrNull() ?: return null
+
+        core.onBeforeMainLaunchApk(packageName, virtualUserId)
+        val intent = Intent(Intent.ACTION_MAIN)
+            .addCategory(Intent.CATEGORY_LAUNCHER)
+            .setComponent(component)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        core.startActivity(intent, virtualUserId)
+        Slog.i(
+            Slog.LAUNCH,
+            "Launched $packageName in user $virtualUserId at ${component.className}",
+        )
+        return EngineResult.ok()
     }
 
     override fun startContainerService(
