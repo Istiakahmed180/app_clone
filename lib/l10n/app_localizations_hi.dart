@@ -1197,4 +1197,104 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'कोई नेटिव लाइब्रेरी नहीं';
+
+  @override
+  String get errorProfileNameEmpty => 'क्लोन के लिए एक नाम चाहिए।';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'क्लोन का नाम ज़्यादा से ज़्यादा $maximum अक्षरों का हो सकता है।';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'आपके सहेजे गए क्लोन पढ़े नहीं जा सके।';
+
+  @override
+  String get errorProfileNotFound => 'वह क्लोन अब मौजूद नहीं है।';
+
+  @override
+  String get errorBridgeFailed =>
+      'ऐप के जिस हिस्से पर क्लोन चलते हैं, उससे बात करने में कुछ गड़बड़ हुई।';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'यह सुविधा सिर्फ़ Android पर उपलब्ध है।';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'टेस्ट ऐप इंस्टॉल है या नहीं, यह जाँचा नहीं जा सका।';
+
+  @override
+  String get errorEngineInitFailed =>
+      'इस डिवाइस पर वर्चुअलाइज़ेशन इंजन शुरू नहीं हो सका।';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'वर्चुअलाइज़ेशन इंजन को Android के नए संस्करण की ज़रूरत है।';
+
+  @override
+  String get errorEngineNoResponse =>
+      'वर्चुअलाइज़ेशन इंजन ने जवाब नहीं दिया। फिर कोशिश करें।';
+
+  @override
+  String get errorNoContainer =>
+      'इस क्लोन का अभी कोई कंटेनर नहीं है। इसे एक बार खोलें और फिर कोशिश करें।';
+
+  @override
+  String get errorLaunchRefused => 'इंजन ने यह क्लोन खोलने से मना कर दिया।';
+
+  @override
+  String get errorAlreadyCloned => 'इस ऐप का क्लोन पहले ही बन चुका है।';
+
+  @override
+  String get errorClearCacheFailed => 'इस क्लोन का कुछ कैश नहीं हटाया जा सका।';
+
+  @override
+  String get errorClearDataFailed => 'इस क्लोन का डेटा साफ़ नहीं किया जा सका।';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'यह लॉन्चर शॉर्टकट जोड़ना समर्थित नहीं करता।';
+
+  @override
+  String get errorShortcutRefused => 'लॉन्चर ने शॉर्टकट अस्वीकार कर दिया।';
+
+  @override
+  String get errorApkGone =>
+      'इस क्लोन की APK अब डिवाइस पर नहीं है, इसलिए शेयर करने को कुछ नहीं है।';
+
+  @override
+  String get errorShareFailed => 'ऐप शेयर नहीं किया जा सका।';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'इस डिवाइस पर खोलने के लिए बैटरी ऑप्टिमाइज़ेशन स्क्रीन नहीं है।';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'इस डिवाइस पर खोलने के लिए बैकग्राउंड गतिविधि स्क्रीन नहीं है।';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'यह सिर्फ़ तभी दिखाया जा सकता है जब ऐप खुला हो।';
+
+  @override
+  String get errorApkUnreadable => 'चुनी गई APK में से एक पढ़ी नहीं जा सकी।';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'चुनी गई सभी APK एक ही ऐप की होनी चाहिए।';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'चुनी गई सभी APK का संस्करण एक ही होना चाहिए।';
+
+  @override
+  String get errorApkBaseRequired =>
+      'ठीक एक बेस APK और एक या अधिक कॉन्फ़िगरेशन स्प्लिट चुनें।';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'एक ही APK स्प्लिट एक से ज़्यादा बार चुना गया।';
 }

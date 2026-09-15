@@ -1200,4 +1200,105 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Ingen native biblioteker';
+
+  @override
+  String get errorProfileNameEmpty => 'En klone trenger et navn.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Navnet på en klone kan være på høyst $maximum tegn.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'De lagrede klonene dine kunne ikke leses.';
+
+  @override
+  String get errorProfileNotFound => 'Den klonen finnes ikke lenger.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Noe gikk galt i kommunikasjonen med den delen av appen som styrer klonene.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Denne funksjonen finnes bare på Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Om testappen er installert, kunne ikke sjekkes.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Virtualiseringsmotoren klarte ikke å starte på denne enheten.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Virtualiseringsmotoren krever en nyere versjon av Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Virtualiseringsmotoren svarte ikke. Prøv igjen.';
+
+  @override
+  String get errorNoContainer =>
+      'Denne klonen har ingen container ennå. Åpne den én gang og prøv igjen.';
+
+  @override
+  String get errorLaunchRefused => 'Motoren nektet å åpne denne klonen.';
+
+  @override
+  String get errorAlreadyCloned => 'Denne appen er allerede klonet.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Deler av bufferen til denne klonen kunne ikke slettes.';
+
+  @override
+  String get errorClearDataFailed =>
+      'Dataene til denne klonen kunne ikke slettes.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Denne launcheren støtter ikke snarveier.';
+
+  @override
+  String get errorShortcutRefused => 'Launcheren avviste snarveien.';
+
+  @override
+  String get errorApkGone =>
+      'APK-en til denne klonen er ikke på enheten lenger, så det er ingenting å dele.';
+
+  @override
+  String get errorShareFailed => 'Appen kunne ikke deles.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Denne enheten har ingen skjerm for batterioptimalisering å åpne.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Denne enheten har ingen skjerm for bakgrunnsaktivitet å åpne.';
+
+  @override
+  String get errorNeedsAppOpen => 'Det kan bare vises mens appen er åpen.';
+
+  @override
+  String get errorApkUnreadable => 'En av de valgte APK-ene kunne ikke leses.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Alle valgte APK-er må tilhøre samme app.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Alle valgte APK-er må ha samme versjon.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Velg nøyaktig én base-APK og én eller flere konfigurasjonssplitter.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Den samme APK-splitten ble valgt mer enn én gang.';
 }

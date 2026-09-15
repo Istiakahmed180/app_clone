@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/errors/app_exception.dart';
 import 'compatibility_report.dart';
 
 /// Why a clone was not made.
@@ -15,9 +16,10 @@ class CloneRefusal {
   /// all — which the caller words for itself rather than inventing a reason.
   const CloneRefusal.blocked(this.finding) : failure = null;
 
-  /// The engine was asked and refused. [failure] is its own message.
-  const CloneRefusal.failed(String this.failure) : finding = null;
+  /// The engine was asked and refused. [failure] is the refusal as it was thrown, so
+  /// the view can translate it by code rather than showing the engine's English.
+  const CloneRefusal.failed(AppException this.failure) : finding = null;
 
   final CompatibilityFinding? finding;
-  final String? failure;
+  final AppException? failure;
 }

@@ -1167,4 +1167,88 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'ネイティブライブラリなし';
+
+  @override
+  String get errorProfileNameEmpty => 'クローンには名前が必要です。';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'クローンの名前は最大 $maximum 文字です。';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '保存されたクローンを読み取れませんでした。';
+
+  @override
+  String get errorProfileNotFound => 'そのクローンはもうありません。';
+
+  @override
+  String get errorBridgeFailed => 'クローンを管理する部分との通信で問題が起きました。';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => 'この機能は Android でのみ利用できます。';
+
+  @override
+  String get errorTestAppCheckFailed => 'テストアプリがインストールされているか確認できませんでした。';
+
+  @override
+  String get errorEngineInitFailed => 'このデバイスで仮想化エンジンを起動できませんでした。';
+
+  @override
+  String get errorEngineAndroidTooOld => '仮想化エンジンにはより新しい Android が必要です。';
+
+  @override
+  String get errorEngineNoResponse => '仮想化エンジンが応答しませんでした。もう一度お試しください。';
+
+  @override
+  String get errorNoContainer => 'このクローンにはまだコンテナがありません。一度起動してからもう一度お試しください。';
+
+  @override
+  String get errorLaunchRefused => 'エンジンがこのクローンの起動を拒否しました。';
+
+  @override
+  String get errorAlreadyCloned => 'このアプリはすでにクローンされています。';
+
+  @override
+  String get errorClearCacheFailed => 'このクローンのキャッシュの一部を削除できませんでした。';
+
+  @override
+  String get errorClearDataFailed => 'このクローンのデータを削除できませんでした。';
+
+  @override
+  String get errorShortcutsUnsupported => 'このランチャーはショートカットの追加に対応していません。';
+
+  @override
+  String get errorShortcutRefused => 'ランチャーがショートカットを拒否しました。';
+
+  @override
+  String get errorApkGone => 'このクローンの APK はデバイスに残っていないため、共有するものがありません。';
+
+  @override
+  String get errorShareFailed => 'アプリを共有できませんでした。';
+
+  @override
+  String get errorNoBatteryScreen => 'このデバイスには開ける電池最適化の画面がありません。';
+
+  @override
+  String get errorNoBackgroundScreen => 'このデバイスには開けるバックグラウンド動作の画面がありません。';
+
+  @override
+  String get errorNeedsAppOpen => 'アプリを開いている間だけ表示できます。';
+
+  @override
+  String get errorApkUnreadable => '選択した APK のひとつを読み取れませんでした。';
+
+  @override
+  String get errorApkPackageMismatch => '選択した APK はすべて同じアプリのものである必要があります。';
+
+  @override
+  String get errorApkVersionMismatch => '選択した APK はすべて同じバージョンである必要があります。';
+
+  @override
+  String get errorApkBaseRequired =>
+      'ベース APK をちょうど 1 つと、設定スプリットを 1 つ以上選んでください。';
+
+  @override
+  String get errorApkDuplicateSplit => '同じ APK スプリットが複数回選択されました。';
 }

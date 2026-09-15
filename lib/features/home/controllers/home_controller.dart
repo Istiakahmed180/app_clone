@@ -43,7 +43,8 @@ class HomeController extends GetxController {
   final Rxn<TestAppModel> testApp = Rxn<TestAppModel>();
   final Rxn<PlatformInfo> platformInfo = Rxn<PlatformInfo>();
   final RxBool isLoading = true.obs;
-  final RxnString errorMessage = RxnString();
+  /// Why the grid could not be loaded, as it was thrown, so the view can word it.
+  final Rx<AppException?> errorMessage = Rx<AppException?>(null);
   final Rxn<VirtualizationAvailability> virtualization =
       Rxn<VirtualizationAvailability>();
   final RxMap<String, VirtualProfileState> profileStates =
@@ -147,13 +148,13 @@ class HomeController extends GetxController {
   ///
   /// Guests post under Duplika, but the engine keeps each clone's channels apart and labels
   /// them, so the screen this opens can silence one clone without touching the others.
-  /// Returns null on success, or a user-facing message.
-  Future<String?> openNotificationSettings() async {
+  /// Returns null on success, or the refusal for the caller to word.
+  Future<AppException?> openNotificationSettings() async {
     try {
       await _nativeBridge.openCloneNotificationSettings();
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -164,9 +165,9 @@ class HomeController extends GetxController {
         packageName: profile.packageName,
       );
 
-  /// Allows or denies one permission for this clone. Returns null on success, or a
-  /// user-facing message.
-  Future<String?> setClonePermission(
+  /// Allows or denies one permission for this clone. Returns null on success, or the
+  /// refusal for the caller to word.
+  Future<AppException?> setClonePermission(
     VirtualProfileModel profile,
     String permission,
     bool allowed,
@@ -179,7 +180,7 @@ class HomeController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -337,7 +338,7 @@ class HomeController extends GetxController {
       profiles.assignAll(_grouped(await _engine.getProfiles()));
       errorMessage.value = null;
     } on AppException catch (error) {
-      errorMessage.value = error.message;
+      errorMessage.value = error;
     }
   }
 
@@ -389,7 +390,7 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Returns `null` on success, or a user-facing message on failure.
+  /// Returns `null` on success, or the refusal for the caller to word.
   /// Clones whose guest process is being started.
   ///
   /// Kept here so the tile itself can say so. A launch takes a second or two — the
@@ -397,13 +398,13 @@ class HomeController extends GetxController {
   /// looked untouched for that long read as a tap that did not register.
   final RxSet<String> launching = <String>{}.obs;
 
-  Future<String?> launchProfile(VirtualProfileModel profile) async {
+  Future<AppException?> launchProfile(VirtualProfileModel profile) async {
     launching.add(profile.id);
     try {
       await _engine.launchProfile(profile.id);
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     } finally {
       // In `finally`, so a refused launch clears the tile rather than leaving it
       // spinning on a guest that is never going to start.
@@ -433,8 +434,8 @@ class HomeController extends GetxController {
 
   /// Asks the launcher to add this clone to the home screen.
   ///
-  /// Returns null when the request was accepted, or a user-facing message otherwise.
-  Future<String?> addShortcut(VirtualProfileModel profile) async {
+  /// Returns null when the request was accepted, or the refusal otherwise.
+  Future<AppException?> addShortcut(VirtualProfileModel profile) async {
     try {
       await _nativeBridge.pinCloneShortcut(
         profileId: profile.id,
@@ -445,11 +446,11 @@ class HomeController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
-  Future<String?> renameProfile(
+  Future<AppException?> renameProfile(
     VirtualProfileModel profile,
     String name,
   ) async {
@@ -459,7 +460,7 @@ class HomeController extends GetxController {
       await _loadProfileStates();
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -503,7 +504,7 @@ class HomeController extends GetxController {
     }
 
     int created = 0;
-    String? firstFailure;
+    AppException? firstFailure;
 
     for (int index = 0; index < count; index++) {
       try {
@@ -517,7 +518,7 @@ class HomeController extends GetxController {
         );
         created++;
       } on AppException catch (error) {
-        firstFailure ??= error.message;
+        firstFailure ??= error;
       }
       onProgress?.call(created, count);
     }
@@ -669,7 +670,7 @@ class HomeController extends GetxController {
   }
 
   /// Stops the guest if it is running. Returns null on success.
-  Future<String?> forceStop(VirtualProfileModel profile) async {
+  Future<AppException?> forceStop(VirtualProfileModel profile) async {
     try {
       await _engine.stopProfile(profile.id);
       // The card's dot is driven by engine-reported state, so re-read it rather than
@@ -677,28 +678,28 @@ class HomeController extends GetxController {
       await _loadProfileStates();
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
   /// Empties this clone's caches. Logins and settings survive.
-  Future<String?> clearCache(VirtualProfileModel profile) async {
+  Future<AppException?> clearCache(VirtualProfileModel profile) async {
     try {
       await _engine.clearProfileCache(profile.id);
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
   /// Empties this clone's container. The next launch is a first launch.
-  Future<String?> clearStorage(VirtualProfileModel profile) async {
+  Future<AppException?> clearStorage(VirtualProfileModel profile) async {
     try {
       await _engine.clearProfileData(profile.id);
       await _loadProfileStates();
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -730,12 +731,12 @@ class HomeController extends GetxController {
   }
 
   /// Installs the bundled microG into this clone without recreating it.
-  Future<String?> installGoogleServices(VirtualProfileModel profile) async {
+  Future<AppException?> installGoogleServices(VirtualProfileModel profile) async {
     try {
       await _engine.provisionMicroG(profile.id);
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -744,7 +745,7 @@ class HomeController extends GetxController {
   /// Goes straight to the bridge rather than through [VirtualizationEngine]: sharing a
   /// file is a host operation, not something a container backend would implement — the
   /// same reason shortcuts and permission requests bypass the engine.
-  Future<String?> shareApp(VirtualProfileModel profile) async {
+  Future<AppException?> shareApp(VirtualProfileModel profile) async {
     try {
       await _nativeBridge.shareProfileApk(
         profileId: profile.id,
@@ -753,18 +754,18 @@ class HomeController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
-  Future<String?> deleteProfile(VirtualProfileModel profile) async {
+  Future<AppException?> deleteProfile(VirtualProfileModel profile) async {
     try {
       await _engine.deleteProfile(profile.id);
       await _loadProfiles();
       await _loadProfileStates();
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -783,12 +784,12 @@ class HomeController extends GetxController {
 
   /// Removes the clone, letting its tile animate out first.
   ///
-  /// Returns the error message if the engine refused, in which case the tile comes back
+  /// Returns the refusal if the engine refused, in which case the tile comes back
   /// rather than staying half-faded on a grid it is still part of.
-  Future<String?> uninstall(VirtualProfileModel profile) async {
+  Future<AppException?> uninstall(VirtualProfileModel profile) async {
     removing.add(profile.id);
     await Future<void>.delayed(removalAnimation);
-    final String? error = await deleteProfile(profile);
+    final AppException? error = await deleteProfile(profile);
     removing.remove(profile.id);
     return error;
   }

@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/background_activity_state.dart';
+import '../../../core/errors/app_error_text.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../data/models/clone_batch_result.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../data/models/virtual_profile_model.dart';
@@ -130,7 +132,10 @@ class HomeView extends GetView<HomeController> {
                           Padding(
                             padding: EdgeInsets.only(bottom: 12.h),
                             child: Text(
-                              controller.errorMessage.value!,
+                              appErrorMessage(
+                                context.l10n,
+                                controller.errorMessage.value!,
+                              ),
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.error,
                               ),
@@ -357,14 +362,14 @@ class HomeView extends GetView<HomeController> {
     BuildContext context,
     VirtualProfileModel profile,
   ) async {
-    final String? error = await controller.launchProfile(profile);
+    final AppException? error = await controller.launchProfile(profile);
     if (!context.mounted) {
       return;
     }
     // Only failures are announced. A launch that worked brings the guest to the front,
     // so a message about it lands on top of the app the user is now looking at.
     if (error != null) {
-      await _showFailure(context, error);
+      await _showFailure(context, appErrorMessage(context.l10n, error));
     }
   }
 
@@ -640,12 +645,12 @@ class HomeView extends GetView<HomeController> {
         if (!confirmed || !context.mounted) {
           return;
         }
-        final String? error = await controller.forceStop(profile);
+        final AppException? error = await controller.forceStop(profile);
         if (!context.mounted) {
           return;
         }
         if (error != null) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         } else {
           _showMessage(context, l10n.cloneStopped(profile.profileName));
         }
@@ -654,12 +659,12 @@ class HomeView extends GetView<HomeController> {
         if (!confirmed || !context.mounted) {
           return;
         }
-        final String? error = await controller.clearCache(profile);
+        final AppException? error = await controller.clearCache(profile);
         if (!context.mounted) {
           return;
         }
         if (error != null) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         } else {
           _showMessage(context, l10n.cloneCacheCleared(profile.profileName));
         }
@@ -670,12 +675,12 @@ class HomeView extends GetView<HomeController> {
         if (!confirmed || !context.mounted) {
           return;
         }
-        final String? error = await controller.clearStorage(profile);
+        final AppException? error = await controller.clearStorage(profile);
         if (!context.mounted) {
           return;
         }
         if (error != null) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         } else {
           _showMessage(context, l10n.cloneStorageCleared(profile.profileName));
         }
@@ -695,11 +700,11 @@ class HomeView extends GetView<HomeController> {
           );
         }
       case CloneAction.shareApp:
-        final String? error = await controller.shareApp(profile);
+        final AppException? error = await controller.shareApp(profile);
         // Only a failure is worth saying: on success the share sheet is already on
         // screen, and a dialog behind it would be talking over the answer.
         if (error != null && context.mounted) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         }
       case CloneAction.rename:
         final String? name = await showRenameProfileDialog(
@@ -709,28 +714,28 @@ class HomeView extends GetView<HomeController> {
         if (name == null || !context.mounted) {
           return;
         }
-        final String? error = await controller.renameProfile(profile, name);
+        final AppException? error = await controller.renameProfile(profile, name);
         if (error != null && context.mounted) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         }
       case CloneAction.clone:
         await _cloneAgain(context, profile);
       case CloneAction.addShortcut:
-        final String? error = await controller.addShortcut(profile);
+        final AppException? error = await controller.addShortcut(profile);
         if (!context.mounted) {
           return;
         }
         if (error != null) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         } else {
           _showMessage(context, l10n.cloneShortcutAdded);
         }
       case CloneAction.notifications:
         // On success the system's own notification screen opens over the app, so there is
         // nothing to say; only a refusal needs a message.
-        final String? error = await controller.openNotificationSettings();
+        final AppException? error = await controller.openNotificationSettings();
         if (error != null && context.mounted) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         }
       case CloneAction.permissions:
         await Navigator.of(context).push<void>(
@@ -753,7 +758,7 @@ class HomeView extends GetView<HomeController> {
           l10n.cloneGoogleServicesInstalling,
         );
         _showProgress(context, profile, progress);
-        final String? error = await controller.installGoogleServices(profile);
+        final AppException? error = await controller.installGoogleServices(profile);
         if (!context.mounted) {
           progress.dispose();
           return;
@@ -762,7 +767,7 @@ class HomeView extends GetView<HomeController> {
         Navigator.of(context).pop();
         progress.dispose();
         if (error != null) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         } else {
           _showMessage(
             context,
@@ -782,9 +787,9 @@ class HomeView extends GetView<HomeController> {
         }
         // `uninstall` rather than `deleteProfile`: it lets the tile animate out first,
         // so the clone that goes is the one the user watched go.
-        final String? error = await controller.uninstall(profile);
+        final AppException? error = await controller.uninstall(profile);
         if (error != null && context.mounted) {
-          await _showFailure(context, error);
+          await _showFailure(context, appErrorMessage(l10n, error));
         }
     }
   }

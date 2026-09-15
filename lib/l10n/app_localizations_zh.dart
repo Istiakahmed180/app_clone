@@ -1154,6 +1154,89 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => '无原生库';
+
+  @override
+  String get errorProfileNameEmpty => '分身需要一个名称。';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return '分身名称最多 $maximum 个字符。';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '无法读取你保存的分身。';
+
+  @override
+  String get errorProfileNotFound => '该分身已不存在。';
+
+  @override
+  String get errorBridgeFailed => '与管理分身的那部分应用通信时出错。';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => '此功能仅在 Android 上可用。';
+
+  @override
+  String get errorTestAppCheckFailed => '无法检查测试应用是否已安装。';
+
+  @override
+  String get errorEngineInitFailed => '虚拟化引擎无法在本设备上启动。';
+
+  @override
+  String get errorEngineAndroidTooOld => '虚拟化引擎需要更新版本的 Android。';
+
+  @override
+  String get errorEngineNoResponse => '虚拟化引擎没有响应，请重试。';
+
+  @override
+  String get errorNoContainer => '此分身还没有容器。先打开一次再重试。';
+
+  @override
+  String get errorLaunchRefused => '引擎拒绝打开此分身。';
+
+  @override
+  String get errorAlreadyCloned => '此应用已经克隆过了。';
+
+  @override
+  String get errorClearCacheFailed => '此分身的部分缓存无法删除。';
+
+  @override
+  String get errorClearDataFailed => '无法清除此分身的数据。';
+
+  @override
+  String get errorShortcutsUnsupported => '此启动器不支持添加快捷方式。';
+
+  @override
+  String get errorShortcutRefused => '启动器拒绝了该快捷方式。';
+
+  @override
+  String get errorApkGone => '此分身的 APK 已不在设备上，因此没有可分享的内容。';
+
+  @override
+  String get errorShareFailed => '无法分享该应用。';
+
+  @override
+  String get errorNoBatteryScreen => '此设备没有可打开的电池优化界面。';
+
+  @override
+  String get errorNoBackgroundScreen => '此设备没有可打开的后台活动界面。';
+
+  @override
+  String get errorNeedsAppOpen => '仅在应用打开时才能显示。';
+
+  @override
+  String get errorApkUnreadable => '无法读取所选 APK 中的一个。';
+
+  @override
+  String get errorApkPackageMismatch => '所选的 APK 必须属于同一个应用。';
+
+  @override
+  String get errorApkVersionMismatch => '所选的 APK 必须是同一版本。';
+
+  @override
+  String get errorApkBaseRequired => '请选择恰好一个基础 APK 和一个或多个配置拆分包。';
+
+  @override
+  String get errorApkDuplicateSplit => '同一个 APK 拆分包被选择了多次。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2306,6 +2389,89 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get componentNoNativeLibraries => '无原生库';
+
+  @override
+  String get errorProfileNameEmpty => '分身需要一个名称。';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return '分身名称最多 $maximum 个字符。';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '无法读取你保存的分身。';
+
+  @override
+  String get errorProfileNotFound => '该分身已不存在。';
+
+  @override
+  String get errorBridgeFailed => '与管理分身的那部分应用通信时出错。';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => '此功能仅在 Android 上可用。';
+
+  @override
+  String get errorTestAppCheckFailed => '无法检查测试应用是否已安装。';
+
+  @override
+  String get errorEngineInitFailed => '虚拟化引擎无法在本设备上启动。';
+
+  @override
+  String get errorEngineAndroidTooOld => '虚拟化引擎需要更新版本的 Android。';
+
+  @override
+  String get errorEngineNoResponse => '虚拟化引擎没有响应，请重试。';
+
+  @override
+  String get errorNoContainer => '此分身还没有容器。先打开一次再重试。';
+
+  @override
+  String get errorLaunchRefused => '引擎拒绝打开此分身。';
+
+  @override
+  String get errorAlreadyCloned => '此应用已经克隆过了。';
+
+  @override
+  String get errorClearCacheFailed => '此分身的部分缓存无法删除。';
+
+  @override
+  String get errorClearDataFailed => '无法清除此分身的数据。';
+
+  @override
+  String get errorShortcutsUnsupported => '此启动器不支持添加快捷方式。';
+
+  @override
+  String get errorShortcutRefused => '启动器拒绝了该快捷方式。';
+
+  @override
+  String get errorApkGone => '此分身的 APK 已不在设备上，因此没有可分享的内容。';
+
+  @override
+  String get errorShareFailed => '无法分享该应用。';
+
+  @override
+  String get errorNoBatteryScreen => '此设备没有可打开的电池优化界面。';
+
+  @override
+  String get errorNoBackgroundScreen => '此设备没有可打开的后台活动界面。';
+
+  @override
+  String get errorNeedsAppOpen => '仅在应用打开时才能显示。';
+
+  @override
+  String get errorApkUnreadable => '无法读取所选 APK 中的一个。';
+
+  @override
+  String get errorApkPackageMismatch => '所选的 APK 必须属于同一个应用。';
+
+  @override
+  String get errorApkVersionMismatch => '所选的 APK 必须是同一版本。';
+
+  @override
+  String get errorApkBaseRequired => '请选择恰好一个基础 APK 和一个或多个配置拆分包。';
+
+  @override
+  String get errorApkDuplicateSplit => '同一个 APK 拆分包被选择了多次。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3458,6 +3624,89 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get componentNoNativeLibraries => '無原生程式庫';
+
+  @override
+  String get errorProfileNameEmpty => '分身需要一個名稱。';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return '分身名稱最多 $maximum 個字元。';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '無法讀取你儲存的分身。';
+
+  @override
+  String get errorProfileNotFound => '該分身已不存在。';
+
+  @override
+  String get errorBridgeFailed => '與管理分身的那部分應用程式通訊時發生錯誤。';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => '此功能僅在 Android 上可用。';
+
+  @override
+  String get errorTestAppCheckFailed => '無法檢查測試應用程式是否已安裝。';
+
+  @override
+  String get errorEngineInitFailed => '虛擬化引擎無法在本裝置上啟動。';
+
+  @override
+  String get errorEngineAndroidTooOld => '虛擬化引擎需要更新版本的 Android。';
+
+  @override
+  String get errorEngineNoResponse => '虛擬化引擎沒有回應，請再試一次。';
+
+  @override
+  String get errorNoContainer => '此分身還沒有容器。先開啟一次再重試。';
+
+  @override
+  String get errorLaunchRefused => '引擎拒絕開啟此分身。';
+
+  @override
+  String get errorAlreadyCloned => '此應用程式已經複製過了。';
+
+  @override
+  String get errorClearCacheFailed => '此分身的部分快取無法刪除。';
+
+  @override
+  String get errorClearDataFailed => '無法清除此分身的資料。';
+
+  @override
+  String get errorShortcutsUnsupported => '此啟動器不支援新增捷徑。';
+
+  @override
+  String get errorShortcutRefused => '啟動器拒絕了該捷徑。';
+
+  @override
+  String get errorApkGone => '此分身的 APK 已不在裝置上，因此沒有可分享的內容。';
+
+  @override
+  String get errorShareFailed => '無法分享該應用程式。';
+
+  @override
+  String get errorNoBatteryScreen => '此裝置沒有可開啟的電池最佳化畫面。';
+
+  @override
+  String get errorNoBackgroundScreen => '此裝置沒有可開啟的背景活動畫面。';
+
+  @override
+  String get errorNeedsAppOpen => '僅在應用程式開啟時才能顯示。';
+
+  @override
+  String get errorApkUnreadable => '無法讀取所選 APK 其中之一。';
+
+  @override
+  String get errorApkPackageMismatch => '所選的 APK 必須屬於同一個應用程式。';
+
+  @override
+  String get errorApkVersionMismatch => '所選的 APK 必須是同一版本。';
+
+  @override
+  String get errorApkBaseRequired => '請選擇剛好一個基礎 APK 和一個或多個設定分割包。';
+
+  @override
+  String get errorApkDuplicateSplit => '同一個 APK 分割包被選擇了多次。';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -4610,4 +4859,87 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get componentNoNativeLibraries => '無原生程式庫';
+
+  @override
+  String get errorProfileNameEmpty => '分身需要一個名稱。';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return '分身名稱最多 $maximum 個字元。';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '無法讀取你儲存的分身。';
+
+  @override
+  String get errorProfileNotFound => '該分身已不存在。';
+
+  @override
+  String get errorBridgeFailed => '與管理分身的那部分應用程式通訊時發生錯誤。';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => '此功能僅在 Android 上可用。';
+
+  @override
+  String get errorTestAppCheckFailed => '無法檢查測試應用程式是否已安裝。';
+
+  @override
+  String get errorEngineInitFailed => '虛擬化引擎無法在本裝置上啟動。';
+
+  @override
+  String get errorEngineAndroidTooOld => '虛擬化引擎需要更新版本的 Android。';
+
+  @override
+  String get errorEngineNoResponse => '虛擬化引擎沒有回應，請再試一次。';
+
+  @override
+  String get errorNoContainer => '此分身還沒有容器。先開啟一次再重試。';
+
+  @override
+  String get errorLaunchRefused => '引擎拒絕開啟此分身。';
+
+  @override
+  String get errorAlreadyCloned => '此應用程式已經複製過了。';
+
+  @override
+  String get errorClearCacheFailed => '此分身的部分快取無法刪除。';
+
+  @override
+  String get errorClearDataFailed => '無法清除此分身的資料。';
+
+  @override
+  String get errorShortcutsUnsupported => '此啟動器不支援新增捷徑。';
+
+  @override
+  String get errorShortcutRefused => '啟動器拒絕了該捷徑。';
+
+  @override
+  String get errorApkGone => '此分身的 APK 已不在裝置上，因此沒有可分享的內容。';
+
+  @override
+  String get errorShareFailed => '無法分享該應用程式。';
+
+  @override
+  String get errorNoBatteryScreen => '此裝置沒有可開啟的電池最佳化畫面。';
+
+  @override
+  String get errorNoBackgroundScreen => '此裝置沒有可開啟的背景活動畫面。';
+
+  @override
+  String get errorNeedsAppOpen => '僅在應用程式開啟時才能顯示。';
+
+  @override
+  String get errorApkUnreadable => '無法讀取所選 APK 其中之一。';
+
+  @override
+  String get errorApkPackageMismatch => '所選的 APK 必須屬於同一個應用程式。';
+
+  @override
+  String get errorApkVersionMismatch => '所選的 APK 必須是同一版本。';
+
+  @override
+  String get errorApkBaseRequired => '請選擇剛好一個基礎 APK 和一個或多個設定分割包。';
+
+  @override
+  String get errorApkDuplicateSplit => '同一個 APK 分割包被選擇了多次。';
 }

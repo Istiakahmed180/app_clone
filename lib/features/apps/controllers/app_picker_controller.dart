@@ -44,12 +44,12 @@ class AppPickerController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxBool isWorking = false.obs;
   final RxString query = ''.obs;
-  /// What the native layer said went wrong, in its own words.
+  /// What went wrong on the native side, as it was thrown.
   ///
-  /// Only ever native prose. A problem this app diagnoses itself goes in [status]
-  /// instead, because only a widget can say it in the user's language — the same split
+  /// The exception rather than its message, so the view can translate it by code. A
+  /// problem this app diagnoses itself goes in [status] instead — the same split
   /// `SettingsController` makes.
-  final RxnString errorMessage = RxnString();
+  final Rx<AppException?> errorMessage = Rx<AppException?>(null);
 
   /// A problem this app found for itself, waiting to be worded and shown once.
   final Rx<PickerStatus?> status = Rx<PickerStatus?>(null);
@@ -256,7 +256,7 @@ class AppPickerController extends GetxController {
       errorMessage.value = null;
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not list installed apps', error, stackTrace);
-      errorMessage.value = error.message;
+      errorMessage.value = error;
     }
     isLoading.value = false;
   }
@@ -365,8 +365,8 @@ class AppPickerController extends GetxController {
 
   /// Shares the host's copy of this app's APK.
   ///
-  /// Returns the error message, or `null` when the chooser opened.
-  Future<String?> shareInstalledApp(InstalledAppModel app) async {
+  /// Returns the refusal, or `null` when the chooser opened.
+  Future<AppException?> shareInstalledApp(InstalledAppModel app) async {
     try {
       await _bridge.shareInstalledApk(
         packageName: app.packageName,
@@ -374,7 +374,7 @@ class AppPickerController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     }
   }
 
@@ -418,7 +418,8 @@ class AppPickerController extends GetxController {
   final Map<String, CompatibilityReport> _reports =
       <String, CompatibilityReport>{};
 
-  /// Clones an installed app. Returns `null` on success, or a user-facing message.
+  /// Clones an installed app. Returns `null` on success, or the refusal to be worded
+  /// by the caller.
   /// Packages a clone is being created for.
   ///
   /// Kept here so the row itself can say so. Creating a container takes a couple of
@@ -446,14 +447,14 @@ class AppPickerController extends GetxController {
         // work, so starting the install would only fail later and less clearly.
         return CloneRefusal.blocked(report.blocker);
       }
-      final String? failure = await cloneInstalledApp(app);
+      final AppException? failure = await cloneInstalledApp(app);
       return failure == null ? null : CloneRefusal.failed(failure);
     } finally {
       cloning.remove(app.packageName);
     }
   }
 
-  Future<String?> cloneInstalledApp(
+  Future<AppException?> cloneInstalledApp(
     InstalledAppModel app, {
     bool installGms = false,
   }) async {
@@ -477,7 +478,7 @@ class AppPickerController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     } finally {
       // In `finally`, so a refused create clears the row rather than leaving it
       // spinning on a clone that is never going to exist.
@@ -532,7 +533,7 @@ class AppPickerController extends GetxController {
           );
           return await _bridge.inspectApk(paths);
         } on AppException catch (error) {
-          errorMessage.value = error.message;
+          errorMessage.value = error;
           return null;
         } on IOException catch (error, stackTrace) {
           _logger.error('Could not copy the selected APK', error, stackTrace);
@@ -585,7 +586,7 @@ class AppPickerController extends GetxController {
   }
 
   /// Installs a previously inspected APK as a new clone.
-  Future<String?> cloneApk(
+  Future<AppException?> cloneApk(
     ApkCandidate candidate, {
     bool installGms = false,
   }) async {
@@ -607,7 +608,7 @@ class AppPickerController extends GetxController {
       );
       return null;
     } on AppException catch (error) {
-      return error.message;
+      return error;
     } finally {
       isWorking.value = false;
     }

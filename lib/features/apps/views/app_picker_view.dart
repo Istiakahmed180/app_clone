@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/errors/app_error_text.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../data/models/clone_refusal.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
@@ -41,7 +43,10 @@ class AppPickerView extends GetView<AppPickerController> {
                   return _centred(
                     EmptyState(
                       title: context.l10n.pickerErrorTitle,
-                      message: controller.errorMessage.value!,
+                      message: appErrorMessage(
+                        context.l10n,
+                        controller.errorMessage.value!,
+                      ),
                       icon: Icons.error_outline,
                     ),
                   );
@@ -347,9 +352,9 @@ class AppPickerView extends GetView<AppPickerController> {
         // another route for an installed app.
         await _quickClone(context, app);
       case InstalledAppAction.shareApp:
-        final String? error = await controller.shareInstalledApp(app);
+        final AppException? error = await controller.shareInstalledApp(app);
         if (error != null && context.mounted) {
-          _showMessage(context, error);
+          _showMessage(context, appErrorMessage(context.l10n, error));
         }
       case InstalledAppAction.appDetails:
         await Navigator.of(context).push<void>(
@@ -433,12 +438,12 @@ class AppPickerView extends GetView<AppPickerController> {
 
     // No GMS argument: provisioning is retired, so both clone routes -- installed app and
     // imported APK -- now behave identically and leave it off.
-    final String? error = await controller.cloneApk(candidate);
+    final AppException? error = await controller.cloneApk(candidate);
     if (!context.mounted) {
       return;
     }
     if (error != null) {
-      _showMessage(context, error);
+      _showMessage(context, appErrorMessage(context.l10n, error));
       return;
     }
     Get.back<bool>(result: true);
@@ -457,7 +462,10 @@ class AppPickerView extends GetView<AppPickerController> {
     if (finding != null) {
       return compatibilityFindingMessage(context.l10n, finding);
     }
-    return refusal.failure ?? context.l10n.pickerCannotClone;
+    final AppException? failure = refusal.failure;
+    return failure == null
+        ? context.l10n.pickerCannotClone
+        : appErrorMessage(context.l10n, failure);
   }
 
   /// The pending problem, cleared as it is taken.
@@ -473,7 +481,8 @@ class AppPickerView extends GetView<AppPickerController> {
         PickerStatus.apkUnreadable => context.l10n.pickerApkUnreadable,
       };
     }
-    return controller.errorMessage.value;
+    final AppException? native = controller.errorMessage.value;
+    return native == null ? null : appErrorMessage(context.l10n, native);
   }
 }
 

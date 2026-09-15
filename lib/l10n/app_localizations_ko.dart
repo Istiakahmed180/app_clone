@@ -1168,4 +1168,87 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => '네이티브 라이브러리 없음';
+
+  @override
+  String get errorProfileNameEmpty => '클론에는 이름이 필요합니다.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return '클론 이름은 최대 $maximum자까지 가능합니다.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable => '저장된 클론을 읽을 수 없습니다.';
+
+  @override
+  String get errorProfileNotFound => '그 클론은 더 이상 없습니다.';
+
+  @override
+  String get errorBridgeFailed => '클론을 관리하는 부분과 통신하는 중 문제가 발생했습니다.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform => '이 기능은 Android에서만 사용할 수 있습니다.';
+
+  @override
+  String get errorTestAppCheckFailed => '테스트 앱이 설치되어 있는지 확인할 수 없습니다.';
+
+  @override
+  String get errorEngineInitFailed => '이 기기에서 가상화 엔진을 시작하지 못했습니다.';
+
+  @override
+  String get errorEngineAndroidTooOld => '가상화 엔진에는 더 새로운 Android 버전이 필요합니다.';
+
+  @override
+  String get errorEngineNoResponse => '가상화 엔진이 응답하지 않았습니다. 다시 시도하세요.';
+
+  @override
+  String get errorNoContainer => '이 클론에는 아직 컨테이너가 없습니다. 한 번 실행한 뒤 다시 시도하세요.';
+
+  @override
+  String get errorLaunchRefused => '엔진이 이 클론 실행을 거부했습니다.';
+
+  @override
+  String get errorAlreadyCloned => '이 앱은 이미 복제되어 있습니다.';
+
+  @override
+  String get errorClearCacheFailed => '이 클론의 캐시 일부를 삭제하지 못했습니다.';
+
+  @override
+  String get errorClearDataFailed => '이 클론의 데이터를 삭제하지 못했습니다.';
+
+  @override
+  String get errorShortcutsUnsupported => '이 런처는 바로가기 추가를 지원하지 않습니다.';
+
+  @override
+  String get errorShortcutRefused => '런처가 바로가기를 거부했습니다.';
+
+  @override
+  String get errorApkGone => '이 클론의 APK가 기기에 없어 공유할 것이 없습니다.';
+
+  @override
+  String get errorShareFailed => '앱을 공유하지 못했습니다.';
+
+  @override
+  String get errorNoBatteryScreen => '이 기기에는 열 수 있는 배터리 최적화 화면이 없습니다.';
+
+  @override
+  String get errorNoBackgroundScreen => '이 기기에는 열 수 있는 백그라운드 활동 화면이 없습니다.';
+
+  @override
+  String get errorNeedsAppOpen => '앱이 열려 있는 동안에만 표시할 수 있습니다.';
+
+  @override
+  String get errorApkUnreadable => '선택한 APK 중 하나를 읽을 수 없습니다.';
+
+  @override
+  String get errorApkPackageMismatch => '선택한 APK는 모두 같은 앱의 것이어야 합니다.';
+
+  @override
+  String get errorApkVersionMismatch => '선택한 APK는 모두 같은 버전이어야 합니다.';
+
+  @override
+  String get errorApkBaseRequired => '기본 APK 하나와 구성 분할 하나 이상을 선택하세요.';
+
+  @override
+  String get errorApkDuplicateSplit => '같은 APK 분할이 여러 번 선택되었습니다.';
 }

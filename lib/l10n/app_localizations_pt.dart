@@ -1203,6 +1203,109 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Sem bibliotecas nativas';
+
+  @override
+  String get errorProfileNameEmpty => 'Um clone precisa de um nome.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'O nome de um clone pode ter no máximo $maximum caracteres.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Não foi possível ler os teus clones guardados.';
+
+  @override
+  String get errorProfileNotFound => 'Esse clone já não existe.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Algo correu mal ao comunicar com a parte da app que gere os clones.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Esta funcionalidade só está disponível no Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Não foi possível verificar se a app de teste está instalada.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'O motor de virtualização não conseguiu arrancar neste dispositivo.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'O motor de virtualização requer uma versão mais recente do Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'O motor de virtualização não respondeu. Tenta novamente.';
+
+  @override
+  String get errorNoContainer =>
+      'Este clone ainda não tem contentor. Abre-o uma vez e tenta novamente.';
+
+  @override
+  String get errorLaunchRefused => 'O motor recusou abrir este clone.';
+
+  @override
+  String get errorAlreadyCloned => 'Esta app já foi clonada.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Parte da cache deste clone não pôde ser eliminada.';
+
+  @override
+  String get errorClearDataFailed =>
+      'Não foi possível limpar os dados deste clone.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Este launcher não suporta a adição de atalhos.';
+
+  @override
+  String get errorShortcutRefused => 'O launcher recusou o atalho.';
+
+  @override
+  String get errorApkGone =>
+      'O APK deste clone já não está no dispositivo, por isso não há nada para partilhar.';
+
+  @override
+  String get errorShareFailed => 'Não foi possível partilhar a app.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Este dispositivo não tem um ecrã de otimização de bateria para abrir.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Este dispositivo não tem um ecrã de atividade em segundo plano para abrir.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Isso só pode ser mostrado enquanto a app está aberta.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Não foi possível ler um dos APK selecionados.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Todos os APK selecionados têm de pertencer à mesma app.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Todos os APK selecionados têm de ter a mesma versão.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Seleciona exatamente um APK base e um ou mais splits de configuração.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'O mesmo split de APK foi selecionado mais do que uma vez.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2402,4 +2505,107 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get componentNoNativeLibraries => 'Sem bibliotecas nativas';
+
+  @override
+  String get errorProfileNameEmpty => 'Um clone precisa de um nome.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'O nome de um clone pode ter no máximo $maximum caracteres.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Não foi possível ler seus clones salvos.';
+
+  @override
+  String get errorProfileNotFound => 'Esse clone não existe mais.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Algo deu errado ao conversar com a parte do app que gerencia os clones.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Este recurso só está disponível no Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Não foi possível verificar se o app de teste está instalado.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'O motor de virtualização não conseguiu iniciar neste dispositivo.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'O motor de virtualização exige uma versão mais recente do Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'O motor de virtualização não respondeu. Tente de novo.';
+
+  @override
+  String get errorNoContainer =>
+      'Este clone ainda não tem contêiner. Abra-o uma vez e tente de novo.';
+
+  @override
+  String get errorLaunchRefused => 'O motor recusou abrir este clone.';
+
+  @override
+  String get errorAlreadyCloned => 'Este app já foi clonado.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Parte do cache deste clone não pôde ser excluída.';
+
+  @override
+  String get errorClearDataFailed =>
+      'Não foi possível limpar os dados deste clone.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Este launcher não suporta adicionar atalhos.';
+
+  @override
+  String get errorShortcutRefused => 'O launcher recusou o atalho.';
+
+  @override
+  String get errorApkGone =>
+      'O APK deste clone não está mais no dispositivo, então não há nada para compartilhar.';
+
+  @override
+  String get errorShareFailed => 'Não foi possível compartilhar o app.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Este dispositivo não tem uma tela de otimização de bateria para abrir.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Este dispositivo não tem uma tela de atividade em segundo plano para abrir.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Isso só pode ser mostrado enquanto o app está aberto.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Não foi possível ler um dos APKs selecionados.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Todos os APKs selecionados devem pertencer ao mesmo app.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Todos os APKs selecionados devem ter a mesma versão.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Selecione exatamente um APK base e um ou mais splits de configuração.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'O mesmo split de APK foi selecionado mais de uma vez.';
 }

@@ -1208,4 +1208,105 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Немає нативних бібліотек';
+
+  @override
+  String get errorProfileNameEmpty => 'Клону потрібна назва.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Назва клону може містити щонайбільше $maximum символів.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Не вдалося прочитати збережені клони.';
+
+  @override
+  String get errorProfileNotFound => 'Цього клону більше немає.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Щось пішло не так під час звернення до частини застосунку, яка керує клонами.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Ця можливість доступна лише на Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Не вдалося перевірити, чи встановлено тестовий застосунок.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Рушій віртуалізації не зміг запуститися на цьому пристрої.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Рушію віртуалізації потрібна новіша версія Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Рушій віртуалізації не відповів. Спробуйте ще раз.';
+
+  @override
+  String get errorNoContainer =>
+      'Цей клон ще не має контейнера. Відкрийте його один раз і спробуйте знову.';
+
+  @override
+  String get errorLaunchRefused => 'Рушій відмовився відкрити цей клон.';
+
+  @override
+  String get errorAlreadyCloned => 'Цей застосунок уже клоновано.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Частину кешу цього клону не вдалося видалити.';
+
+  @override
+  String get errorClearDataFailed => 'Не вдалося очистити дані цього клону.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Цей лаунчер не підтримує додавання ярликів.';
+
+  @override
+  String get errorShortcutRefused => 'Лаунчер відхилив ярлик.';
+
+  @override
+  String get errorApkGone =>
+      'APK цього клону більше немає на пристрої, тож ділитися нічим.';
+
+  @override
+  String get errorShareFailed => 'Не вдалося поділитися застосунком.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'На цьому пристрої немає екрана оптимізації батареї, який можна відкрити.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'На цьому пристрої немає екрана фонової активності, який можна відкрити.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Це можна показати, лише поки застосунок відкрито.';
+
+  @override
+  String get errorApkUnreadable => 'Один із вибраних APK не вдалося прочитати.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Усі вибрані APK мають належати одному застосунку.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Усі вибрані APK мають мати однакову версію.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Виберіть рівно один базовий APK і один або більше конфігураційних сплітів.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Той самий спліт APK вибрано кілька разів.';
 }

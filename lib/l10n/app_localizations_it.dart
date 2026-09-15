@@ -1208,4 +1208,108 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Nessuna libreria nativa';
+
+  @override
+  String get errorProfileNameEmpty => 'Un clone ha bisogno di un nome.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Il nome di un clone può avere al massimo $maximum caratteri.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Non è stato possibile leggere i tuoi cloni salvati.';
+
+  @override
+  String get errorProfileNotFound => 'Quel clone non esiste più.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Qualcosa è andato storto nel dialogo con la parte dell\'app che gestisce i cloni.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Questa funzione è disponibile solo su Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Non è stato possibile verificare se l\'app di prova è installata.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Il motore di virtualizzazione non è riuscito ad avviarsi su questo dispositivo.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Il motore di virtualizzazione richiede una versione più recente di Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Il motore di virtualizzazione non ha risposto. Riprova.';
+
+  @override
+  String get errorNoContainer =>
+      'Questo clone non ha ancora un container. Aprilo una volta e riprova.';
+
+  @override
+  String get errorLaunchRefused =>
+      'Il motore ha rifiutato di aprire questo clone.';
+
+  @override
+  String get errorAlreadyCloned => 'Questa app è già stata clonata.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Parte della cache di questo clone non è stata eliminata.';
+
+  @override
+  String get errorClearDataFailed =>
+      'Non è stato possibile cancellare i dati di questo clone.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Questo launcher non supporta l\'aggiunta di scorciatoie.';
+
+  @override
+  String get errorShortcutRefused => 'Il launcher ha rifiutato la scorciatoia.';
+
+  @override
+  String get errorApkGone =>
+      'L\'APK di questo clone non è più sul dispositivo, quindi non c\'è nulla da condividere.';
+
+  @override
+  String get errorShareFailed => 'Non è stato possibile condividere l\'app.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Questo dispositivo non ha una schermata di ottimizzazione della batteria da aprire.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Questo dispositivo non ha una schermata di attività in background da aprire.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Può essere mostrato solo mentre l\'app è aperta.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Non è stato possibile leggere uno degli APK selezionati.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Tutti gli APK selezionati devono appartenere alla stessa app.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Tutti gli APK selezionati devono avere la stessa versione.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Seleziona esattamente un APK base e uno o più split di configurazione.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Lo stesso split APK è stato selezionato più di una volta.';
 }

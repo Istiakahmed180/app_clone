@@ -1198,4 +1198,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'No native libraries';
+
+  @override
+  String get errorProfileNameEmpty => 'A clone needs a name.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'A clone\'s name can be at most $maximum characters.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Your saved clones could not be read.';
+
+  @override
+  String get errorProfileNotFound => 'That clone no longer exists.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Something went wrong talking to the part of the app that manages clones.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'This feature is only available on Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Whether the test app is installed could not be checked.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'The virtualization engine failed to start on this device.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'The virtualization engine requires a newer version of Android.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'The virtualization engine did not answer. Try again.';
+
+  @override
+  String get errorNoContainer =>
+      'This clone has no container yet. Open it once and try again.';
+
+  @override
+  String get errorLaunchRefused => 'The engine refused to open this clone.';
+
+  @override
+  String get errorAlreadyCloned => 'This app has already been cloned.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Part of this clone\'s cache could not be deleted.';
+
+  @override
+  String get errorClearDataFailed => 'This clone\'s data could not be cleared.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'This launcher does not support adding shortcuts.';
+
+  @override
+  String get errorShortcutRefused => 'The launcher refused the shortcut.';
+
+  @override
+  String get errorApkGone =>
+      'This clone\'s APK is no longer on the device, so there is nothing to share.';
+
+  @override
+  String get errorShareFailed => 'The app could not be shared.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'This device has no battery optimisation screen to open.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'This device has no background activity screen to open.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'That can only be shown while the app is open.';
+
+  @override
+  String get errorApkUnreadable =>
+      'One of the selected APKs could not be read.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'All selected APKs must belong to the same app.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'All selected APKs must have the same version.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Select exactly one base APK and one or more configuration splits.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'The same APK split was selected more than once.';
 }

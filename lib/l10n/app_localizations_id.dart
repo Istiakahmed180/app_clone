@@ -1197,4 +1197,106 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Tanpa pustaka native';
+
+  @override
+  String get errorProfileNameEmpty => 'Klon perlu sebuah nama.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Nama klon paling banyak $maximum karakter.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Klon tersimpan Anda tidak dapat dibaca.';
+
+  @override
+  String get errorProfileNotFound => 'Klon itu sudah tidak ada.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Terjadi masalah saat berkomunikasi dengan bagian aplikasi yang mengelola klon.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Fitur ini hanya tersedia di Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Tidak dapat memeriksa apakah aplikasi uji sudah terpasang.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Mesin virtualisasi gagal dijalankan di perangkat ini.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Mesin virtualisasi memerlukan versi Android yang lebih baru.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Mesin virtualisasi tidak menjawab. Coba lagi.';
+
+  @override
+  String get errorNoContainer =>
+      'Klon ini belum punya kontainer. Buka sekali lalu coba lagi.';
+
+  @override
+  String get errorLaunchRefused => 'Mesin menolak membuka klon ini.';
+
+  @override
+  String get errorAlreadyCloned => 'Aplikasi ini sudah diklon.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Sebagian cache klon ini tidak dapat dihapus.';
+
+  @override
+  String get errorClearDataFailed => 'Data klon ini tidak dapat dihapus.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Peluncur ini tidak mendukung penambahan pintasan.';
+
+  @override
+  String get errorShortcutRefused => 'Peluncur menolak pintasan.';
+
+  @override
+  String get errorApkGone =>
+      'APK klon ini sudah tidak ada di perangkat, jadi tidak ada yang bisa dibagikan.';
+
+  @override
+  String get errorShareFailed => 'Aplikasi tidak dapat dibagikan.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Perangkat ini tidak punya layar pengoptimalan baterai untuk dibuka.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Perangkat ini tidak punya layar aktivitas latar belakang untuk dibuka.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Itu hanya bisa ditampilkan selagi aplikasi terbuka.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Salah satu APK yang dipilih tidak dapat dibaca.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Semua APK yang dipilih harus milik aplikasi yang sama.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Semua APK yang dipilih harus memiliki versi yang sama.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Pilih tepat satu APK dasar dan satu atau beberapa split konfigurasi.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Split APK yang sama dipilih lebih dari sekali.';
 }

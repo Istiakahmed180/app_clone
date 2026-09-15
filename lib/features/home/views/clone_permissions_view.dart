@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/clone_permissions.dart';
 import '../../../data/models/virtual_profile_model.dart';
+import '../../../core/errors/app_error_text.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../widgets/empty_state.dart';
@@ -75,7 +77,7 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
       }
     });
 
-    final String? failure = await widget.controller.setClonePermission(
+    final AppException? failure = await widget.controller.setClonePermission(
       widget.profile,
       permission,
       allowed,
@@ -93,7 +95,9 @@ class _ClonePermissionsViewState extends State<ClonePermissionsView> {
     });
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(failure)));
+      ..showSnackBar(
+        SnackBar(content: Text(appErrorMessage(context.l10n, failure))),
+      );
   }
 
   @override

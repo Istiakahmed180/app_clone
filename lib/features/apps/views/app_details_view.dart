@@ -3,13 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/errors/app_error_text.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/app_details.dart';
+import '../../../data/models/installed_app_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
-import '../widgets/app_facts_text.dart';
-import '../../../data/models/installed_app_model.dart';
 import '../controllers/app_picker_controller.dart';
+import '../widgets/app_facts_text.dart';
 
 /// Everything Duplika knows about one installed app, before anything is cloned.
 ///
@@ -31,7 +32,7 @@ class AppDetailsView extends StatefulWidget {
 
 class _AppDetailsViewState extends State<AppDetailsView> {
   AppDetails? _details;
-  String? _error;
+  AppException? _error;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _AppDetailsViewState extends State<AppDetailsView> {
       }
     } on AppException catch (error) {
       if (mounted) {
-        setState(() => _error = error.message);
+        setState(() => _error = error);
       }
     }
   }
@@ -67,7 +68,12 @@ class _AppDetailsViewState extends State<AppDetailsView> {
           _header(theme),
           SizedBox(height: 20.h),
           if (_error != null)
-            _card(child: Text(_error!, style: theme.textTheme.bodySmall))
+            _card(
+              child: Text(
+                appErrorMessage(l10n, _error!),
+                style: theme.textTheme.bodySmall,
+              ),
+            )
           else if (_details == null)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 48.h),

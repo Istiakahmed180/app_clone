@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/errors/app_exception.dart';
 import 'clone_budget.dart';
 
 /// What a request for more clones came to.
@@ -30,11 +31,11 @@ class CloneBatchResult {
   /// budget itself, so the refusal can quote the sentence the stepper already showed.
   final CloneBudget? refusedBy;
 
-  /// The engine's own message for the first clone that failed.
+  /// The first clone that failed, as it was thrown.
   ///
-  /// Not translated here: it comes from the native layer as finished prose, and
-  /// paraphrasing it would lose the detail that makes it worth showing.
-  final String? failure;
+  /// The exception rather than its message: the view translates it by code, and only a
+  /// code the table has no wording for falls back to the engine's own prose.
+  final AppException? failure;
 
   bool get isSuccess => refusedBy == null && failure == null;
 

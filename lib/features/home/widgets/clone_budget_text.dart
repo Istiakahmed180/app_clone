@@ -1,3 +1,5 @@
+import '../../../core/errors/app_error_text.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../data/models/clone_batch_result.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../l10n/app_localizations.dart';
@@ -54,13 +56,14 @@ String? cloneBatchFailure(
     );
   }
 
-  final String? failure = result.failure;
+  final AppException? failure = result.failure;
   if (failure == null) {
     return null;
   }
-  // A batch that landed nothing has only the engine's own message to offer; one that
-  // landed some needs the tally as well, or a partial result reads as a total failure.
+  // A batch that landed nothing has only the refusal to offer; one that landed some
+  // needs the tally as well, or a partial result reads as a total failure.
+  final String said = appErrorMessage(l10n, failure);
   return result.isPartial
-      ? l10n.cloneCreatedPartly(result.created, result.requested, failure)
-      : failure;
+      ? l10n.cloneCreatedPartly(result.created, result.requested, said)
+      : said;
 }

@@ -130,6 +130,7 @@ class NativeBridge {
     } on PlatformException catch (error, stackTrace) {
       _logger.error('isTestAppInstalled failed', error, stackTrace);
       throw NativeBridgeException(
+        AppErrorCodes.testAppCheckFailed,
         'Could not check whether the test app is installed.',
       );
     } on MissingPluginException {
@@ -608,6 +609,7 @@ class NativeBridge {
           .invokeMethod<Map<Object?, Object?>>(method, arguments);
       if (raw == null) {
         throw NativeBridgeException(
+          AppErrorCodes.bridgeNoData,
           'The native bridge returned no data for $method.',
         );
       }
@@ -617,10 +619,16 @@ class NativeBridge {
       );
     } on PlatformException catch (error, stackTrace) {
       _logger.error('$method failed', error, stackTrace);
-      throw NativeBridgeException('The native bridge call "$method" failed.');
+      throw NativeBridgeException(
+        AppErrorCodes.bridgeCallFailed,
+        'The native bridge call "$method" failed.',
+      );
     } on MissingPluginException catch (error, stackTrace) {
       _logger.error('$method unavailable on this platform', error, stackTrace);
-      throw NativeBridgeException('This feature is only available on Android.');
+      throw NativeBridgeException(
+        AppErrorCodes.bridgeUnsupportedPlatform,
+        'This feature is only available on Android.',
+      );
     }
   }
 

@@ -1197,4 +1197,106 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Tiada pustaka natif';
+
+  @override
+  String get errorProfileNameEmpty => 'Klon perlukan satu nama.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Nama klon boleh sepanjang $maximum aksara sahaja.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Klon anda yang disimpan tidak dapat dibaca.';
+
+  @override
+  String get errorProfileNotFound => 'Klon itu sudah tiada.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Ada masalah semasa berhubung dengan bahagian apl yang menguruskan klon.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Ciri ini hanya tersedia pada Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Sama ada apl ujian dipasang tidak dapat disemak.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Enjin virtualisasi gagal dimulakan pada peranti ini.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Enjin virtualisasi memerlukan versi Android yang lebih baharu.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Enjin virtualisasi tidak menjawab. Cuba lagi.';
+
+  @override
+  String get errorNoContainer =>
+      'Klon ini belum mempunyai bekas. Buka sekali dan cuba lagi.';
+
+  @override
+  String get errorLaunchRefused => 'Enjin enggan membuka klon ini.';
+
+  @override
+  String get errorAlreadyCloned => 'Apl ini sudah diklon.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Sebahagian cache klon ini tidak dapat dipadam.';
+
+  @override
+  String get errorClearDataFailed => 'Data klon ini tidak dapat dipadam.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Pelancar ini tidak menyokong penambahan pintasan.';
+
+  @override
+  String get errorShortcutRefused => 'Pelancar menolak pintasan.';
+
+  @override
+  String get errorApkGone =>
+      'APK klon ini tiada lagi pada peranti, jadi tiada apa untuk dikongsi.';
+
+  @override
+  String get errorShareFailed => 'Apl tidak dapat dikongsi.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Peranti ini tiada skrin pengoptimuman bateri untuk dibuka.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Peranti ini tiada skrin aktiviti latar belakang untuk dibuka.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Itu hanya boleh ditunjukkan semasa apl dibuka.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Salah satu APK yang dipilih tidak dapat dibaca.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Semua APK yang dipilih mesti milik apl yang sama.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Semua APK yang dipilih mesti mempunyai versi yang sama.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Pilih tepat satu APK asas dan satu atau lebih split konfigurasi.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Split APK yang sama dipilih lebih daripada sekali.';
 }

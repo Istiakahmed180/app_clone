@@ -7,6 +7,7 @@ import '../../../app/theme/status_colors.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/space_identity.dart';
+import '../../../core/errors/app_error_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../data/models/virtual_profile_model.dart';
@@ -70,7 +71,7 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
     } on AppException catch (error) {
       if (mounted) {
         setState(() {
-          _identityError = error.message;
+          _identityError = appErrorMessage(context.l10n, error);
           _busy = false;
         });
       }

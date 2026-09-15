@@ -2141,6 +2141,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No native libraries'**
   String get componentNoNativeLibraries;
+
+  /// No description provided for @errorProfileNameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'A clone needs a name.'**
+  String get errorProfileNameEmpty;
+
+  /// No description provided for @errorProfileNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'A clone\'s name can be at most {maximum} characters.'**
+  String errorProfileNameTooLong(int maximum);
+
+  /// No description provided for @errorProfileStorageUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved clones could not be read.'**
+  String get errorProfileStorageUnreadable;
+
+  /// No description provided for @errorProfileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'That clone no longer exists.'**
+  String get errorProfileNotFound;
+
+  /// No description provided for @errorBridgeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong talking to the part of the app that manages clones.'**
+  String get errorBridgeFailed;
+
+  /// No description provided for @errorBridgeUnsupportedPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is only available on Android.'**
+  String get errorBridgeUnsupportedPlatform;
+
+  /// No description provided for @errorTestAppCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether the test app is installed could not be checked.'**
+  String get errorTestAppCheckFailed;
+
+  /// No description provided for @errorEngineInitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The virtualization engine failed to start on this device.'**
+  String get errorEngineInitFailed;
+
+  /// No description provided for @errorEngineAndroidTooOld.
+  ///
+  /// In en, this message translates to:
+  /// **'The virtualization engine requires a newer version of Android.'**
+  String get errorEngineAndroidTooOld;
+
+  /// No description provided for @errorEngineNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The virtualization engine did not answer. Try again.'**
+  String get errorEngineNoResponse;
+
+  /// No description provided for @errorNoContainer.
+  ///
+  /// In en, this message translates to:
+  /// **'This clone has no container yet. Open it once and try again.'**
+  String get errorNoContainer;
+
+  /// No description provided for @errorLaunchRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The engine refused to open this clone.'**
+  String get errorLaunchRefused;
+
+  /// No description provided for @errorAlreadyCloned.
+  ///
+  /// In en, this message translates to:
+  /// **'This app has already been cloned.'**
+  String get errorAlreadyCloned;
+
+  /// No description provided for @errorClearCacheFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of this clone\'s cache could not be deleted.'**
+  String get errorClearCacheFailed;
+
+  /// No description provided for @errorClearDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This clone\'s data could not be cleared.'**
+  String get errorClearDataFailed;
+
+  /// No description provided for @errorShortcutsUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This launcher does not support adding shortcuts.'**
+  String get errorShortcutsUnsupported;
+
+  /// No description provided for @errorShortcutRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The launcher refused the shortcut.'**
+  String get errorShortcutRefused;
+
+  /// No description provided for @errorApkGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This clone\'s APK is no longer on the device, so there is nothing to share.'**
+  String get errorApkGone;
+
+  /// No description provided for @errorShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The app could not be shared.'**
+  String get errorShareFailed;
+
+  /// No description provided for @errorNoBatteryScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no battery optimisation screen to open.'**
+  String get errorNoBatteryScreen;
+
+  /// No description provided for @errorNoBackgroundScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no background activity screen to open.'**
+  String get errorNoBackgroundScreen;
+
+  /// No description provided for @errorNeedsAppOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'That can only be shown while the app is open.'**
+  String get errorNeedsAppOpen;
+
+  /// No description provided for @errorApkUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'One of the selected APKs could not be read.'**
+  String get errorApkUnreadable;
+
+  /// No description provided for @errorApkPackageMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'All selected APKs must belong to the same app.'**
+  String get errorApkPackageMismatch;
+
+  /// No description provided for @errorApkVersionMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'All selected APKs must have the same version.'**
+  String get errorApkVersionMismatch;
+
+  /// No description provided for @errorApkBaseRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select exactly one base APK and one or more configuration splits.'**
+  String get errorApkBaseRequired;
+
+  /// No description provided for @errorApkDuplicateSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'The same APK split was selected more than once.'**
+  String get errorApkDuplicateSplit;
 }
 
 class _AppLocalizationsDelegate

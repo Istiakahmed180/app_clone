@@ -1206,4 +1206,109 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Keine nativen Bibliotheken';
+
+  @override
+  String get errorProfileNameEmpty => 'Ein Klon braucht einen Namen.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Der Name eines Klons darf höchstens $maximum Zeichen haben.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Deine gespeicherten Klone konnten nicht gelesen werden.';
+
+  @override
+  String get errorProfileNotFound => 'Diesen Klon gibt es nicht mehr.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Bei der Verständigung mit dem Teil der App, der die Klone verwaltet, ist etwas schiefgegangen.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Diese Funktion gibt es nur unter Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Ob die Test-App installiert ist, ließ sich nicht prüfen.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Die Virtualisierungs-Engine konnte auf diesem Gerät nicht starten.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Die Virtualisierungs-Engine braucht eine neuere Android-Version.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Die Virtualisierungs-Engine hat nicht geantwortet. Versuche es erneut.';
+
+  @override
+  String get errorNoContainer =>
+      'Dieser Klon hat noch keinen Container. Öffne ihn einmal und versuche es erneut.';
+
+  @override
+  String get errorLaunchRefused =>
+      'Die Engine hat das Öffnen dieses Klons abgelehnt.';
+
+  @override
+  String get errorAlreadyCloned => 'Diese App wurde bereits geklont.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Ein Teil des Caches dieses Klons ließ sich nicht löschen.';
+
+  @override
+  String get errorClearDataFailed =>
+      'Die Daten dieses Klons konnten nicht gelöscht werden.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Dieser Launcher unterstützt keine Verknüpfungen.';
+
+  @override
+  String get errorShortcutRefused =>
+      'Der Launcher hat die Verknüpfung abgelehnt.';
+
+  @override
+  String get errorApkGone =>
+      'Die APK dieses Klons ist nicht mehr auf dem Gerät, es gibt also nichts zu teilen.';
+
+  @override
+  String get errorShareFailed => 'Die App konnte nicht geteilt werden.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Dieses Gerät hat keinen Bildschirm für die Akku-Optimierung zum Öffnen.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Dieses Gerät hat keinen Bildschirm für Hintergrundaktivität zum Öffnen.';
+
+  @override
+  String get errorNeedsAppOpen =>
+      'Das lässt sich nur zeigen, solange die App geöffnet ist.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Eine der ausgewählten APKs konnte nicht gelesen werden.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Alle ausgewählten APKs müssen zur selben App gehören.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Alle ausgewählten APKs müssen dieselbe Version haben.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Wähle genau eine Basis-APK und einen oder mehrere Konfigurations-Splits.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Derselbe APK-Split wurde mehr als einmal ausgewählt.';
 }

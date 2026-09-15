@@ -50,7 +50,10 @@ class VirtualProfileRepository {
         error,
         stackTrace,
       );
-      throw const StorageException('Saved profiles could not be read.');
+      throw const StorageException(
+        AppErrorCodes.profileStorageUnreadable,
+        'Saved profiles could not be read.',
+      );
     }
   }
 
@@ -200,10 +203,14 @@ class VirtualProfileRepository {
   String _validateName(String value) {
     final String name = value.trim();
     if (name.isEmpty) {
-      throw const ValidationException('Profile name cannot be empty.');
+      throw const ValidationException(
+        AppErrorCodes.profileNameEmpty,
+        'Profile name cannot be empty.',
+      );
     }
     if (name.length > AppConstants.maxProfileNameLength) {
       throw const ValidationException(
+        AppErrorCodes.profileNameTooLong,
         'Profile name must be ${AppConstants.maxProfileNameLength} characters or fewer.',
       );
     }

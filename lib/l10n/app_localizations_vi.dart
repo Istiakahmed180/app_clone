@@ -1194,4 +1194,105 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get componentNoNativeLibraries => 'Không có thư viện native';
+
+  @override
+  String get errorProfileNameEmpty => 'Bản sao cần một tên.';
+
+  @override
+  String errorProfileNameTooLong(int maximum) {
+    return 'Tên bản sao dài tối đa $maximum ký tự.';
+  }
+
+  @override
+  String get errorProfileStorageUnreadable =>
+      'Không đọc được các bản sao đã lưu của bạn.';
+
+  @override
+  String get errorProfileNotFound => 'Bản sao đó không còn nữa.';
+
+  @override
+  String get errorBridgeFailed =>
+      'Có lỗi khi trao đổi với phần ứng dụng quản lý các bản sao.';
+
+  @override
+  String get errorBridgeUnsupportedPlatform =>
+      'Tính năng này chỉ có trên Android.';
+
+  @override
+  String get errorTestAppCheckFailed =>
+      'Không kiểm tra được ứng dụng thử nghiệm đã cài hay chưa.';
+
+  @override
+  String get errorEngineInitFailed =>
+      'Công cụ ảo hoá không khởi động được trên thiết bị này.';
+
+  @override
+  String get errorEngineAndroidTooOld =>
+      'Công cụ ảo hoá cần phiên bản Android mới hơn.';
+
+  @override
+  String get errorEngineNoResponse =>
+      'Công cụ ảo hoá không phản hồi. Hãy thử lại.';
+
+  @override
+  String get errorNoContainer =>
+      'Bản sao này chưa có vùng chứa. Hãy mở nó một lần rồi thử lại.';
+
+  @override
+  String get errorLaunchRefused => 'Công cụ đã từ chối mở bản sao này.';
+
+  @override
+  String get errorAlreadyCloned => 'Ứng dụng này đã được nhân bản rồi.';
+
+  @override
+  String get errorClearCacheFailed =>
+      'Một phần bộ nhớ đệm của bản sao này không xoá được.';
+
+  @override
+  String get errorClearDataFailed => 'Không xoá được dữ liệu của bản sao này.';
+
+  @override
+  String get errorShortcutsUnsupported =>
+      'Trình khởi chạy này không hỗ trợ thêm lối tắt.';
+
+  @override
+  String get errorShortcutRefused => 'Trình khởi chạy đã từ chối lối tắt.';
+
+  @override
+  String get errorApkGone =>
+      'Tệp APK của bản sao này không còn trên thiết bị nên không có gì để chia sẻ.';
+
+  @override
+  String get errorShareFailed => 'Không chia sẻ được ứng dụng.';
+
+  @override
+  String get errorNoBatteryScreen =>
+      'Thiết bị này không có màn hình tối ưu hoá pin để mở.';
+
+  @override
+  String get errorNoBackgroundScreen =>
+      'Thiết bị này không có màn hình hoạt động nền để mở.';
+
+  @override
+  String get errorNeedsAppOpen => 'Chỉ hiển thị được khi ứng dụng đang mở.';
+
+  @override
+  String get errorApkUnreadable =>
+      'Không đọc được một trong các tệp APK đã chọn.';
+
+  @override
+  String get errorApkPackageMismatch =>
+      'Tất cả APK đã chọn phải thuộc cùng một ứng dụng.';
+
+  @override
+  String get errorApkVersionMismatch =>
+      'Tất cả APK đã chọn phải cùng một phiên bản.';
+
+  @override
+  String get errorApkBaseRequired =>
+      'Hãy chọn đúng một APK cơ sở và một hoặc nhiều tệp tách cấu hình.';
+
+  @override
+  String get errorApkDuplicateSplit =>
+      'Cùng một tệp tách APK đã được chọn nhiều lần.';
 }
