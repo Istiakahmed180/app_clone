@@ -339,16 +339,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cloneActionShareApp => '앱 공유';
 
   @override
-  String get cloneActionNotifications => '알림';
-
-  @override
   String get cloneActionPermissions => '권한';
 
   @override
-  String get cloneActionGoogleServicesInstalled => 'Google 서비스(microG) 설치됨';
-
-  @override
-  String get cloneActionInstallGoogleServices => 'Google 서비스(microG) 설치';
+  String get cloneActionInstallGoogleServices => 'Google 서비스 설치';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -396,7 +390,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName이(가) 내장된 microG를 Google Play 서비스로 이 클론에 설치합니다. 클론의 데이터는 유지됩니다. 몇 초 걸릴 수 있습니다.';
+    return '$appName이(가) Google Play 서비스를 이 클론에 설치합니다. 클론의 데이터는 유지됩니다. 몇 초 걸릴 수 있습니다.';
   }
 
   @override

@@ -685,13 +685,6 @@ class HomeView extends GetView<HomeController> {
         } else {
           _showMessage(context, l10n.cloneShortcutAdded);
         }
-      case CloneAction.notifications:
-        // On success the system's own notification screen opens over the app, so there is
-        // nothing to say; only a refusal needs a message.
-        final AppException? error = await controller.openNotificationSettings();
-        if (error != null && context.mounted) {
-          await _showFailure(context, appErrorMessage(l10n, error));
-        }
       case CloneAction.permissions:
         await Navigator.of(context).push<void>(
           MaterialPageRoute<void>(

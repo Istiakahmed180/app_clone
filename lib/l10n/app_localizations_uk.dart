@@ -346,18 +346,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cloneActionShareApp => 'Поділитися';
 
   @override
-  String get cloneActionNotifications => 'Сповіщення';
-
-  @override
   String get cloneActionPermissions => 'Дозволи';
 
   @override
-  String get cloneActionGoogleServicesInstalled =>
-      'Сервіси Google (microG) встановлено';
-
-  @override
-  String get cloneActionInstallGoogleServices =>
-      'Встановити сервіси Google (microG)';
+  String get cloneActionInstallGoogleServices => 'Встановити сервіси Google';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -409,7 +401,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName встановить вбудований microG у цей клон як сервіси Google Play. Дані клону збережуться. Це може зайняти кілька секунд.';
+    return '$appName встановить сервіси Google Play у цей клон. Дані клону збережуться. Це може зайняти кілька секунд.';
   }
 
   @override

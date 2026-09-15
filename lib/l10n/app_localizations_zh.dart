@@ -336,16 +336,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cloneActionShareApp => '分享应用';
 
   @override
-  String get cloneActionNotifications => '通知';
-
-  @override
   String get cloneActionPermissions => '权限';
 
   @override
-  String get cloneActionGoogleServicesInstalled => '已安装 Google 服务（microG）';
-
-  @override
-  String get cloneActionInstallGoogleServices => '安装 Google 服务（microG）';
+  String get cloneActionInstallGoogleServices => '安装 Google 服务';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -393,7 +387,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName 会把内置的 microG 作为 Google Play 服务安装到此分身中。分身的数据会保留。这可能需要几秒钟。';
+    return '$appName 会把 Google Play 服务安装到此分身中。分身的数据会保留。这可能需要几秒钟。';
   }
 
   @override
@@ -1491,16 +1485,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get cloneActionShareApp => '分享应用';
 
   @override
-  String get cloneActionNotifications => '通知';
-
-  @override
   String get cloneActionPermissions => '权限';
 
   @override
-  String get cloneActionGoogleServicesInstalled => '已安装 Google 服务（microG）';
-
-  @override
-  String get cloneActionInstallGoogleServices => '安装 Google 服务（microG）';
+  String get cloneActionInstallGoogleServices => '安装 Google 服务';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -1548,7 +1536,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName 会把内置的 microG 作为 Google Play 服务安装到此分身中。分身的数据会保留。这可能需要几秒钟。';
+    return '$appName 会把 Google Play 服务安装到此分身中。分身的数据会保留。这可能需要几秒钟。';
   }
 
   @override
@@ -2646,16 +2634,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get cloneActionShareApp => '分享應用程式';
 
   @override
-  String get cloneActionNotifications => '通知';
-
-  @override
   String get cloneActionPermissions => '權限';
 
   @override
-  String get cloneActionGoogleServicesInstalled => '已安裝 Google 服務（microG）';
-
-  @override
-  String get cloneActionInstallGoogleServices => '安裝 Google 服務（microG）';
+  String get cloneActionInstallGoogleServices => '安裝 Google 服務';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -2703,7 +2685,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName 會把內建的 microG 當作 Google Play 服務安裝到這個分身中。分身的資料會保留。這可能需要幾秒鐘。';
+    return '$appName 會把 Google Play 服務安裝到這個分身中。分身的資料會保留。這可能需要幾秒鐘。';
   }
 
   @override
@@ -3801,16 +3783,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get cloneActionShareApp => '分享應用程式';
 
   @override
-  String get cloneActionNotifications => '通知';
-
-  @override
   String get cloneActionPermissions => '權限';
 
   @override
-  String get cloneActionGoogleServicesInstalled => '已安裝 Google 服務（microG）';
-
-  @override
-  String get cloneActionInstallGoogleServices => '安裝 Google 服務（microG）';
+  String get cloneActionInstallGoogleServices => '安裝 Google 服務';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -3858,7 +3834,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName 會把內建的 microG 當作 Google Play 服務安裝到這個分身中。分身的資料會保留。這可能需要幾秒鐘。';
+    return '$appName 會把 Google Play 服務安裝到這個分身中。分身的資料會保留。這可能需要幾秒鐘。';
   }
 
   @override

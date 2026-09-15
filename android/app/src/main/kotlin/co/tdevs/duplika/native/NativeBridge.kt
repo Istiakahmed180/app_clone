@@ -30,7 +30,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val appDetails = AppDetailsReader(appContext)
     private val deviceCapacity = DeviceCapacity(appContext)
     private val disguise = AppDisguise(appContext)
-    private val notifications = NotificationControl(appContext)
     private val profiles = VirtualProfileManager(appContext)
     private val permissionPolicy = ClonePermissionPolicy(appContext)
     private var channel: MethodChannel? = null
@@ -153,23 +152,6 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         "Launcher disguise set.",
                         mapOf("mode" to disguise.currentMode().name),
                     ),
-                )
-            }
-
-            "openCloneNotificationSettings" -> {
-                val opened = notifications.openNotificationSettings()
-                result.success(
-                    if (opened) {
-                        success(
-                            "NOTIFICATION_SETTINGS_OPENED",
-                            "Opened Duplika's notification settings.",
-                        )
-                    } else {
-                        failure(
-                            "NOTIFICATION_SETTINGS_UNAVAILABLE",
-                            "This device has no notification settings screen to open.",
-                        )
-                    },
                 )
             }
 

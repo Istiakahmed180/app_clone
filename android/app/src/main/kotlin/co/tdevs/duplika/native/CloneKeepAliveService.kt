@@ -53,8 +53,21 @@ class CloneKeepAliveService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var userId: Int = -1
 
+    /**
+     * Re-labels the engine's notification channels once the guest process is up.
+     *
+     * The engine creates them from inside the guest (`:black`) process, a moment after this
+     * service starts, and that creation replaces the neutral names set earlier. Measured on
+     * API 35: right after a launch the channel reads "blackbox_core" in Android's
+     * notification settings for Duplika; a pass a few seconds later restores it.
+     */
+    private val relabel = Runnable { EngineNotificationSilencer.blockChannel(this) }
+
     private val reconnect = object : Runnable {
         override fun run() {
+            // The long-interval backstop for the same drift, for a guest that creates a
+            // channel later still.
+            EngineNotificationSilencer.blockChannel(this@CloneKeepAliveService)
             val user = userId
             if (user < 0) return
             runCatching {
@@ -83,6 +96,14 @@ class CloneKeepAliveService : Service() {
 
         userId = intent.getIntExtra(EXTRA_USER_ID, -1)
         startForegroundCompat()
+        // The engine creates its own channels lazily, when it first starts the daemon for a
+        // container -- i.e. after Application.onCreate has already run. This service starts
+        // on the same launch, just after, so it is the first point at which the engine's
+        // names can be overwritten again with neutral ones. Measured: without this the
+        // channel reads "blackbox_core" in Android's notification settings for Duplika.
+        EngineNotificationSilencer.blockChannel(this)
+        handler.removeCallbacks(relabel)
+        RELABEL_DELAYS_MS.forEach { handler.postDelayed(relabel, it) }
         handler.removeCallbacks(reconnect)
         if (userId >= 0) {
             handler.postDelayed(reconnect, WAKE_INTERVAL_MS)
@@ -95,6 +116,7 @@ class CloneKeepAliveService : Service() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(relabel)
         handler.removeCallbacks(reconnect)
         super.onDestroy()
     }
@@ -134,6 +156,9 @@ class CloneKeepAliveService : Service() {
     companion object {
         private const val CHANNEL_ID = "clone_keepalive"
         private const val NOTIFICATION_ID = 4711
+        /** When to re-label after a launch, bracketing how long the guest takes to come up. */
+        private val RELABEL_DELAYS_MS = longArrayOf(3_000L, 10_000L, 30_000L)
+
         private const val WAKE_INTERVAL_MS = 120_000L
 
         const val EXTRA_PACKAGE = "package_name"

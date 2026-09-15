@@ -726,28 +726,16 @@ abstract class AppLocalizations {
   /// **'Share app'**
   String get cloneActionShareApp;
 
-  /// No description provided for @cloneActionNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get cloneActionNotifications;
-
   /// No description provided for @cloneActionPermissions.
   ///
   /// In en, this message translates to:
   /// **'Permissions'**
   String get cloneActionPermissions;
 
-  /// No description provided for @cloneActionGoogleServicesInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'Google services (microG) installed'**
-  String get cloneActionGoogleServicesInstalled;
-
   /// No description provided for @cloneActionInstallGoogleServices.
   ///
   /// In en, this message translates to:
-  /// **'Install Google services (microG)'**
+  /// **'Install Google services'**
   String get cloneActionInstallGoogleServices;
 
   /// Screen-reader suffix naming which clone of an app a tile is.
@@ -837,7 +825,7 @@ abstract class AppLocalizations {
   /// No description provided for @cloneInstallGoogleServicesMessage.
   ///
   /// In en, this message translates to:
-  /// **'{appName} will install its bundled microG into this clone as Google Play services. The clone keeps its data. This can take a few seconds.'**
+  /// **'{appName} will install Google Play services into this clone. The clone keeps its data. This can take a few seconds.'**
   String cloneInstallGoogleServicesMessage(String appName);
 
   /// No description provided for @cloneInstallGoogleServicesConfirm.

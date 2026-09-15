@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_theme.dart';
-import '../../../app/theme/status_colors.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
@@ -25,7 +24,6 @@ enum CloneAction {
   clearCache,
   clearStorage,
   toggleHidden,
-  notifications,
   permissions,
   installGoogleServices,
   shareApp,
@@ -39,9 +37,9 @@ enum CloneAction {
 /// * **three primary tiles** — things done *with* a clone: make another, put it on the
 ///   home screen, look at what it is;
 /// * **Manage** — things done *to* it, ordered by cost: harmless (rename), recoverable
-///   (force stop, clear cache), then costly (clear storage). Google services appear here
-///   only for a clone whose app needs them: the state when microG is in place, the
-///   install row when it is not;
+///   (force stop, clear cache), then costly (clear storage). The Google services row
+///   appears only for a clone whose app needs them and does not have them yet: a clone
+///   that already has them needs nothing said;
 /// * **Uninstall**, alone below a divider, because it is the only one that destroys the
 ///   clone itself.
 ///
@@ -101,12 +99,12 @@ class _CloneActionSheet extends StatelessWidget {
   final bool hidden;
   final List<CompatibilityFinding> findings;
 
-  /// Whether this clone's app depends on Google services. Only then is the microG state
-  /// shown at all — see `HomeController.requiresGoogleServices`.
+  /// Whether this clone's app depends on Google services. Only then is the install row
+  /// ever offered — see `HomeController.requiresGoogleServices`.
   final bool requiresGoogleServices;
 
-  /// Whether the container already carries microG. When it does the sheet reports that
-  /// state; when it does not, the row that installs it is offered instead.
+  /// Whether the container already carries them. When it does the sheet says nothing at
+  /// all; the install row is offered only while they are missing.
   final bool googleServicesInstalled;
 
   @override
@@ -360,41 +358,21 @@ class _CloneActionSheet extends StatelessWidget {
           ],
         ),
         SizedBox(height: 12.h),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _ActionRow(
-                action: CloneAction.notifications,
-                icon: Icons.notifications_outlined,
-                label: l10n.cloneActionNotifications,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _ActionRow(
-                action: CloneAction.permissions,
-                icon: Icons.admin_panel_settings_outlined,
-                label: l10n.cloneActionPermissions,
-              ),
-            ),
-          ],
+        _ActionRow(
+          action: CloneAction.permissions,
+          icon: Icons.admin_panel_settings_outlined,
+          label: l10n.cloneActionPermissions,
         ),
-        // Full width on its own line: the label names a provider, and squeezing it into
-        // the two-column grid would have it ellipsised for no gain.
-        if (requiresGoogleServices) ...<Widget>[
+        // Full width on its own line: the label does not fit the two-column grid without
+        // being ellipsised. Offered only while it is missing -- a clone that already has
+        // it needs nothing said, and naming what provides it is not the user's business.
+        if (requiresGoogleServices && !googleServicesInstalled) ...<Widget>[
           SizedBox(height: 12.h),
-          if (googleServicesInstalled)
-            _StatusRow(
-              icon: Icons.check_circle_outline,
-              color: StatusColors.of(context).positive,
-              label: l10n.cloneActionGoogleServicesInstalled,
-            )
-          else
-            _ActionRow(
-              action: CloneAction.installGoogleServices,
-              icon: Icons.cloud_download_outlined,
-              label: l10n.cloneActionInstallGoogleServices,
-            ),
+          _ActionRow(
+            action: CloneAction.installGoogleServices,
+            icon: Icons.cloud_download_outlined,
+            label: l10n.cloneActionInstallGoogleServices,
+          ),
         ],
       ],
     );
@@ -513,51 +491,6 @@ class _ActionRow extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// A bordered row that reports a state rather than offering an action.
-///
-/// Styled like [_ActionRow] so the Manage section keeps one visual grammar, but with no
-/// ink: there is nothing here to tap.
-class _StatusRow extends StatelessWidget {
-  const _StatusRow({
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius.r),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: <Widget>[
-          Icon(icon, size: 20.r, color: color),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(color: theme.colorScheme.onSurface),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }

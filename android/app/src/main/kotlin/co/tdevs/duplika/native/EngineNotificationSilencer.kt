@@ -49,18 +49,31 @@ object EngineNotificationSilencer {
     /** `ProxyVpnService` (VPN mode is pinned off, kept for completeness). */
     private const val VPN_CHANNEL_ID = "BlackBoxVPN"
 
+    /** Shown in Android's own notification settings; deliberately says nothing of the backend. */
+    private const val CHANNEL_NAME = "System"
+
     /** Engine notification ids that are not package-derived. */
     private const val LOG_UPLOAD_NOTIFICATION_ID = 9999
     private const val VPN_NOTIFICATION_ID = 1001
 
-    /** Runs before the engine attaches; see [co.tdevs.duplika.DuplikaApplication]. */
+    /**
+     * Pins every engine channel to `IMPORTANCE_NONE` and a neutral name.
+     *
+     * Called twice, and idempotent by design: once before the engine attaches, so the
+     * importance is set first and can never be raised, and once after it has attached,
+     * because the engine's own `createNotificationChannel` replaces the channel *name*
+     * even when it cannot touch the importance. See [co.tdevs.duplika.DuplikaApplication].
+     */
     fun blockChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         engineChannelIds(context.packageName).forEach { id ->
             val channel = NotificationChannel(
                 id,
-                "BlackBox",
+                // The user sees this name in Android's notification settings for Duplika,
+                // so it says what the channel is for rather than which backend asked for
+                // it: the engine behind a clone is not the user's business.
+                CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_NONE,
             ).apply {
                 setShowBadge(false)

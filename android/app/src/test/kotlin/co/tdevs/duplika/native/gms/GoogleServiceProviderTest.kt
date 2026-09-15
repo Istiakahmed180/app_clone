@@ -372,9 +372,14 @@ class GoogleServiceProviderTest {
             .resolve(GmsProviderMode.MICROG)
 
         assertEquals(UnsupportedProvider.NAME, provider.providerName)
+        // The reason names what was asked for and why it could not be served. It says
+        // "the bundled provider" rather than the implementation's name on purpose: a
+        // provisioning failure carries this reason all the way into a user-facing snack
+        // bar (ProviderResult.reasonOrEmpty -> EngineResult.Failure -> appErrorMessage's
+        // default branch), where the backend's name has no business appearing.
         val reason = (provider.hostGmsPresence() as ProviderResult.Unavailable).reason
-        assertTrue(reason.contains("microG"))
-        assertTrue(reason.contains("bundled"))
+        assertTrue(reason.contains("bundled provider was requested"))
+        assertTrue(reason.contains("no artefact ships"))
     }
 
     @Test

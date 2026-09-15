@@ -74,7 +74,7 @@ class GoogleServiceProviderResolver(
         } else {
             Selection(
                 UnsupportedProvider(
-                    "microG was requested but no microG artefact is bundled in this build"
+                    "the bundled provider was requested but no artefact ships in this build"
                 ),
                 "microG requested but not bundled; deliberately not falling back to Real GMS",
             )
@@ -91,7 +91,7 @@ class GoogleServiceProviderResolver(
             else -> Selection(
                 UnsupportedProvider(
                     "no Google service backend is available: the host has no usable Google " +
-                        "Play services and no microG artefact is bundled in this build"
+                        "Play services and no bundled artefact ships in this build"
                 ),
                 "AUTO found no available backend",
             )

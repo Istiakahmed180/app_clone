@@ -89,7 +89,7 @@ class MicroGProvider(
     override fun hostGmsPresence(): ProviderResult<Boolean> = ProviderResult.Unsupported(
         provider = providerName,
         capability = GmsCapability.HOST_GMS_PRESENCE,
-        reason = "microG does not report the host's Play services presence; Real GMS does",
+        reason = "the bundled provider does not report the host's Play services presence",
     )
 
     override fun provisionContainerGms(virtualUserId: Int): ProviderResult<Unit> {
@@ -98,7 +98,7 @@ class MicroGProvider(
             return ProviderResult.Unavailable(
                 provider = providerName,
                 capability = GmsCapability.CONTAINER_GMS_PROVISIONING,
-                reason = "no microG artefact is bundled in this build",
+                reason = "no Google services artefact is bundled in this build",
                 diagnostics = mapOf("virtualUserId" to virtualUserId.toString()),
             )
         }
@@ -112,8 +112,8 @@ class MicroGProvider(
                 return ProviderResult.Error(
                     provider = providerName,
                     capability = GmsCapability.CONTAINER_GMS_PROVISIONING,
-                    code = "MICROG_ARTIFACT_UNREADABLE",
-                    message = "bundled microG artefact $name could not be read",
+                    code = "BUNDLED_GMS_UNREADABLE",
+                    message = "bundled Google services artefact $name could not be read",
                     diagnostics = mapOf("virtualUserId" to virtualUserId.toString()),
                 )
             }
@@ -133,8 +133,8 @@ class MicroGProvider(
             return ProviderResult.Error(
                 provider = providerName,
                 capability = GmsCapability.CONTAINER_GMS_PROVISIONING,
-                code = "MICROG_INSTALL_FAILED",
-                message = "no microG artefact was installed",
+                code = "BUNDLED_GMS_INSTALL_FAILED",
+                message = "no Google services artefact was installed",
                 diagnostics = mapOf("virtualUserId" to virtualUserId.toString()),
             )
         }

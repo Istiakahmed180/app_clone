@@ -42,6 +42,22 @@ open class MainActivity : FlutterFragmentActivity() {
         // the host kept alive is no longer in the foreground. Stopping here is what keeps the
         // keep-alive scoped to a clone the user actually has open.
         co.tdevs.duplika.native.CloneKeepAliveService.stop(this)
+        // Whatever the clone's engine did to its notification channels while it was in the
+        // foreground, undo the labelling here.
+        co.tdevs.duplika.native.EngineNotificationSilencer.blockChannel(this)
+    }
+
+    /**
+     * The same re-labelling on the way out.
+     *
+     * Creating a clone starts containers without ever leaving this activity, so the engine
+     * can rename its channels with no [onResume] in between. Every route to Android's own
+     * notification settings for Duplika passes through here first, which makes this the
+     * last point the app controls before the user can read those names.
+     */
+    override fun onPause() {
+        co.tdevs.duplika.native.EngineNotificationSilencer.blockChannel(this)
+        super.onPause()
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {

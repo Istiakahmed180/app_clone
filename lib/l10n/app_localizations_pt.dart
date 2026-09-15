@@ -345,18 +345,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cloneActionShareApp => 'Partilhar app';
 
   @override
-  String get cloneActionNotifications => 'Notificações';
-
-  @override
   String get cloneActionPermissions => 'Permissões';
 
   @override
-  String get cloneActionGoogleServicesInstalled =>
-      'Serviços Google (microG) instalados';
-
-  @override
-  String get cloneActionInstallGoogleServices =>
-      'Instalar serviços Google (microG)';
+  String get cloneActionInstallGoogleServices => 'Instalar serviços Google';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -407,7 +399,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return 'O $appName vai instalar o microG incluído neste clone como serviços Google Play. O clone mantém os seus dados. Pode demorar alguns segundos.';
+    return 'O $appName vai instalar os serviços Google Play neste clone. O clone mantém os seus dados. Pode demorar alguns segundos.';
   }
 
   @override
@@ -1557,18 +1549,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get cloneActionShareApp => 'Partilhar app';
 
   @override
-  String get cloneActionNotifications => 'Notificações';
-
-  @override
   String get cloneActionPermissions => 'Permissões';
 
   @override
-  String get cloneActionGoogleServicesInstalled =>
-      'Serviços Google (microG) instalados';
-
-  @override
-  String get cloneActionInstallGoogleServices =>
-      'Instalar serviços Google (microG)';
+  String get cloneActionInstallGoogleServices => 'Instalar serviços Google';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -1619,7 +1603,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return 'O $appName vai instalar o microG incluído neste clone como serviços do Google Play. O clone mantém seus dados. Pode levar alguns segundos.';
+    return 'O $appName vai instalar os serviços do Google Play neste clone. O clone mantém seus dados. Pode levar alguns segundos.';
   }
 
   @override

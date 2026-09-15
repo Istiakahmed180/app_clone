@@ -80,6 +80,14 @@ class DuplikaApplication : Application() {
         // removed by changing the channel, so cancel it explicitly.
         EngineNotificationSilencer.cancelPostedNotification(this)
 
+        // Again, now that the engine has attached. Android refuses to *raise* a channel's
+        // importance after creation but does let a later createNotificationChannel replace
+        // its **name**, and the engine's own call does exactly that -- measured: the channel
+        // came back labelled "blackbox_core" in Android's notification settings for Duplika,
+        // where the user can read it. Re-applying here restores the neutral name; the
+        // importance set in attachBaseContext is untouched.
+        EngineNotificationSilencer.blockChannel(this)
+
         // Idempotent (KEEP): reconnects each clone's microG push channel while the app is in
         // the background, which a closed clone cannot do for itself on aggressive OEM builds.
         ClonePushRefreshWorker.schedule(this)

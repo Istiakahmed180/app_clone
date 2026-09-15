@@ -343,17 +343,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cloneActionShareApp => 'Chia sẻ ứng dụng';
 
   @override
-  String get cloneActionNotifications => 'Thông báo';
-
-  @override
   String get cloneActionPermissions => 'Quyền';
 
   @override
-  String get cloneActionGoogleServicesInstalled =>
-      'Đã cài dịch vụ Google (microG)';
-
-  @override
-  String get cloneActionInstallGoogleServices => 'Cài dịch vụ Google (microG)';
+  String get cloneActionInstallGoogleServices => 'Cài dịch vụ Google';
 
   @override
   String cloneTileSibling(int index, int count) {
@@ -404,7 +397,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String cloneInstallGoogleServicesMessage(String appName) {
-    return '$appName sẽ cài microG đi kèm vào bản sao này dưới dạng dịch vụ Google Play. Bản sao vẫn giữ dữ liệu. Việc này có thể mất vài giây.';
+    return '$appName sẽ cài dịch vụ Google Play vào bản sao này. Bản sao vẫn giữ dữ liệu. Việc này có thể mất vài giây.';
   }
 
   @override
