@@ -7,7 +7,7 @@
 # which BlackBoxCore.<clinit> throws
 #   java.lang.RuntimeException: Not found @BlackClass or @BlackStrClass
 # during Application.attachBaseContext -- so the engine is dead before Flutter
-# starts and every clone is unusable. See docs/RELEASE_BUILD.md.
+# starts and every clone is unusable.
 
 # -- Hidden-API mirror stubs -------------------------------------------------
 # One interface per mirrored framework class, reached only by annotation lookup.

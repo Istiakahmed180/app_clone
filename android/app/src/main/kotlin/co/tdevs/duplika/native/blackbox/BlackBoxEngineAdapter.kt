@@ -19,8 +19,26 @@ import top.niunaijun.blackbox.core.env.BEnvironment
 /**
  * The ONLY file in Duplika permitted to reference NewBlackbox (`top.niunaijun.*`).
  *
- * Backend: NewBlackbox `Bcore`, Apache-2.0, vendored as a prebuilt AAR — see
- * `android/app/libs/BCORE_SOURCE_COMMIT.txt` and `docs/DEPENDENCY_LICENSE_AUDIT.md`.
+ * Backend: NewBlackbox `Bcore`, vendored as a prebuilt AAR pinned by
+ * `android/app/libs/BCORE_SOURCE_COMMIT.txt`.
+ *
+ * ## Open provenance risk — do not distribute a build on this engine
+ *
+ * NewBlackbox declares Apache-2.0 for its whole repository, and the licence copy is kept
+ * at `android/app/libs/LICENSE-NewBlackbox-Apache-2.0.txt`. That declaration is doubtful.
+ * NewBlackbox credits `asLody/VirtualApp` as its original framework; VirtualApp ships no
+ * LICENSE file and its README requires purchased commercial authorisation. The
+ * `top.niunaijun.blackbox` namespace used here comes from `FBlackBox/BlackBox`, which also
+ * ships no LICENSE and which the GitHub API reports as `license: null`. On that evidence
+ * NewBlackbox was very likely not in a position to grant Apache-2.0 for code it inherited.
+ *
+ * Nothing in this repository resolves it. Closing it needs a lawyer, and then one of:
+ * purchased authorisation, a different backend behind [VirtualizationEngineAdapter], or
+ * not shipping. Internal development and testing are unaffected.
+ *
+ * This note is kept here because the audit that used to hold it was removed along with the
+ * rest of the project's documentation, and a risk of this size should not live only in git
+ * history.
  */
 class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
@@ -36,9 +54,9 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             val core = BlackBoxCore.get()
             core.closeCodeInit()
             // Registered before the attach so it is in place when a guest process binds:
-            // the callback fires inside the clone and is what carries the alias repair
-            // there. Harmless in the host, where no guest application is ever created.
-            core.addAppLifecycleCallback(GuestAliasLifecycleCallback())
+            // the callback fires inside the clone and is what carries Duplika's guest-side
+            // repairs there. Harmless in the host, where no guest application is created.
+            core.addAppLifecycleCallback(GuestRepairsLifecycleCallback())
             core.onBeforeMainApplicationAttach(application, base)
             core.doAttachBaseContext(base, hostConfiguration(base))
             core.onAfterMainApplicationAttach(application, base)

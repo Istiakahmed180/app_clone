@@ -3,8 +3,8 @@ package co.tdevs.duplika.native.gms
 /**
  * The Google-service capabilities Duplika itself actually uses.
  *
- * Deliberately only two. The audit (`docs/level10-gms-provider-audit.md`) established that
- * Duplika's production code makes no Google API calls of its own: Google APIs are called by
+ * Deliberately only two. Duplika's production code makes no Google API calls of its own,
+ * which was established by reading every call site: Google APIs are called by
  * the *guest apps* inside containers, directly against the host's real Play services
  * through the engine's IPC. Duplika is the substrate under that call path, not a
  * participant in it.
@@ -13,9 +13,12 @@ package co.tdevs.duplika.native.gms
  * Adding `LocationServiceCapability`, `MessagingServiceCapability` or
  * `GoogleApiCapability` now would be abstracting nothing, and an interface with no
  * implementation and no caller is worse than no interface: it invites a future provider to
- * implement a contract nobody verified. Those become entries here only if Duplika itself
- * ever calls such an API — see `docs/level10-gms-provider-architecture.md` for how to add
- * one.
+ * implement a contract nobody verified.
+ *
+ * The rule for adding one: a capability goes here when Duplika itself calls the API, and
+ * it arrives with a provider that actually serves it and a measurement showing it does.
+ * Every provider must then answer for it — including by declining, which is what
+ * [ProviderResult.Unsupported] is for.
  */
 enum class GmsCapability {
 

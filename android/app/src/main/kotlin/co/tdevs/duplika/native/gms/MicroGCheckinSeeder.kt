@@ -7,8 +7,7 @@ import co.tdevs.duplika.native.VirtualizationEngineAdapter
  *
  * microG stores these two switches in its own default `SharedPreferences`, and both default
  * to **off**. With checkin off, `PushRegisterService.ensureCheckinIsUpToDate` throws
- * `Checkin disabled` and no app can obtain a push token. Measured on the emulator; see
- * `docs/microg-container-spike.md`.
+ * `Checkin disabled` and no app can obtain a push token. Measured on the emulator.
  *
  * Writing the file before the container's microG ever starts is safe: the guest's
  * SharedPreferences are read at process start, so the values take effect on first launch.

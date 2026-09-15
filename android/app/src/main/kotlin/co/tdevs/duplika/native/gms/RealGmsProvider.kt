@@ -25,10 +25,15 @@ import co.tdevs.duplika.native.VirtualizationEngineAdapter
  *
  * It does not touch package identity, UID mapping, signatures, certificates, account
  * identity, Play Integrity or any security check — it cannot, because it only forwards two
- * calls whose implementations live in the engine and were not modified. In particular it
- * does **not** make the guest see Play services; that is the engine's host-platform package
- * visibility patch (`engine-patches/0002-host-platform-package-visibility.patch`), which is
- * unrelated to and unaffected by this class.
+ * calls whose implementations live in the engine and were not modified.
+ *
+ * In particular it does **not** make the guest see Play services. That comes from a change
+ * built into the vendored engine: its `IPackageManagerProxy` answers a guest's by-name
+ * query about a host *platform* package with the host PackageManager's own unmodified
+ * answer — real version, real certificate, real flags. It fabricates no metadata, grants
+ * no permission and changes no identity, and `getInstalledPackages` still lists only the
+ * container, so it changes what a guest can see and nothing about how it connects. That
+ * behaviour is baked into `bcore.aar`; it is unrelated to and unaffected by this class.
  *
  * Note that a `true` from `isGmsSupported()` means the *host* has Play services, which is a
  * different and weaker claim than "Google APIs work in a guest". The Level 10 evidence is

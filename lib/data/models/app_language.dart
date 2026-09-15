@@ -46,9 +46,14 @@ class AppLanguage {
 /// The languages offered, in the order the screen lists them.
 ///
 /// Every locale here must be one `flutter_localizations` can actually supply, so that
-/// choosing it changes the framework's own strings and its date and number formats.
-/// `language_catalogue_test.dart` asserts that for each entry rather than trusting this
-/// comment.
+/// choosing it changes the framework's own strings and its date and number formats. It
+/// must also be one this app itself has an ARB for, or the screen offers a language that
+/// changes only half of what the user sees.
+///
+/// Nothing asserts either of those today. A catalogue test used to, and went with the
+/// rest of the test suite; both invariants now hold by inspection only. Adding an entry
+/// means checking `AppLocalizations.delegate.isSupported` accepts it and that
+/// `lib/l10n/app_<tag>.arb` exists.
 abstract final class AppLanguages {
   static const List<AppLanguage> all = <AppLanguage>[
     AppLanguage(

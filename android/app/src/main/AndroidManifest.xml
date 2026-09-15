@@ -145,7 +145,7 @@
          This is a Play-policy-sensitive permission: a dual-app/cloning product is one of
          Google's permitted use cases, but it must be declared and justified at review.
          Duplika uses it ONLY to list launchable apps for the picker; it never
-         inspects another app's private data. See docs/SECURITY.md. -->
+         inspects another app's private data. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
@@ -244,9 +244,14 @@
 
       It stays opt-in: this only declares it. Android grants it solely through the
       "All files access" screen in Settings, never silently, and clones that do not need it
-      are unaffected. Note for release: Play requires a declared justification for this
-      permission; the exception argument and the fallback if it is rejected are prepared
-      in docs/PLAY_PERMISSION_DECLARATIONS.md.
+      are unaffected.
+
+      Note for release: Play requires a declared justification for this permission, and
+      one still has to be written. The argument is the paragraph above — a cloned file or
+      media app reaches shared storage only through the host's grant, so without this a
+      whole category of app cannot be cloned at all — and the fallback, if it is refused,
+      is to drop the declaration and let AppCompatibilityAnalyzer's STORAGE_UNAVAILABLE
+      finding refuse those apps up front instead of failing them at launch.
     -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" tools:node="remove" />

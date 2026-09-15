@@ -71,8 +71,8 @@ class VirtualAppInstaller(
      * **microG is preferred, and provisioned automatically for an app that requires Google
      * Play services.** The host-GMS copy is still modelled by [providerResolver] but is not
      * used for this: it cannot bootstrap inside a container (its Chimera modules fail to
-     * load), whereas microG starts and completes FCM registration -- measured end to end, see
-     * `docs/microg-container-spike.md`.
+     * load), whereas microG starts and completes FCM registration -- measured end to end on a
+     * device, with a real token stored.
      *
      * This runs before the app itself is installed, so a clone that needs Google services has
      * a `com.google.android.gms` to find on its first launch rather than having to be

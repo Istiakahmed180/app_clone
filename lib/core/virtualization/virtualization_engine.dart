@@ -22,7 +22,6 @@ abstract class VirtualizationEngine {
   /// genuine Play services, and the copy cannot bootstrap its own Chimera modules. Kept as
   /// a parameter so the native capability stays reachable for diagnostics and for a future
   /// provider that might provision legitimately. Defaults off; leave it off.
-  /// See `docs/level10-gms-provider-migration.md`.
     bool installGms = false,
   });
 
@@ -79,7 +78,6 @@ abstract class VirtualizationEngine {
   /// genuine Play services, and the copy cannot bootstrap its own Chimera modules. Kept as
   /// a parameter so the native capability stays reachable for diagnostics and for a future
   /// provider that might provision legitimately. Defaults off; leave it off.
-  /// See `docs/level10-gms-provider-migration.md`.
     bool installGms = false,
   });
 }

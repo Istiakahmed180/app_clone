@@ -8,9 +8,13 @@ import android.os.Build
 /**
  * Read-only package metadata for the single controlled test application.
  *
- * The controlled app is `baseline_test_app/` in this repository, built as
- * [TEST_APP_PACKAGE]. Only the public PackageManager surface is used. This class never
- * touches another application's private storage.
+ * The controlled app is [TEST_APP_PACKAGE]. Its source used to live in this repository
+ * and was removed with the rest of the test infrastructure; it survives in git history
+ * (`git checkout 6db439f^ -- baseline_test_app/`) and has to be built and installed
+ * separately for anything that needs it.
+ *
+ * Only the public PackageManager surface is used. This class never touches another
+ * application's private storage.
  */
 class TestAppManager(private val context: Context) {
 

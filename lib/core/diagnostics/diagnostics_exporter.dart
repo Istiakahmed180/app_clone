@@ -45,7 +45,7 @@ class DiagnosticsExporter {
   final DiagnosticsRepository _repository;
   final Future<Directory> Function() _directoryProvider;
 
-  /// Builds the bundle described in `docs/diagnostics-system.md`.
+  /// Builds the export bundle: a report header, then one file per retained event set.
   ///
   /// [filter] is applied to the event files and recorded in the report header, so a
   /// filtered export cannot be mistaken for the full history.

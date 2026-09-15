@@ -50,9 +50,15 @@ class SpaceIdentity {
   /// The smallest wiring attempt — replacing the nested `AndroidIdProxy$GetString` — was
   /// measured and does not register, because Bcore discovers hooks by scanning declared
   /// **member** classes; a real fix replaces the enclosing stub classes, which is a
-  /// substantial engine change. It is on hold until the licence blocker and the Play
-  /// identifier-spoofing question are settled. See the "What is not true yet" section of
-  /// `docs/ARCHITECTURE.md`.
+  /// substantial engine change against an obfuscated prebuilt AAR, and the patch-and-build
+  /// toolchain that could have done it is no longer in this repository.
+  ///
+  /// On hold for three reasons, in order: the engine's unresolved licence provenance means
+  /// no engine work here could ship anyway; identifier spoofing is sensitive under Play
+  /// policy and that needs an answer rather than an assumption; and most of these values
+  /// are already inert on modern Android — the IMEI and serial need privileged permissions
+  /// a normal app does not hold, and both MACs come back as the constant
+  /// `02:00:00:00:00:00`. `androidId` is the one that would actually matter.
   ///
   /// A constant rather than a runtime check because there is nothing to check yet: the
   /// day the override ships, this becomes a real query and every screen that reads it

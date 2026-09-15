@@ -13,7 +13,7 @@ import java.io.File
  * `com.google.android.gms`, so a cloned app's Google client libraries have a local
  * implementation to bind. It was implemented only after being verified on a device: a cloned
  * Firebase app in a Duplika container completed push registration and stored a real FCM
- * token. See `docs/microg-container-spike.md`.
+ * token.
  *
  * ## What makes it work in this container (and what it does not do)
  *

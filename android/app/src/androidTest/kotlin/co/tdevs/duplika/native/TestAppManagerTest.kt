@@ -14,9 +14,11 @@ import org.junit.runner.RunWith
 /**
  * Exercises package detection against the real PackageManager.
  *
- * Requires `baseline_test_app` (`com.example.duplikabaseline`) to be installed on the
- * target device; the not-installed path is covered separately with a package that cannot
- * exist.
+ * Requires `com.example.duplikabaseline` to be installed on the target device; the
+ * not-installed path is covered separately with a package that cannot exist.
+ *
+ * Its source is no longer in the working tree — see [TestAppManager] — so this test does
+ * not run out of a fresh checkout without recovering it first.
  */
 @RunWith(AndroidJUnit4::class)
 class TestAppManagerTest {
@@ -32,8 +34,10 @@ class TestAppManagerTest {
     @Test
     fun detectsInstalledTestApp() {
         assertTrue(
-            "Install the test app first: cd baseline_test_app && ./gradlew " +
-                ":app:assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk",
+            "Install com.example.duplikabaseline first. Its source is not in the " +
+                "working tree: git checkout 6db439f^ -- baseline_test_app/, then " +
+                "cd baseline_test_app && ./gradlew :app:assembleDebug && adb install -r " +
+                "app/build/outputs/apk/debug/app-debug.apk",
             manager.isTestAppInstalled(),
         )
     }

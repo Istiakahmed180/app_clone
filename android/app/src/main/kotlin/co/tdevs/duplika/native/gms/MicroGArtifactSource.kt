@@ -24,8 +24,12 @@ interface MicroGArtifactSource {
  * Reads the artefacts from the app's own `assets/microg/` directory.
  *
  * What is bundled is the **official, unmodified** microG GmsCore (Apache-2.0), re-signed
- * only where an ABI trim required it. Nothing Google-proprietary is copied. The repository's
- * `NOTICE` carries the microG attribution obligation.
+ * only where an ABI trim required it. Nothing Google-proprietary is copied.
+ *
+ * Attribution obligation, unmet: Apache-2.0 requires the licence text and the notices to
+ * travel with a redistribution, and the repository no longer carries either — the NOTICE
+ * and the licence copies were removed. Anything that ships this artefact has to restore
+ * them first.
  */
 class AssetMicroGArtifactSource(
     private val context: Context,

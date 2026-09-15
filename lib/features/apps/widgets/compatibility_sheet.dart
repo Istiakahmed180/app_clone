@@ -13,7 +13,6 @@ import 'compatibility_text.dart';
 /// bootstrap its Chimera modules, and — once host GMS passthrough landed — it actively
 /// *shadowed* the path that works, because the engine's PackageManager hooks answer from
 /// the container before falling back to the host. Opting in therefore made a clone worse.
-/// See `docs/level10-gms-provider-migration.md`.
 class CloneDecision {
   const CloneDecision({required this.proceed});
 

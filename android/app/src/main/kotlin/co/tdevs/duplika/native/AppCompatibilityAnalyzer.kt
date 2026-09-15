@@ -328,7 +328,7 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                 "identity-bound APIs such as location and SMS verification."
 
         /**
-         * Measured, not predicted: `evidence/physical-android15/fcm-cabexfx/`. Play services
+         * Measured on a physical Android 15 device, not predicted. Play services
          * logs `GCM: Invalid caller: <package> <host uid>` and the client library surfaces
          * `SERVICE_NOT_AVAILABLE` about thirty seconds later. The delay is worth warning
          * about too — without it the clone simply looks like it has hung on first launch.

@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit
  * state. It exists because the alternative — holding a permanent socket — is what the
  * platform's background restrictions (and aggressive OEM killers) exist to prevent.
  *
- * Recorded in `docs/SECURITY.md`: this is background persistence, bounded to a periodic
+ * Stated plainly, because it is the kind of thing that should not be discovered by
+ * reading the code: this is background persistence. It is bounded to a periodic
  * reconnect, and it is the price of push in a container on these devices.
  */
 class ClonePushRefreshWorker(

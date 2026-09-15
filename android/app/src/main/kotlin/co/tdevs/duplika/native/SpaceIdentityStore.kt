@@ -28,9 +28,16 @@ import java.security.MessageDigest
  *
  * Written to `filesDir/space_identity/<virtualUserId>.json`, which every Duplika process
  * can read — including the Bcore stub processes, which run under the same UID. That is
- * the file a future engine override reads to answer a guest's own identifier queries;
- * see `engine-patches/`. **Until that override exists, guests still see the device's real
- * values and nothing here reaches them.**
+ * the file a future engine override would read to answer a guest's own identifier
+ * queries. **No such override exists, so guests still see the device's real values and
+ * nothing here reaches them.**
+ *
+ * It cannot be written from this module. Bcore's identifier hooks (`AndroidIdProxy`,
+ * `DeviceIdProxy`, `IDeviceIdentifiersPolicyProxy`) are discovered by scanning each stub
+ * for `@ProxyMethod`-annotated **member** classes, so a hand-written class that merely
+ * shares a binary name is never registered — measured, not assumed. Reaching them means
+ * replacing the enclosing stub classes inside an R8-obfuscated prebuilt AAR, and the
+ * patch-and-rebuild toolchain that could have done that was removed from this repository.
  */
 class SpaceIdentityStore(context: Context) {
 

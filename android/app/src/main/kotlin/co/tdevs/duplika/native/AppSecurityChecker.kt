@@ -14,7 +14,7 @@ import android.os.Build
  *
  * The property is a Play-policy manifest declaration rather than a platform SDK constant
  * (it is absent from android.jar on API 35-37), so the candidate names below are checked
- * defensively. See docs/SECURITY.md.
+ * defensively.
  */
 class AppSecurityChecker(private val context: Context) {
 
@@ -62,7 +62,7 @@ class AppSecurityChecker(private val context: Context) {
      * Platform limit, stated plainly: `PackageManager.getProperty()` only answers for
      * installed packages, so an archive can only be screened through its application
      * meta-data. An APK that declares the requirement solely as a `<property>` and is not
-     * installed here cannot be detected. See docs/SECURITY.md.
+     * installed here cannot be detected.
      */
     fun checkApk(packageName: String, apkPath: String? = null): Verdict {
         blockedReason(packageName)?.let { return it }

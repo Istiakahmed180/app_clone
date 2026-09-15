@@ -19,9 +19,9 @@ import '../controllers/home_controller.dart';
 ///
 /// The values are the real stored per-space values, but a guest app does not read them
 /// yet: Bcore exposes no way to point its identifier hooks at a per-space store. This
-/// screen therefore does not tell the user their identifiers are isolated — see
-/// [SpaceIdentity.isolatedFromGuests] and the Space identity section of
-/// `docs/ARCHITECTURE.md`. It is read-only for the same reason.
+/// screen therefore does not tell the user their identifiers are isolated, and must not
+/// start saying so while [SpaceIdentity.isolatedFromGuests] is false. It is read-only for
+/// the same reason — offering to edit a value nothing reads would imply it has an effect.
 class SpaceInfoView extends StatefulWidget {
   const SpaceInfoView({
     required this.controller,

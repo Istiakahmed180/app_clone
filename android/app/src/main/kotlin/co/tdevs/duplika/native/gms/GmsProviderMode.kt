@@ -8,8 +8,8 @@ package co.tdevs.duplika.native.gms
  * yields [UnsupportedProvider] with a stated reason, not a Real GMS provider pretending.
  *
  * There is still no global user-facing mode toggle. All four modes are implemented and
- * honoured, and the microG backend genuinely works (device-verified; see
- * `docs/microg-container-spike.md`). Choosing it is a per-clone action in the clone sheet
+ * honoured, and the microG backend genuinely works (device-verified). Choosing it is a
+ * per-clone action in the clone sheet
  * ("Install Google services (microG)"), which calls
  * `RealVirtualizationEngine.provisionMicroG` for that one container rather than switching
  * the whole app. [AUTO] is the default and reproduces exactly the behaviour Duplika had

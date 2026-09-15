@@ -2,7 +2,7 @@
 https://github.com/ALEX5402/NewBlackbox
 
 PATCHED. This bcore.aar is NOT the upstream artefact — it was rebuilt from the source at
-the commit above with the numbered patches in engine-patches applied. These include the
+the commit above with the numbered engine patches applied. These include the
 Android 15 AppOps return-type fix, host-platform package visibility, split APK installation
 support, the permission-gated public-media path bridge, the Android 15 UserManager
 application-restrictions method registration, the LocaleManager per-app-locale hook, instance-aware proxy slot allocation, and
@@ -29,6 +29,16 @@ argument to the host package -- which the Binder calling UID genuinely owns -- a
 userId untouched, so no other Android user is addressed and no identity is spoofed.
 
 To reproduce: clone the repo at that commit,
-apply every engine-patches/*.patch, lower Bcore's compileOptions from JavaVersion.VERSION_21
+apply every patch, lower Bcore's compileOptions from JavaVersion.VERSION_21
 to VERSION_17 (local JDK is 17), and run `./gradlew :Bcore:assembleRelease` (NDK
-29.0.13846066). See engine-patches/README.md.
+29.0.13846066).
+
+The patches, their README and the build scripts are no longer in the working tree: the
+engine patching infrastructure was decommissioned in commit d7c11c4. They are still in
+git history and can be read or extracted from its parent, e.g.
+
+    git show d7c11c4^:engine-patches/README.md
+    git checkout d7c11c4^ -- engine-patches/
+
+This artefact predates that removal (it was last rebuilt in commit 7100cbd), so it IS the
+patched build described above -- the patches were removed, not reverted.

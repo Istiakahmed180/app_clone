@@ -10,7 +10,10 @@ plugins {
  * Release signing material, read from `android/key.properties` if it is present.
  *
  * The file is gitignored, along with `*.keystore` and `*.jks`, so the keystore and its
- * passwords never enter the repository. See `docs/RELEASE_BUILD.md` for how to create it.
+ * passwords never enter the repository.
+ *
+ * The file is a Java properties file with four keys: `storeFile` (a path relative to
+ * `android/`), `storePassword`, `keyAlias` and `keyPassword`.
  *
  * Absent on a fresh checkout, and that is the normal case: the build then falls back to the
  * debug key so `flutter run --release` still works for local testing. The fallback is
@@ -75,7 +78,9 @@ android {
                 logger.warn(
                     "\n  Duplika: android/key.properties not found -- signing the release " +
                         "build with the DEBUG key.\n  Fine for local testing; Play Console " +
-                        "will reject this artefact. See docs/RELEASE_BUILD.md.\n"
+                        "will reject this artefact. Create android/key.properties with " +
+                        "storeFile, storePassword, keyAlias and keyPassword to sign " +
+                        "properly.\n"
                 )
                 signingConfigs.getByName("debug")
             }
