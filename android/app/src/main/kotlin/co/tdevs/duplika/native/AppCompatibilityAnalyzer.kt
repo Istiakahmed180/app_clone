@@ -121,7 +121,7 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         val host = hostState()
         val archives = archivesOf(packageInfo.applicationInfo)
         val abi = engineAbiOf(archives.abis, host.loadableAbis)
-        val findings = findingsFor(packageInfo, abi, host, archives.baseReadable)
+        val findings = findingsFor(packageInfo, abi, host, archives.baseReadable, quiet = false)
 
         return Report(
             packageName = packageName,
@@ -136,40 +136,38 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     }
 
     /**
-     * Whether a clone of this package could be created at all.
+     * Why a clone of this package could not be created, as the code of the first blocking
+     * finding — or null when nothing blocks it.
      *
-     * The picker's filter, and the one question a listing has: whether to show the row.
-     * It stops at the first blocking finding's existence rather than building the whole
-     * [Report] that [analyze] returns, which also resolves the app's Google-services
-     * dependency — a question a listing never asks.
+     * The picker's filter, and the one question a listing has: whether to show the row,
+     * and if not, what to say about having left it out. It stops at the first blocking
+     * finding rather than building the whole [Report] that [analyze] returns, which also
+     * resolves the app's Google-services dependency — a question a listing never asks.
      *
      * It shares [findingsFor] with [analyze] rather than restating the rules, so the list
      * cannot come to disagree with the verdict shown when a row is opened.
-     */
-    fun canClone(packageName: String): Boolean {
-        val packageInfo = installedPackageInfo(packageName) ?: return false
-        return canClone(packageInfo, hostState())
-    }
-
-    /**
-     * The same verdict for a package the caller has already read.
      *
      * A listing asks this of every launchable package, so everything it would otherwise
      * repeat is passed in: the record (read by [installedPackageInfo], whose flags
-     * [findingsFor] depends on), the device facts, and the app's ABIs, which the listing
-     * needs for its own architecture filter and would otherwise read out of the archives
-     * twice.
+     * [findingsFor] depends on), the device facts, and the app's archives, which the
+     * listing needs for its own architecture filter and would otherwise read twice.
+     *
+     * Returning the reason rather than a yes or no is what lets the checks behind it stay
+     * silent for a bulk pass: the listing accounts for every app it left out in the one
+     * line it already writes, instead of each refusal narrating itself once per refresh.
+     * See [findingsFor]'s `quiet`.
      */
-    fun canClone(
+    fun blockingCode(
         packageInfo: PackageInfo,
         host: HostState,
         archives: ApkAbis.Archives = archivesOf(packageInfo.applicationInfo),
-    ): Boolean = findingsFor(
+    ): String? = findingsFor(
         packageInfo,
         engineAbiOf(archives.abis, host.loadableAbis),
         host,
         archives.baseReadable,
-    ).none { it.blocking }
+        quiet = true,
+    ).firstOrNull { it.blocking }?.code
 
     /**
      * Reads a package with every flag [findingsFor] needs.
@@ -185,6 +183,17 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         )
     } catch (_: PackageManager.NameNotFoundException) {
         null
+    } catch (error: Throwable) {
+        // Not only NameNotFoundException, because that is not the only way this fails.
+        // Both flags above make the reply bigger — a manifest with many permissions or
+        // much meta-data — and a reply that will not fit through the binder comes back as
+        // TransactionTooLargeException, a RuntimeException the signature does not mention.
+        // Left to propagate it came out of the listing's per-app loop, past every guard,
+        // and one app nobody could read turned the whole picker into "Could not list
+        // apps". A package that cannot be read is a package that cannot be cloned; it is
+        // left out, like any other, and the reason is said here rather than thrown.
+        Slog.w(Slog.INSTALL, "Could not read $packageName: ${error.javaClass.simpleName}")
+        null
     }
 
     /** Everything known to stand in the way of hosting an installed package. */
@@ -193,10 +202,12 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         abi: String?,
         host: HostState,
         baseArchiveReadable: Boolean,
+        /** Set by a pass over every app on the device; see [AppSecurityChecker.check]. */
+        quiet: Boolean,
     ): List<Finding> {
         val findings = mutableListOf<Finding>()
 
-        val rejection = securityChecker.check(packageInfo, host.secureEnvironmentDeclarers)
+        val rejection = securityChecker.check(packageInfo, host.secureEnvironmentDeclarers, quiet)
         (rejection as? AppSecurityChecker.Verdict.Rejected)?.let {
             findings += Finding(it.code, it.message, blocking = true)
         }

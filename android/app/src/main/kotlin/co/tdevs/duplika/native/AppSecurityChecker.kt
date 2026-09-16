@@ -67,15 +67,24 @@ class AppSecurityChecker(private val context: Context) {
      * gathered once by [secureEnvironmentDeclarers]. Null means it could not be gathered,
      * and this package is queried on its own — the same answer, one binder call at a time.
      */
-    fun check(packageInfo: PackageInfo, declarers: Set<String>? = null): Verdict {
+    fun check(
+        packageInfo: PackageInfo,
+        declarers: Set<String>? = null,
+        quiet: Boolean = false,
+    ): Verdict {
         val packageName = packageInfo.packageName
-        blockedReason(packageName)?.let { return it }
+        blockedReason(packageName, quiet)?.let { return it }
 
         val viaProperty =
             if (declarers == null) declaredViaProperty(packageName) else packageName in declarers
 
         if (viaProperty || declaredInMetaData(packageInfo.applicationInfo?.metaData)) {
-            Slog.w(Slog.INSTALL, "$packageName declares a secure-environment requirement; rejecting")
+            if (!quiet) {
+                Slog.w(
+                    Slog.INSTALL,
+                    "$packageName declares a secure-environment requirement; rejecting",
+                )
+            }
             return Verdict.Rejected(
                 EngineErrorCodes.SECURE_ENV_REQUIRED,
                 "This application requires a secure environment and cannot be virtualized.",
@@ -180,8 +189,16 @@ class AppSecurityChecker(private val context: Context) {
      *
      * The host itself would recurse, and cloning core system/framework packages produces
      * a broken container rather than a useful one.
+     *
+     * [quiet] is set by the picker's listing, which asks this of every launchable app on
+     * the device and does so again on every refresh. Narrating each refusal there wrote
+     * the same handful of lines into the diagnostics ring over and over — six a listing,
+     * a listing per resume — pushing out the events someone reading that console is
+     * actually looking for. The listing says which apps it left out, once, in one line.
+     * Every other caller is asking about one app because someone wants to know about
+     * that app, and says why.
      */
-    private fun blockedReason(packageName: String): Verdict.Rejected? {
+    private fun blockedReason(packageName: String, quiet: Boolean = false): Verdict.Rejected? {
         if (packageName == context.packageName) {
             return Verdict.Rejected(
                 EngineErrorCodes.SELF_CLONE_UNSUPPORTED,
@@ -189,6 +206,9 @@ class AppSecurityChecker(private val context: Context) {
             )
         }
         if (BLOCKED_PREFIXES.any { packageName == it || packageName.startsWith("$it.") }) {
+            if (!quiet) {
+                Slog.i(Slog.INSTALL, "$packageName is a system component; not offering it")
+            }
             return Verdict.Rejected(
                 EngineErrorCodes.SYSTEM_COMPONENT_UNSUPPORTED,
                 "System components cannot be cloned.",

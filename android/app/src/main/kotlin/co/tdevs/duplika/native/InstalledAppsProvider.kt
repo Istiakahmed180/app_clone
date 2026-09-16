@@ -60,7 +60,11 @@ class InstalledAppsProvider(private val context: Context) {
         // against, read once. Per app, these were the listing's largest cost.
         val host = analyzer.listingHostState()
 
-        var hidden = 0
+        // Every app this pass is not offering, against the reason it is not. Kept rather
+        // than tallied because the tally could not answer the only question ever asked of
+        // it — a user saying an app is missing, with nothing on record to say whether it
+        // was a decision or a defect, or which decision.
+        val excluded = sortedMapOf<String, String>()
         val seen = HashSet<String>()
         val apps = packageManager.queryIntentActivities(intent, 0)
             .asSequence()
@@ -73,9 +77,17 @@ class InstalledAppsProvider(private val context: Context) {
             // per listing.
             .mapNotNull { info ->
                 val packageInfo = analyzer.installedPackageInfo(info.packageName)
-                // Uninstalled between the query and this read. Counted with the rest:
-                // it is one more row the picker is not offering.
-                if (packageInfo == null) hidden++
+                // Uninstalled between the query and this read, or unreadable. Counted
+                // with the rest: it is one more row the picker is not offering.
+                //
+                // Recorded under a real engine code rather than a word of its own: every
+                // other entry in this map is one, and a lookalike literal sitting among
+                // them reads like a code nobody can find. [installedPackageInfo] has
+                // already said which of the two it was, in its own line, when it was the
+                // second.
+                if (packageInfo == null) {
+                    excluded[info.packageName] = EngineErrorCodes.APP_NOT_FOUND
+                }
                 packageInfo?.let { info to it }
             }
             // The archives likewise: the compatibility verdict and the picker's
@@ -87,9 +99,12 @@ class InstalledAppsProvider(private val context: Context) {
                 Listing(info, packageInfo, label(info), archivesOf(info, packageInfo))
             }
             .filter { listing ->
-                val allowed = analyzer.canClone(listing.packageInfo, host, listing.archives)
-                if (!allowed) hidden++
-                allowed
+                // The reason, not just yes or no: it is what the summary below reports,
+                // and asking for it is what lets the checks behind it stay silent while a
+                // whole device is being judged. See [AppCompatibilityAnalyzer.blockingCode].
+                val blocker = analyzer.blockingCode(listing.packageInfo, host, listing.archives)
+                if (blocker != null) excluded[listing.packageInfo.packageName] = blocker
+                blocker == null
             }
             // Deliberately unsorted. The picker sorts and groups the list itself — by name,
             // by install date or by update date, whichever the user chose — so anything
@@ -111,11 +126,33 @@ class InstalledAppsProvider(private val context: Context) {
             archiveCache.flush()
         }
 
-        if (hidden > 0) {
-            Slog.i(Slog.INSTALL, "Picker: left out $hidden app(s) that cannot be cloned")
+        // Only when the answer is not the one already on record. A listing now runs on
+        // every resume and on every package change, and writing the same roster each time
+        // filled the diagnostics ring with repetitions of a line that had not changed —
+        // crowding out the events someone opens that console to find. Silence here means
+        // "exactly as last reported"; anything else is said in full.
+        if (excluded.keys != lastExcluded) {
+            lastExcluded = excluded.keys.toSet()
+            if (excluded.isNotEmpty()) {
+                Slog.i(
+                    Slog.INSTALL,
+                    "Picker: left out ${excluded.size} app(s) that cannot be cloned: " +
+                        excluded.entries.joinToString(", ") { "${it.key} (${it.value})" },
+                )
+            } else {
+                Slog.i(Slog.INSTALL, "Picker: every launchable app can be cloned")
+            }
         }
-        return mapOf("apps" to apps, "hidden" to hidden)
+        return mapOf("apps" to apps, "hidden" to excluded.size)
     }
+
+    /**
+     * The roster the last listing reported, so an unchanged one is not reported again.
+     *
+     * Null until the first listing, which is what makes a fresh process always say where
+     * it stands rather than starting out silent.
+     */
+    private var lastExcluded: Set<String>? = null
 
     /** One launchable app, with the lookups a listing would otherwise repeat. */
     private class Listing(
