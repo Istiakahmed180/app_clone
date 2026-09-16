@@ -310,6 +310,25 @@ class NativeBridge {
     });
   }
 
+  /// Repaints several clones' pinned shortcuts in one call.
+  ///
+  /// For a change that renumbers an app's clones rather than altering one of them, where
+  /// the single form would mean one round trip and one icon drawn per clone. The native
+  /// side asks which shortcuts are actually pinned before drawing anything, so a batch
+  /// covering clones nobody has pinned costs almost nothing.
+  ///
+  /// Each entry carries the same fields as [refreshCloneShortcut].
+  Future<void> refreshCloneShortcuts(
+    List<Map<String, dynamic>> clones,
+  ) async {
+    if (clones.isEmpty) {
+      return;
+    }
+    await _invokeEngine('refreshCloneShortcuts', <String, dynamic>{
+      'clones': clones,
+    });
+  }
+
   Future<void> pinCloneShortcut({
     required String profileId,
     required String packageName,

@@ -408,7 +408,11 @@ class HomeView extends GetView<HomeController> {
     final CloneBatchResult result = await controller.createClones(
       profile,
       count,
-      onProgress: (int created, int total) => progress.value = created >= total
+      // "Finishing" also covers a cancelled batch: the clone in flight when Cancel was
+      // tapped still has to land, and naming the next one would promise work that is no
+      // longer going to happen.
+      onProgress: (int created, int total) => progress.value =
+          created >= total || controller.cloneBatchCancelling.value
           ? l10n.cloneCreatingFinishing
           : l10n.cloneCreating(created + 1, total),
     );
@@ -426,7 +430,13 @@ class HomeView extends GetView<HomeController> {
       await _showFailure(context, failure);
       return;
     }
-    _showMessage(context, l10n.cloneAdded(count, profile.appName));
+    // A cancelled batch stops short, so the tally is what actually landed rather than
+    // what was asked for. Nothing is said when it landed none: the user stopped it
+    // themselves and "0 clones added" tells them only what they already did.
+    if (result.created == 0) {
+      return;
+    }
+    _showMessage(context, l10n.cloneAdded(result.created, profile.appName));
   }
 
   void _showProgress(
@@ -458,6 +468,21 @@ class HomeView extends GetView<HomeController> {
             ),
           ],
         ),
+        // The one way out of a barrier that is not dismissible. Twenty clones is close
+        // to a minute, and a user who has changed their mind should not have to wait out
+        // a decision they have already reversed. Disabled once asked: the clone being
+        // installed still has to finish, and a button that invites a second tap would
+        // suggest the first one was missed.
+        actions: <Widget>[
+          Obx(
+            () => TextButton(
+              onPressed: controller.cloneBatchCancelling.value
+                  ? null
+                  : controller.cancelCloneBatch,
+              child: Text(context.l10n.commonCancel),
+            ),
+          ),
+        ],
       ),
     );
   }

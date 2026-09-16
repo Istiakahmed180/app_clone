@@ -132,6 +132,60 @@ class CloneShortcutManager(private val context: Context) {
         EngineResult.ok()
     }
 
+    /**
+     * One clone's shortcut, as the batch refresh receives it over the channel.
+     */
+    data class CloneShortcut(
+        val profileId: String,
+        val packageName: String,
+        val label: String,
+        val spaceIndex: Int,
+        val spaceCount: Int,
+        val badgeArgb: Int?,
+        val iconPath: String?,
+    )
+
+    /**
+     * Refreshes several clones' pinned shortcuts at once.
+     *
+     * For the changes that renumber a whole app's clones rather than altering one of
+     * them: removing clone 1 of twenty renumbers the other nineteen, and sending those
+     * one at a time meant nineteen channel round trips and nineteen icons drawn while the
+     * grid waited.
+     *
+     * Unlike [refreshPinned] this does ask which shortcuts are pinned, and it asks once.
+     * The single-clone path can afford to skip that check because `updateShortcuts`
+     * ignores an id nobody has pinned — but it only ignores it *after* [describe] has
+     * already decoded the app's icon and drawn the badge onto it, and for a batch that is
+     * the whole cost, paid for clones that have no shortcut at all. Most users pin few,
+     * so this usually reduces the work to nothing.
+     */
+    fun refreshPinnedAll(clones: List<CloneShortcut>): EngineResult<Unit> = try {
+        val pinned = ShortcutManagerCompat
+            .getShortcuts(context, ShortcutManagerCompat.FLAG_MATCH_PINNED)
+            .mapTo(HashSet()) { it.id }
+
+        val updates = clones
+            .filter { it.profileId in pinned }
+            .map {
+                describe(
+                    it.profileId, it.packageName, it.label, it.spaceIndex, it.spaceCount,
+                    it.badgeArgb, it.iconPath,
+                )
+            }
+
+        if (updates.isNotEmpty()) {
+            ShortcutManagerCompat.updateShortcuts(context, updates)
+        }
+        EngineResult.ok()
+    } catch (error: Throwable) {
+        // Never fatal, for the same reason as [refreshPinned]: the app already draws the
+        // clones correctly, and a launcher that will not take the update is not a failure
+        // worth reporting to someone who was deleting a clone.
+        Slog.w(Slog.PROFILE, "Could not refresh pinned shortcuts: ${error.message}")
+        EngineResult.ok()
+    }
+
     /** The shortcut for one clone, as both pinning and refreshing need it. */
     private fun describe(
         profileId: String,

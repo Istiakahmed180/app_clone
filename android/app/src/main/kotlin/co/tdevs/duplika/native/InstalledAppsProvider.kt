@@ -79,8 +79,7 @@ class InstalledAppsProvider(private val context: Context) {
     }
 
     /** Whether a clone of this package could be created at all. */
-    private fun canClone(packageName: String): Boolean =
-        analyzer.analyze(packageName).verdict != AppCompatibilityAnalyzer.Verdict.UNSUPPORTED
+    private fun canClone(packageName: String): Boolean = analyzer.canClone(packageName)
 
     /**
      * Icons for a specific set of packages.

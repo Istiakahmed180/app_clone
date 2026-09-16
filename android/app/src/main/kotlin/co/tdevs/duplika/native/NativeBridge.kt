@@ -265,6 +265,36 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 )
             }
 
+            // The batch form, for a change that renumbers an app's clones rather than
+            // altering one of them. See CloneShortcutManager.refreshPinnedAll.
+            "refreshCloneShortcuts" -> {
+                val clones = call.argument<List<Map<String, Any?>>>("clones").orEmpty()
+                result.success(
+                    shortcuts.refreshPinnedAll(
+                        clones.mapNotNull { clone ->
+                            val profileId = clone["profileId"] as? String
+                            val packageName = clone["packageName"] as? String
+                            if (profileId.isNullOrBlank() || packageName.isNullOrBlank()) {
+                                // One malformed entry must not lose the rest of the batch.
+                                return@mapNotNull null
+                            }
+                            CloneShortcutManager.CloneShortcut(
+                                profileId = profileId,
+                                packageName = packageName,
+                                label = (clone["label"] as? String).orEmpty()
+                                    .ifBlank { packageName },
+                                spaceIndex = (clone["spaceIndex"] as? Number)?.toInt() ?: 1,
+                                spaceCount = (clone["spaceCount"] as? Number)?.toInt() ?: 1,
+                                // Read as Number for the same reason as pinCloneShortcut:
+                                // an opaque ARGB value arrives as a Long.
+                                badgeArgb = (clone["badgeArgb"] as? Number)?.toInt(),
+                                iconPath = clone["iconPath"] as? String,
+                            )
+                        },
+                    ).toEnvelope("SHORTCUT_REFRESHED", "Pinned shortcuts refreshed."),
+                )
+            }
+
             "pinCloneShortcut" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return

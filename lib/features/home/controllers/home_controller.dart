@@ -320,8 +320,97 @@ class HomeController extends GetxController {
       profiles.assignAll(_grouped(await _engine.getProfiles()));
       errorMessage.value = null;
       await _loadCustomIcons();
+      await _reconcileShortcutLabels();
     } on AppException catch (error) {
       errorMessage.value = error;
+    }
+  }
+
+  /// What each clone's shortcut was last known to say, by profile id.
+  ///
+  /// Only the parts [_refreshShortcut] derives from the *set* of profiles — the label and
+  /// the numbering. A clone's own appearance (its colour mark, its custom picture) is not
+  /// in here: those change in one place each, which already repaints the shortcut, and
+  /// folding them in would mean re-deriving a picture to decide whether to redraw it.
+  final Map<String, String> _shortcutLabels = <String, String>{};
+
+  /// Whether this session has already brought the pinned shortcuts into step once.
+  bool _shortcutsReconciled = false;
+
+  String _shortcutLabelOf(VirtualProfileModel profile) =>
+      '${shortcutLabel(profile)}|${instanceIndex(profile)}|${siblingCount(profile)}';
+
+  /// Repaints the pinned shortcuts whose label or number no longer matches the grid.
+  ///
+  /// A clone's number is its position among its siblings, so it is not only the clone
+  /// being changed that goes stale: adding a second clone turns the first one's "Camera"
+  /// into "Camera 1", and removing clone 1 of three leaves the app's new clone 1 pinned
+  /// as "Camera 2". Reconciling here rather than at each call site is deliberate — the
+  /// paths that can renumber a clone are more than the ones that obviously look like it,
+  /// and rename and delete had each already been missed.
+  ///
+  /// Nothing is sent for a clone whose label is unchanged, so the ordinary refresh — a
+  /// pull on the grid, a return from Settings — costs no launcher calls at all.
+  ///
+  /// The first pass of a session is the exception: it repaints every clone rather than
+  /// only recording them. What a shortcut *should* say is known here, but what it does
+  /// say is not, and a session that only watches for changes can never correct one that
+  /// went wrong before it started — a rename made by a build without this reconciliation,
+  /// or one the app was killed in the middle of, would stay wrong on the home screen for
+  /// good. The native side asks which shortcuts are pinned before drawing anything, so
+  /// the cost of that pass is a single query for a user who has pinned none.
+  Future<void> _reconcileShortcutLabels() async {
+    // Held back until there is something to compare against: a launch whose stored
+    // profiles could not be read loads an empty grid, and spending the one healing pass
+    // on it would leave the real clones uncorrected once the read recovered.
+    final bool firstPass = !_shortcutsReconciled && profiles.isNotEmpty;
+    if (firstPass) {
+      _shortcutsReconciled = true;
+    }
+
+    final Map<String, String> current = <String, String>{};
+    final List<VirtualProfileModel> stale = <VirtualProfileModel>[];
+
+    for (final VirtualProfileModel profile in profiles) {
+      final String label = _shortcutLabelOf(profile);
+      current[profile.id] = label;
+      // After the first pass, a clone nobody has seen before is recorded rather than
+      // repainted: it has just been made, and has no shortcut to correct.
+      final String? previous = _shortcutLabels[profile.id];
+      if (firstPass || (previous != null && previous != label)) {
+        stale.add(profile);
+      }
+    }
+
+    _shortcutLabels
+      ..clear()
+      ..addAll(current);
+
+    if (stale.isEmpty) {
+      return;
+    }
+
+    // One call for the whole set. Removing clone 1 of twenty renumbers nineteen, and
+    // sending those one at a time would put nineteen round trips between the user and a
+    // grid that has already redrawn without the clone they deleted.
+    try {
+      await _nativeBridge.refreshCloneShortcuts(<Map<String, dynamic>>[
+        for (final VirtualProfileModel profile in stale)
+          <String, dynamic>{
+            'profileId': profile.id,
+            'packageName': profile.packageName,
+            'label': shortcutLabel(profile),
+            'spaceIndex': instanceIndex(profile),
+            'spaceCount': siblingCount(profile),
+            'badgeArgb': profile.iconColor.argb,
+            'iconPath': profile.iconPath,
+          },
+      ]);
+    } on Object catch (error, stackTrace) {
+      // Never rethrown, for the same reason as [_refreshShortcut]: the grid is already
+      // right, and a launcher that will not take the update must not fail the delete or
+      // rename that prompted it.
+      _logger.error('Could not refresh renumbered shortcuts', error, stackTrace);
     }
   }
 
@@ -459,6 +548,11 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Renames one clone.
+  ///
+  /// The pinned shortcut follows, through [_reconcileShortcutLabels]: [shortcutLabel] is
+  /// derived from the name, so a rename is one of the changes that would otherwise leave
+  /// the home screen saying something the app no longer says.
   Future<AppException?> renameProfile(
     VirtualProfileModel profile,
     String name,
@@ -625,15 +719,25 @@ class HomeController extends GetxController {
     int created = 0;
     AppException? firstFailure;
 
+    _cloneBatchCancelled = false;
+    cloneBatchCancelling.value = false;
+
+    // Once, not per clone: the suggestion is derived from the app's own name, so every
+    // pass of the loop was asking the same question and waiting for the same answer.
+    final String profileName = await _repository.suggestProfileName(
+      appName: profile.appName,
+      packageName: profile.packageName,
+    );
+
     for (int index = 0; index < count; index++) {
+      if (_cloneBatchCancelled) {
+        break;
+      }
       try {
         await _engine.createProfile(
           packageName: profile.packageName,
           appName: profile.appName,
-          profileName: await _repository.suggestProfileName(
-            appName: profile.appName,
-            packageName: profile.packageName,
-          ),
+          profileName: profileName,
         );
         created++;
       } on AppException catch (error) {
@@ -642,13 +746,41 @@ class HomeController extends GetxController {
       onProgress?.call(created, count);
     }
 
+    // After the reload, not before it: the progress dialog is still up until this call
+    // returns, and clearing the flag early would re-enable its Cancel button for the
+    // length of the refresh — offering to stop work that has already stopped.
     await refreshAll();
+    cloneBatchCancelling.value = false;
 
     return CloneBatchResult(
       requested: count,
       created: created,
       failure: firstFailure,
     );
+  }
+
+  /// Set when the user has asked to stop a batch part way through.
+  bool _cloneBatchCancelled = false;
+
+  /// Whether a running batch has been asked to stop but has not finished stopping.
+  ///
+  /// Drives the progress dialog's own button: once asked, there is nothing more to ask
+  /// for, and a button that still invites a second tap suggests the first one missed.
+  final RxBool cloneBatchCancelling = false.obs;
+
+  /// Abandons the rest of a running batch.
+  ///
+  /// The clone currently being installed is not interrupted. A container install is not
+  /// abortable part way, and tearing one down mid-write would trade a wait the user
+  /// chose to end for a clone in a state nothing else in the app expects. What stops is
+  /// every clone after it.
+  ///
+  /// Nothing made so far is undone: those clones are exactly what the user asked for,
+  /// and the tally reports how many of them landed rather than pretending the whole
+  /// batch failed.
+  void cancelCloneBatch() {
+    _cloneBatchCancelled = true;
+    cloneBatchCancelling.value = true;
   }
 
   /// The most clones the dialog will ever offer, whatever the device could take.
@@ -888,6 +1020,8 @@ class HomeController extends GetxController {
       } on Object catch (error, stackTrace) {
         _logger.error('Could not remove the icon for ${profile.id}', error, stackTrace);
       }
+      // Renumbers the clone's siblings, whose pinned shortcuts are brought back into
+      // step by [_reconcileShortcutLabels] on the reload below.
       await _loadProfiles();
       await _loadProfileStates();
       return null;

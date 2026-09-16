@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -28,7 +29,7 @@ enum PickerStatus {
 }
 
 /// Backs the "add a clone" flow: pick an installed app, or import an APK.
-class AppPickerController extends GetxController {
+class AppPickerController extends GetxController with WidgetsBindingObserver {
   AppPickerController({
     required this._bridge,
     required this._engine,
@@ -231,9 +232,29 @@ class AppPickerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     final Object? argument = Get.arguments;
     if (argument is String && argument.isNotEmpty) {
       query.value = argument;
+    }
+  }
+
+  /// Forgets the cached verdicts when the app comes back to the foreground.
+  ///
+  /// The storage finding is the reason. It depends on whether Duplika holds All files
+  /// access, its refusal tells the user to go to Settings and grant it, and Settings is
+  /// another app — so the one journey the message asks for is exactly the one that ends
+  /// with a resume and a verdict that is no longer true. Refusing the clone a second
+  /// time, with the same instruction the user has just followed, is the worst answer
+  /// available.
+  ///
+  /// Only the verdicts are dropped. The app list itself is not re-read: it costs a
+  /// native call over every launchable package, and nothing about leaving for Settings
+  /// changes which apps are installed.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _reports.clear();
     }
   }
 
@@ -251,6 +272,9 @@ class AppPickerController extends GetxController {
       // actually drawn. See [requestIcons].
       _requestedIcons.clear();
       _pendingIcons.clear();
+      // Dropped with the list they describe. See [didChangeAppLifecycleState] for why a
+      // verdict is not a fact that can be kept.
+      _reports.clear();
       apps.assignAll(await _bridge.listInstalledApps(includeIcons: false));
       clonedPackages.assignAll(await _repository.clonedPackageNames());
       errorMessage.value = null;
@@ -351,6 +375,7 @@ class AppPickerController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _disposed = true;
     _pendingIcons.clear();
     super.onClose();

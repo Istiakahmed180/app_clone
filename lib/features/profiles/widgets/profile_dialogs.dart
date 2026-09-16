@@ -44,7 +44,19 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
     super.dispose();
   }
 
-  void _submit() => Navigator.of(context).pop(_controller.text);
+  /// Whether the field holds a name the repository will accept.
+  ///
+  /// The same rule as `_validateName`, checked here so an empty field disables Save
+  /// rather than being taken and answered with an error dialog. The length bound is the
+  /// field's own `maxLength`, so only emptiness can be got wrong.
+  bool get _isValid => _controller.text.trim().isNotEmpty;
+
+  void _submit() {
+    if (!_isValid) {
+      return;
+    }
+    Navigator.of(context).pop(_controller.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +68,7 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
         maxLength: AppConstants.maxProfileNameLength,
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(labelText: context.l10n.renameFieldLabel),
+        onChanged: (_) => setState(() {}),
         onSubmitted: (_) => _submit(),
       ),
       actions: <Widget>[
@@ -63,7 +76,10 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(context.l10n.commonCancel),
         ),
-        FilledButton(onPressed: _submit, child: Text(context.l10n.commonSave)),
+        FilledButton(
+          onPressed: _isValid ? _submit : null,
+          child: Text(context.l10n.commonSave),
+        ),
       ],
     );
   }

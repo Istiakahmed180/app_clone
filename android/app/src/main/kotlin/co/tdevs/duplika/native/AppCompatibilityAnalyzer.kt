@@ -47,12 +47,8 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     private val securityChecker = AppSecurityChecker(context)
 
     fun analyze(packageName: String): Report {
-        val findings = mutableListOf<Finding>()
-
-        val packageInfo = try {
-            context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-        } catch (_: PackageManager.NameNotFoundException) {
-            return Report(
+        val packageInfo = installedPackageInfo(packageName)
+            ?: return Report(
                 packageName = packageName,
                 verdict = Verdict.UNSUPPORTED,
                 findings = listOf(
@@ -65,15 +61,57 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                 requiresGms = false,
                 abi = null,
             )
-        }
+
+        val abi = packageInfo.applicationInfo?.let(::detectAbi)
+        val findings = findingsFor(packageName, packageInfo, abi)
+
+        return Report(
+            packageName = packageName,
+            verdict = verdictOf(findings),
+            // Still computed -- the action sheet uses it to decide whether to offer the
+            // Google services install -- but no longer reported as a finding: what a clone
+            // can and cannot do with Google's services is not something the user is shown.
+            requiresGms = requiresGooglePlayServices(packageName, packageInfo),
+            findings = findings,
+            abi = abi,
+        )
+    }
+
+    /**
+     * Whether a clone of this package could be created at all.
+     *
+     * The picker's filter, and the reason it is not simply `analyze().verdict`: that call
+     * also resolves the app's Google-services dependency, which costs a second metadata
+     * read of every package on the device and answers a question a listing never asks.
+     *
+     * It shares [findingsFor] with [analyze] rather than restating the rules, so the list
+     * cannot come to disagree with the verdict shown when a row is opened.
+     */
+    fun canClone(packageName: String): Boolean {
+        val packageInfo = installedPackageInfo(packageName) ?: return false
+        val abi = packageInfo.applicationInfo?.let(::detectAbi)
+        return findingsFor(packageName, packageInfo, abi).none { it.blocking }
+    }
+
+    private fun installedPackageInfo(packageName: String): PackageInfo? = try {
+        context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+    } catch (_: PackageManager.NameNotFoundException) {
+        null
+    }
+
+    /** Everything known to stand in the way of hosting an installed package. */
+    private fun findingsFor(
+        packageName: String,
+        packageInfo: PackageInfo,
+        abi: String?,
+    ): List<Finding> {
+        val findings = mutableListOf<Finding>()
 
         (securityChecker.check(packageName) as? AppSecurityChecker.Verdict.Rejected)?.let {
             findings += Finding(it.code, it.message, blocking = true)
         }
 
         val applicationInfo = packageInfo.applicationInfo
-        val abi = applicationInfo?.let(::detectAbi)
-
         if (applicationInfo != null && hasNativeCode(applicationInfo) && abi == null) {
             findings += Finding(
                 EngineErrorCodes.ABI_NOT_SUPPORTED,
@@ -82,28 +120,17 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             )
         }
 
-        // Still computed -- the action sheet uses it to decide whether to offer the Google
-        // services install -- but no longer reported as a finding: what a clone can and
-        // cannot do with Google's services is not something the user is shown.
-        val requiresGms = requiresGooglePlayServices(packageName, packageInfo)
-
         storageFinding(packageInfo.requestedPermissions?.toSet().orEmpty())?.let {
             findings += it
         }
 
-        val verdict = when {
-            findings.any { it.blocking } -> Verdict.UNSUPPORTED
-            findings.isNotEmpty() -> Verdict.LIMITED
-            else -> Verdict.SUPPORTED
-        }
+        return findings
+    }
 
-        return Report(
-            packageName = packageName,
-            verdict = verdict,
-            findings = findings,
-            requiresGms = requiresGms,
-            abi = abi,
-        )
+    private fun verdictOf(findings: List<Finding>): Verdict = when {
+        findings.any { it.blocking } -> Verdict.UNSUPPORTED
+        findings.isNotEmpty() -> Verdict.LIMITED
+        else -> Verdict.SUPPORTED
     }
 
     /**
@@ -143,11 +170,7 @@ class AppCompatibilityAnalyzer(private val context: Context) {
 
         return Report(
             packageName = packageName,
-            verdict = when {
-                findings.any { it.blocking } -> Verdict.UNSUPPORTED
-                findings.isNotEmpty() -> Verdict.LIMITED
-                else -> Verdict.SUPPORTED
-            },
+            verdict = verdictOf(findings),
             findings = findings,
             requiresGms = requiresGms,
             abi = abi.takeIf { it != UNSUPPORTED_ABI },
@@ -160,16 +183,13 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      */
     private fun archiveAbi(apkPath: String): String? = try {
         java.util.zip.ZipFile(java.io.File(apkPath)).use { zip ->
-            val abis = zip.entries().asSequence()
-                .map { it.name }
-                .filter { it.startsWith("lib/") }
-                .mapNotNull { it.split('/').getOrNull(1) }
-                .toSet()
-
-            when {
-                abis.isEmpty() -> null
-                else -> abis.firstOrNull { it in ENGINE_ABIS } ?: UNSUPPORTED_ABI
-            }
+            engineAbiOf(
+                zip.entries().asSequence()
+                    .map { it.name }
+                    .filter { it.startsWith("lib/") }
+                    .mapNotNull { it.split('/').getOrNull(1) }
+                    .toSet(),
+            )
         }
     } catch (error: Exception) {
         Slog.w(Slog.INSTALL, "Could not read ABIs from $apkPath: ${error.message}")
@@ -283,14 +303,8 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      * Derived from `nativeLibraryDir` (a public field) rather than the hidden
      * `primaryCpuAbi`, so no hidden API is touched.
      */
-    private fun detectAbi(info: ApplicationInfo): String? {
-        val dir = info.nativeLibraryDir?.substringAfterLast('/') ?: return null
-        return when (dir) {
-            "arm64" -> "arm64-v8a".takeIf { it in ENGINE_ABIS }
-            "arm" -> "armeabi-v7a".takeIf { it in ENGINE_ABIS }
-            else -> null
-        }
-    }
+    private fun detectAbi(info: ApplicationInfo): String? =
+        engineAbiForLibraryDir(info.nativeLibraryDir)
 
     companion object {
         const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
@@ -352,10 +366,45 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             }
         }
 
-        private val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
+        /**
+         * The engine-loadable ABI for a set of `lib/` directory names.
+         *
+         * Three outcomes, and the difference between the last two is what the ABI finding
+         * turns on: null for an archive with no native code at all (pure bytecode, which
+         * runs anywhere), [UNSUPPORTED_ABI] for one that ships native code the engine
+         * cannot load, and the ABI itself otherwise.
+         *
+         * Split out as a pure function for the same reason as [storageFindingFor]: it is
+         * a decision worth testing, and reaching it through a real archive on a real
+         * device is not.
+         */
+        @JvmStatic
+        internal fun engineAbiOf(abiDirectories: Set<String>): String? = when {
+            abiDirectories.isEmpty() -> null
+            else -> abiDirectories.firstOrNull { it in ENGINE_ABIS } ?: UNSUPPORTED_ABI
+        }
+
+        /**
+         * The engine-loadable ABI an installed package's `nativeLibraryDir` implies.
+         *
+         * Android names the directory after the ABI family rather than the ABI, so the
+         * two names it can end in are mapped back. Null covers both "no native code" and
+         * "an ABI this engine does not load" — the caller separates them with
+         * `hasNativeCode`, which asks whether the directory has anything in it.
+         */
+        @JvmStatic
+        internal fun engineAbiForLibraryDir(nativeLibraryDir: String?): String? {
+            return when (nativeLibraryDir?.substringAfterLast('/')) {
+                "arm64" -> "arm64-v8a".takeIf { it in ENGINE_ABIS }
+                "arm" -> "armeabi-v7a".takeIf { it in ENGINE_ABIS }
+                else -> null
+            }
+        }
+
+        internal val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
 
         private const val GMS_VERSION_META = "com.google.android.gms.version"
-        private const val UNSUPPORTED_ABI = "unsupported"
+        internal const val UNSUPPORTED_ABI = "unsupported"
 
         private val GMS_PERMISSION_MARKERS = setOf(
             "com.google.android.c2dm.permission.RECEIVE",
