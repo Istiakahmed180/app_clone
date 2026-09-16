@@ -334,6 +334,8 @@
   "pickerSystemChip": "System",
   "pickerCannotClone": "This app cannot be cloned on this device.",
   "pickerApkUnreadable": "The selected APK could not be read.",
+  "pickerHiddenApps": "{count, plural, =1{1 app on this device cannot be cloned and is not listed} other{{count} apps on this device cannot be cloned and are not listed}}",
+  "@pickerHiddenApps": { "placeholders": { "count": { "type": "int" } } },
 
   "filterTitle": "Filter and sort",
   "filterSort": "Sort",

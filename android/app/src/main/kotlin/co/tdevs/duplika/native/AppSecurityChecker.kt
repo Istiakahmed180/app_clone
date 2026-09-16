@@ -1,8 +1,10 @@
 package co.tdevs.duplika.native
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 
 /**
  * Decides whether a target application may be loaded into the virtual container.
@@ -49,6 +51,69 @@ class AppSecurityChecker(private val context: Context) {
         }
 
         return Verdict.Allowed
+    }
+
+    /**
+     * Admission check for a record the caller has already read.
+     *
+     * A listing runs this over every launchable package, and the name-only [check] above
+     * costs two platform calls on each of them that this one does not: the installed check
+     * (the caller is holding the record, so the question is already answered), and the
+     * meta-data fetch (read off [PackageInfo.applicationInfo], which requires the record to
+     * have been read with `GET_META_DATA`). With [declarers] supplied, the property queries
+     * go too — three more per package.
+     *
+     * [declarers] is the set of packages that declare a secure-environment *property*,
+     * gathered once by [secureEnvironmentDeclarers]. Null means it could not be gathered,
+     * and this package is queried on its own — the same answer, one binder call at a time.
+     */
+    fun check(packageInfo: PackageInfo, declarers: Set<String>? = null): Verdict {
+        val packageName = packageInfo.packageName
+        blockedReason(packageName)?.let { return it }
+
+        val viaProperty =
+            if (declarers == null) declaredViaProperty(packageName) else packageName in declarers
+
+        if (viaProperty || declaredInMetaData(packageInfo.applicationInfo?.metaData)) {
+            Slog.w(Slog.INSTALL, "$packageName declares a secure-environment requirement; rejecting")
+            return Verdict.Rejected(
+                EngineErrorCodes.SECURE_ENV_REQUIRED,
+                "This application requires a secure environment and cannot be virtualized.",
+            )
+        }
+
+        return Verdict.Allowed
+    }
+
+    /**
+     * Every installed package that declares a secure-environment property, asked of the
+     * platform once for the whole device.
+     *
+     * Null below API 31, where `queryApplicationProperty` does not exist and there is
+     * nothing to gather — and also when the query itself fails, so a caller falls back to
+     * asking package by package rather than concluding that nobody declares anything.
+     *
+     * Safe to use for a listing even though it is one bulk answer rather than a direct
+     * question about each package: nothing is admitted on its strength. Tapping a row
+     * re-analyses that app with no declarer set, which asks about it directly, and
+     * [VirtualAppInstaller] asks a third time before anything is installed. A package this
+     * set somehow missed is a row that is offered and then refused — never a clone of an
+     * app that said no.
+     */
+    fun secureEnvironmentDeclarers(): Set<String>? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return null
+        }
+        return try {
+            SECURE_ENV_PROPERTIES.flatMapTo(HashSet()) { name ->
+                context.packageManager.queryApplicationProperty(name)
+                    .filter { it.isTruthy() }
+                    .map { it.packageName }
+            }
+        } catch (error: Exception) {
+            Slog.w(Slog.INSTALL, "Could not query secure-environment properties: ${error.message}")
+            null
+        }
     }
 
     /**
@@ -171,10 +236,29 @@ class AppSecurityChecker(private val context: Context) {
             packageName,
             PackageManager.GET_META_DATA,
         )
-        SECURE_ENV_PROPERTIES.any { info.metaData?.getBoolean(it, false) == true }
+        declaredInMetaData(info.metaData)
     } catch (_: PackageManager.NameNotFoundException) {
         false
     }
+
+    /**
+     * The same reading of a bundle the caller already has.
+     *
+     * Every encoding counts, for the reason [isTruthy] spells out: `android:value="true"`
+     * does not reach the bundle as a boolean in every app, and asking only for a boolean
+     * silently missed apps that had refused virtualization in writing.
+     */
+    private fun declaredInMetaData(metaData: Bundle?): Boolean = metaData != null &&
+        SECURE_ENV_PROPERTIES.any { name ->
+            // Asked by type rather than through the untyped getter: a bundle returns the
+            // default for a key stored as something else, so the three questions are safe
+            // to ask in turn and none of them is deprecated.
+            metaData.getBoolean(name, false) ||
+                metaData.getInt(name, 0) != 0 ||
+                metaData.getString(name).let {
+                    it != null && (it.equals("true", ignoreCase = true) || it == "1")
+                }
+        }
 
     private fun isInstalled(packageName: String): Boolean = try {
         context.packageManager.getPackageInfo(packageName, 0)

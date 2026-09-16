@@ -175,6 +175,7 @@
   "pickerSystemChip": "Sistem",
   "pickerCannotClone": "Apl ini tidak boleh diklon pada peranti ini.",
   "pickerApkUnreadable": "APK yang dipilih tidak dapat dibaca.",
+  "pickerHiddenApps": "{count, plural, other{{count} apl pada peranti ini tidak boleh diklon dan tidak disenaraikan}}",
   "filterTitle": "Tapis dan isih",
   "filterSort": "Isih",
   "filterSortName": "Nama apl",

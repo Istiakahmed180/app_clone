@@ -175,6 +175,7 @@
   "pickerSystemChip": "系统",
   "pickerCannotClone": "此应用无法在本设备上克隆。",
   "pickerApkUnreadable": "无法读取所选的 APK。",
+  "pickerHiddenApps": "{count, plural, other{此设备上有 {count} 个应用无法克隆，因此未列出}}",
   "filterTitle": "筛选和排序",
   "filterSort": "排序",
   "filterSortName": "应用名称",

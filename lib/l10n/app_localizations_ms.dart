@@ -661,6 +661,17 @@ class AppLocalizationsMs extends AppLocalizations {
   String get pickerApkUnreadable => 'APK yang dipilih tidak dapat dibaca.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count apl pada peranti ini tidak boleh diklon dan tidak disenaraikan',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => 'Tapis dan isih';
 
   @override

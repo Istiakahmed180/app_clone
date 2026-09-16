@@ -102,6 +102,26 @@ class InstalledAppModel {
 
 }
 
+/// What the picker asked the device for: the apps it may clone, and how many it may not.
+///
+/// The count is carried rather than discarded because its absence was its own bug. An app
+/// the engine cannot host is left out of the list — the right call, since a row that can
+/// only fail is worse than no row — but leaving it out silently means a user hunting for a
+/// missing app has no way to tell a refusal from a bug.
+@immutable
+class InstalledAppListing {
+  const InstalledAppListing({required this.apps, required this.hidden});
+
+  const InstalledAppListing.empty()
+    : apps = const <InstalledAppModel>[],
+      hidden = 0;
+
+  final List<InstalledAppModel> apps;
+
+  /// Launchable apps on this device that cannot be cloned, and so are not in [apps].
+  final int hidden;
+}
+
 /// Identity read from a standalone APK the user picked, before it is installed.
 @immutable
 class ApkCandidate {

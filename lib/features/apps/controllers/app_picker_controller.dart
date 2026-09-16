@@ -55,6 +55,15 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// A problem this app found for itself, waiting to be worded and shown once.
   final Rx<PickerStatus?> status = Rx<PickerStatus?>(null);
 
+  /// A non-blocking finding from the clone that was just created, waiting to be shown once.
+  ///
+  /// The compatibility layer produces two kinds of finding and only one of them used to
+  /// reach anybody. A blocking one refuses the clone and is said out loud; a non-blocking
+  /// one was computed, translated into every language Duplika ships, and then dropped on
+  /// the floor — the clone was made and the user found out at launch, if at all. This is
+  /// the other half of that contract. See [CompatibilityReport.caution].
+  final Rx<CompatibilityFinding?> caution = Rx<CompatibilityFinding?>(null);
+
   /// How the list is ordered.
   final Rx<AppSort> sort = AppSort.name.obs;
 
@@ -66,6 +75,13 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   final Rx<AppFilter> filter = AppFilter.all.obs;
   final Rx<ArchitectureFilter> architecture = ArchitectureFilter.all.obs;
   final Rx<PackageTypeFilter> packageType = PackageTypeFilter.all.obs;
+
+  /// Launchable apps on this device that cannot be cloned, and so are not in [apps].
+  ///
+  /// Shown under the list. An app the engine cannot host is deliberately left out — a row
+  /// that can only fail is worse than no row — but leaving it out *silently* left a user
+  /// looking for a missing app unable to tell a decision from a defect.
+  final RxInt hiddenApps = 0.obs;
 
   /// Packages that already have at least one clone.
   ///
@@ -285,7 +301,11 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       // Dropped with the list they describe. See [didChangeAppLifecycleState] for why a
       // verdict is not a fact that can be kept.
       _reports.clear();
-      apps.assignAll(await _bridge.listInstalledApps(includeIcons: false));
+      final InstalledAppListing listing = await _bridge.listInstalledApps(
+        includeIcons: false,
+      );
+      apps.assignAll(listing.apps);
+      hiddenApps.value = listing.hidden;
       errorMessage.value = null;
 
       // Caught separately, and still behind the spinner. Separately because these marks
@@ -460,7 +480,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// Compatibility verdict for a picked APK, read from the archive rather than assumed.
   Future<CompatibilityReport> analyzeApk(ApkCandidate candidate) async {
     try {
-      return await _bridge.analyzeApk(candidate.apkPath, candidate.packageName);
+      return await _bridge.analyzeApk(candidate.apkPaths, candidate.packageName);
     } on AppException catch (error, stackTrace) {
       _logger.error(
         'APK analysis failed for ${candidate.packageName}',
@@ -504,7 +524,13 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         return CloneRefusal.blocked(report.blocker);
       }
       final AppException? failure = await cloneInstalledApp(app);
-      return failure == null ? null : CloneRefusal.failed(failure);
+      if (failure != null) {
+        return CloneRefusal.failed(failure);
+      }
+      // Only on success: a clone that was refused has already said why, and a second
+      // message about a lesser problem with it would bury the first.
+      caution.value = report.caution;
+      return null;
     } finally {
       cloning.remove(app.packageName);
     }
@@ -674,6 +700,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         profileName: profileName,
         installGms: installGms,
       );
+      caution.value = report.caution;
       return null;
     } on AppException catch (error) {
       return error;

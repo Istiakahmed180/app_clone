@@ -206,7 +206,7 @@ class NativeBridge {
   /// Raises on failure rather than returning an empty list: the picker renders an empty
   /// result as "No matching apps", which would tell the user they have no apps when in
   /// fact the call failed. The caller already has an error path for this.
-  Future<List<InstalledAppModel>> listInstalledApps({
+  Future<InstalledAppListing> listInstalledApps({
     bool includeIcons = false,
   }) async {
     final EngineResponse response = await _invokeEngine(
@@ -219,21 +219,25 @@ class NativeBridge {
     }
 
     final Object? apps = response.data['apps'];
+    final Object? hidden = response.data['hidden'];
     if (apps is! List) {
-      return const <InstalledAppModel>[];
+      return const InstalledAppListing.empty();
     }
 
-    // A single malformed entry must not lose the whole list.
-    return apps
-        .whereType<Map<Object?, Object?>>()
-        .map(
-          (Map<Object?, Object?> app) => InstalledAppModel.fromMap(
-            app.map(
-              (Object? k, Object? v) => MapEntry<String, dynamic>('$k', v),
+    return InstalledAppListing(
+      // A single malformed entry must not lose the whole list.
+      apps: apps
+          .whereType<Map<Object?, Object?>>()
+          .map(
+            (Map<Object?, Object?> app) => InstalledAppModel.fromMap(
+              app.map(
+                (Object? k, Object? v) => MapEntry<String, dynamic>('$k', v),
+              ),
             ),
-          ),
-        )
-        .toList(growable: false);
+          )
+          .toList(growable: false),
+      hidden: hidden is int && hidden > 0 ? hidden : 0,
+    );
   }
 
   /// What will and will not work if this app is cloned.
@@ -249,13 +253,19 @@ class NativeBridge {
   ///
   /// Unlike [analyzeApp] this needs no installed package, so an imported APK can be judged
   /// before anything is installed.
+  /// [apkPaths] is the base APK first, then any splits: the base answers the manifest
+  /// questions, and an app bundle's native code lives in a split the base does not name.
   Future<CompatibilityReport> analyzeApk(
-    String apkPath,
+    List<String> apkPaths,
     String packageName,
   ) async {
     final EngineResponse response = await _invokeEngine(
       'analyzeApk',
-      <String, dynamic>{'apkPath': apkPath, 'packageName': packageName},
+      <String, dynamic>{
+        'apkPath': apkPaths.first,
+        'apkPaths': apkPaths,
+        'packageName': packageName,
+      },
     );
     return _reportOf(response, packageName);
   }

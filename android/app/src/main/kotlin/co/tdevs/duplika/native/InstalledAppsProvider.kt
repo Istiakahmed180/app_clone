@@ -13,7 +13,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
 import java.io.ByteArrayOutputStream
-import java.util.zip.ZipFile
 
 /**
  * Enumerates the launchable applications a user may clone.
@@ -36,25 +35,30 @@ class InstalledAppsProvider(private val context: Context) {
 
     /**
      * Launchable apps that can actually be cloned, user-installed first, alphabetically
-     * within each group.
+     * within each group, and a count of the ones left out.
      *
      * An app the engine could never host — one that asks not to be virtualized, a system
      * component, an app whose native libraries target no ABI the engine can load — is left
      * out rather than listed and then refused. Offering a row that can only fail is worse
      * than not offering it.
      *
-     * The filter runs after the cheap ones, so nothing is analysed that would have been
-     * dropped anyway, and before [describe], so no icon or ABI is decoded for an app that
-     * will not appear.
+     * The count travels with the list because silence was its own problem: an app that is
+     * simply absent, with nothing said, reads as a picker that cannot see it. The picker
+     * shows the number so a user looking for a missing app learns that the omission was a
+     * decision.
      *
      * Icons are expensive, so they are only decoded when [includeIcons] is set.
      */
-    fun listLaunchableApps(includeIcons: Boolean = true): List<Map<String, Any?>> {
+    fun listLaunchableApps(includeIcons: Boolean = true): Map<String, Any?> {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+
+        // Everything about this device and this build that every verdict below is measured
+        // against, read once. Per app, these were the listing's largest cost.
+        val host = analyzer.listingHostState()
 
         var hidden = 0
         val seen = HashSet<String>()
-        return packageManager.queryIntentActivities(intent, 0)
+        val apps = packageManager.queryIntentActivities(intent, 0)
             .asSequence()
             .mapNotNull { it.activityInfo?.applicationInfo }
             .filter { seen.add(it.packageName) }
@@ -70,16 +74,23 @@ class InstalledAppsProvider(private val context: Context) {
                 if (packageInfo == null) hidden++
                 packageInfo?.let { info to it }
             }
-            .filter { (_, packageInfo) ->
-                val allowed = analyzer.canClone(packageInfo)
+            // The ABIs likewise: the compatibility verdict and the picker's architecture
+            // filter are the same question asked twice, and reading the archives once for
+            // both is what keeps them from answering it differently.
+            //
+            // The label for a sharper reason still: `compareBy` runs its selectors on
+            // every comparison, so a label read inside the comparator was thousands of
+            // `getApplicationLabel` calls — each one opening the app's resources — where
+            // one per app is enough.
+            .map { (info, packageInfo) ->
+                Listing(info, packageInfo, label(info), ApkAbis.of(info))
+            }
+            .filter { listing ->
+                val allowed = listing.packageInfo != null &&
+                    analyzer.canClone(listing.packageInfo, host, listing.abis)
                 if (!allowed) hidden++
                 allowed
             }
-            // The label likewise, and for a sharper reason: `compareBy` runs its selectors
-            // on every comparison, so a label read inside the comparator was thousands of
-            // `getApplicationLabel` calls — each one opening the app's resources — where
-            // one per app is enough.
-            .map { (info, packageInfo) -> Listing(info, packageInfo, label(info)) }
             .sortedWith(
                 compareBy(
                     { it.info.isSystemApp() },
@@ -88,11 +99,11 @@ class InstalledAppsProvider(private val context: Context) {
             )
             .map { describe(it, includeIcons) }
             .toList()
-            .also {
-                if (hidden > 0) {
-                    Slog.i(Slog.INSTALL, "Picker: left out $hidden app(s) that cannot be cloned")
-                }
-            }
+
+        if (hidden > 0) {
+            Slog.i(Slog.INSTALL, "Picker: left out $hidden app(s) that cannot be cloned")
+        }
+        return mapOf("apps" to apps, "hidden" to hidden)
     }
 
     /** One launchable app, with the lookups a listing would otherwise repeat. */
@@ -101,6 +112,8 @@ class InstalledAppsProvider(private val context: Context) {
         /** Null only on the single-package path, where the record is read defensively. */
         val packageInfo: PackageInfo?,
         val label: String,
+        /** Every `lib/<abi>/` directory the app's APKs carry, read once. */
+        val abis: Set<String>,
     ) {
         /** Folded once rather than per comparison, for the same reason as [label]. */
         val sortKey: String = label.lowercase()
@@ -135,7 +148,7 @@ class InstalledAppsProvider(private val context: Context) {
         val packageInfo = runCatching {
             packageManager.getPackageInfo(packageName, 0)
         }.getOrNull()
-        return describe(Listing(info, packageInfo, label(info)), includeIcons)
+        return describe(Listing(info, packageInfo, label(info), ApkAbis.of(info)), includeIcons)
     }
 
     private fun describe(listing: Listing, includeIcons: Boolean): Map<String, Any?> {
@@ -151,56 +164,12 @@ class InstalledAppsProvider(private val context: Context) {
             "appName" to listing.label,
             "versionName" to packageInfo?.versionName,
             "system" to info.isSystemApp(),
-            "abis" to abisOf(info),
+            "abis" to listing.abis.filter { it in ApkAbis.KNOWN },
             "apkCount" to apkCount,
             "firstInstallTime" to packageInfo?.firstInstallTime,
             "lastUpdateTime" to packageInfo?.lastUpdateTime,
             "icon" to if (includeIcons) encodeIcon(info) else null,
         )
-    }
-
-    /**
-     * The ABI directories this package actually ships native code for.
-     *
-     * Read from the archive rather than from `ApplicationInfo`: the only field that
-     * names an ABI is `primaryCpuAbi`, which is hidden, and `nativeLibraryDir` names one
-     * ABI at best and does not exist at all for a package installed with
-     * `extractNativeLibs="false"`. The archive is the source of truth, and reading it
-     * only touches the zip's central directory.
-     *
-     * An empty list is a real answer: it means the package is pure bytecode, which is
-     * what the picker's "No native code" filter is about.
-     */
-    private fun abisOf(info: ApplicationInfo): List<String> {
-        val found = LinkedHashSet<String>()
-        val sources = buildList {
-            add(info.sourceDir)
-            info.splitSourceDirs?.let(::addAll)
-        }
-
-        for (source in sources) {
-            runCatching {
-                ZipFile(source).use { zip ->
-                    val entries = zip.entries()
-                    while (entries.hasMoreElements()) {
-                        val name = entries.nextElement().name
-                        if (!name.startsWith(LIB_PREFIX)) {
-                            continue
-                        }
-                        val abi = name.substring(LIB_PREFIX.length).substringBefore('/')
-                        if (abi.isNotEmpty() && KNOWN_ABIS.contains(abi)) {
-                            found.add(abi)
-                            // Every known ABI accounted for; nothing left to learn from
-                            // the remaining entries, which can number in the thousands.
-                            if (found.size == KNOWN_ABIS.size) {
-                                return found.toList()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return found.toList()
     }
 
     private fun label(info: ApplicationInfo): String =
@@ -302,15 +271,6 @@ class InstalledAppsProvider(private val context: Context) {
     }
 
     private companion object {
-        const val LIB_PREFIX = "lib/"
-
-        /**
-         * The four ABIs Android still ships. Anything else in `lib/` is not a CPU
-         * directory, and matching a fixed set keeps a malformed archive from inventing
-         * architectures the filter cannot offer.
-         */
-        val KNOWN_ABIS = setOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
-
         const val ICON_PX = 144
 
         /**

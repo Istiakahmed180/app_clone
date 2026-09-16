@@ -646,6 +646,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pickerApkUnreadable => '선택한 APK를 읽을 수 없습니다.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 기기의 앱 $count개는 복제할 수 없어 목록에 표시되지 않습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => '필터 및 정렬';
 
   @override

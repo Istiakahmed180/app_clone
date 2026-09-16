@@ -146,7 +146,7 @@ class VirtualAppInstaller(
 
         provisionGoogleServices(
             virtualUserId,
-            requiresGms = analyzer.analyzeApk(apkPaths.first(), packageName).requiresGms,
+            requiresGms = analyzer.analyzeApk(apkPaths, packageName).requiresGms,
             explicitlyRequested = provisionGms,
         )
         return adapter.installApkFiles(apkPaths, virtualUserId)

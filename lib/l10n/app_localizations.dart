@@ -1218,6 +1218,12 @@ abstract class AppLocalizations {
   /// **'The selected APK could not be read.'**
   String get pickerApkUnreadable;
 
+  /// No description provided for @pickerHiddenApps.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 app on this device cannot be cloned and is not listed} other{{count} apps on this device cannot be cloned and are not listed}}'**
+  String pickerHiddenApps(int count);
+
   /// No description provided for @filterTitle.
   ///
   /// In en, this message translates to:

@@ -76,7 +76,10 @@ class CompatibilityReport {
   /// Used when analysis could not run at all.
   ///
   /// Deliberately not [CompatibilityVerdict.supported]: an app nobody examined must never
-  /// be presented as problem-free.
+  /// be recorded as problem-free. It carries no findings, though, so nothing is said to
+  /// the user about it either — there is no true sentence to say, and the clone goes
+  /// ahead. A verdict this app could not reach must not become a refusal it cannot
+  /// explain; if the engine then fails, the engine's own error is what speaks.
   static const CompatibilityReport unknown = CompatibilityReport(
     packageName: '',
     verdict: CompatibilityVerdict.limited,
@@ -94,4 +97,14 @@ class CompatibilityReport {
   /// The first blocking reason, which is what stops the app being cloned.
   CompatibilityFinding? get blocker =>
       findings.where((CompatibilityFinding f) => f.blocking).firstOrNull;
+
+  /// The first finding that does not stop the clone but still has to be acted on.
+  ///
+  /// A [CompatibilityVerdict.limited] app is one the engine will host and that will not
+  /// work properly until the user does something — today, granting Duplika All files
+  /// access in Settings. That is worth exactly one sentence at the moment the clone is
+  /// made: it is the last point before launch, which is where the problem would otherwise
+  /// appear with no explanation attached.
+  CompatibilityFinding? get caution =>
+      findings.where((CompatibilityFinding f) => !f.blocking).firstOrNull;
 }

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
 import java.io.File
+import co.tdevs.duplika.native.ApkAbis
 import co.tdevs.duplika.native.EngineAvailability
 import co.tdevs.duplika.native.EngineErrorCodes
 import co.tdevs.duplika.native.EngineResult
@@ -173,9 +174,11 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             )
         }
 
-        // Bcore ships native code for arm64-v8a and armeabi-v7a only.
+        // Bcore ships native code for arm64-v8a and armeabi-v7a only. The same constant the
+        // per-app compatibility verdict is measured against, so the engine and the picker
+        // cannot come to disagree about what this build can run.
         val abis = Build.SUPPORTED_ABIS.toSet()
-        if (SUPPORTED_ABIS.none { it in abis }) {
+        if (ApkAbis.ENGINE.none { it in abis }) {
             return EngineAvailability.Unavailable(
                 EngineErrorCodes.ABI_NOT_SUPPORTED,
                 "This device's CPU (${abis.joinToString()}) is not supported by the engine.",
@@ -511,7 +514,6 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     private companion object {
         const val MIN_SDK = Build.VERSION_CODES.LOLLIPOP
-        val SUPPORTED_ABIS = setOf("arm64-v8a", "armeabi-v7a")
 
         /** Comfortably above Bcore's 50 ms service-creation rate limit. */
         const val WARM_UP_MIN_INTERVAL_MS = 1_000L

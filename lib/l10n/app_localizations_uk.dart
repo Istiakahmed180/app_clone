@@ -665,6 +665,21 @@ class AppLocalizationsUk extends AppLocalizations {
   String get pickerApkUnreadable => 'Не вдалося прочитати вибраний APK.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count застосунків на цьому пристрої не можна клонувати, тому їх немає в списку',
+      few:
+          '$count застосунки на цьому пристрої не можна клонувати, тому їх немає в списку',
+      one:
+          '$count застосунок на цьому пристрої не можна клонувати, тому його немає в списку',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => 'Фільтр і сортування';
 
   @override

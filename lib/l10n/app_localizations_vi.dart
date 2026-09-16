@@ -658,6 +658,17 @@ class AppLocalizationsVi extends AppLocalizations {
   String get pickerApkUnreadable => 'Không đọc được tệp APK đã chọn.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count ứng dụng trên thiết bị này không thể nhân bản nên không được liệt kê',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => 'Lọc và sắp xếp';
 
   @override

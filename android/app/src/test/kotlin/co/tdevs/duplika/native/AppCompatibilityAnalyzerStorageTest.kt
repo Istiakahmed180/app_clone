@@ -1,5 +1,6 @@
 package co.tdevs.duplika.native
 
+import android.os.Build
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -16,7 +17,14 @@ import org.junit.Test
 class AppCompatibilityAnalyzerStorageTest {
 
     private val readStorage = "android.permission.READ_EXTERNAL_STORAGE"
+    private val writeStorage = "android.permission.WRITE_EXTERNAL_STORAGE"
     private val allFiles = "android.permission.MANAGE_EXTERNAL_STORAGE"
+
+    /** Android 11, where the legacy read still reaches the shared tree. */
+    private val androidR = Build.VERSION_CODES.R
+
+    /** Android 13, where it does not. */
+    private val androidT = Build.VERSION_CODES.TIRAMISU
 
     @Test
     fun anAppThatDoesNotTouchSharedStorageIsNeverFlagged() {
@@ -28,7 +36,7 @@ class AppCompatibilityAnalyzerStorageTest {
         ).forEach { requested ->
             assertNull(
                 "unexpected finding for $requested",
-                AppCompatibilityAnalyzer.storageFindingFor(requested, true, true),
+                AppCompatibilityAnalyzer.storageFindingFor(requested, true, true, androidT),
             )
         }
     }
@@ -40,6 +48,7 @@ class AppCompatibilityAnalyzerStorageTest {
                 requestedPermissions = setOf(readStorage),
                 hostDeclaresAllFilesAccess = true,
                 hostHoldsAllFilesAccess = true,
+                deviceSdk = androidR,
             ),
         )
     }
@@ -50,6 +59,7 @@ class AppCompatibilityAnalyzerStorageTest {
             requestedPermissions = setOf(readStorage),
             hostDeclaresAllFilesAccess = true,
             hostHoldsAllFilesAccess = false,
+            deviceSdk = androidR,
         )
 
         assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_NOT_GRANTED, finding?.code)
@@ -64,6 +74,7 @@ class AppCompatibilityAnalyzerStorageTest {
             requestedPermissions = setOf(readStorage),
             hostDeclaresAllFilesAccess = false,
             hostHoldsAllFilesAccess = false,
+            deviceSdk = androidR,
         )
 
         assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE, finding?.code)
@@ -71,14 +82,21 @@ class AppCompatibilityAnalyzerStorageTest {
     }
 
     @Test
-    fun aGuestDeclaringAllFilesAccessItselfCountsAsStorageDependent() {
-        val finding = AppCompatibilityAnalyzer.storageFindingFor(
-            requestedPermissions = setOf(allFiles),
-            hostDeclaresAllFilesAccess = false,
-            hostHoldsAllFilesAccess = false,
-        )
+    fun aGuestDeclaringAllFilesAccessItselfCountsAsStorageDependentOnEveryVersion() {
+        listOf(Build.VERSION_CODES.Q, androidR, androidT).forEach { sdk ->
+            val finding = AppCompatibilityAnalyzer.storageFindingFor(
+                requestedPermissions = setOf(allFiles),
+                hostDeclaresAllFilesAccess = false,
+                hostHoldsAllFilesAccess = false,
+                deviceSdk = sdk,
+            )
 
-        assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE, finding?.code)
+            assertEquals(
+                "wrong finding on API $sdk",
+                AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE,
+                finding?.code,
+            )
+        }
     }
 
     @Test
@@ -88,8 +106,61 @@ class AppCompatibilityAnalyzerStorageTest {
             requestedPermissions = setOf(readStorage),
             hostDeclaresAllFilesAccess = false,
             hostHoldsAllFilesAccess = false,
+            deviceSdk = androidR,
         )
 
         assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE, finding?.code)
+    }
+
+    // -------------------------------------------------------------------------------
+    // The legacy declarations, which `requestedPermissions` reports verbatim
+    // -------------------------------------------------------------------------------
+
+    @Test
+    fun theLegacyWriteDeclarationIsNotStorageDependenceFromAndroid11() {
+        // `WRITE_EXTERNAL_STORAGE`, almost always declared with `maxSdkVersion="28"`, grants
+        // nothing from API 30 on. Counting it flagged a large share of ordinary apps, and in
+        // a build without All files access it would have dropped them from the picker.
+        listOf(androidR, androidT).forEach { sdk ->
+            assertNull(
+                "unexpected finding on API $sdk",
+                AppCompatibilityAnalyzer.storageFindingFor(
+                    requestedPermissions = setOf(writeStorage),
+                    hostDeclaresAllFilesAccess = false,
+                    hostHoldsAllFilesAccess = false,
+                    deviceSdk = sdk,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun theLegacyReadDeclarationIsNotStorageDependenceFromAndroid13() {
+        // Replaced by the media permissions, which are scoped and need nothing from the host.
+        assertNull(
+            AppCompatibilityAnalyzer.storageFindingFor(
+                requestedPermissions = setOf(readStorage, writeStorage),
+                hostDeclaresAllFilesAccess = false,
+                hostHoldsAllFilesAccess = false,
+                deviceSdk = androidT,
+            ),
+        )
+    }
+
+    @Test
+    fun bothLegacyDeclarationsStillCountBelowAndroid11() {
+        // Where they are real, they are still the thing being asked about.
+        listOf(readStorage, writeStorage).forEach { permission ->
+            assertEquals(
+                "wrong finding for $permission",
+                AppCompatibilityAnalyzer.CODE_STORAGE_NOT_GRANTED,
+                AppCompatibilityAnalyzer.storageFindingFor(
+                    requestedPermissions = setOf(permission),
+                    hostDeclaresAllFilesAccess = true,
+                    hostHoldsAllFilesAccess = false,
+                    deviceSdk = Build.VERSION_CODES.Q,
+                )?.code,
+            )
+        }
     }
 }

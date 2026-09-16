@@ -665,6 +665,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die ausgewählte APK konnte nicht gelesen werden.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count Apps auf diesem Gerät können nicht geklont werden und werden nicht aufgeführt',
+      one:
+          '1 App auf diesem Gerät kann nicht geklont werden und wird nicht aufgeführt',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => 'Filtern und sortieren';
 
   @override

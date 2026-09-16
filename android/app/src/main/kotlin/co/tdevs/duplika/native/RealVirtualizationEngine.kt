@@ -200,14 +200,15 @@ class RealVirtualizationEngine(
         return result
     }
 
-    fun listInstalledApps(includeIcons: Boolean): List<Map<String, Any?>> =
+    /** The picker's payload: the clonable apps, and how many were left out. */
+    fun listInstalledApps(includeIcons: Boolean): Map<String, Any?> =
         installedApps.listLaunchableApps(includeIcons)
 
     fun appIconsFor(packageNames: Collection<String>): Map<String, String> =
         installedApps.iconsFor(packageNames)
 
-    fun analyzeApk(apkPath: String, packageName: String): Map<String, Any?> =
-        analyzer.analyzeApk(apkPath, packageName).toMap()
+    fun analyzeApk(apkPaths: List<String>, packageName: String): Map<String, Any?> =
+        analyzer.analyzeApk(apkPaths, packageName).toMap()
 
     fun describeApp(packageName: String): Map<String, Any?>? =
         installedApps.describeInstalled(packageName)

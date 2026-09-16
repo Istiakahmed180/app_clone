@@ -641,6 +641,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickerApkUnreadable => '无法读取所选的 APK。';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此设备上有 $count 个应用无法克隆，因此未列出',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => '筛选和排序';
 
   @override
@@ -1760,6 +1770,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get pickerApkUnreadable => '无法读取所选的 APK。';
+
+  @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此设备上有 $count 个应用无法克隆，因此未列出',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get filterTitle => '筛选和排序';
@@ -2883,6 +2903,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get pickerApkUnreadable => '無法讀取所選的 APK。';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此裝置上有 $count 個應用程式無法複製，因此未列出',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => '篩選與排序';
 
   @override
@@ -4002,6 +4032,16 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get pickerApkUnreadable => '無法讀取所選的 APK。';
+
+  @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此裝置上有 $count 個應用程式無法複製，因此未列出',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get filterTitle => '篩選與排序';

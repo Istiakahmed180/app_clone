@@ -175,6 +175,7 @@
   "pickerSystemChip": "システム",
   "pickerCannotClone": "このデバイスではこのアプリをクローンできません。",
   "pickerApkUnreadable": "選択した APK を読み取れませんでした。",
+  "pickerHiddenApps": "{count, plural, other{このデバイスの {count} 個のアプリはクローンできないため、一覧に表示されていません}}",
   "filterTitle": "絞り込みと並べ替え",
   "filterSort": "並べ替え",
   "filterSortName": "アプリ名",

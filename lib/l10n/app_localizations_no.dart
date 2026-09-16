@@ -660,6 +660,18 @@ class AppLocalizationsNo extends AppLocalizations {
   String get pickerApkUnreadable => 'Den valgte APK-filen kunne ikke leses.';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count apper på denne enheten kan ikke klones og vises ikke i listen',
+      one: '1 app på denne enheten kan ikke klones og vises ikke i listen',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => 'Filtrer og sorter';
 
   @override

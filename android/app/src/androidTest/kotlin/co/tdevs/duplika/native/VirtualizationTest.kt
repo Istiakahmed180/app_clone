@@ -72,7 +72,7 @@ class AppSecurityCheckerTest {
     fun allowsOrdinaryInstalledAppsAndExplainsAnyRefusal() {
         val installed = InstalledAppsProvider(ApplicationProvider.getApplicationContext())
             .listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
+            .listedPackageNames()
             .filter { it != TestAppManager.TEST_APP_PACKAGE }
             .take(20)
 
@@ -167,7 +167,7 @@ class InstalledAppsProviderTest {
     fun listsLaunchableAppsWithoutTheHostItself() {
         val context: Context = ApplicationProvider.getApplicationContext()
         val packages = provider.listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
+            .listedPackageNames()
 
         assertTrue(packages.contains(TestAppManager.TEST_APP_PACKAGE))
         assertFalse("the host must not offer to clone itself", packages.contains(context.packageName))
@@ -371,7 +371,7 @@ class AppCompatibilityAnalyzerTest {
     fun arm64AppsAreNeverBlockedForTheirAbi() {
         val installed = InstalledAppsProvider(context)
             .listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
+            .listedPackageNames()
 
         var checked = 0
         for (packageName in installed) {

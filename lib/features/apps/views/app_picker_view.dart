@@ -68,13 +68,24 @@ class AppPickerView extends GetView<AppPickerController> {
                   0,
                   (int total, AppSection section) => total + section.apps.length,
                 );
+                // Read here, like the sets above: `itemBuilder` runs outside this closure,
+                // so an observable read inside it would never rebuild the list.
+                final int hidden = controller.hiddenApps.value;
 
                 if (sections.isEmpty) {
                   return _centred(
-                    EmptyState(
-                      title: context.l10n.pickerNoMatchesTitle,
-                      message: context.l10n.pickerNoMatchesMessage,
-                      icon: Icons.search_off,
+                    Column(
+                      // Stretched, so the panel keeps the full width it had when it was
+                      // the list's only child rather than shrinking to its own content.
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        EmptyState(
+                          title: context.l10n.pickerNoMatchesTitle,
+                          message: context.l10n.pickerNoMatchesMessage,
+                          icon: Icons.search_off,
+                        ),
+                        _hiddenNote(context, hidden),
+                      ],
                     ),
                   );
                 }
@@ -83,8 +94,12 @@ class AppPickerView extends GetView<AppPickerController> {
                   padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
                   // One item per group, not per app: the grouped layout would otherwise
                   // cost a full layout pass over every installed app on first frame.
-                  itemCount: sections.length + 1,
+                  // Plus the header and the footer note.
+                  itemCount: sections.length + 2,
                   itemBuilder: (BuildContext context, int index) {
+                    if (index == sections.length + 1) {
+                      return _hiddenNote(context, hidden);
+                    }
                     // Icons are fetched for what the builder is asked to draw, which
                     // runs for on-screen groups only. That is what keeps opening the
                     // picker off the "decode every installed app" path.
@@ -126,6 +141,30 @@ class AppPickerView extends GetView<AppPickerController> {
         () => controller.isWorking.value && controller.cloning.isEmpty
             ? const LinearProgressIndicator()
             : const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  /// How many launchable apps this device has that no clone could be made of.
+  ///
+  /// A line under the list rather than a banner over it: it answers a question only some
+  /// users will ask — where is my app — and the apps that *are* listed are what the screen
+  /// is for. Nothing to tap, because there is nothing to do about it; what the user needs
+  /// is to know the omission was a decision rather than a failure to look.
+  Widget _hiddenNote(BuildContext context, int hidden) {
+    if (hidden <= 0) {
+      return const SizedBox.shrink();
+    }
+    final ThemeData theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(top: 20.h),
+      child: Text(
+        context.l10n.pickerHiddenApps(hidden),
+        textAlign: TextAlign.center,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -298,6 +337,7 @@ class AppPickerView extends GetView<AppPickerController> {
       _showMessage(context, _refusalMessage(context, refusal));
       return;
     }
+    _showCaution(context);
 
     // A beat before leaving, so the row is seen finishing rather than the screen
     // changing under the finger. Short enough not to be a wait of its own.
@@ -412,13 +452,43 @@ class AppPickerView extends GetView<AppPickerController> {
       _showMessage(context, appErrorMessage(context.l10n, error));
       return;
     }
+    _showCaution(context);
     Get.back<bool>(result: true);
   }
 
-  void _showMessage(BuildContext context, String message) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    Duration? duration,
+  }) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: duration ?? const Duration(seconds: 4),
+        ),
+      );
+  }
+
+  /// Says the one thing a clone that *was* made still needs the user to do.
+  ///
+  /// Shown on the way out of the picker, and it survives that: the snackbar goes to the
+  /// app's root messenger, so popping this route does not take the message with it.
+  ///
+  /// Longer on screen than an ordinary message because it asks for a trip to Settings,
+  /// and a sentence naming where to go is not one that can be read in four seconds.
+  void _showCaution(BuildContext context) {
+    final CompatibilityFinding? caution = controller.caution.value;
+    if (caution == null) {
+      return;
+    }
+    controller.caution.value = null;
+    _showMessage(
+      context,
+      compatibilityFindingMessage(context.l10n, caution),
+      duration: const Duration(seconds: 8),
+    );
   }
 
   /// Why the clone did not happen, in the user's language where there is a translation
@@ -599,7 +669,8 @@ class _AppRow extends StatelessWidget {
 /// compatibility verdict instead — a block or an info glyph — which meant the icon on
 /// the right answered a question the user had not asked yet and never showed the one
 /// action the row actually performs. The verdict is reported where it can be acted on:
-/// in the clone flow, and on the app's details screen.
+/// in the clone flow, which refuses an app the engine cannot host and says what still
+/// has to be done for one it can.
 class _AddMark extends StatelessWidget {
   const _AddMark({this.isCloning = false});
 

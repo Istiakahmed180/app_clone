@@ -44,7 +44,63 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         )
     }
 
+    /**
+     * The facts about *this device and this build* that every verdict is measured against.
+     *
+     * Read once and carried, rather than looked up per app. A listing analyses every
+     * launchable package on the device, and each of these was costing a platform call on
+     * each of them — the All files grant, and one property query per candidate property
+     * name. None of them can change while a single listing pass runs.
+     *
+     * Deliberately not cached across passes: the All files grant is one the user can change
+     * in Settings while Duplika is running, and a stale answer there would be wrong rather
+     * than merely slow. Every pass builds a fresh one — [hostState] for a single app,
+     * [listingHostState] for a pass over all of them.
+     */
+    class HostState internal constructor(
+        internal val hostDeclaresAllFilesAccess: Boolean,
+        internal val hostHoldsAllFilesAccess: Boolean,
+        internal val loadableAbis: Set<String>,
+        /**
+         * Every package that declares a secure-environment property, or null where the
+         * platform cannot be asked that question in one go (below API 31) and each package
+         * must be queried on its own.
+         */
+        internal val secureEnvironmentDeclarers: Set<String>?,
+    )
+
     private val securityChecker = AppSecurityChecker(context)
+
+    /**
+     * The device and build facts as they stand right now, for judging a single app.
+     *
+     * No declarer set: gathering one asks the platform for every package on the device
+     * that declares each candidate property, which is a bargain across a whole listing and
+     * a waste for one app that can be asked about directly. [listingHostState] is the
+     * other half of that trade.
+     */
+    fun hostState(): HostState = hostState(declarers = null)
+
+    /**
+     * The same facts for a pass that will judge every launchable app on the device.
+     *
+     * Worth the device-wide property query exactly once here: it replaces one query per
+     * candidate property per app, which was the listing's largest cost.
+     */
+    fun listingHostState(): HostState =
+        hostState(declarers = securityChecker.secureEnvironmentDeclarers())
+
+    /**
+     * The two above differ in one field, and are built here so they cannot come to differ
+     * in another: a fact added for one pass and forgotten for the other would be a verdict
+     * that quietly depends on which route asked for it.
+     */
+    private fun hostState(declarers: Set<String>?): HostState = HostState(
+        hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess,
+        hostHoldsAllFilesAccess = hostHoldsAllFilesAccess(),
+        loadableAbis = ApkAbis.loadable(Build.SUPPORTED_ABIS?.asList().orEmpty()),
+        secureEnvironmentDeclarers = declarers,
+    )
 
     fun analyze(packageName: String): Report {
         val packageInfo = installedPackageInfo(packageName)
@@ -62,8 +118,9 @@ class AppCompatibilityAnalyzer(private val context: Context) {
                 abi = null,
             )
 
-        val abi = packageInfo.applicationInfo?.let(::detectAbi)
-        val findings = findingsFor(packageName, packageInfo, abi)
+        val host = hostState()
+        val abi = abiOf(packageInfo.applicationInfo, host)
+        val findings = findingsFor(packageInfo, abi, host)
 
         return Report(
             packageName = packageName,
@@ -73,62 +130,72 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             // can and cannot do with Google's services is not something the user is shown.
             requiresGms = requiresGooglePlayServices(packageName, packageInfo),
             findings = findings,
-            abi = abi,
+            abi = abi.takeIf { it != UNSUPPORTED_ABI },
         )
     }
 
     /**
      * Whether a clone of this package could be created at all.
      *
-     * The picker's filter, and the reason it is not simply `analyze().verdict`: that call
-     * also resolves the app's Google-services dependency, which costs a second metadata
-     * read of every package on the device and answers a question a listing never asks.
+     * The picker's filter, and the one question a listing has: whether to show the row.
+     * It stops at the first blocking finding's existence rather than building the whole
+     * [Report] that [analyze] returns, which also resolves the app's Google-services
+     * dependency — a question a listing never asks.
      *
      * It shares [findingsFor] with [analyze] rather than restating the rules, so the list
      * cannot come to disagree with the verdict shown when a row is opened.
      */
     fun canClone(packageName: String): Boolean {
         val packageInfo = installedPackageInfo(packageName) ?: return false
-        return canClone(packageInfo)
+        return canClone(packageInfo, hostState())
     }
 
     /**
      * The same verdict for a package the caller has already read.
      *
-     * A listing asks this of every launchable package, and reading each one's
-     * [PackageInfo] a second time here doubled the PackageManager round trips behind the
-     * picker for nothing. The record must have been read with [PackageManager.GET_PERMISSIONS]
-     * — [findingsFor] judges the storage declarations, and a record fetched without that
-     * flag reports no permissions rather than none declared, which would silently drop a
-     * finding. Callers with only a package name should use the overload above, which
-     * fetches it correctly.
+     * A listing asks this of every launchable package, so everything it would otherwise
+     * repeat is passed in: the record (read by [installedPackageInfo], whose flags
+     * [findingsFor] depends on), the device facts, and the app's ABIs, which the listing
+     * needs for its own architecture filter and would otherwise read out of the archives
+     * twice.
      */
-    fun canClone(packageInfo: PackageInfo): Boolean {
-        val abi = packageInfo.applicationInfo?.let(::detectAbi)
-        return findingsFor(packageInfo.packageName, packageInfo, abi).none { it.blocking }
-    }
+    fun canClone(
+        packageInfo: PackageInfo,
+        host: HostState,
+        abis: Set<String> = packageInfo.applicationInfo?.let(ApkAbis::of).orEmpty(),
+    ): Boolean = findingsFor(packageInfo, engineAbiOf(abis, host.loadableAbis), host)
+        .none { it.blocking }
 
-    /** Reads a package with every flag [findingsFor] needs. */
+    /**
+     * Reads a package with every flag [findingsFor] needs.
+     *
+     * `GET_PERMISSIONS` for the storage declarations, and `GET_META_DATA` so the
+     * secure-environment check can read the app's meta-data off this record instead of
+     * fetching the package a second time for it.
+     */
     fun installedPackageInfo(packageName: String): PackageInfo? = try {
-        context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+        context.packageManager.getPackageInfo(
+            packageName,
+            PackageManager.GET_PERMISSIONS or PackageManager.GET_META_DATA,
+        )
     } catch (_: PackageManager.NameNotFoundException) {
         null
     }
 
     /** Everything known to stand in the way of hosting an installed package. */
     private fun findingsFor(
-        packageName: String,
         packageInfo: PackageInfo,
         abi: String?,
+        host: HostState,
     ): List<Finding> {
         val findings = mutableListOf<Finding>()
 
-        (securityChecker.check(packageName) as? AppSecurityChecker.Verdict.Rejected)?.let {
+        val rejection = securityChecker.check(packageInfo, host.secureEnvironmentDeclarers)
+        (rejection as? AppSecurityChecker.Verdict.Rejected)?.let {
             findings += Finding(it.code, it.message, blocking = true)
         }
 
-        val applicationInfo = packageInfo.applicationInfo
-        if (applicationInfo != null && hasNativeCode(applicationInfo) && abi == null) {
+        if (abi == UNSUPPORTED_ABI) {
             findings += Finding(
                 EngineErrorCodes.ABI_NOT_SUPPORTED,
                 "This app's native libraries are not built for an architecture the engine supports.",
@@ -136,7 +203,7 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             )
         }
 
-        storageFinding(packageInfo.requestedPermissions?.toSet().orEmpty())?.let {
+        storageFinding(packageInfo.requestedPermissions?.toSet().orEmpty(), host)?.let {
             findings += it
         }
 
@@ -150,23 +217,32 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     }
 
     /**
-     * Analyses a standalone APK, without needing it to be installed.
+     * Analyses a standalone APK, or a split set, without needing it to be installed.
      *
      * The import flow previously had nothing to inspect for an APK that is not installed
      * here, and presented it as "Supported / no known problems" — an overclaim about
-     * something never examined. Everything below is read out of the archive itself.
+     * something never examined. Everything below is read out of the archives themselves.
+     *
+     * [apkPaths] is the whole set, base first. Only the ABI question needs more than the
+     * base: an app bundle puts its native code in a `config.<abi>` split, so reading the
+     * base alone found no `lib/` at all and called every split import pure bytecode —
+     * which is the ABI check not running rather than passing. The manifest questions —
+     * permissions, secure environment, the Google-services marker — are the base's to
+     * answer, and are still asked of it alone.
      */
-    fun analyzeApk(apkPath: String, packageName: String): Report {
+    fun analyzeApk(apkPaths: List<String>, packageName: String): Report {
+        val apkPath = apkPaths.first()
+        val host = hostState()
         val findings = mutableListOf<Finding>()
 
         (securityChecker.checkApk(packageName, apkPath) as? AppSecurityChecker.Verdict.Rejected)
             ?.let { findings += Finding(it.code, it.message, blocking = true) }
 
-        val abi = archiveAbi(apkPath)
+        val abi = engineAbiOf(ApkAbis.ofArchives(apkPaths), host.loadableAbis)
         if (abi == UNSUPPORTED_ABI) {
             findings += Finding(
                 EngineErrorCodes.ABI_NOT_SUPPORTED,
-                "This APK's native libraries are not built for an architecture the engine supports.",
+                "This app's native libraries are not built for an architecture the engine supports.",
                 blocking = true,
             )
         }
@@ -182,7 +258,7 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             ApkManifestReader.readDeclarations(apkPath)
                 .any { it.element == "meta-data" && it.name == GMS_VERSION_META }
 
-        storageFinding(requested)?.let { findings += it }
+        storageFinding(requested, host)?.let { findings += it }
 
         return Report(
             packageName = packageName,
@@ -191,25 +267,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             requiresGms = requiresGms,
             abi = abi.takeIf { it != UNSUPPORTED_ABI },
         )
-    }
-
-    /**
-     * The engine-loadable ABI an archive ships, [UNSUPPORTED_ABI] when it carries native
-     * code for none, or null when it carries no native code at all.
-     */
-    private fun archiveAbi(apkPath: String): String? = try {
-        java.util.zip.ZipFile(java.io.File(apkPath)).use { zip ->
-            engineAbiOf(
-                zip.entries().asSequence()
-                    .map { it.name }
-                    .filter { it.startsWith("lib/") }
-                    .mapNotNull { it.split('/').getOrNull(1) }
-                    .toSet(),
-            )
-        }
-    } catch (error: Exception) {
-        Slog.w(Slog.INSTALL, "Could not read ABIs from $apkPath: ${error.message}")
-        null
     }
 
     /**
@@ -253,15 +310,9 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         if (GMS_PERMISSION_MARKERS.any { it in requested }) {
             return true
         }
-
-        return try {
-            val meta = context.packageManager
-                .getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-                .metaData
-            meta?.containsKey("com.google.android.gms.version") == true
-        } catch (_: PackageManager.NameNotFoundException) {
-            false
-        }
+        // Read off the record rather than fetched again: [installedPackageInfo] already
+        // asks for GET_META_DATA.
+        return info.applicationInfo?.metaData?.containsKey(GMS_VERSION_META) == true
     }
 
     /**
@@ -273,22 +324,17 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      * it and must instead say what is wrong. The decision itself is
      * [storageFindingFor] — a pure function, so it is unit-tested without a device.
      */
-    private fun storageFinding(requestedPermissions: Set<String>): Finding? =
+    private fun storageFinding(requestedPermissions: Set<String>, host: HostState): Finding? =
         storageFindingFor(
             requestedPermissions = requestedPermissions,
-            hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess,
-            hostHoldsAllFilesAccess = hostHoldsAllFilesAccess(),
+            hostDeclaresAllFilesAccess = host.hostDeclaresAllFilesAccess,
+            hostHoldsAllFilesAccess = host.hostHoldsAllFilesAccess,
+            deviceSdk = Build.VERSION.SDK_INT,
         )
 
     /**
      * Cached: this is a fact about Duplika's own manifest, so it cannot change while the
-     * process lives. The picker analyses every launchable app to decide what to list, and
-     * re-reading the host's own permission set once per app was the one part of that pass
-     * that scaled with the number of apps for no reason.
-     *
-     * Deliberately not paired with a cache for [hostHoldsAllFilesAccess]: that one is a
-     * runtime grant the user can change in Settings while Duplika is running, and a stale
-     * answer there would be wrong rather than merely slow.
+     * process lives.
      */
     private val hostDeclaresAllFilesAccess: Boolean by lazy {
         try {
@@ -310,35 +356,16 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             true
         }
 
-    private fun hasNativeCode(info: ApplicationInfo): Boolean =
-        !info.nativeLibraryDir.isNullOrEmpty() && java.io.File(info.nativeLibraryDir).let {
-            it.isDirectory && (it.list()?.isNotEmpty() == true)
-        }
-
-    /**
-     * Derived from `nativeLibraryDir` (a public field) rather than the hidden
-     * `primaryCpuAbi`, so no hidden API is touched.
-     */
-    private fun detectAbi(info: ApplicationInfo): String? =
-        engineAbiForLibraryDir(info.nativeLibraryDir)
+    private fun abiOf(info: ApplicationInfo?, host: HostState): String? =
+        info?.let { engineAbiOf(ApkAbis.of(it), host.loadableAbis) }
 
     companion object {
         const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
         const val CODE_STORAGE_NOT_GRANTED = "STORAGE_NOT_GRANTED"
 
         private const val ALL_FILES_ACCESS = "android.permission.MANAGE_EXTERNAL_STORAGE"
-
-        /**
-         * Broad shared-storage declarations. A guest that asks for one of these wants the
-         * whole shared tree, which only exists for it when the host holds All files access.
-         * `READ_MEDIA_*` is deliberately absent: it is media-scoped, and an app that declares
-         * only those reaches media through MediaStore, which does not need this.
-         */
-        private val STORAGE_PERMISSIONS = setOf(
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            ALL_FILES_ACCESS,
-        )
+        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+        private const val WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE"
 
         private const val STORAGE_UNAVAILABLE_MESSAGE =
             "This app uses shared storage, and this build of Duplika does not declare All " +
@@ -347,6 +374,37 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         private const val STORAGE_NOT_GRANTED_MESSAGE =
             "This app uses shared storage. Grant Duplika \"All files access\" in Settings → " +
                 "Special app access before launching the clone, or it may be refused at launch."
+
+        /**
+         * The declarations that still mean "this app wants the whole shared tree" *on this
+         * device*, which is not a fixed set.
+         *
+         * Reading them as fixed was a false positive with a long reach. `requestedPermissions`
+         * lists a manifest's declarations verbatim, `android:maxSdkVersion` and all, and the
+         * overwhelmingly common legacy pattern — `WRITE_EXTERNAL_STORAGE` capped at API 28 —
+         * is inert on every device sold in years. Counting it flagged a large share of
+         * ordinary apps as storage-dependent, and in a build without All files access (the
+         * Play-rejection fallback, where the finding turns blocking) it would have dropped
+         * them from the picker entirely.
+         *
+         * So the set follows the platform:
+         *  - From Android 13 the legacy pair is gone; media arrives through `READ_MEDIA_*`,
+         *    which is media-scoped and needs nothing from the host.
+         *  - From Android 11 `WRITE_EXTERNAL_STORAGE` grants nothing at all, while
+         *    `READ_EXTERNAL_STORAGE` still reads the shared tree.
+         *  - Below that, both are real.
+         *
+         * `READ_MEDIA_*` is absent throughout, for the reason it always was: it is
+         * media-scoped and reaches its files through MediaStore.
+         */
+        @JvmStatic
+        internal fun sharedStoragePermissionsFor(deviceSdk: Int): Set<String> = when {
+            deviceSdk >= Build.VERSION_CODES.TIRAMISU -> setOf(ALL_FILES_ACCESS)
+            deviceSdk >= Build.VERSION_CODES.R ->
+                setOf(ALL_FILES_ACCESS, READ_EXTERNAL_STORAGE)
+            else ->
+                setOf(ALL_FILES_ACCESS, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE)
+        }
 
         /**
          * The pure half of the storage fallback, with every Android lookup passed in.
@@ -361,8 +419,9 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             requestedPermissions: Set<String>,
             hostDeclaresAllFilesAccess: Boolean,
             hostHoldsAllFilesAccess: Boolean,
+            deviceSdk: Int,
         ): Finding? {
-            if (STORAGE_PERMISSIONS.none { it in requestedPermissions }) {
+            if (sharedStoragePermissionsFor(deviceSdk).none { it in requestedPermissions }) {
                 return null
             }
             return when {
@@ -390,34 +449,16 @@ class AppCompatibilityAnalyzer(private val context: Context) {
          * runs anywhere), [UNSUPPORTED_ABI] for one that ships native code the engine
          * cannot load, and the ABI itself otherwise.
          *
-         * Split out as a pure function for the same reason as [storageFindingFor]: it is
-         * a decision worth testing, and reaching it through a real archive on a real
-         * device is not.
+         * [loadable] is passed in rather than read from [ApkAbis.ENGINE] directly so that
+         * the device's own architectures are part of the answer — see [ApkAbis.loadable] —
+         * and so this stays a pure function, testable without a device.
          */
         @JvmStatic
-        internal fun engineAbiOf(abiDirectories: Set<String>): String? = when {
-            abiDirectories.isEmpty() -> null
-            else -> abiDirectories.firstOrNull { it in ENGINE_ABIS } ?: UNSUPPORTED_ABI
-        }
-
-        /**
-         * The engine-loadable ABI an installed package's `nativeLibraryDir` implies.
-         *
-         * Android names the directory after the ABI family rather than the ABI, so the
-         * two names it can end in are mapped back. Null covers both "no native code" and
-         * "an ABI this engine does not load" — the caller separates them with
-         * `hasNativeCode`, which asks whether the directory has anything in it.
-         */
-        @JvmStatic
-        internal fun engineAbiForLibraryDir(nativeLibraryDir: String?): String? {
-            return when (nativeLibraryDir?.substringAfterLast('/')) {
-                "arm64" -> "arm64-v8a".takeIf { it in ENGINE_ABIS }
-                "arm" -> "armeabi-v7a".takeIf { it in ENGINE_ABIS }
-                else -> null
+        internal fun engineAbiOf(abiDirectories: Set<String>, loadable: Set<String>): String? =
+            when {
+                abiDirectories.isEmpty() -> null
+                else -> abiDirectories.firstOrNull { it in loadable } ?: UNSUPPORTED_ABI
             }
-        }
-
-        internal val ENGINE_ABIS = setOf("arm64-v8a", "armeabi-v7a")
 
         private const val GMS_VERSION_META = "com.google.android.gms.version"
         internal const val UNSUPPORTED_ABI = "unsupported"

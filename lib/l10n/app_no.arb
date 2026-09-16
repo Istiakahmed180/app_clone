@@ -175,6 +175,7 @@
   "pickerSystemChip": "System",
   "pickerCannotClone": "Denne appen kan ikke klones på denne enheten.",
   "pickerApkUnreadable": "Den valgte APK-filen kunne ikke leses.",
+  "pickerHiddenApps": "{count, plural, =1{1 app på denne enheten kan ikke klones og vises ikke i listen} other{{count} apper på denne enheten kan ikke klones og vises ikke i listen}}",
   "filterTitle": "Filtrer og sorter",
   "filterSort": "Sorter",
   "filterSortName": "Appnavn",

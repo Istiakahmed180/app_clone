@@ -645,6 +645,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pickerApkUnreadable => '選択した APK を読み取れませんでした。';
 
   @override
+  String pickerHiddenApps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'このデバイスの $count 個のアプリはクローンできないため、一覧に表示されていません',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get filterTitle => '絞り込みと並べ替え';
 
   @override

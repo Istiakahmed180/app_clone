@@ -115,7 +115,7 @@ class ApkManifestReaderTest {
     fun realApksAreParsedRatherThanSilentlyReturningNothing() {
         val packages = InstalledAppsProvider(context)
             .listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
+            .listedPackageNames()
             .take(25)
 
         var parsed = 0
@@ -176,7 +176,7 @@ class ApkManifestReaderTest {
     @Test
     fun analysingADeclaringArchiveYieldsAnUnsupportedVerdict() {
         val report = AppCompatibilityAnalyzer(context)
-            .analyzeApk(fixture(SECURE_FIXTURE), "com.example.secureenvfixture")
+            .analyzeApk(listOf(fixture(SECURE_FIXTURE)), "com.example.secureenvfixture")
 
         assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
         assertTrue(report.findings.any { it.blocking })
@@ -189,7 +189,7 @@ class ApkManifestReaderTest {
             .sourceDir
 
         val report = AppCompatibilityAnalyzer(context)
-            .analyzeApk(realApk, TestAppManager.TEST_APP_PACKAGE)
+            .analyzeApk(listOf(realApk), TestAppManager.TEST_APP_PACKAGE)
 
         assertFalse(
             "an ordinary APK was blocked: ${report.findings.map { it.code }}",
@@ -204,7 +204,7 @@ class ApkManifestReaderTest {
             context.packageManager.getApplicationInfo(AUTHENTICATOR, 0).sourceDir
         }.getOrNull() ?: return
 
-        val report = AppCompatibilityAnalyzer(context).analyzeApk(apk, AUTHENTICATOR)
+        val report = AppCompatibilityAnalyzer(context).analyzeApk(listOf(apk), AUTHENTICATOR)
 
         assertEquals(AppCompatibilityAnalyzer.Verdict.UNSUPPORTED, report.verdict)
         assertTrue(
@@ -227,20 +227,27 @@ class ApkManifestReaderTest {
         val analyzer = AppCompatibilityAnalyzer(context)
         val packages = InstalledAppsProvider(context)
             .listLaunchableApps(includeIcons = false)
-            .map { it["packageName"] as String }
+            .listedPackageNames()
             .take(20)
 
         val disagreements = mutableListOf<String>()
         var compared = 0
 
         for (packageName in packages) {
-            val apk = runCatching {
-                context.packageManager.getApplicationInfo(packageName, 0).sourceDir
-            }.getOrNull() ?: continue
-            if (!File(apk).canRead()) continue
+            // Base plus every split, which is what the installed path reads: an app bundle
+            // keeps its native code in a config split, so comparing the base alone would
+            // have the archive path finding no ABI where the installed one finds one.
+            val apks = runCatching {
+                val info = context.packageManager.getApplicationInfo(packageName, 0)
+                buildList {
+                    add(info.sourceDir)
+                    info.splitSourceDirs?.forEach { split -> split?.let(::add) }
+                }
+            }.getOrNull().orEmpty()
+            if (apks.isEmpty() || apks.any { !File(it).canRead() }) continue
 
             val installed = analyzer.analyze(packageName)
-            val archive = analyzer.analyzeApk(apk, packageName)
+            val archive = analyzer.analyzeApk(apks, packageName)
             compared++
 
             val installedBlocked = installed.findings.filter { it.blocking }.map { it.code }.toSet()

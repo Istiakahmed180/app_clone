@@ -209,7 +209,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                     success(
                         "APPS_LISTED",
                         "Installed applications listed.",
-                        mapOf("apps" to engine.listInstalledApps(includeIcons)),
+                        engine.listInstalledApps(includeIcons),
                     )
                 }
             }
@@ -228,11 +228,17 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
             "analyzeApk" -> {
                 val packageName = call.requiredPackage(result) ?: return
                 val apkPath = call.requiredArg("apkPath", result) ?: return
+                // The whole set where the caller has one, so an ABI that lives only in a
+                // config split is not missed. `apkPath` stays the base and the fallback.
+                val apkPaths = call.argument<List<*>>("apkPaths")
+                    ?.filterIsInstance<String>()
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: listOf(apkPath)
                 async(result) {
                     success(
                         "APK_ANALYZED",
                         "Compatibility analysed.",
-                        engine.analyzeApk(apkPath, packageName),
+                        engine.analyzeApk(apkPaths, packageName),
                     )
                 }
             }

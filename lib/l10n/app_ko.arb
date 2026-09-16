@@ -175,6 +175,7 @@
   "pickerSystemChip": "시스템",
   "pickerCannotClone": "이 기기에서는 이 앱을 복제할 수 없습니다.",
   "pickerApkUnreadable": "선택한 APK를 읽을 수 없습니다.",
+  "pickerHiddenApps": "{count, plural, other{이 기기의 앱 {count}개는 복제할 수 없어 목록에 표시되지 않습니다}}",
   "filterTitle": "필터 및 정렬",
   "filterSort": "정렬",
   "filterSortName": "앱 이름",

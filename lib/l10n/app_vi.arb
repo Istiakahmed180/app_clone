@@ -175,6 +175,7 @@
   "pickerSystemChip": "Hệ thống",
   "pickerCannotClone": "Không thể nhân bản ứng dụng này trên thiết bị này.",
   "pickerApkUnreadable": "Không đọc được tệp APK đã chọn.",
+  "pickerHiddenApps": "{count, plural, other{{count} ứng dụng trên thiết bị này không thể nhân bản nên không được liệt kê}}",
   "filterTitle": "Lọc và sắp xếp",
   "filterSort": "Sắp xếp",
   "filterSortName": "Tên ứng dụng",
