@@ -610,6 +610,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get commonBack => 'Kembali';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => 'Guna';
 
   @override
@@ -797,6 +800,10 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Pustaka natif apl ini tidak dibina untuk seni bina yang disokong oleh enjin.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

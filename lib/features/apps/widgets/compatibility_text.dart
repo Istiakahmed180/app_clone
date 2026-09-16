@@ -24,6 +24,8 @@ String compatibilityFindingMessage(
       return l10n.findingSystemComponent;
     case 'ABI_NOT_SUPPORTED':
       return l10n.findingAbiNotSupported;
+    case 'APP_ARCHIVE_UNAVAILABLE':
+      return l10n.findingAppArchiveUnavailable;
     case 'STORAGE_UNAVAILABLE':
       return l10n.findingStorageUnavailable(app);
     case 'STORAGE_NOT_GRANTED':

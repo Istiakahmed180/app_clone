@@ -611,6 +611,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonBack => 'Atrás';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => 'Aplicar';
 
   @override
@@ -802,6 +805,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Las bibliotecas nativas de esta app no están compiladas para una arquitectura compatible con el motor.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

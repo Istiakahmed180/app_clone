@@ -608,6 +608,9 @@ class AppLocalizationsNo extends AppLocalizations {
   String get commonBack => 'Tilbake';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => 'Bruk';
 
   @override
@@ -798,6 +801,10 @@ class AppLocalizationsNo extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'De native bibliotekene i denne appen er ikke bygget for en arkitektur motoren støtter.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

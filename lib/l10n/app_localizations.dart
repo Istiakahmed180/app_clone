@@ -1134,6 +1134,12 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get commonBack;
 
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get commonRetry;
+
   /// No description provided for @commonApply.
   ///
   /// In en, this message translates to:
@@ -1463,6 +1469,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This app\'s native libraries are not built for an architecture the engine supports.'**
   String get findingAbiNotSupported;
+
+  /// No description provided for @findingAppArchiveUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.'**
+  String get findingAppArchiveUnavailable;
 
   /// No description provided for @findingStorageUnavailable.
   ///

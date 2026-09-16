@@ -119,8 +119,9 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             )
 
         val host = hostState()
-        val abi = abiOf(packageInfo.applicationInfo, host)
-        val findings = findingsFor(packageInfo, abi, host)
+        val archives = archivesOf(packageInfo.applicationInfo)
+        val abi = engineAbiOf(archives.abis, host.loadableAbis)
+        val findings = findingsFor(packageInfo, abi, host, archives.baseReadable)
 
         return Report(
             packageName = packageName,
@@ -162,9 +163,13 @@ class AppCompatibilityAnalyzer(private val context: Context) {
     fun canClone(
         packageInfo: PackageInfo,
         host: HostState,
-        abis: Set<String> = packageInfo.applicationInfo?.let(ApkAbis::of).orEmpty(),
-    ): Boolean = findingsFor(packageInfo, engineAbiOf(abis, host.loadableAbis), host)
-        .none { it.blocking }
+        archives: ApkAbis.Archives = archivesOf(packageInfo.applicationInfo),
+    ): Boolean = findingsFor(
+        packageInfo,
+        engineAbiOf(archives.abis, host.loadableAbis),
+        host,
+        archives.baseReadable,
+    ).none { it.blocking }
 
     /**
      * Reads a package with every flag [findingsFor] needs.
@@ -187,12 +192,27 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         packageInfo: PackageInfo,
         abi: String?,
         host: HostState,
+        baseArchiveReadable: Boolean,
     ): List<Finding> {
         val findings = mutableListOf<Finding>()
 
         val rejection = securityChecker.check(packageInfo, host.secureEnvironmentDeclarers)
         (rejection as? AppSecurityChecker.Verdict.Rejected)?.let {
             findings += Finding(it.code, it.message, blocking = true)
+        }
+
+        // Before the ABI question, because it is the reason the ABI question has no answer.
+        // An archived app (Android 15 keeps the launcher entry and deletes the APK) has no
+        // `lib/` to find, which used to read as "pure bytecode, runs anywhere" — so it was
+        // offered in the picker and could only fail once the installer went looking for the
+        // archive that is not there.
+        if (!baseArchiveReadable) {
+            findings += Finding(
+                EngineErrorCodes.APP_ARCHIVE_UNAVAILABLE,
+                "This app's APK is not on the device. It has been archived, or its " +
+                    "installation is incomplete.",
+                blocking = true,
+            )
         }
 
         if (abi == UNSUPPORTED_ABI) {
@@ -238,7 +258,16 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         (securityChecker.checkApk(packageName, apkPath) as? AppSecurityChecker.Verdict.Rejected)
             ?.let { findings += Finding(it.code, it.message, blocking = true) }
 
-        val abi = engineAbiOf(ApkAbis.ofArchives(apkPaths), host.loadableAbis)
+        val archives = ApkAbis.readArchives(apkPaths)
+        if (!archives.baseReadable) {
+            findings += Finding(
+                EngineErrorCodes.APP_ARCHIVE_UNAVAILABLE,
+                "This APK could not be opened.",
+                blocking = true,
+            )
+        }
+
+        val abi = engineAbiOf(archives.abis, host.loadableAbis)
         if (abi == UNSUPPORTED_ABI) {
             findings += Finding(
                 EngineErrorCodes.ABI_NOT_SUPPORTED,
@@ -356,8 +385,13 @@ class AppCompatibilityAnalyzer(private val context: Context) {
             true
         }
 
-    private fun abiOf(info: ApplicationInfo?, host: HostState): String? =
-        info?.let { engineAbiOf(ApkAbis.of(it), host.loadableAbis) }
+    /**
+     * The archive read for a package record, or the empty unreadable answer when the
+     * record carries no [ApplicationInfo] at all — which is itself a package with nothing
+     * to read.
+     */
+    private fun archivesOf(info: ApplicationInfo?): ApkAbis.Archives =
+        info?.let(ApkAbis::read) ?: ApkAbis.readArchives(emptyList())
 
     companion object {
         const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"

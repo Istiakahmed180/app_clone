@@ -607,6 +607,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get commonBack => 'Quay lại';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => 'Áp dụng';
 
   @override
@@ -795,6 +798,10 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Thư viện native của ứng dụng này không được biên dịch cho kiến trúc mà công cụ hỗ trợ.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

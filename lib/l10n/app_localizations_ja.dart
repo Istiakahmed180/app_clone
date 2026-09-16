@@ -596,6 +596,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonBack => '戻る';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => '適用';
 
   @override
@@ -778,6 +781,10 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'このアプリのネイティブライブラリは、エンジンが対応するアーキテクチャ向けにビルドされていません。';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

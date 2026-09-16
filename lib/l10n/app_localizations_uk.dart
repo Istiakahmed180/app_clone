@@ -612,6 +612,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get commonBack => 'Назад';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => 'Застосувати';
 
   @override
@@ -806,6 +809,10 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       'Нативні бібліотеки цього застосунку не зібрані під архітектуру, яку підтримує рушій.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

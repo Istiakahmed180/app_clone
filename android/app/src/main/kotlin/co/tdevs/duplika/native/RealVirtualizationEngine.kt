@@ -201,9 +201,6 @@ class RealVirtualizationEngine(
     fun analyzeApk(apkPaths: List<String>, packageName: String): Map<String, Any?> =
         analyzer.analyzeApk(apkPaths, packageName).toMap()
 
-    fun describeApp(packageName: String): Map<String, Any?>? =
-        installedApps.describeInstalled(packageName)
-
     /** Reads an imported APK's identity so the UI can confirm before installing. */
     fun inspectApk(apkPaths: List<String>): EngineResult<Map<String, Any?>> {
         phase(

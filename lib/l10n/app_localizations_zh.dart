@@ -592,6 +592,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commonBack => '返回';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => '应用';
 
   @override
@@ -773,6 +776,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get findingAbiNotSupported => '此应用的原生库并非为引擎支持的架构构建。';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

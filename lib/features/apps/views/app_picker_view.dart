@@ -34,102 +34,15 @@ class AppPickerView extends GetView<AppPickerController> {
             _header(context),
             _searchRow(context),
             Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (controller.errorMessage.value != null) {
-                  return _centred(
-                    EmptyState(
-                      title: context.l10n.pickerErrorTitle,
-                      message: appErrorMessage(
-                        context.l10n,
-                        controller.errorMessage.value!,
-                      ),
-                      icon: Icons.error_outline,
-                    ),
-                  );
-                }
-
-                final List<AppSection> sections = controller.sections;
-
-                // Read here, not in the item builder. `Obx` only records the observables
-                // touched during its own build, and an item builder runs later, during
-                // layout — so reading these there registered no dependency and the marks
-                // never updated until something else rebuilt the list. Snapshots also
-                // keep a row from seeing the set change mid-frame.
-                final Set<String> cloned = controller.clonedPackages.toSet();
-                final Set<String> cloning = controller.cloning.toSet();
-                final List<InstalledAppModel> picks = controller.quickPicks;
-                // Counted off the sections rather than read from `visibleApps`, which
-                // would filter and sort every installed app a second time on every
-                // rebuild — and a rebuild happens once per batch of icons that arrives.
-                final int visibleCount = sections.fold<int>(
-                  0,
-                  (int total, AppSection section) => total + section.apps.length,
-                );
-                // Read here, like the sets above: `itemBuilder` runs outside this closure,
-                // so an observable read inside it would never rebuild the list.
-                final int hidden = controller.hiddenApps.value;
-
-                if (sections.isEmpty) {
-                  return _centred(
-                    Column(
-                      // Stretched, so the panel keeps the full width it had when it was
-                      // the list's only child rather than shrinking to its own content.
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        EmptyState(
-                          title: context.l10n.pickerNoMatchesTitle,
-                          message: context.l10n.pickerNoMatchesMessage,
-                          icon: Icons.search_off,
-                        ),
-                        _hiddenNote(context, hidden),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
-                  // One item per group, not per app: the grouped layout would otherwise
-                  // cost a full layout pass over every installed app on first frame.
-                  // Plus the header and the footer note.
-                  itemCount: sections.length + 2,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == sections.length + 1) {
-                      return _hiddenNote(context, hidden);
-                    }
-                    // Icons are fetched for what the builder is asked to draw, which
-                    // runs for on-screen groups only. That is what keeps opening the
-                    // picker off the "decode every installed app" path.
-                    if (index == 0) {
-                      controller.requestIcons(
-                        picks.map((InstalledAppModel app) => app.packageName),
-                      );
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          _quickPicks(context, picks, cloned, cloning),
-                          _installedHeading(context, visibleCount),
-                        ],
-                      );
-                    }
-                    final AppSection section = sections[index - 1];
-                    controller.requestIcons(
-                      section.apps.map(
-                        (InstalledAppModel app) => app.packageName,
-                      ),
-                    );
-                    return _SectionGroup(
-                      section: section,
-                      clonedPackages: cloned,
-                      cloningPackages: cloning,
-                      onTap: (InstalledAppModel app) => _openApp(context, app),
-                    );
-                  },
-                );
-              }),
+              // Pull to re-read the device. The list is also re-read on resume, but a
+              // gesture is what a user reaches for when they believe the screen is out
+              // of date — and it is the only way back from a listing that failed.
+              child: Obx(
+                () => RefreshIndicator(
+                  onRefresh: () => controller.loadApps(background: true),
+                  child: _body(context),
+                ),
+              ),
             ),
           ],
         ),
@@ -142,6 +55,109 @@ class AppPickerView extends GetView<AppPickerController> {
             ? const LinearProgressIndicator()
             : const SizedBox.shrink(),
       ),
+    );
+  }
+
+  /// The list, or whichever of the spinner, the refusal and the two empty states stands
+  /// in for it. Called from inside an [Obx], so every observable it reads is one the
+  /// screen rebuilds for.
+  Widget _body(BuildContext context) {
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (controller.errorMessage.value != null) {
+      return _centred(
+        EmptyState(
+          title: context.l10n.pickerErrorTitle,
+          message: appErrorMessage(
+            context.l10n,
+            controller.errorMessage.value!,
+          ),
+          icon: Icons.error_outline,
+          // Without this the screen was a dead end: one failed read and the
+          // only way to ask again was to leave the picker and come back.
+          actionLabel: context.l10n.commonRetry,
+          onAction: controller.loadApps,
+        ),
+      );
+    }
+
+    final List<AppSection> sections = controller.sections;
+
+    // Read here, not in the item builder. `Obx` only records the observables
+    // touched during its own build, and an item builder runs later, during
+    // layout — so reading these there registered no dependency and the marks
+    // never updated until something else rebuilt the list. Snapshots also
+    // keep a row from seeing the set change mid-frame.
+    final Set<String> cloned = controller.clonedPackages.toSet();
+    final Set<String> cloning = controller.cloning.toSet();
+    final List<InstalledAppModel> picks = controller.quickPicks;
+    // Counted off the sections rather than read from `visibleApps`, which
+    // would filter and sort every installed app a second time on every
+    // rebuild — and a rebuild happens once per batch of icons that arrives.
+    final int visibleCount = sections.fold<int>(
+      0,
+      (int total, AppSection section) => total + section.apps.length,
+    );
+    // Read here, like the sets above: `itemBuilder` runs outside this closure,
+    // so an observable read inside it would never rebuild the list.
+    final int hidden = controller.hiddenApps.value;
+
+    if (sections.isEmpty) {
+      return _centred(
+        Column(
+          // Stretched, so the panel keeps the full width it had when it was
+          // the list's only child rather than shrinking to its own content.
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            EmptyState(
+              title: context.l10n.pickerNoMatchesTitle,
+              message: context.l10n.pickerNoMatchesMessage,
+              icon: Icons.search_off,
+            ),
+            _hiddenNote(context, hidden),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
+      // One item per group, not per app: the grouped layout would otherwise
+      // cost a full layout pass over every installed app on first frame.
+      // Plus the header and the footer note.
+      itemCount: sections.length + 2,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == sections.length + 1) {
+          return _hiddenNote(context, hidden);
+        }
+        // Icons are fetched for what the builder is asked to draw, which
+        // runs for on-screen groups only. That is what keeps opening the
+        // picker off the "decode every installed app" path.
+        if (index == 0) {
+          controller.requestIcons(
+            picks.map((InstalledAppModel app) => app.packageName),
+          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _quickPicks(context, picks, cloned, cloning),
+              _installedHeading(context, visibleCount),
+            ],
+          );
+        }
+        final AppSection section = sections[index - 1];
+        controller.requestIcons(
+          section.apps.map((InstalledAppModel app) => app.packageName),
+        );
+        return _SectionGroup(
+          section: section,
+          clonedPackages: cloned,
+          cloningPackages: cloning,
+          onTap: (InstalledAppModel app) => _openApp(context, app),
+        );
+      },
     );
   }
 
@@ -169,7 +185,11 @@ class AppPickerView extends GetView<AppPickerController> {
     );
   }
 
+  /// A single panel, in a list that scrolls even when it does not overflow — otherwise
+  /// there is nothing to pull on, and the refresh gesture would be unavailable on
+  /// exactly the screens that most need it.
   Widget _centred(Widget child) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
     padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
     children: <Widget>[child],
   );
@@ -304,7 +324,10 @@ class AppPickerView extends GetView<AppPickerController> {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
-          Text(context.l10n.pickerInstalledApps, style: theme.textTheme.titleLarge),
+          Text(
+            context.l10n.pickerInstalledApps,
+            style: theme.textTheme.titleLarge,
+          ),
           Text(
             context.l10n.pickerAppCount(count),
             style: theme.textTheme.labelMedium?.copyWith(
@@ -644,11 +667,16 @@ class _AppRow extends StatelessWidget {
                       // is 32-bit or a split set decides whether it can be cloned at
                       // all on a given device, and the picker's filters are about
                       // exactly these two facts.
-                      _Chip(label: installedArchitectureLabel(context.l10n, app)),
-                      _Chip(label: packageTypeLabel(context.l10n, app.apkCount)),
+                      _Chip(
+                        label: installedArchitectureLabel(context.l10n, app),
+                      ),
+                      _Chip(
+                        label: packageTypeLabel(context.l10n, app.apkCount),
+                      ),
                       if (app.versionName != null)
                         _Chip(label: 'v${app.versionName}'),
-                      if (app.isSystem) _Chip(label: context.l10n.pickerSystemChip),
+                      if (app.isSystem)
+                        _Chip(label: context.l10n.pickerSystemChip),
                     ],
                   ),
                 ],

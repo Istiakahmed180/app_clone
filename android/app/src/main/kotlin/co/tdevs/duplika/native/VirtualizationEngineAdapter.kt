@@ -154,6 +154,16 @@ object EngineErrorCodes {
     const val SELF_CLONE_UNSUPPORTED = "SELF_CLONE_UNSUPPORTED"
     const val SYSTEM_COMPONENT_UNSUPPORTED = "SYSTEM_COMPONENT_UNSUPPORTED"
     const val SECURE_ENV_REQUIRED = "SECURE_ENV_REQUIRED"
+
+    /**
+     * The app is installed, but its APK is not on the device to read or copy.
+     *
+     * Android 15's app archiving is the case that matters: the launcher entry stays and
+     * the archive is deleted, so the app is still enumerated and still looks launchable.
+     * Distinct from [APP_NOT_FOUND] — the package record exists — and from
+     * [ABI_NOT_SUPPORTED], which is about an archive that *was* read.
+     */
+    const val APP_ARCHIVE_UNAVAILABLE = "APP_ARCHIVE_UNAVAILABLE"
     const val APP_INSTALL_FAILED = "APP_INSTALL_FAILED"
     const val GMS_INSTALL_FAILED = "GMS_INSTALL_FAILED"
 

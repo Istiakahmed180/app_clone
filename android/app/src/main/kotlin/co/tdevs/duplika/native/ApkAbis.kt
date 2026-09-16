@@ -46,8 +46,28 @@ object ApkAbis {
     fun loadable(deviceAbis: Collection<String>): Set<String> =
         ENGINE.filterTo(LinkedHashSet()) { it in deviceAbis }
 
+    /**
+     * What a read of an app's archives found.
+     *
+     * The two halves are kept apart because "this app ships no native code" and "there was
+     * no archive to look in" are different answers that used to arrive as the same empty
+     * set. An archived app — Android 15 keeps its launcher entry and deletes its APK —
+     * answered the second and was read as the first, which made it look like pure
+     * bytecode: clonable anywhere, offered in the picker, and impossible to actually
+     * install.
+     */
+    class Archives internal constructor(
+        /** Every `lib/<abi>/` directory name found across the archives that opened. */
+        val abis: Set<String>,
+        /** Whether the base archive could be opened at all. False when there is none. */
+        val baseReadable: Boolean,
+    )
+
     /** Every `lib/<abi>/` directory name across an installed app's base APK and its splits. */
-    fun of(info: ApplicationInfo): Set<String> = ofArchives(sourcesOf(info))
+    fun of(info: ApplicationInfo): Set<String> = read(info).abis
+
+    /** The same read, with the base archive's readability kept rather than discarded. */
+    fun read(info: ApplicationInfo): Archives = readArchives(sourcesOf(info))
 
     /** The same, for one standalone archive. */
     fun ofArchive(apkPath: String): Set<String> = ofArchives(listOf(apkPath))
@@ -57,40 +77,57 @@ object ApkAbis {
      *
      * An unreadable archive contributes nothing rather than failing the read: a split that
      * cannot be opened must not be able to make an app look architecture-free, and the
-     * importer refuses a corrupt archive on its own.
+     * importer refuses a corrupt archive on its own. The *base* being unreadable is not
+     * the same thing, and is reported through [Archives.baseReadable] rather than hidden.
      */
-    fun ofArchives(apkPaths: Collection<String>): Set<String> {
+    fun ofArchives(apkPaths: Collection<String>): Set<String> = readArchives(apkPaths).abis
+
+    /** [ofArchives], with the base archive's readability kept. [apkPaths] is base first. */
+    fun readArchives(apkPaths: Collection<String>): Archives {
         val found = LinkedHashSet<String>()
+        var baseReadable = false
+        var base = true
+
         for (path in apkPaths) {
-            runCatching {
-                ZipFile(path).use { zip ->
-                    val entries = zip.entries()
-                    while (entries.hasMoreElements()) {
-                        val name = entries.nextElement().name
-                        if (!name.startsWith(LIB_PREFIX)) {
-                            continue
-                        }
-                        // `lib/arm64-v8a/libfoo.so`, never `lib/NOTICE`: without the
-                        // trailing separator a stray file directly under lib/ would be
-                        // read as an architecture.
-                        val rest = name.substring(LIB_PREFIX.length)
-                        val abi = rest.substringBefore('/')
-                        if (abi.isEmpty() || abi.length == rest.length) {
-                            continue
-                        }
-                        found.add(abi)
-                        // Every ABI Android ships is accounted for, so nothing is left to
-                        // learn from the remaining entries — which number in the thousands
-                        // for a large app. Safe for the compatibility verdict too: a set
-                        // containing all four already contains one the engine can load.
-                        if (found.containsAll(KNOWN)) {
-                            return found
-                        }
-                    }
-                }
+            val opened = runCatching {
+                ZipFile(path).use { zip -> collectAbis(zip, found) }
+            }.isSuccess
+            if (base) {
+                baseReadable = opened
+                base = false
+            }
+            // Every ABI Android ships is accounted for, so nothing is left to learn from
+            // the remaining archives. Safe for the compatibility verdict too: a set
+            // containing all four already contains one the engine can load.
+            if (found.containsAll(KNOWN)) {
+                break
             }
         }
-        return found
+
+        return Archives(found, baseReadable)
+    }
+
+    private fun collectAbis(zip: ZipFile, found: MutableSet<String>) {
+        val entries = zip.entries()
+        while (entries.hasMoreElements()) {
+            val name = entries.nextElement().name
+            if (!name.startsWith(LIB_PREFIX)) {
+                continue
+            }
+            // `lib/arm64-v8a/libfoo.so`, never `lib/NOTICE`: without the trailing
+            // separator a stray file directly under lib/ would be read as an architecture.
+            val rest = name.substring(LIB_PREFIX.length)
+            val abi = rest.substringBefore('/')
+            if (abi.isEmpty() || abi.length == rest.length) {
+                continue
+            }
+            found.add(abi)
+            // Nothing left to learn from the remaining entries — which number in the
+            // thousands for a large app.
+            if (found.containsAll(KNOWN)) {
+                return
+            }
+        }
     }
 
     private fun sourcesOf(info: ApplicationInfo): List<String> = buildList {

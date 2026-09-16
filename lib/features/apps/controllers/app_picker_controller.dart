@@ -45,6 +45,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   final RxBool isLoading = true.obs;
   final RxBool isWorking = false.obs;
   final RxString query = ''.obs;
+
   /// What went wrong on the native side, as it was thrown.
   ///
   /// The exception rather than its message, so the view can translate it by code. A
@@ -265,22 +266,29 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  /// Forgets the cached verdicts when the app comes back to the foreground.
+  /// Re-reads the device when the app comes back to the foreground.
   ///
-  /// The storage finding is the reason. It depends on whether Duplika holds All files
-  /// access, its refusal tells the user to go to Settings and grant it, and Settings is
-  /// another app — so the one journey the message asks for is exactly the one that ends
-  /// with a resume and a verdict that is no longer true. Refusing the clone a second
-  /// time, with the same instruction the user has just followed, is the worst answer
-  /// available.
+  /// The cached verdicts are the first reason. A verdict depends on whether Duplika holds
+  /// All files access, its refusal tells the user to go to Settings and grant it, and
+  /// Settings is another app — so the one journey the message asks for is exactly the one
+  /// that ends with a resume and a verdict that is no longer true. Refusing the clone a
+  /// second time, with the same instruction the user has just followed, is the worst
+  /// answer available.
   ///
-  /// Only the verdicts are dropped. The app list itself is not re-read: it costs a
-  /// native call over every launchable package, and nothing about leaving for Settings
-  /// changes which apps are installed.
+  /// The list is the second, and it used to be left alone here on the grounds that
+  /// leaving for Settings does not change which apps are installed. True of Settings, and
+  /// false of everywhere else a user goes: installing an app from Play and coming
+  /// straight back is the ordinary way to arrive at this screen wanting to clone it, and
+  /// the picker had no way to ever see it. An app uninstalled while the picker was open
+  /// was worse — the row stayed, and tapping it failed.
+  ///
+  /// Reloaded in the background, so the list the user is looking at is not replaced by a
+  /// spinner for work they did not ask for.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _reports.clear();
+      unawaited(loadApps(background: true));
     }
   }
 
@@ -290,21 +298,69 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     loadApps();
   }
 
-  Future<void> loadApps() async {
-    isLoading.value = true;
+  /// Whether a read of the device is already in flight.
+  ///
+  /// Three things ask for one now — opening the screen, coming back to the foreground,
+  /// and pulling the list down — and two of them can land together. The second is
+  /// dropped rather than queued: both would return the same device.
+  bool _loading = false;
+
+  /// Re-reads the device.
+  ///
+  /// [background] keeps the list and its scroll position on screen for the duration and
+  /// leaves a failure unreported when there is still a usable list to show — a refresh
+  /// nobody asked for must not replace one with an error screen. Opening the picker and
+  /// tapping Retry both pass false and get the spinner.
+  Future<void> loadApps({bool background = false}) async {
+    if (_loading || _disposed) {
+      return;
+    }
+    _loading = true;
+    if (!background) {
+      isLoading.value = true;
+    }
     try {
+      // What the list already holds, before it is replaced. The icons in it are worth
+      // keeping — see [_carryIcon].
+      final Map<String, InstalledAppModel> previous =
+          <String, InstalledAppModel>{
+            for (final InstalledAppModel app in apps) app.packageName: app,
+          };
+
       // Metadata only. Decoding every launchable app's icon here took about fifteen
       // seconds on a real device; the icons arrive afterwards, for the rows that are
       // actually drawn. See [requestIcons].
-      _requestedIcons.clear();
+      final InstalledAppListing listing = await _bridge.listInstalledApps(
+        includeIcons: false,
+      );
+      if (_disposed) {
+        return;
+      }
+
+      final List<InstalledAppModel> loaded = <InstalledAppModel>[
+        for (final InstalledAppModel app in listing.apps)
+          _carryIcon(app, previous[app.packageName]),
+      ];
+
+      // Reset here rather than before the read, so this bookkeeping is only ever
+      // discarded together with the list it describes. Cleared up front, a read that
+      // failed left the rows still on screen unmarked — every one of them re-requested
+      // and re-decoded on the next rebuild, for a refresh that had changed nothing.
+      //
+      // An icon carried over counts as already requested: sparing that round trip is
+      // the whole point of carrying it.
+      _requestedIcons
+        ..clear()
+        ..addAll(<String>[
+          for (final InstalledAppModel app in loaded)
+            if (app.icon != null) app.packageName,
+        ]);
       _pendingIcons.clear();
       // Dropped with the list they describe. See [didChangeAppLifecycleState] for why a
       // verdict is not a fact that can be kept.
       _reports.clear();
-      final InstalledAppListing listing = await _bridge.listInstalledApps(
-        includeIcons: false,
-      );
-      apps.assignAll(listing.apps);
+
+      apps.assignAll(loaded);
       hiddenApps.value = listing.hidden;
       errorMessage.value = null;
 
@@ -317,16 +373,46 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       try {
         clonedPackages.assignAll(await _repository.clonedPackageNames());
       } on AppException catch (error, stackTrace) {
-        _logger.error('Could not read which packages are cloned', error, stackTrace);
+        _logger.error(
+          'Could not read which packages are cloned',
+          error,
+          stackTrace,
+        );
       }
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not list installed apps', error, stackTrace);
-      errorMessage.value = error;
+      // A background refresh that fails leaves the list it could not replace exactly
+      // where it was: the user did not ask for this read, and a screenful of error in
+      // place of apps they can still act on is a worse answer than saying nothing.
+      if (!background || apps.isEmpty) {
+        errorMessage.value = error;
+      }
     } finally {
       // In `finally` because a failure that is not an [AppException] — a channel fault,
       // a malformed reply — would otherwise leave the screen on its spinner forever.
+      _loading = false;
       isLoading.value = false;
     }
+  }
+
+  /// Keeps an icon the list has already decoded across a reload.
+  ///
+  /// Without this every refresh — and one runs on every resume — put each visible row
+  /// back on its placeholder until the icon batches came round again, which reads as a
+  /// flicker over work the user did not ask for and re-decodes icons that had not
+  /// changed.
+  ///
+  /// Dropped when the package has been updated since, because its icon may have been
+  /// updated with it. That is the same key the native side uses to decide whether an
+  /// app's archives are worth re-reading, so the two invalidate together.
+  static InstalledAppModel _carryIcon(
+    InstalledAppModel fresh,
+    InstalledAppModel? previous,
+  ) {
+    if (previous?.icon == null || previous!.updatedAt != fresh.updatedAt) {
+      return fresh;
+    }
+    return fresh.copyWith(icon: previous.icon);
   }
 
   /// How many icons one native round trip decodes.
@@ -408,6 +494,14 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       }
     } finally {
       _iconWorkerRunning = false;
+      // Anything queued while this worker was on its last batch has no worker of its
+      // own: [requestIcons] saw one running and left the starting to it. Without this
+      // those rows keep the placeholder until something else happens to queue more —
+      // which, after a refresh cleared the queue mid-batch, is never.
+      if (!_disposed && _pendingIcons.isNotEmpty) {
+        _iconWorkerRunning = true;
+        unawaited(_pumpIcons());
+      }
     }
   }
 
@@ -480,7 +574,10 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// Compatibility verdict for a picked APK, read from the archive rather than assumed.
   Future<CompatibilityReport> analyzeApk(ApkCandidate candidate) async {
     try {
-      return await _bridge.analyzeApk(candidate.apkPaths, candidate.packageName);
+      return await _bridge.analyzeApk(
+        candidate.apkPaths,
+        candidate.packageName,
+      );
     } on AppException catch (error, stackTrace) {
       _logger.error(
         'APK analysis failed for ${candidate.packageName}',
@@ -558,6 +655,11 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         profileName: profileName,
         installGms: installGms,
       );
+      // The picker closes on success today, so nothing has been seen to go stale here.
+      // Recorded anyway because the set is what the tick and the Already added / Not
+      // added filters read, and "it happens to be torn down straight afterwards" is a
+      // property of the caller, not of this method.
+      clonedPackages.add(app.packageName);
       return null;
     } on AppException catch (error) {
       return error;
@@ -684,7 +786,8 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     try {
       final CompatibilityReport report = await analyzeApk(candidate);
       final CompatibilityFinding? blocker = report.blocker;
-      if (report.verdict == CompatibilityVerdict.unsupported && blocker != null) {
+      if (report.verdict == CompatibilityVerdict.unsupported &&
+          blocker != null) {
         // Carries the finding's own code, so the view words it in the user's language
         // through the same table the installed-app refusal uses.
         return VirtualizationException(blocker.message, code: blocker.code);
@@ -700,6 +803,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         profileName: profileName,
         installGms: installGms,
       );
+      clonedPackages.add(candidate.packageName);
       caution.value = report.caution;
       return null;
     } on AppException catch (error) {

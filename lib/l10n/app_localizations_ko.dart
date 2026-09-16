@@ -597,6 +597,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commonBack => '뒤로';
 
   @override
+  String get commonRetry => 'Try again';
+
+  @override
   String get commonApply => '적용';
 
   @override
@@ -779,6 +782,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get findingAbiNotSupported =>
       '이 앱의 네이티브 라이브러리는 엔진이 지원하는 아키텍처용으로 빌드되지 않았습니다.';
+
+  @override
+  String get findingAppArchiveUnavailable =>
+      'This app\'s installation files are not on the device. It has been archived, or its installation is incomplete.';
 
   @override
   String findingStorageUnavailable(String appName) {

@@ -47,6 +47,8 @@ String appErrorMessage(AppLocalizations l10n, AppException error) {
       return l10n.findingSystemComponent;
     case 'ABI_NOT_SUPPORTED':
       return l10n.findingAbiNotSupported;
+    case 'APP_ARCHIVE_UNAVAILABLE':
+      return l10n.findingAppArchiveUnavailable;
 
     // ── the engine's own ──────────────────────────────────────────────────
     case 'VIRTUALIZATION_NOT_AVAILABLE':
