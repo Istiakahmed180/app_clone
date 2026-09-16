@@ -97,7 +97,7 @@ jobs:
           ls -lh build/app/outputs/flutter-apk/*.apk
           ls -lh dist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: duplika-apk
           path: dist/*.apk
