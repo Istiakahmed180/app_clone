@@ -324,6 +324,26 @@ class AppLocalizationsMs extends AppLocalizations {
   String get cloneActionEditName => 'Ubah nama';
 
   @override
+  String get cloneActionChangeIcon => 'Tukar ikon';
+
+  @override
+  String get cloneIconPickerChoose => 'Pilih gambar';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Guna ikon apl';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Gambar itu tidak boleh digunakan sebagai ikon. Cuba yang lain.';
+
+  @override
+  String get cloneIconPickerTitle => 'Ikon klon ini';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Beri gambar anda sendiri, atau kekalkan ikon apl dan tandakannya dengan warna — kedua-duanya membolehkan anda mengecamnya sekali pandang antara klon lain apl yang sama.';
+
+  @override
   String get cloneActionForceStop => 'Paksa henti';
 
   @override

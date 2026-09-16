@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "Все выбранные APK должны относиться к одному приложению.",
   "errorApkVersionMismatch": "Все выбранные APK должны иметь одинаковую версию.",
   "errorApkBaseRequired": "Выберите ровно один базовый APK и один или несколько конфигурационных сплитов.",
-  "errorApkDuplicateSplit": "Один и тот же сплит APK выбран несколько раз."
+  "errorApkDuplicateSplit": "Один и тот же сплит APK выбран несколько раз.",
+  "cloneActionChangeIcon": "Изменить значок",
+  "cloneIconPickerTitle": "Значок этого клона",
+  "cloneIconPickerMessage": "Поставьте своё изображение или оставьте значок приложения и отметьте его цветом — в любом случае вы сразу отличите его от других клонов того же приложения.",
+  "cloneIconPickerChoose": "Выбрать изображение",
+  "cloneIconPickerUseAppIcon": "Использовать значок приложения",
+  "errorCloneIconFailed": "Это изображение не удалось использовать как значок. Попробуйте другое."
 }

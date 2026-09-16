@@ -324,6 +324,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cloneActionEditName => 'Изменить имя';
 
   @override
+  String get cloneActionChangeIcon => 'Изменить значок';
+
+  @override
+  String get cloneIconPickerChoose => 'Выбрать изображение';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Использовать значок приложения';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Это изображение не удалось использовать как значок. Попробуйте другое.';
+
+  @override
+  String get cloneIconPickerTitle => 'Значок этого клона';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Поставьте своё изображение или оставьте значок приложения и отметьте его цветом — в любом случае вы сразу отличите его от других клонов того же приложения.';
+
+  @override
   String get cloneActionForceStop => 'Остановить';
 
   @override

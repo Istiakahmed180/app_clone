@@ -322,6 +322,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get cloneActionEditName => 'Ubah nama';
 
   @override
+  String get cloneActionChangeIcon => 'Ubah ikon';
+
+  @override
+  String get cloneIconPickerChoose => 'Pilih gambar';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Gunakan ikon aplikasi';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Gambar itu tidak bisa dipakai sebagai ikon. Coba yang lain.';
+
+  @override
+  String get cloneIconPickerTitle => 'Ikon klon ini';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Beri gambar milikmu sendiri, atau pertahankan ikon aplikasinya dan tandai dengan warna — keduanya membuatmu langsung mengenalinya di antara klon lain dari aplikasi yang sama.';
+
+  @override
   String get cloneActionForceStop => 'Paksa berhenti';
 
   @override

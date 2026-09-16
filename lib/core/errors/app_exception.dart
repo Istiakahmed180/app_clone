@@ -9,6 +9,9 @@ abstract final class AppErrorCodes {
   static const String profileStorageUnreadable = 'PROFILE_STORAGE_UNREADABLE';
   static const String profileNotFound = 'PROFILE_NOT_FOUND';
 
+  /// A picture the user picked could not be read, decoded or stored as a clone's icon.
+  static const String cloneIconFailed = 'CLONE_ICON_FAILED';
+
   /// The channel answered, but with nothing usable in it.
   static const String bridgeNoData = 'BRIDGE_NO_DATA';
 

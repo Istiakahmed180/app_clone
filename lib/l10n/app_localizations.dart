@@ -684,6 +684,42 @@ abstract class AppLocalizations {
   /// **'Edit name'**
   String get cloneActionEditName;
 
+  /// No description provided for @cloneActionChangeIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Change icon'**
+  String get cloneActionChangeIcon;
+
+  /// No description provided for @cloneIconPickerChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a picture'**
+  String get cloneIconPickerChoose;
+
+  /// No description provided for @cloneIconPickerUseAppIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app\'s icon'**
+  String get cloneIconPickerUseAppIcon;
+
+  /// No description provided for @errorCloneIconFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That picture could not be used as an icon. Try a different one.'**
+  String get errorCloneIconFailed;
+
+  /// No description provided for @cloneIconPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This clone\'s icon'**
+  String get cloneIconPickerTitle;
+
+  /// No description provided for @cloneIconPickerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a picture of your own, or keep the app\'s icon and mark it with a colour — either way you can tell it from your other clones of the same app at a glance.'**
+  String get cloneIconPickerMessage;
+
   /// No description provided for @cloneActionForceStop.
   ///
   /// In en, this message translates to:

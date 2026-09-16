@@ -286,12 +286,38 @@ class NativeBridge {
   ///
   /// Success means the launcher accepted the request; it still shows its own confirmation,
   /// so this does not mean the shortcut exists yet.
+  /// Repaints this clone's pinned shortcut, if the launcher holds one.
+  ///
+  /// Does nothing visible when there is no shortcut to repaint, and never prompts: this
+  /// is a correction to something already on the home screen, not a request to add one.
+  Future<void> refreshCloneShortcut({
+    required String profileId,
+    required String packageName,
+    required String label,
+    int spaceIndex = 1,
+    int spaceCount = 1,
+    int? badgeArgb,
+    String? iconPath,
+  }) async {
+    await _invokeEngine('refreshCloneShortcut', <String, dynamic>{
+      'profileId': profileId,
+      'packageName': packageName,
+      'label': label,
+      'spaceIndex': spaceIndex,
+      'spaceCount': spaceCount,
+      'badgeArgb': badgeArgb,
+      'iconPath': iconPath,
+    });
+  }
+
   Future<void> pinCloneShortcut({
     required String profileId,
     required String packageName,
     required String label,
     int spaceIndex = 1,
     int spaceCount = 1,
+    int? badgeArgb,
+    String? iconPath,
   }) async {
     final EngineResponse
     response = await _invokeEngine('pinCloneShortcut', <String, dynamic>{
@@ -302,6 +328,11 @@ class NativeBridge {
       // there is more than one, since otherwise every clone's shortcut is the same tile.
       'spaceIndex': spaceIndex,
       'spaceCount': spaceCount,
+      // The colour the user marked this clone with, as opaque ARGB, or null for none.
+      // The same integer the grid paints with, so the two surfaces cannot disagree.
+      'badgeArgb': badgeArgb,
+      // A picture the user chose, which replaces the app's icon on the shortcut too.
+      'iconPath': iconPath,
     });
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);

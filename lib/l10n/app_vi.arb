@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "Tất cả APK đã chọn phải thuộc cùng một ứng dụng.",
   "errorApkVersionMismatch": "Tất cả APK đã chọn phải cùng một phiên bản.",
   "errorApkBaseRequired": "Hãy chọn đúng một APK cơ sở và một hoặc nhiều tệp tách cấu hình.",
-  "errorApkDuplicateSplit": "Cùng một tệp tách APK đã được chọn nhiều lần."
+  "errorApkDuplicateSplit": "Cùng một tệp tách APK đã được chọn nhiều lần.",
+  "cloneActionChangeIcon": "Đổi biểu tượng",
+  "cloneIconPickerTitle": "Biểu tượng của bản sao này",
+  "cloneIconPickerMessage": "Đặt ảnh của riêng bạn, hoặc giữ biểu tượng của ứng dụng và đánh dấu bằng một màu — cách nào bạn cũng nhận ra nó ngay giữa các bản sao khác của cùng ứng dụng.",
+  "cloneIconPickerChoose": "Chọn một ảnh",
+  "cloneIconPickerUseAppIcon": "Dùng biểu tượng của ứng dụng",
+  "errorCloneIconFailed": "Không thể dùng ảnh đó làm biểu tượng. Hãy thử ảnh khác."
 }

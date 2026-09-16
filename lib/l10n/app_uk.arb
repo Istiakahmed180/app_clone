@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "Усі вибрані APK мають належати одному застосунку.",
   "errorApkVersionMismatch": "Усі вибрані APK мають мати однакову версію.",
   "errorApkBaseRequired": "Виберіть рівно один базовий APK і один або більше конфігураційних сплітів.",
-  "errorApkDuplicateSplit": "Той самий спліт APK вибрано кілька разів."
+  "errorApkDuplicateSplit": "Той самий спліт APK вибрано кілька разів.",
+  "cloneActionChangeIcon": "Змінити піктограму",
+  "cloneIconPickerTitle": "Піктограма цього клону",
+  "cloneIconPickerMessage": "Поставте власне зображення або залиште піктограму застосунку й позначте її кольором — у будь-якому разі ви одразу відрізните його від інших клонів того самого застосунку.",
+  "cloneIconPickerChoose": "Вибрати зображення",
+  "cloneIconPickerUseAppIcon": "Використати піктограму застосунку",
+  "errorCloneIconFailed": "Це зображення не вдалося використати як піктограму. Спробуйте інше."
 }

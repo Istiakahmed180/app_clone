@@ -8,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_error_text.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/clone_batch_result.dart';
+import '../../../data/models/clone_icon_color.dart';
 import '../../../data/models/clone_budget.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ import '../controllers/home_controller.dart';
 import 'clone_permissions_view.dart';
 import '../widgets/add_clone_tile.dart';
 import '../widgets/clone_action_sheet.dart';
+import '../widgets/clone_icon_picker.dart';
 import '../widgets/clone_budget_text.dart';
 import '../widgets/clone_count_dialog.dart';
 import '../widgets/clone_tile.dart';
@@ -659,6 +661,26 @@ class HomeView extends GetView<HomeController> {
         // screen, and a dialog behind it would be talking over the answer.
         if (error != null && context.mounted) {
           await _showFailure(context, appErrorMessage(l10n, error));
+        }
+      case CloneAction.changeIcon:
+        final CloneIconChoice? choice = await showCloneIconPicker(
+          context,
+          current: profile.iconColor,
+          hasCustomIcon: profile.iconPath != null,
+        );
+        // Null is a dismissal. Every other answer is something the user asked for,
+        // including CloneIconColor.none, which clears the mark.
+        if (choice == null || !context.mounted) {
+          return;
+        }
+        final AppException? iconError = switch (choice) {
+          CloneIconColorChosen(:final CloneIconColor color) =>
+            await controller.setIconColor(profile, color),
+          CloneIconPictureRequested() => await controller.setCustomIcon(profile),
+          CloneIconAppIconRequested() => await controller.clearCustomIcon(profile),
+        };
+        if (iconError != null && context.mounted) {
+          await _showFailure(context, appErrorMessage(l10n, iconError));
         }
       case CloneAction.rename:
         final String? name = await showRenameProfileDialog(

@@ -1,12 +1,15 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/services/clone_icon_store.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/clone_batch_result.dart';
 import '../../../data/models/clone_budget.dart';
+import '../../../data/models/clone_icon_color.dart';
 import '../../../data/models/clone_permissions.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/device_capacity.dart';
@@ -25,14 +28,20 @@ class HomeController extends GetxController {
     required this._nativeBridge,
     required this._repository,
     required this._privateSpace,
-  });
+    CloneIconStore? iconStore,
+  }) : _iconStore = iconStore ?? CloneIconStore();
 
   final VirtualizationEngine _engine;
   final NativeBridge _nativeBridge;
 
-  /// Consulted only for what a new clone should be called. The same seam the picker
-  /// uses, so both flows name clones by one rule.
+  /// Names a new clone -- the same seam the picker uses, so both flows name clones by one
+  /// rule -- and records the mark the user puts on one. Both are host-side metadata that
+  /// never reaches the container, which is why they do not go through the engine.
   final VirtualProfileRepository _repository;
+
+  /// Where a picture the user chose for a clone lives. Injectable so the icon flow can be
+  /// exercised without touching the device's storage.
+  final CloneIconStore _iconStore;
 
   /// The lock and the hidden-clone flag. The grid reads [visibleProfiles] and the
   /// Private space screen reads [hiddenProfiles] from the same loaded list.
@@ -50,6 +59,10 @@ class HomeController extends GetxController {
   final RxMap<String, VirtualProfileState> profileStates =
       <String, VirtualProfileState>{}.obs;
   final RxMap<String, Uint8List> appIcons = <String, Uint8List>{}.obs;
+
+  /// Pictures the user chose, keyed by profile id rather than by package: two clones of
+  /// one app can carry different ones, which is the whole point of them.
+  final RxMap<String, Uint8List> customIcons = <String, Uint8List>{}.obs;
 
   /// Compatibility reports for the cloned packages, keyed by package name.
   ///
@@ -123,8 +136,9 @@ class HomeController extends GetxController {
 
   /// Icon for a profile's package, or null for a clone whose APK is not installed
   /// on the host (the card then falls back to a placeholder).
+  /// What this clone is drawn with: the picture the user chose, or its app's own icon.
   Uint8List? iconFor(VirtualProfileModel profile) =>
-      appIcons[profile.packageName];
+      customIcons[profile.id] ?? appIcons[profile.packageName];
 
   /// The dangerous permissions this clone's app declares, and the ones denied for it.
   Future<ClonePermissions> clonePermissions(VirtualProfileModel profile) =>
@@ -305,9 +319,34 @@ class HomeController extends GetxController {
     try {
       profiles.assignAll(_grouped(await _engine.getProfiles()));
       errorMessage.value = null;
+      await _loadCustomIcons();
     } on AppException catch (error) {
       errorMessage.value = error;
     }
+  }
+
+  /// Reads the pictures the user chose, for the clones that have one.
+  ///
+  /// A file that has gone is simply not loaded, so the clone falls back to its app's icon
+  /// rather than showing a hole. Failures are swallowed on purpose: an unreadable icon is
+  /// a cosmetic loss, and taking the grid down over it would not be.
+  Future<void> _loadCustomIcons() async {
+    final Map<String, Uint8List> loaded = <String, Uint8List>{};
+    for (final VirtualProfileModel profile in profiles) {
+      final String? path = profile.iconPath;
+      if (path == null) {
+        continue;
+      }
+      try {
+        final Uint8List? bytes = await _iconStore.read(path);
+        if (bytes != null) {
+          loaded[profile.id] = bytes;
+        }
+      } on Object catch (error, stackTrace) {
+        _logger.error('Could not read the icon for ${profile.id}', error, stackTrace);
+      }
+    }
+    customIcons.assignAll(loaded);
   }
 
   /// Grid order: clones of the same app together, numbered ascending, apps A-Z.
@@ -411,6 +450,8 @@ class HomeController extends GetxController {
         label: shortcutLabel(profile),
         spaceIndex: instanceIndex(profile),
         spaceCount: siblingCount(profile),
+        badgeArgb: profile.iconColor.argb,
+        iconPath: profile.iconPath,
       );
       return null;
     } on AppException catch (error) {
@@ -429,6 +470,116 @@ class HomeController extends GetxController {
       return null;
     } on AppException catch (error) {
       return error;
+    }
+  }
+
+  /// Marks this clone with a colour, or clears the mark with [CloneIconColor.none].
+  ///
+  /// Host-side only: the container is untouched, so a running clone is not disturbed by
+  /// being re-marked. A shortcut the launcher already holds is repainted too, so the home
+  /// screen does not keep showing the mark the clone used to have.
+  Future<AppException?> setIconColor(
+    VirtualProfileModel profile,
+    CloneIconColor color,
+  ) async {
+    try {
+      await _repository.updateProfile(profile.id, iconColor: color);
+      await _loadProfiles();
+      await _refreshShortcut(profile.id);
+      return null;
+    } on AppException catch (error) {
+      return error;
+    }
+  }
+
+  /// Carries a changed icon out to this clone's pinned shortcut, if it has one.
+  ///
+  /// Read back from [profiles] rather than taken from the caller's copy: the caller holds
+  /// the clone as it was *before* the change, and repainting the shortcut with that would
+  /// undo on the home screen what was just done everywhere else.
+  ///
+  /// Never rethrows. The icon has already changed in the app; a launcher that will not
+  /// take the update is not a reason to report the change as failed.
+  Future<void> _refreshShortcut(String profileId) async {
+    VirtualProfileModel? updated;
+    for (final VirtualProfileModel profile in profiles) {
+      if (profile.id == profileId) {
+        updated = profile;
+        break;
+      }
+    }
+    if (updated == null) {
+      return;
+    }
+    try {
+      await _nativeBridge.refreshCloneShortcut(
+        profileId: updated.id,
+        packageName: updated.packageName,
+        label: shortcutLabel(updated),
+        spaceIndex: instanceIndex(updated),
+        spaceCount: siblingCount(updated),
+        badgeArgb: updated.iconColor.argb,
+        iconPath: updated.iconPath,
+      );
+    } on Object catch (error, stackTrace) {
+      _logger.error('Could not refresh the shortcut for $profileId', error, stackTrace);
+    }
+  }
+
+  /// Puts a picture of the user's own on this clone, in place of its app's icon.
+  ///
+  /// Returns null when the icon was set *or* when the user backed out of the picker --
+  /// both are "nothing went wrong". Non-null is a refusal for the caller to word.
+  ///
+  /// The picture is normalised and copied into the app's own storage, so the clone keeps
+  /// its icon after the original is moved, renamed or deleted from the gallery.
+  Future<AppException?> setCustomIcon(VirtualProfileModel profile) async {
+    try {
+      final List<PlatformFile> picked = await FilePicker.pickFiles(
+        type: FileType.image,
+      );
+      if (picked.isEmpty) {
+        return null;
+      }
+      final Uint8List source = await picked.first.readAsBytes();
+      final String path = await _iconStore.save(
+        profileId: profile.id,
+        source: source,
+      );
+      await _repository.updateProfile(profile.id, iconPath: path);
+      await _loadProfiles();
+      await _refreshShortcut(profile.id);
+      return null;
+    } on AppException catch (error) {
+      return error;
+    } on Object catch (error, stackTrace) {
+      // Decoding someone else's picture and writing a file are both things that can fail
+      // for reasons this app did not cause -- an unreadable format, a full disk. The
+      // caller says so in the user's language; the detail goes to the log.
+      _logger.error('Could not set the icon for ${profile.id}', error, stackTrace);
+      return const StorageException(
+        AppErrorCodes.cloneIconFailed,
+        'The picture could not be used as an icon.',
+      );
+    }
+  }
+
+  /// Gives this clone its app's own icon back, and forgets the picture.
+  Future<AppException?> clearCustomIcon(VirtualProfileModel profile) async {
+    try {
+      await _repository.updateProfile(profile.id, clearIconPath: true);
+      await _iconStore.delete(profile.id);
+      await _loadProfiles();
+      await _refreshShortcut(profile.id);
+      return null;
+    } on AppException catch (error) {
+      return error;
+    } on Object catch (error, stackTrace) {
+      _logger.error('Could not clear the icon for ${profile.id}', error, stackTrace);
+      return const StorageException(
+        AppErrorCodes.cloneIconFailed,
+        'The icon could not be removed.',
+      );
     }
   }
 
@@ -729,6 +880,14 @@ class HomeController extends GetxController {
   Future<AppException?> deleteProfile(VirtualProfileModel profile) async {
     try {
       await _engine.deleteProfile(profile.id);
+      // After the clone is gone, and never in a way that can fail the delete: a picture
+      // left behind is wasted bytes, but a delete refused because of one would leave the
+      // user with a clone they asked to be rid of.
+      try {
+        await _iconStore.delete(profile.id);
+      } on Object catch (error, stackTrace) {
+        _logger.error('Could not remove the icon for ${profile.id}', error, stackTrace);
+      }
       await _loadProfiles();
       await _loadProfileStates();
       return null;

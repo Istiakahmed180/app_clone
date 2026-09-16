@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "選択した APK はすべて同じアプリのものである必要があります。",
   "errorApkVersionMismatch": "選択した APK はすべて同じバージョンである必要があります。",
   "errorApkBaseRequired": "ベース APK をちょうど 1 つと、設定スプリットを 1 つ以上選んでください。",
-  "errorApkDuplicateSplit": "同じ APK スプリットが複数回選択されました。"
+  "errorApkDuplicateSplit": "同じ APK スプリットが複数回選択されました。",
+  "cloneActionChangeIcon": "アイコンを変更",
+  "cloneIconPickerTitle": "このクローンのアイコン",
+  "cloneIconPickerMessage": "好きな画像を設定するか、アプリのアイコンのまま色で印を付けられます。どちらでも、同じアプリの他のクローンとひと目で見分けられます。",
+  "cloneIconPickerChoose": "画像を選ぶ",
+  "cloneIconPickerUseAppIcon": "アプリのアイコンを使う",
+  "errorCloneIconFailed": "その画像はアイコンとして使えませんでした。別の画像をお試しください。"
 }

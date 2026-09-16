@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "Todos os APKs selecionados devem pertencer ao mesmo app.",
   "errorApkVersionMismatch": "Todos os APKs selecionados devem ter a mesma versão.",
   "errorApkBaseRequired": "Selecione exatamente um APK base e um ou mais splits de configuração.",
-  "errorApkDuplicateSplit": "O mesmo split de APK foi selecionado mais de uma vez."
+  "errorApkDuplicateSplit": "O mesmo split de APK foi selecionado mais de uma vez.",
+  "cloneActionChangeIcon": "Mudar ícone",
+  "cloneIconPickerTitle": "Ícone deste clone",
+  "cloneIconPickerMessage": "Dê a ele uma imagem sua, ou mantenha o ícone do app e marque-o com uma cor — de qualquer jeito você o distingue num relance dos seus outros clones do mesmo app.",
+  "cloneIconPickerChoose": "Escolher uma imagem",
+  "cloneIconPickerUseAppIcon": "Usar o ícone do app",
+  "errorCloneIconFailed": "Não foi possível usar essa imagem como ícone. Tente outra."
 }

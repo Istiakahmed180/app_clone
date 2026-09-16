@@ -323,6 +323,26 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cloneActionEditName => 'नाम बदलें';
 
   @override
+  String get cloneActionChangeIcon => 'आइकन बदलें';
+
+  @override
+  String get cloneIconPickerChoose => 'तस्वीर चुनें';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'ऐप का आइकन इस्तेमाल करें';
+
+  @override
+  String get errorCloneIconFailed =>
+      'उस तस्वीर को आइकन के रूप में इस्तेमाल नहीं किया जा सका। कोई दूसरी आज़माएँ।';
+
+  @override
+  String get cloneIconPickerTitle => 'इस क्लोन का आइकन';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'इसे अपनी कोई तस्वीर दें, या ऐप का आइकन रखकर उस पर रंग का निशान लगाएँ — दोनों ही तरह आप इसे उसी ऐप के अपने दूसरे क्लोन से एक नज़र में पहचान लेंगे।';
+
+  @override
   String get cloneActionForceStop => 'ज़बरदस्ती रोकें';
 
   @override

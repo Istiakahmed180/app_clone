@@ -33,6 +33,8 @@ String appErrorMessage(AppLocalizations l10n, AppException error) {
       return l10n.errorBridgeUnsupportedPlatform;
     case AppErrorCodes.testAppCheckFailed:
       return l10n.errorTestAppCheckFailed;
+    case AppErrorCodes.cloneIconFailed:
+      return l10n.errorCloneIconFailed;
 
     // ── the engine's, shared with the clone refusal message ───────────────
     case 'APP_NOT_FOUND':

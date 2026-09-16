@@ -324,6 +324,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cloneActionEditName => 'Editar nome';
 
   @override
+  String get cloneActionChangeIcon => 'Mudar ícone';
+
+  @override
+  String get cloneIconPickerChoose => 'Escolher uma imagem';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Usar o ícone da aplicação';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Não foi possível usar essa imagem como ícone. Experimente outra.';
+
+  @override
+  String get cloneIconPickerTitle => 'Ícone deste clone';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Dê-lhe uma imagem sua, ou mantenha o ícone da aplicação e marque-o com uma cor — de qualquer forma distingue-o num relance dos outros clones da mesma aplicação.';
+
+  @override
   String get cloneActionForceStop => 'Forçar paragem';
 
   @override
@@ -1475,6 +1495,26 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get cloneActionEditName => 'Editar nome';
+
+  @override
+  String get cloneActionChangeIcon => 'Mudar ícone';
+
+  @override
+  String get cloneIconPickerChoose => 'Escolher uma imagem';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Usar o ícone do app';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Não foi possível usar essa imagem como ícone. Tente outra.';
+
+  @override
+  String get cloneIconPickerTitle => 'Ícone deste clone';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Dê a ele uma imagem sua, ou mantenha o ícone do app e marque-o com uma cor — de qualquer jeito você o distingue num relance dos seus outros clones do mesmo app.';
 
   @override
   String get cloneActionForceStop => 'Forçar paragem';

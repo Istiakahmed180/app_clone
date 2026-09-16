@@ -322,6 +322,26 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cloneActionEditName => 'Sửa tên';
 
   @override
+  String get cloneActionChangeIcon => 'Đổi biểu tượng';
+
+  @override
+  String get cloneIconPickerChoose => 'Chọn một ảnh';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Dùng biểu tượng của ứng dụng';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Không thể dùng ảnh đó làm biểu tượng. Hãy thử ảnh khác.';
+
+  @override
+  String get cloneIconPickerTitle => 'Biểu tượng của bản sao này';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Đặt ảnh của riêng bạn, hoặc giữ biểu tượng của ứng dụng và đánh dấu bằng một màu — cách nào bạn cũng nhận ra nó ngay giữa các bản sao khác của cùng ứng dụng.';
+
+  @override
   String get cloneActionForceStop => 'Buộc dừng';
 
   @override

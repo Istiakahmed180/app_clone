@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'clone_icon_color.dart';
+
 /// Metadata describing one virtual profile.
 ///
 /// This model is the host's own record of a clone. The container it maps to — with its
@@ -18,6 +20,8 @@ class VirtualProfileModel {
     required this.createdAt,
     this.enabled = true,
     this.hidden = false,
+    this.iconColor = CloneIconColor.none,
+    this.iconPath,
   });
 
   factory VirtualProfileModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class VirtualProfileModel {
       createdAt: DateTime.parse(json['createdAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
       hidden: json['hidden'] as bool? ?? false,
+      iconColor: CloneIconColor.parse(json['iconColor'] as String?),
+      iconPath: json['iconPath'] as String?,
     );
   }
 
@@ -46,10 +52,32 @@ class VirtualProfileModel {
   /// default in [fromJson].
   final bool hidden;
 
+  /// The mark the user put on this clone to tell it from its siblings, or
+  /// [CloneIconColor.none] when they have not chosen one.
+  ///
+  /// Host-side metadata, like [hidden]: it changes how the clone is drawn and nothing
+  /// about the container. Absent from older stored profiles, which [CloneIconColor.parse]
+  /// reads as [CloneIconColor.none].
+  final CloneIconColor iconColor;
+
+  /// A picture the user chose for this clone, replacing its app's icon, or null when it
+  /// still shows the app's own.
+  ///
+  /// A path rather than the bytes: profiles are rewritten whole on every change, and
+  /// carrying a few hundred kilobytes of PNG in each row would make renaming one clone
+  /// rewrite the icons of all of them. The file is owned by `CloneIconStore`.
+  ///
+  /// A path whose file has gone reads as no custom icon rather than as an error: losing
+  /// the picture should cost the user their icon, not their clone.
+  final String? iconPath;
+
   VirtualProfileModel copyWith({
     String? profileName,
     bool? enabled,
     bool? hidden,
+    CloneIconColor? iconColor,
+    String? iconPath,
+    bool clearIconPath = false,
   }) {
     return VirtualProfileModel(
       id: id,
@@ -59,6 +87,8 @@ class VirtualProfileModel {
       createdAt: createdAt,
       enabled: enabled ?? this.enabled,
       hidden: hidden ?? this.hidden,
+      iconColor: iconColor ?? this.iconColor,
+      iconPath: clearIconPath ? null : (iconPath ?? this.iconPath),
     );
   }
 
@@ -70,6 +100,8 @@ class VirtualProfileModel {
         'createdAt': createdAt.toIso8601String(),
         'enabled': enabled,
         'hidden': hidden,
+        'iconColor': iconColor.wire,
+        'iconPath': iconPath,
       };
 
   @override
@@ -82,9 +114,12 @@ class VirtualProfileModel {
           other.profileName == profileName &&
           other.createdAt == createdAt &&
           other.enabled == enabled &&
-          other.hidden == hidden;
+          other.hidden == hidden &&
+          other.iconColor == iconColor &&
+          other.iconPath == iconPath;
 
   @override
   int get hashCode =>
-      Object.hash(id, packageName, appName, profileName, createdAt, enabled, hidden);
+      Object.hash(id, packageName, appName, profileName, createdAt, enabled, hidden,
+          iconColor, iconPath);
 }

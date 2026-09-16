@@ -245,6 +245,26 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                 ),
             )
 
+            // Repaints a shortcut the launcher already holds. Separate from pinning
+            // because it must never put the "add to home screen" prompt in front of
+            // someone who only changed a clone's icon.
+            "refreshCloneShortcut" -> {
+                val profileId = call.requiredProfile(result) ?: return
+                val packageName = call.requiredPackage(result) ?: return
+                val label = call.argument<String>("label").orEmpty().ifBlank { packageName }
+                result.success(
+                    shortcuts.refreshPinned(
+                        profileId,
+                        packageName,
+                        label,
+                        spaceIndex = call.argument<Int>("spaceIndex") ?: 1,
+                        spaceCount = call.argument<Int>("spaceCount") ?: 1,
+                        badgeArgb = call.argument<Number>("badgeArgb")?.toInt(),
+                        iconPath = call.argument<String>("iconPath"),
+                    ).toEnvelope("SHORTCUT_REFRESHED", "Pinned shortcut refreshed."),
+                )
+            }
+
             "pinCloneShortcut" -> {
                 val profileId = call.requiredProfile(result) ?: return
                 val packageName = call.requiredPackage(result) ?: return
@@ -256,6 +276,16 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
                         label,
                         spaceIndex = call.argument<Int>("spaceIndex") ?: 1,
                         spaceCount = call.argument<Int>("spaceCount") ?: 1,
+                        // Read as Number, not Int. An opaque ARGB value has the alpha
+                        // byte set, so it is larger than Integer.MAX_VALUE and the
+                        // channel hands it over as a Long -- asking for an Int throws
+                        // "java.lang.Long cannot be cast to java.lang.Integer".
+                        // `toInt()` keeps the bit pattern, which is the colour.
+                        //
+                        // Null when the user has not marked this clone; the badge then
+                        // falls back to the app's accent.
+                        badgeArgb = call.argument<Number>("badgeArgb")?.toInt(),
+                        iconPath = call.argument<String>("iconPath"),
                     ).toEnvelope("SHORTCUT_REQUESTED", "Shortcut request sent to the launcher."),
                 )
             }

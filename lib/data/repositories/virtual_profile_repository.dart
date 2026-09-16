@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/services/profile_storage.dart';
 import '../../core/utils/app_logger.dart';
+import '../models/clone_icon_color.dart';
 import '../models/virtual_profile_model.dart';
 
 /// Owns all persistence of virtual profile metadata.
@@ -132,6 +133,9 @@ class VirtualProfileRepository {
     String? profileName,
     bool? enabled,
     bool? hidden,
+    CloneIconColor? iconColor,
+    String? iconPath,
+    bool clearIconPath = false,
   }) async {
     final List<VirtualProfileModel> profiles = await getProfiles();
     final int index = profiles.indexWhere(
@@ -149,6 +153,9 @@ class VirtualProfileRepository {
       profileName: name,
       enabled: enabled,
       hidden: hidden,
+      iconColor: iconColor,
+      iconPath: iconPath,
+      clearIconPath: clearIconPath,
     );
 
     final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(

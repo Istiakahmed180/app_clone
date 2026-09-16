@@ -324,6 +324,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cloneActionEditName => 'Namen ändern';
 
   @override
+  String get cloneActionChangeIcon => 'Symbol ändern';
+
+  @override
+  String get cloneIconPickerChoose => 'Bild auswählen';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'App-Symbol verwenden';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Dieses Bild konnte nicht als Symbol verwendet werden. Probiere ein anderes.';
+
+  @override
+  String get cloneIconPickerTitle => 'Symbol dieses Klons';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Gib ihm ein eigenes Bild oder behalte das App-Symbol und markiere es mit einer Farbe — so erkennst du ihn auf einen Blick unter deinen anderen Klonen derselben App.';
+
+  @override
   String get cloneActionForceStop => 'Beenden erzwingen';
 
   @override

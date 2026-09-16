@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "Semua APK yang dipilih harus milik aplikasi yang sama.",
   "errorApkVersionMismatch": "Semua APK yang dipilih harus memiliki versi yang sama.",
   "errorApkBaseRequired": "Pilih tepat satu APK dasar dan satu atau beberapa split konfigurasi.",
-  "errorApkDuplicateSplit": "Split APK yang sama dipilih lebih dari sekali."
+  "errorApkDuplicateSplit": "Split APK yang sama dipilih lebih dari sekali.",
+  "cloneActionChangeIcon": "Ubah ikon",
+  "cloneIconPickerTitle": "Ikon klon ini",
+  "cloneIconPickerMessage": "Beri gambar milikmu sendiri, atau pertahankan ikon aplikasinya dan tandai dengan warna — keduanya membuatmu langsung mengenalinya di antara klon lain dari aplikasi yang sama.",
+  "cloneIconPickerChoose": "Pilih gambar",
+  "cloneIconPickerUseAppIcon": "Gunakan ikon aplikasi",
+  "errorCloneIconFailed": "Gambar itu tidak bisa dipakai sebagai ikon. Coba yang lain."
 }

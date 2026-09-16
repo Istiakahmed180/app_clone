@@ -325,6 +325,26 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cloneActionEditName => 'Змінити назву';
 
   @override
+  String get cloneActionChangeIcon => 'Змінити піктограму';
+
+  @override
+  String get cloneIconPickerChoose => 'Вибрати зображення';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Використати піктограму застосунку';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Це зображення не вдалося використати як піктограму. Спробуйте інше.';
+
+  @override
+  String get cloneIconPickerTitle => 'Піктограма цього клону';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Поставте власне зображення або залиште піктограму застосунку й позначте її кольором — у будь-якому разі ви одразу відрізните його від інших клонів того самого застосунку.';
+
+  @override
   String get cloneActionForceStop => 'Зупинити';
 
   @override

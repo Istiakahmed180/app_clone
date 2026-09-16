@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "चुनी गई सभी APK एक ही ऐप की होनी चाहिए।",
   "errorApkVersionMismatch": "चुनी गई सभी APK का संस्करण एक ही होना चाहिए।",
   "errorApkBaseRequired": "ठीक एक बेस APK और एक या अधिक कॉन्फ़िगरेशन स्प्लिट चुनें।",
-  "errorApkDuplicateSplit": "एक ही APK स्प्लिट एक से ज़्यादा बार चुना गया।"
+  "errorApkDuplicateSplit": "एक ही APK स्प्लिट एक से ज़्यादा बार चुना गया।",
+  "cloneActionChangeIcon": "आइकन बदलें",
+  "cloneIconPickerTitle": "इस क्लोन का आइकन",
+  "cloneIconPickerMessage": "इसे अपनी कोई तस्वीर दें, या ऐप का आइकन रखकर उस पर रंग का निशान लगाएँ — दोनों ही तरह आप इसे उसी ऐप के अपने दूसरे क्लोन से एक नज़र में पहचान लेंगे।",
+  "cloneIconPickerChoose": "तस्वीर चुनें",
+  "cloneIconPickerUseAppIcon": "ऐप का आइकन इस्तेमाल करें",
+  "errorCloneIconFailed": "उस तस्वीर को आइकन के रूप में इस्तेमाल नहीं किया जा सका। कोई दूसरी आज़माएँ।"
 }

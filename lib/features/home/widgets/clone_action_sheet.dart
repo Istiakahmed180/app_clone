@@ -19,6 +19,7 @@ enum CloneAction {
   addShortcut,
   spaceInfo,
   rename,
+  changeIcon,
   forceStop,
   clearCache,
   clearStorage,
@@ -251,9 +252,9 @@ class _CloneActionSheet extends StatelessWidget {
             SizedBox(width: 12.w),
             Expanded(
               child: _ActionRow(
-                action: CloneAction.forceStop,
-                icon: Icons.highlight_off,
-                label: l10n.cloneActionForceStop,
+                action: CloneAction.changeIcon,
+                icon: Icons.palette_outlined,
+                label: l10n.cloneActionChangeIcon,
               ),
             ),
           ],
@@ -261,6 +262,14 @@ class _CloneActionSheet extends StatelessWidget {
         SizedBox(height: 12.h),
         Row(
           children: <Widget>[
+            Expanded(
+              child: _ActionRow(
+                action: CloneAction.forceStop,
+                icon: Icons.highlight_off,
+                label: l10n.cloneActionForceStop,
+              ),
+            ),
+            SizedBox(width: 12.w),
             Expanded(
               child: _ActionRow(
                 action: CloneAction.clearCache,
@@ -268,7 +277,11 @@ class _CloneActionSheet extends StatelessWidget {
                 label: l10n.cloneActionClearCache,
               ),
             ),
-            SizedBox(width: 12.w),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: <Widget>[
             Expanded(
               child: _ActionRow(
                 action: CloneAction.clearStorage,
@@ -276,11 +289,7 @@ class _CloneActionSheet extends StatelessWidget {
                 label: l10n.cloneActionClearStorage,
               ),
             ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        Row(
-          children: <Widget>[
+            SizedBox(width: 12.w),
             Expanded(
               child: _ActionRow(
                 action: CloneAction.toggleHidden,
@@ -290,7 +299,11 @@ class _CloneActionSheet extends StatelessWidget {
                 label: hidden ? l10n.cloneActionUnhide : l10n.cloneActionHide,
               ),
             ),
-            SizedBox(width: 12.w),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: <Widget>[
             Expanded(
               child: _ActionRow(
                 action: CloneAction.shareApp,
@@ -298,13 +311,15 @@ class _CloneActionSheet extends StatelessWidget {
                 label: l10n.cloneActionShareApp,
               ),
             ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _ActionRow(
+                action: CloneAction.permissions,
+                icon: Icons.admin_panel_settings_outlined,
+                label: l10n.cloneActionPermissions,
+              ),
+            ),
           ],
-        ),
-        SizedBox(height: 12.h),
-        _ActionRow(
-          action: CloneAction.permissions,
-          icon: Icons.admin_panel_settings_outlined,
-          label: l10n.cloneActionPermissions,
         ),
         // Full width on its own line: the label does not fit the two-column grid without
         // being ellipsised. Offered only while it is missing -- a clone that already has

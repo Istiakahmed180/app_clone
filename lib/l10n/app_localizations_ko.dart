@@ -318,6 +318,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cloneActionEditName => '이름 수정';
 
   @override
+  String get cloneActionChangeIcon => '아이콘 변경';
+
+  @override
+  String get cloneIconPickerChoose => '사진 선택';
+
+  @override
+  String get cloneIconPickerUseAppIcon => '앱 아이콘 사용';
+
+  @override
+  String get errorCloneIconFailed => '그 사진은 아이콘으로 사용할 수 없습니다. 다른 사진을 선택해 주세요.';
+
+  @override
+  String get cloneIconPickerTitle => '이 클론의 아이콘';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '직접 고른 사진을 넣거나, 앱 아이콘을 그대로 두고 색으로 표시할 수 있습니다. 어느 쪽이든 같은 앱의 다른 클론과 한눈에 구분됩니다.';
+
+  @override
   String get cloneActionForceStop => '강제 중지';
 
   @override

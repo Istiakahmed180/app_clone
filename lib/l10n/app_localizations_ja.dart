@@ -317,6 +317,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cloneActionEditName => '名前を編集';
 
   @override
+  String get cloneActionChangeIcon => 'アイコンを変更';
+
+  @override
+  String get cloneIconPickerChoose => '画像を選ぶ';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'アプリのアイコンを使う';
+
+  @override
+  String get errorCloneIconFailed => 'その画像はアイコンとして使えませんでした。別の画像をお試しください。';
+
+  @override
+  String get cloneIconPickerTitle => 'このクローンのアイコン';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '好きな画像を設定するか、アプリのアイコンのまま色で印を付けられます。どちらでも、同じアプリの他のクローンとひと目で見分けられます。';
+
+  @override
   String get cloneActionForceStop => '強制停止';
 
   @override

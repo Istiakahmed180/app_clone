@@ -327,6 +327,26 @@ class AppLocalizationsIt extends AppLocalizations {
   String get cloneActionEditName => 'Modifica nome';
 
   @override
+  String get cloneActionChangeIcon => 'Cambia icona';
+
+  @override
+  String get cloneIconPickerChoose => 'Scegli un\'immagine';
+
+  @override
+  String get cloneIconPickerUseAppIcon => 'Usa l\'icona dell\'app';
+
+  @override
+  String get errorCloneIconFailed =>
+      'Non è stato possibile usare quell\'immagine come icona. Provane un\'altra.';
+
+  @override
+  String get cloneIconPickerTitle => 'Icona di questo clone';
+
+  @override
+  String get cloneIconPickerMessage =>
+      'Dagli un\'immagine tua, oppure tieni l\'icona dell\'app e contrassegnala con un colore: in entrambi i casi lo riconoscerai a colpo d\'occhio tra gli altri cloni della stessa app.';
+
+  @override
   String get cloneActionForceStop => 'Arresto forzato';
 
   @override

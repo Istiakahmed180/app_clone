@@ -9,6 +9,7 @@ import '../../../l10n/l10n_context.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/status_colors.dart';
 import '../../../data/models/engine_result.dart';
+import '../../../data/models/clone_icon_color.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/app_icon.dart';
 import '../controllers/home_controller.dart';
@@ -145,11 +146,17 @@ class CloneTile extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (siblingCount > 1)
+                    // Shown for a sibling to be told from, or because the user marked
+                    // this clone deliberately -- a mark on a lone clone is still the
+                    // answer to "which of my accounts is this".
+                    if (siblingCount > 1 || profile.iconColor.isSet)
                       Positioned(
                         top: 0,
                         right: 0,
-                        child: _InstanceBadge(instanceIndex),
+                        child: _InstanceBadge(
+                          index: siblingCount > 1 ? instanceIndex : null,
+                          color: profile.iconColor,
+                        ),
                       ),
                   ],
                 ),
@@ -248,28 +255,51 @@ class CloneTile extends StatelessWidget {
 
 /// The instance number, for telling two clones of the same app apart.
 class _InstanceBadge extends StatelessWidget {
-  const _InstanceBadge(this.index);
+  const _InstanceBadge({required this.index, required this.color});
 
-  final int index;
+  /// The clone's number among its siblings, or null when it has none -- a lone clone the
+  /// user has marked gets the colour without a number, because "1 of 1" says nothing.
+  final int? index;
+
+  final CloneIconColor color;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final int? argb = color.argb;
+
+    // The user's mark when they made one, the app's accent when they did not: this is
+    // identity, not a status, and a grid of tiles already has one accent doing work.
+    final Color tint =
+        argb == null ? theme.colorScheme.primary : Color(argb);
+    final int? number = index;
+
+    if (number == null) {
+      return Container(
+        width: 12.r,
+        height: 12.r,
+        decoration: BoxDecoration(
+          color: tint,
+          shape: BoxShape.circle,
+          // The tile's own surface, so the dot reads as sitting on the icon rather than
+          // floating over whatever it happens to overlap.
+          border: Border.all(color: theme.colorScheme.surface, width: 1.5.r),
+        ),
+      );
+    }
 
     return Container(
       alignment: Alignment.center,
       constraints: BoxConstraints(minWidth: 18.r, minHeight: 18.r),
       padding: EdgeInsets.symmetric(horizontal: 5.w),
       decoration: BoxDecoration(
-        // The accent at low opacity rather than a second colour: this is identity, not
-        // a status, and a grid of tiles already has one accent doing work.
-        color: theme.colorScheme.primary.withValues(alpha: 0.12),
+        color: tint.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(9.r),
       ),
       child: Text(
-        '$index',
+        '$number',
         style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.primary,
+          color: tint,
           fontWeight: FontWeight.w700,
         ),
       ),

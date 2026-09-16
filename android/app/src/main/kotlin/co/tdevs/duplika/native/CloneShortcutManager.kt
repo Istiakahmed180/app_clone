@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -46,6 +47,8 @@ class CloneShortcutManager(private val context: Context) {
         label: String,
         spaceIndex: Int = 1,
         spaceCount: Int = 1,
+        badgeArgb: Int? = null,
+        iconPath: String? = null,
     ): EngineResult<Unit> {
         if (!isSupported()) {
             return EngineResult.Failure(
@@ -55,18 +58,9 @@ class CloneShortcutManager(private val context: Context) {
         }
 
         return try {
-            val intent = Intent(context, CloneLauncherActivity::class.java).apply {
-                action = Intent.ACTION_VIEW
-                putExtra(CloneLauncherActivity.EXTRA_PROFILE_ID, profileId)
-                putExtra(CloneLauncherActivity.EXTRA_PACKAGE_NAME, packageName)
-            }
-
-            val shortcut = ShortcutInfoCompat.Builder(context, profileId)
-                .setShortLabel(label)
-                .setLongLabel(label)
-                .setIcon(iconFor(packageName, spaceIndex, spaceCount))
-                .setIntent(intent)
-                .build()
+            val shortcut = describe(
+                profileId, packageName, label, spaceIndex, spaceCount, badgeArgb, iconPath,
+            )
 
             if (ShortcutManagerCompat.requestPinShortcut(context, shortcut, null)) {
                 Slog.i(Slog.PROFILE, "Requested a home-screen shortcut for $profileId")
@@ -101,28 +95,120 @@ class CloneShortcutManager(private val context: Context) {
     }
 
     /**
-     * The guest app's own icon, badged with the space number, falling back to Duplika's
-     * icon when the package is not installed on the host.
+     * Repaints a shortcut the launcher already holds, if it holds one.
      *
-     * The badge is only drawn when the app has more than one clone. With a single clone
-     * there is nothing to disambiguate: the launcher already stamps a pinned shortcut
-     * with the owning app's icon, which separates it from the host app's own launcher
-     * entry.
+     * A pinned shortcut is not frozen: the app that published it may update it, which is
+     * what keeps a home-screen tile honest after the clone it points at is re-marked or
+     * given a new picture. Launchers redraw on their own schedule, so the change may not
+     * be instant, but it does arrive.
+     *
+     * Silent when the clone has no shortcut pinned: `updateShortcuts` matches on id and
+     * simply does nothing for one nobody has. That is why this takes no "is it pinned"
+     * check of its own.
      */
-    private fun iconFor(packageName: String, spaceIndex: Int, spaceCount: Int): IconCompat {
-        val drawable: Drawable = try {
-            context.packageManager.getApplicationIcon(packageName)
-        } catch (_: PackageManager.NameNotFoundException) {
-            context.applicationInfo.loadIcon(context.packageManager)
+    fun refreshPinned(
+        profileId: String,
+        packageName: String,
+        label: String,
+        spaceIndex: Int = 1,
+        spaceCount: Int = 1,
+        badgeArgb: Int? = null,
+        iconPath: String? = null,
+    ): EngineResult<Unit> = try {
+        ShortcutManagerCompat.updateShortcuts(
+            context,
+            listOf(
+                describe(
+                    profileId, packageName, label, spaceIndex, spaceCount, badgeArgb,
+                    iconPath,
+                ),
+            ),
+        )
+        EngineResult.ok()
+    } catch (error: Throwable) {
+        // Never fatal: the clone's icon has already changed everywhere the app draws it,
+        // and a launcher that would not take the update is not worth failing over.
+        Slog.w(Slog.PROFILE, "Could not refresh the shortcut for $profileId: ${error.message}")
+        EngineResult.ok()
+    }
+
+    /** The shortcut for one clone, as both pinning and refreshing need it. */
+    private fun describe(
+        profileId: String,
+        packageName: String,
+        label: String,
+        spaceIndex: Int,
+        spaceCount: Int,
+        badgeArgb: Int?,
+        iconPath: String?,
+    ): ShortcutInfoCompat {
+        val intent = Intent(context, CloneLauncherActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            putExtra(CloneLauncherActivity.EXTRA_PROFILE_ID, profileId)
+            putExtra(CloneLauncherActivity.EXTRA_PACKAGE_NAME, packageName)
         }
 
-        val base = drawable.toBitmap()
-        val bitmap = if (spaceCount > 1) badge(base, spaceIndex) else base
+        return ShortcutInfoCompat.Builder(context, profileId)
+            .setShortLabel(label)
+            .setLongLabel(label)
+            .setIcon(iconFor(packageName, spaceIndex, spaceCount, badgeArgb, iconPath))
+            .setIntent(intent)
+            .build()
+    }
+
+    /**
+     * The guest app's own icon, badged, falling back to Duplika's icon when the package
+     * is not installed on the host.
+     *
+     * Two reasons to badge, and they draw differently:
+     *
+     * - the app has **more than one clone**, so the badge carries the space number;
+     * - the user **marked this clone** with a colour ([badgeArgb]), so the badge is a
+     *   plain dot -- with one clone a number says nothing, and the mark is the message.
+     *
+     * Neither applies, no badge: the launcher already stamps a pinned shortcut with the
+     * owning app's icon, which separates it from the host app's own launcher entry.
+     *
+     * The colour matches what the grid draws, because both come from the same `argb` on
+     * the Dart side, and [refreshPinned] carries a later change out to a shortcut the
+     * launcher already holds.
+     */
+    private fun iconFor(
+        packageName: String,
+        spaceIndex: Int,
+        spaceCount: Int,
+        badgeArgb: Int?,
+        iconPath: String?,
+    ): IconCompat {
+        // A picture the user chose wins over the app's own icon. Read defensively: the
+        // file is the app's, but a missing or unreadable one should cost the shortcut its
+        // custom look, not stop it being created.
+        val chosen = iconPath?.let { path ->
+            runCatching { BitmapFactory.decodeFile(path) }
+                .onFailure { Slog.w(Slog.PROFILE, "Could not read the clone icon: ${it.message}") }
+                .getOrNull()
+        }
+
+        val base = chosen?.let { Bitmap.createScaledBitmap(it, ICON_PX, ICON_PX, true) }
+            ?: run {
+                val drawable: Drawable = try {
+                    context.packageManager.getApplicationIcon(packageName)
+                } catch (_: PackageManager.NameNotFoundException) {
+                    context.applicationInfo.loadIcon(context.packageManager)
+                }
+                drawable.toBitmap()
+            }
+        val color = badgeArgb ?: BADGE_COLOR
+        val bitmap = when {
+            spaceCount > 1 -> badge(base, spaceIndex, color)
+            badgeArgb != null -> badge(base, null, color)
+            else -> base
+        }
         return IconCompat.createWithBitmap(bitmap)
     }
 
     /**
-     * Draws [number] in a filled circle over the icon.
+     * Draws a filled circle over the icon, carrying [number] when there is one.
      *
      * Bottom-**left**, because Android puts its own owning-app badge bottom-right, and
      * inset from the edge rather than flush: a launcher that masks the icon to a circle
@@ -130,7 +216,7 @@ class CloneShortcutManager(private val context: Context) {
      *
      * A white ring around it keeps the number readable over an icon of any colour.
      */
-    private fun badge(source: Bitmap, number: Int): Bitmap {
+    private fun badge(source: Bitmap, number: Int?, fillColor: Int): Bitmap {
         val output = source.copy(Bitmap.Config.ARGB_8888, true) ?: return source
         val canvas = Canvas(output)
         val size = output.width.toFloat()
@@ -142,10 +228,11 @@ class CloneShortcutManager(private val context: Context) {
         val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
         canvas.drawCircle(centreX, centreY, radius, ring)
 
-        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BADGE_COLOR }
+        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = fillColor }
         canvas.drawCircle(centreX, centreY, radius * 0.86f, fill)
 
-        val text = number.toString()
+        // A mark without siblings to count: the colour is the whole message.
+        val text = number?.toString() ?: return output
         val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -174,7 +261,10 @@ class CloneShortcutManager(private val context: Context) {
     private companion object {
         const val ICON_PX = 192
 
-        /** Mirrors `AppTheme.accent`; a launcher icon has no theme to follow. */
+        /**
+         * Mirrors `AppTheme.accent`; a launcher icon has no theme to follow. Used when the
+         * user has not marked the clone with a colour of their own.
+         */
         val BADGE_COLOR = Color.rgb(0xFF, 0x5A, 0x2E)
 
         const val BADGE_RADIUS_FRACTION = 0.20f

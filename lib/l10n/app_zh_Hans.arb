@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "所选的 APK 必须属于同一个应用。",
   "errorApkVersionMismatch": "所选的 APK 必须是同一版本。",
   "errorApkBaseRequired": "请选择恰好一个基础 APK 和一个或多个配置拆分包。",
-  "errorApkDuplicateSplit": "同一个 APK 拆分包被选择了多次。"
+  "errorApkDuplicateSplit": "同一个 APK 拆分包被选择了多次。",
+  "cloneActionChangeIcon": "更改图标",
+  "cloneIconPickerTitle": "此分身的图标",
+  "cloneIconPickerMessage": "给它换上你自己的图片，或者保留应用图标并用颜色做个标记——两种方式都能让你在同一应用的其他分身中一眼认出它。",
+  "cloneIconPickerChoose": "选择图片",
+  "cloneIconPickerUseAppIcon": "使用应用图标",
+  "errorCloneIconFailed": "那张图片无法用作图标。请换一张试试。"
 }

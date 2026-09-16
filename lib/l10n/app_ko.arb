@@ -321,5 +321,11 @@
   "errorApkPackageMismatch": "선택한 APK는 모두 같은 앱의 것이어야 합니다.",
   "errorApkVersionMismatch": "선택한 APK는 모두 같은 버전이어야 합니다.",
   "errorApkBaseRequired": "기본 APK 하나와 구성 분할 하나 이상을 선택하세요.",
-  "errorApkDuplicateSplit": "같은 APK 분할이 여러 번 선택되었습니다."
+  "errorApkDuplicateSplit": "같은 APK 분할이 여러 번 선택되었습니다.",
+  "cloneActionChangeIcon": "아이콘 변경",
+  "cloneIconPickerTitle": "이 클론의 아이콘",
+  "cloneIconPickerMessage": "직접 고른 사진을 넣거나, 앱 아이콘을 그대로 두고 색으로 표시할 수 있습니다. 어느 쪽이든 같은 앱의 다른 클론과 한눈에 구분됩니다.",
+  "cloneIconPickerChoose": "사진 선택",
+  "cloneIconPickerUseAppIcon": "앱 아이콘 사용",
+  "errorCloneIconFailed": "그 사진은 아이콘으로 사용할 수 없습니다. 다른 사진을 선택해 주세요."
 }

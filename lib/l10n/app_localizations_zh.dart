@@ -315,6 +315,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cloneActionEditName => '编辑名称';
 
   @override
+  String get cloneActionChangeIcon => '更改图标';
+
+  @override
+  String get cloneIconPickerChoose => '选择图片';
+
+  @override
+  String get cloneIconPickerUseAppIcon => '使用应用图标';
+
+  @override
+  String get errorCloneIconFailed => '那张图片无法用作图标。请换一张试试。';
+
+  @override
+  String get cloneIconPickerTitle => '此分身的图标';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '给它换上你自己的图片，或者保留应用图标并用颜色做个标记——两种方式都能让你在同一应用的其他分身中一眼认出它。';
+
+  @override
   String get cloneActionForceStop => '强制停止';
 
   @override
@@ -1415,6 +1434,25 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get cloneActionEditName => '编辑名称';
+
+  @override
+  String get cloneActionChangeIcon => '更改图标';
+
+  @override
+  String get cloneIconPickerChoose => '选择图片';
+
+  @override
+  String get cloneIconPickerUseAppIcon => '使用应用图标';
+
+  @override
+  String get errorCloneIconFailed => '那张图片无法用作图标。请换一张试试。';
+
+  @override
+  String get cloneIconPickerTitle => '此分身的图标';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '给它换上你自己的图片，或者保留应用图标并用颜色做个标记——两种方式都能让你在同一应用的其他分身中一眼认出它。';
 
   @override
   String get cloneActionForceStop => '强制停止';
@@ -2519,6 +2557,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get cloneActionEditName => '編輯名稱';
 
   @override
+  String get cloneActionChangeIcon => '變更圖示';
+
+  @override
+  String get cloneIconPickerChoose => '選擇圖片';
+
+  @override
+  String get cloneIconPickerUseAppIcon => '使用應用程式圖示';
+
+  @override
+  String get errorCloneIconFailed => '那張圖片無法用作圖示。請換一張試試。';
+
+  @override
+  String get cloneIconPickerTitle => '這個分身的圖示';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '給它換上你自己的圖片，或者保留應用程式圖示並用顏色做個標記——兩種方式都能讓你在同一應用程式的其他分身中一眼認出它。';
+
+  @override
   String get cloneActionForceStop => '強制停止';
 
   @override
@@ -3619,6 +3676,25 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get cloneActionEditName => '編輯名稱';
+
+  @override
+  String get cloneActionChangeIcon => '變更圖示';
+
+  @override
+  String get cloneIconPickerChoose => '選擇圖片';
+
+  @override
+  String get cloneIconPickerUseAppIcon => '使用應用程式圖示';
+
+  @override
+  String get errorCloneIconFailed => '嗰張圖片無法用作圖示。請換一張試試。';
+
+  @override
+  String get cloneIconPickerTitle => '這個分身的圖示';
+
+  @override
+  String get cloneIconPickerMessage =>
+      '給它換上你自己的圖片，或者保留應用程式圖示並用顏色做個標記——兩種方式都能讓你喺同一應用程式嘅其他分身中一眼認出佢。';
 
   @override
   String get cloneActionForceStop => '強制停止';
