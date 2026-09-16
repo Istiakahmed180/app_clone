@@ -9,6 +9,7 @@ import co.tdevs.duplika.diagnostics.DiagnosticLogger
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
@@ -34,6 +35,25 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     private val permissionPolicy = ClonePermissionPolicy(appContext)
     private var channel: MethodChannel? = null
     private var activity: Activity? = null
+
+    /**
+     * Tells Flutter the device's apps have changed. Separate from [channel] because it is
+     * the one thing here the native side says without being asked.
+     */
+    private var events: EventChannel? = null
+    private var eventSink: EventChannel.EventSink? = null
+    private val packageChanges = PackageChangeWatcher(appContext) { emitPackagesChanged() }
+
+    /**
+     * Only while something is listening. The watcher is registered with the channel, so
+     * the usual case is that there is a sink; the guard is for the moment between the
+     * engine attaching and Dart subscribing.
+     */
+    private fun emitPackagesChanged() {
+        mainHandler.post {
+            eventSink?.success(mapOf("type" to EVENT_PACKAGES_CHANGED))
+        }
+    }
 
     fun bindActivity(activity: Activity) {
         this.activity = activity
@@ -102,9 +122,30 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     fun attach(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, CHANNEL_NAME).also { it.setMethodCallHandler(this) }
+        events = EventChannel(messenger, EVENT_CHANNEL_NAME).also {
+            it.setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
+                        eventSink = sink
+                        // Registered with the first listener rather than with the engine:
+                        // a broadcast nobody is going to hear is a wake-up for nothing.
+                        packageChanges.start()
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        packageChanges.stop()
+                        eventSink = null
+                    }
+                },
+            )
+        }
     }
 
     fun detach() {
+        packageChanges.stop()
+        eventSink = null
+        events?.setStreamHandler(null)
+        events = null
         channel?.setMethodCallHandler(null)
         channel = null
         engineExecutor.shutdown()
@@ -590,6 +631,10 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
     companion object {
         const val CHANNEL_NAME = "duplika/native_bridge"
+        const val EVENT_CHANNEL_NAME = "duplika/native_bridge_events"
+
+        /** Something about the device's installed apps changed. Read it again. */
+        const val EVENT_PACKAGES_CHANGED = "packagesChanged"
 
         /**
          * Diagnostics-only argument keys, prefixed so they can never collide with a real

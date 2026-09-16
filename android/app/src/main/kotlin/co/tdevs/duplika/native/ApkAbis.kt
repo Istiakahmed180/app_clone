@@ -63,6 +63,16 @@ object ApkAbis {
         val baseReadable: Boolean,
     )
 
+    /**
+     * An [Archives] rebuilt from values that were read once and kept — see [ArchiveCache].
+     *
+     * The constructor is not public so that an [Archives] can only otherwise come from an
+     * actual read; this is the one deliberate exception, and it is named so a caller
+     * cannot reach for it by accident.
+     */
+    fun archivesOf(abis: Set<String>, baseReadable: Boolean): Archives =
+        Archives(abis, baseReadable)
+
     /** Every `lib/<abi>/` directory name across an installed app's base APK and its splits. */
     fun of(info: ApplicationInfo): Set<String> = read(info).abis
 

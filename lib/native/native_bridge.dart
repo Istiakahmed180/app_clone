@@ -23,13 +23,45 @@ import '../data/models/test_app_model.dart';
 /// Callers receive typed models; [MethodChannel], [PlatformException] and raw
 /// maps never escape this class.
 class NativeBridge {
-  NativeBridge({MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel(channelName);
+  NativeBridge({MethodChannel? channel, EventChannel? events})
+    : _channel = channel ?? const MethodChannel(channelName),
+      _events = events ?? const EventChannel(eventChannelName);
 
   static const String channelName = 'duplika/native_bridge';
+  static const String eventChannelName = 'duplika/native_bridge_events';
 
   final MethodChannel _channel;
+  final EventChannel _events;
   final AppLogger _logger = const AppLogger('NativeBridge');
+
+  /// Fires when the set of apps installed on the device changes.
+  ///
+  /// Carries nothing. The only useful response to an install, an uninstall, an update or
+  /// an app being enabled is to read the device again, and a payload here would only
+  /// tempt a caller into patching its own copy of the list instead — which is how a list
+  /// stops matching the device it claims to describe.
+  ///
+  /// The native watcher is registered when this is first listened to and torn down when
+  /// the last listener goes, so a screen that does not care costs nothing.
+  ///
+  /// Deliberately *not* wrapped in `asBroadcastStream`. That holds a subscription of its
+  /// own to the channel and never lets go of it, so cancelling the last real listener
+  /// never reached the platform and the broadcast receiver stayed registered for the life
+  /// of the engine — waking Duplika for every package change on the device long after the
+  /// screen that asked had closed. The channel's own stream is already a broadcast
+  /// stream; `where` and `map` over it stay broadcast, so this can still be listened to
+  /// by several callers and re-listened to after they have all gone.
+  Stream<void> get packageChanges => _packageChanges ??= _events
+      .receiveBroadcastStream()
+      .where(
+        (Object? event) =>
+            event is Map && event['type'] == _packagesChangedEvent,
+      )
+      .map<void>((Object? _) {});
+
+  Stream<void>? _packageChanges;
+
+  static const String _packagesChangedEvent = 'packagesChanged';
 
   Future<PlatformInfo> getPlatformInfo() async {
     final Map<String, dynamic> result = await _invokeMap('getPlatformInfo');
@@ -70,7 +102,7 @@ class NativeBridge {
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
-      return AppDisguiseMode.parse(response.data['mode'] as String?);
+    return AppDisguiseMode.parse(response.data['mode'] as String?);
   }
 
   /// The dangerous permissions a clone's app declares, and which the user has denied for
@@ -96,16 +128,18 @@ class NativeBridge {
     required String permission,
     required bool allowed,
   }) async {
-    final EngineResponse response = await _invokeEngine('setClonePermission', <String, dynamic>{
-      'profileId': profileId,
-      'permission': permission,
-      'allowed': allowed,
-    });
+    final EngineResponse response = await _invokeEngine(
+      'setClonePermission',
+      <String, dynamic>{
+        'profileId': profileId,
+        'permission': permission,
+        'allowed': allowed,
+      },
+    );
     if (!response.success) {
       throw VirtualizationException(response.message, code: response.code);
     }
   }
-
 
   Future<bool> isTestAppInstalled() async {
     try {
@@ -193,8 +227,10 @@ class NativeBridge {
   /// for every Google API, so it is a deliberate action rather than something a clone
   /// silently gets. The native [MicroGProvider] is the only thing that can do this, and it
   /// reports a structured failure when no artefact is bundled.
-  Future<EngineResponse> provisionMicroG(String profileId) =>
-      _invokeEngine('provisionMicroG', <String, dynamic>{'profileId': profileId});
+  Future<EngineResponse> provisionMicroG(String profileId) => _invokeEngine(
+    'provisionMicroG',
+    <String, dynamic>{'profileId': profileId},
+  );
 
   /// Launchable apps on the device, for the clone picker.
   ///
@@ -286,7 +322,8 @@ class NativeBridge {
   }
 
   /// Whether the current launcher can pin shortcuts at all.
-  Future<bool> areShortcutsSupported() async {    final EngineResponse response = await _invokeEngine(
+  Future<bool> areShortcutsSupported() async {
+    final EngineResponse response = await _invokeEngine(
       'areShortcutsSupported',
     );
     return response.data['supported'] as bool? ?? false;
@@ -328,9 +365,7 @@ class NativeBridge {
   /// covering clones nobody has pinned costs almost nothing.
   ///
   /// Each entry carries the same fields as [refreshCloneShortcut].
-  Future<void> refreshCloneShortcuts(
-    List<Map<String, dynamic>> clones,
-  ) async {
+  Future<void> refreshCloneShortcuts(List<Map<String, dynamic>> clones) async {
     if (clones.isEmpty) {
       return;
     }

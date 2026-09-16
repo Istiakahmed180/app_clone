@@ -11,6 +11,7 @@ import '../../../core/diagnostics/diagnostic_event.dart';
 import '../../../core/diagnostics/diagnostic_operation.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/app_name_sort.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/app_details.dart';
 import '../../../data/models/clone_refusal.dart';
@@ -123,13 +124,16 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
 
   /// Apps matching the search and every active filter, in the chosen order.
   List<InstalledAppModel> get visibleApps {
-    final String needle = query.value.trim().toLowerCase();
+    // Folded like the sort key, so a search typed without the accents still finds the
+    // app: someone looking for Écran types "ecran", and a keyboard that has no easy way
+    // to reach É is the ordinary case rather than the exotic one.
+    final String needle = foldSearchTerm(query.value.trim());
 
     final List<InstalledAppModel> matching = apps.where((
       InstalledAppModel app,
     ) {
       if (needle.isNotEmpty &&
-          !app.appName.toLowerCase().contains(needle) &&
+          !appNameSortKey(app.appName).contains(needle) &&
           !app.packageName.toLowerCase().contains(needle)) {
         return false;
       }
@@ -167,18 +171,20 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
 
   /// The sort comparator. Apps with no timestamp fall to the end of a time sort rather
   /// than to the top: "unknown" is not "newest".
-  int Function(InstalledAppModel, InstalledAppModel) get _comparator =>
-      switch (sort.value) {
-        AppSort.name =>
-          (InstalledAppModel a, InstalledAppModel b) =>
-              a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
-        AppSort.recentlyInstalled =>
-          (InstalledAppModel a, InstalledAppModel b) =>
-              _descending(a.installedAt, b.installedAt),
-        AppSort.recentlyUpdated =>
-          (InstalledAppModel a, InstalledAppModel b) =>
-              _descending(a.updatedAt, b.updatedAt),
-      };
+  int Function(InstalledAppModel, InstalledAppModel)
+  get _comparator => switch (sort.value) {
+    // Not `toLowerCase().compareTo()`: that is UTF-16 code unit order, which filed
+    // every accented name after `z`. See [compareAppNames].
+    AppSort.name =>
+      (InstalledAppModel a, InstalledAppModel b) =>
+          compareAppNames(a.appName, b.appName),
+    AppSort.recentlyInstalled =>
+      (InstalledAppModel a, InstalledAppModel b) =>
+          _descending(a.installedAt, b.installedAt),
+    AppSort.recentlyUpdated =>
+      (InstalledAppModel a, InstalledAppModel b) =>
+          _descending(a.updatedAt, b.updatedAt),
+  };
 
   static int _descending(DateTime? a, DateTime? b) {
     if (a == null && b == null) {
@@ -218,7 +224,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         <String, List<InstalledAppModel>>{};
     for (final InstalledAppModel app in visible) {
       grouped
-          .putIfAbsent(_initial(app.appName), () => <InstalledAppModel>[])
+          .putIfAbsent(appNameInitial(app.appName), () => <InstalledAppModel>[])
           .add(app);
     }
 
@@ -235,35 +241,48 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         .toList(growable: false);
   }
 
-  /// Any letter in any script, so a name is grouped under its own initial.
-  ///
-  /// Matching `[A-Z]` put every non-Latin name under '#': on a Chinese, Russian or
-  /// Bengali device that was the entire list in one group, which also collapsed the
-  /// section count the lazy layout depends on to a single enormous item.
-  static final RegExp _letter = RegExp(r'\p{L}', unicode: true);
-
-  static String _initial(String name) {
-    final String trimmed = name.trim();
-    if (trimmed.isEmpty) {
-      return '#';
-    }
-    // By rune, not by `trimmed[0]`: an app named with an emoji or any character above
-    // the BMP starts with a surrogate half, which is a letter in no script and would
-    // have been grouped by half a character.
-    final String first = String.fromCharCode(trimmed.runes.first).toUpperCase();
-    return _letter.hasMatch(first) ? first : '#';
-  }
-
   /// When opened from a profile card, the picker arrives pre-filtered to that package
   /// so "Add another clone" lands on the right app.
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    _packageChanges = _bridge.packageChanges.listen(
+      (void _) => _schedulePackageReload(),
+    );
     final Object? argument = Get.arguments;
     if (argument is String && argument.isNotEmpty) {
       query.value = argument;
     }
+  }
+
+  /// The device telling us its apps changed while this screen is in front.
+  ///
+  /// Resume covers the common case — installing from Play means leaving and coming back —
+  /// so this is for the rest: a sideload finishing behind the picker, an update Play
+  /// applies on its own, an uninstall from a notification shade.
+  StreamSubscription<void>? _packageChanges;
+  Timer? _packageReload;
+
+  /// How long to wait for the broadcasts to stop before reading the device.
+  ///
+  /// Installs arrive as a burst — an update is a remove and an add, and a Play session
+  /// can write several packages in a row — and a listing per broadcast would read the
+  /// whole device repeatedly to answer questions that are still changing. Long enough to
+  /// collect a burst, short enough that the list is right before the user has finished
+  /// looking for the app they just installed.
+  static const Duration _packageSettle = Duration(milliseconds: 700);
+
+  void _schedulePackageReload() {
+    if (_disposed) {
+      return;
+    }
+    _packageReload?.cancel();
+    _packageReload = Timer(_packageSettle, () {
+      if (!_disposed && _foreground) {
+        unawaited(loadApps(background: true));
+      }
+    });
   }
 
   /// Re-reads the device when the app comes back to the foreground.
@@ -286,11 +305,21 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// spinner for work they did not ask for.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground) {
       _reports.clear();
       unawaited(loadApps(background: true));
     }
   }
+
+  /// Whether this screen is the one the user is looking at.
+  ///
+  /// Read only by [_schedulePackageReload]. A package broadcast that arrives while
+  /// Duplika is in the background is real, but acting on it there would read the whole
+  /// device for a screen nobody can see — and the resume that follows reads it again
+  /// anyway. Coming back to the foreground is the refresh; this just keeps it from being
+  /// done twice.
+  bool _foreground = true;
 
   @override
   void onReady() {
@@ -522,6 +551,11 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _disposed = true;
+    _packageReload?.cancel();
+    // Cancelling the last listener is what unregisters the native broadcast receiver, so
+    // leaving this behind would keep the device waking Duplika up for a screen that no
+    // longer exists.
+    unawaited(_packageChanges?.cancel());
     _pendingIcons.clear();
     super.onClose();
   }

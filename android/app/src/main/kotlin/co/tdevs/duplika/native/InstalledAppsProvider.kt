@@ -13,7 +13,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
 import java.io.ByteArrayOutputStream
-import java.util.concurrent.ConcurrentHashMap
+import java.io.File
 
 /**
  * Enumerates the launchable applications a user may clone.
@@ -100,7 +100,16 @@ class InstalledAppsProvider(private val context: Context) {
             .toList()
 
         // Only what is still installed, so an uninstalled app's entry does not outlive it.
-        abiCache.keys.retainAll(seen)
+        // Written out here rather than per app: one pass, one write.
+        //
+        // Guarded on having seen anything at all. A pass that enumerated nothing has not
+        // discovered that the device has no apps — it has failed to ask — and retaining
+        // against an empty set would answer that by throwing the whole cache away and
+        // writing an empty file, making the next cold start slow for no reason.
+        if (seen.isNotEmpty()) {
+            archiveCache.retain(seen)
+            archiveCache.flush()
+        }
 
         if (hidden > 0) {
             Slog.i(Slog.INSTALL, "Picker: left out $hidden app(s) that cannot be cloned")
@@ -118,28 +127,17 @@ class InstalledAppsProvider(private val context: Context) {
     )
 
     /**
-     * The archive read for one app, kept between listings.
-     *
-     * Reading it means opening the base APK and every split and walking the zip central
-     * directory, and a listing does that for every launchable app on the device — which
-     * was the whole cost of a refresh. The answer cannot change without the package being
-     * updated, so [PackageInfo.lastUpdateTime] is the whole cache key: a reinstall, an
-     * update or a downgrade all move it, and an entry that does not match is re-read.
-     *
-     * Concurrent because nothing in the type's contract says a single thread owns it, not
-     * because two threads are known to call it.
+     * The archive reads this listing does not have to do again. See [ArchiveCache] for
+     * what is kept, what invalidates it, and why it is on disk rather than in memory.
      */
-    private val abiCache = ConcurrentHashMap<String, CachedArchives>()
-
-    private class CachedArchives(val lastUpdateTime: Long, val archives: ApkAbis.Archives)
+    private val archiveCache by lazy {
+        ArchiveCache(File(context.filesDir, ARCHIVE_CACHE_FILE))
+    }
 
     private fun archivesOf(info: ApplicationInfo, packageInfo: PackageInfo): ApkAbis.Archives {
-        val cached = abiCache[info.packageName]
-        if (cached != null && cached.lastUpdateTime == packageInfo.lastUpdateTime) {
-            return cached.archives
-        }
+        archiveCache.get(info.packageName, packageInfo.lastUpdateTime)?.let { return it }
         val archives = ApkAbis.read(info)
-        abiCache[info.packageName] = CachedArchives(packageInfo.lastUpdateTime, archives)
+        archiveCache.put(info.packageName, packageInfo.lastUpdateTime, archives)
         return archives
     }
 
@@ -283,6 +281,9 @@ class InstalledAppsProvider(private val context: Context) {
     }
 
     private companion object {
+        /** Under `filesDir`, so it is private to the app and cleared with its data. */
+        const val ARCHIVE_CACHE_FILE = "picker-archives.tsv"
+
         const val ICON_PX = 144
 
         /**
