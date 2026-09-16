@@ -50,7 +50,15 @@ class CloneBudgetService {
   /// The count dialog takes its ceiling from here, the batch checks against the same
   /// figure, and the picker refuses a single clone on it — so the app can never offer a
   /// number it will then refuse, on any route.
-  Future<CloneBudget> cloneBudget() async {
+  ///
+  /// [existingClones] is how many the device already has. Only the memory bound uses it,
+  /// and only to stop the offer being a number the device cannot live up to: the tier
+  /// below is a judgement about how many containers can usefully run *at once*, and an
+  /// offer that ignored the ones already there said "up to 6 at a time" to someone who
+  /// had eight. Leave it at zero where the count is not to hand; the answer is then the
+  /// old one, which is the right default for a caller that only wants to know whether
+  /// there is room for one.
+  Future<CloneBudget> cloneBudget({int existingClones = 0}) async {
     final DeviceCapacity capacity;
     try {
       capacity = await _nativeBridge.deviceCapacity();
@@ -68,7 +76,7 @@ class CloneBudgetService {
     final int storageCap = capacity.knowsStorage
         ? (usable <= 0 ? 0 : usable ~/ _perCloneBytes)
         : absoluteMaximum;
-    final int memoryCap = _memoryCap(capacity);
+    final int memoryCap = _memoryCap(capacity, existingClones);
     final int maximum = <int>[
       absoluteMaximum,
       storageCap,
@@ -116,18 +124,34 @@ class CloneBudgetService {
     );
   }
 
-  /// What this device should be encouraged to *run*, which is a different question.
+  /// What this device should be encouraged to *run*, which is a different question from
+  /// what it can hold.
   ///
-  /// An idle container costs [_perCloneBytes] and no memory at all, so RAM does not
-  /// bound how many clones can exist. It bounds how many are usable at once — which is
-  /// what someone who made twenty of them is about to try. These tiers are a judgement
-  /// about that, not a measurement of anything: tune them, do not trust them.
+  /// [existingClones] is subtracted from the tier, and it is worth being exact about why,
+  /// because an idle container costs [_perCloneBytes] and no memory at all: the clones
+  /// already made are not occupying RAM right now, and this is not pretending they are.
+  /// What the tier expresses is how many containers are worth *having* on a device this
+  /// size — the number someone who made twenty of them is about to try to use — and that
+  /// is a claim about the total, not about the next batch. An offer that counted only the
+  /// new ones said "up to 6 at a time" to someone who already had eight: a number that
+  /// cannot be acted on and deliver what it says.
   ///
-  /// It caps a batch, not a total. Nothing here counts the clones already made, so
-  /// repeating the action reaches any number the storage floor permits. That is
-  /// deliberate — locking someone out of their own device on a guessed tier would be
-  /// worse than the friction — and it is why the offer says "at a time".
-  int _memoryCap(DeviceCapacity capacity) {
+  /// Never below one. The tiers are a judgement and they are wrong on some device, so
+  /// they are allowed to shrink an offer and never to refuse one — someone who wants a
+  /// ninth clone on a small phone still gets it, one at a time. Locking them out of their
+  /// own device on a guess would be worse than the friction. Only storage, which is
+  /// measured rather than guessed, can bring the answer to zero.
+  int _memoryCap(DeviceCapacity capacity, int existingClones) {
+    final int remaining = _memoryTier(capacity) - existingClones;
+    return remaining < 1 ? 1 : remaining;
+  }
+
+  /// How many containers this device is judged good for at once, before counting what it
+  /// already has.
+  ///
+  /// These tiers are a judgement, not a measurement of anything: tune them, do not trust
+  /// them.
+  int _memoryTier(DeviceCapacity capacity) {
     if (capacity.isLowRamDevice ?? false) {
       return 4;
     }

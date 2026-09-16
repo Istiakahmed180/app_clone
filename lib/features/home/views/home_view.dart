@@ -405,25 +405,36 @@ class HomeView extends GetView<HomeController> {
     );
     _showProgress(context, profile, progress);
 
-    final CloneBatchResult result = await controller.createClones(
-      profile,
-      count,
-      // "Finishing" also covers a cancelled batch: the clone in flight when Cancel was
-      // tapped still has to land, and naming the next one would promise work that is no
-      // longer going to happen.
-      onProgress: (int created, int total) => progress.value =
-          created >= total || controller.cloneBatchCancelling.value
-          ? l10n.cloneCreatingFinishing
-          : l10n.cloneCreating(created + 1, total),
-    );
+    // Closed in a `finally`, because the barrier is not dismissible — see
+    // [_showProgress] — so taking it down cannot be left to the success path.
+    // [createClones] reports a clone that failed in its tally rather than throwing, but
+    // a failure it does not model — a platform error reaching Dart unwrapped, a refresh
+    // that fails after the batch landed — would otherwise leave a spinner on screen that
+    // nothing removes and no gesture dismisses.
+    final CloneBatchResult result;
+    try {
+      result = await controller.createClones(
+        profile,
+        count,
+        // "Finishing" also covers a cancelled batch: the clone in flight when Cancel was
+        // tapped still has to land, and naming the next one would promise work that is no
+        // longer going to happen.
+        onProgress: (int created, int total) => progress.value =
+            created >= total || controller.cloneBatchCancelling.value
+            ? l10n.cloneCreatingFinishing
+            : l10n.cloneCreating(created + 1, total),
+      );
+    } finally {
+      if (context.mounted) {
+        // Closes the barrier, whose route is the top one.
+        Navigator.of(context).pop();
+      }
+      progress.dispose();
+    }
 
     if (!context.mounted) {
-      progress.dispose();
       return;
     }
-    // Closes the barrier, whose route is the top one.
-    Navigator.of(context).pop();
-    progress.dispose();
 
     final String? failure = cloneBatchFailure(l10n, result, profile.appName);
     if (failure != null) {
@@ -752,14 +763,21 @@ class HomeView extends GetView<HomeController> {
           l10n.cloneGoogleServicesInstalling,
         );
         _showProgress(context, profile, progress);
-        final AppException? error = await controller.installGoogleServices(profile);
-        if (!context.mounted) {
+        // In a `finally` for the same reason as the clone batch above: an undismissable
+        // barrier must not depend on the work returning normally.
+        final AppException? error;
+        try {
+          error = await controller.installGoogleServices(profile);
+        } finally {
+          if (context.mounted) {
+            // Closes the barrier, whose route is the top one.
+            Navigator.of(context).pop();
+          }
           progress.dispose();
+        }
+        if (!context.mounted) {
           return;
         }
-        // Closes the barrier, whose route is the top one.
-        Navigator.of(context).pop();
-        progress.dispose();
         if (error != null) {
           await _showFailure(context, appErrorMessage(l10n, error));
         } else {

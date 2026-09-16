@@ -221,14 +221,20 @@ class HomeController extends GetxController {
 
   Future<void> refreshAll() async {
     isLoading.value = true;
-    await _loadVirtualization();
-    await Future.wait<void>(<Future<void>>[_loadProfiles(), _loadTestApp()]);
-    await Future.wait<void>(<Future<void>>[
-      _loadProfileStates(),
-      _loadIcons(),
-      _loadCompatibility(),
-    ]);
-    isLoading.value = false;
+    try {
+      await _loadVirtualization();
+      await Future.wait<void>(<Future<void>>[_loadProfiles(), _loadTestApp()]);
+      await Future.wait<void>(<Future<void>>[
+        _loadProfileStates(),
+        _loadIcons(),
+        _loadCompatibility(),
+      ]);
+    } finally {
+      // In `finally`: every step above guards the failures it expects, and one it does
+      // not would otherwise leave this true for the life of the screen -- a grid stuck
+      // on its spinner with the clones it was loading right there in memory.
+      isLoading.value = false;
+    }
   }
 
   Future<void> _loadVirtualization() async {
@@ -754,7 +760,15 @@ class HomeController extends GetxController {
     // After the reload, not before it: the progress dialog is still up until this call
     // returns, and clearing the flag early would re-enable its Cancel button for the
     // length of the refresh — offering to stop work that has already stopped.
-    await refreshAll();
+    try {
+      await refreshAll();
+    } on Object catch (error, stackTrace) {
+      // The clones are made. A refresh that cannot redraw the grid is worth saying, but
+      // it is not worth throwing away the tally of what landed — the caller would report
+      // a batch that plainly happened as a failure, and the grid rights itself on the
+      // next load anyway.
+      _logger.error('Could not refresh after a clone batch', error, stackTrace);
+    }
     cloneBatchCancelling.value = false;
 
     return CloneBatchResult(
@@ -793,7 +807,12 @@ class HomeController extends GetxController {
   /// Delegated rather than computed here: the picker refuses a single clone on the same
   /// figure, and two copies of this arithmetic is how one screen comes to offer what the
   /// other refuses. See [CloneBudgetService].
-  Future<CloneBudget> cloneBudget() => _cloneBudgets.cloneBudget();
+  ///
+  /// The clones already made are passed in because this screen is holding them anyway,
+  /// and because the memory bound is about how many can run at once — a question the
+  /// ones already there are part of.
+  Future<CloneBudget> cloneBudget() =>
+      _cloneBudgets.cloneBudget(existingClones: profiles.length);
 
   /// The budget that refuses [count] more clones, or null to go ahead.
   ///
