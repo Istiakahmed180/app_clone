@@ -43,10 +43,10 @@ jobs:
     timeout-minutes: 45
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Matches `compileOptions { sourceCompatibility = VERSION_17 }` in the app module.
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -67,6 +67,13 @@ jobs:
       # The same checks that gate the work locally, so a broken commit is reported here
       # rather than discovered on a device.
       - run: flutter analyze
+
+      # Generates the Android build files without building anything -- and with them the
+      # Gradle wrapper, which Flutter's own `android/.gitignore` keeps out of the
+      # repository. Without this the next step has no `./gradlew` to run: measured, the
+      # first run of this workflow failed there with exit 127.
+      - name: Generate the Android build files
+        run: flutter build apk --config-only
 
       - name: Android unit tests
         working-directory: android
