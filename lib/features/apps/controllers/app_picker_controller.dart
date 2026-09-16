@@ -218,13 +218,23 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         .toList(growable: false);
   }
 
+  /// Any letter in any script, so a name is grouped under its own initial.
+  ///
+  /// Matching `[A-Z]` put every non-Latin name under '#': on a Chinese, Russian or
+  /// Bengali device that was the entire list in one group, which also collapsed the
+  /// section count the lazy layout depends on to a single enormous item.
+  static final RegExp _letter = RegExp(r'\p{L}', unicode: true);
+
   static String _initial(String name) {
     final String trimmed = name.trim();
     if (trimmed.isEmpty) {
       return '#';
     }
-    final String first = trimmed[0].toUpperCase();
-    return RegExp(r'[A-Z]').hasMatch(first) ? first : '#';
+    // By rune, not by `trimmed[0]`: an app named with an emoji or any character above
+    // the BMP starts with a surrogate half, which is a letter in no script and would
+    // have been grouped by half a character.
+    final String first = String.fromCharCode(trimmed.runes.first).toUpperCase();
+    return _letter.hasMatch(first) ? first : '#';
   }
 
   /// When opened from a profile card, the picker arrives pre-filtered to that package
@@ -276,13 +286,27 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       // verdict is not a fact that can be kept.
       _reports.clear();
       apps.assignAll(await _bridge.listInstalledApps(includeIcons: false));
-      clonedPackages.assignAll(await _repository.clonedPackageNames());
       errorMessage.value = null;
+
+      // Caught separately, and still behind the spinner. Separately because these marks
+      // are decoration on rows that are already usable, and losing them must not replace
+      // a list the user can act on with an error screen. Behind the spinner because the
+      // Not added / Already added filters read them: finishing the load without them
+      // would show the list once with every tick missing, and under either of those
+      // filters would show the wrong apps until they arrived.
+      try {
+        clonedPackages.assignAll(await _repository.clonedPackageNames());
+      } on AppException catch (error, stackTrace) {
+        _logger.error('Could not read which packages are cloned', error, stackTrace);
+      }
     } on AppException catch (error, stackTrace) {
       _logger.error('Could not list installed apps', error, stackTrace);
       errorMessage.value = error;
+    } finally {
+      // In `finally` because a failure that is not an [AppException] — a channel fault,
+      // a malformed reply — would otherwise leave the screen on its spinner forever.
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
   /// How many icons one native round trip decodes.
@@ -344,7 +368,14 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
           );
           // Unmarked, so a later rebuild can retry instead of leaving those rows on
           // the placeholder for the rest of the session.
+          //
+          // The queue behind the failed batch is unmarked too. Giving up here ends the
+          // only worker, and a package that is still marked as requested is one that
+          // [requestIcons] will skip — so anything left queued would never be asked for
+          // again, and its row would keep the placeholder exactly as above.
           _requestedIcons.removeAll(batch);
+          _requestedIcons.removeAll(_pendingIcons);
+          _pendingIcons.clear();
           return;
         }
 
@@ -657,7 +688,8 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
 class AppSection {
   const AppSection({required this.letter, required this.apps});
 
-  /// The heading: a single A-Z letter, or '#' for everything else.
+  /// The heading: the initial the names in this group share, or '#' for everything
+  /// that does not start with a letter.
   final String letter;
   final List<InstalledAppModel> apps;
 }

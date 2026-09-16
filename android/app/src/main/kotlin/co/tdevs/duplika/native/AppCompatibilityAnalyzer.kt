@@ -89,11 +89,27 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      */
     fun canClone(packageName: String): Boolean {
         val packageInfo = installedPackageInfo(packageName) ?: return false
-        val abi = packageInfo.applicationInfo?.let(::detectAbi)
-        return findingsFor(packageName, packageInfo, abi).none { it.blocking }
+        return canClone(packageInfo)
     }
 
-    private fun installedPackageInfo(packageName: String): PackageInfo? = try {
+    /**
+     * The same verdict for a package the caller has already read.
+     *
+     * A listing asks this of every launchable package, and reading each one's
+     * [PackageInfo] a second time here doubled the PackageManager round trips behind the
+     * picker for nothing. The record must have been read with [PackageManager.GET_PERMISSIONS]
+     * — [findingsFor] judges the storage declarations, and a record fetched without that
+     * flag reports no permissions rather than none declared, which would silently drop a
+     * finding. Callers with only a package name should use the overload above, which
+     * fetches it correctly.
+     */
+    fun canClone(packageInfo: PackageInfo): Boolean {
+        val abi = packageInfo.applicationInfo?.let(::detectAbi)
+        return findingsFor(packageInfo.packageName, packageInfo, abi).none { it.blocking }
+    }
+
+    /** Reads a package with every flag [findingsFor] needs. */
+    fun installedPackageInfo(packageName: String): PackageInfo? = try {
         context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
     } catch (_: PackageManager.NameNotFoundException) {
         null

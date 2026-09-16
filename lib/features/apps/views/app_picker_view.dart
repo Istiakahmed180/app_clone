@@ -61,7 +61,13 @@ class AppPickerView extends GetView<AppPickerController> {
                 final Set<String> cloned = controller.clonedPackages.toSet();
                 final Set<String> cloning = controller.cloning.toSet();
                 final List<InstalledAppModel> picks = controller.quickPicks;
-                final int visibleCount = controller.visibleApps.length;
+                // Counted off the sections rather than read from `visibleApps`, which
+                // would filter and sort every installed app a second time on every
+                // rebuild — and a rebuild happens once per batch of icons that arrives.
+                final int visibleCount = sections.fold<int>(
+                  0,
+                  (int total, AppSection section) => total + section.apps.length,
+                );
 
                 if (sections.isEmpty) {
                   return _centred(

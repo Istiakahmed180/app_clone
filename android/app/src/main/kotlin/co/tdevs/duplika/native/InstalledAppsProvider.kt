@@ -3,6 +3,7 @@ package co.tdevs.duplika.native
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -58,18 +59,34 @@ class InstalledAppsProvider(private val context: Context) {
             .mapNotNull { it.activityInfo?.applicationInfo }
             .filter { seen.add(it.packageName) }
             .filter { it.packageName != context.packageName }
-            .filter { info ->
-                val allowed = canClone(info.packageName)
+            // Read once, here, and carried through the filter, the sort and [describe].
+            // Each of those used to look the package up again, so a device with a couple
+            // of hundred launchable apps paid several hundred PackageManager round trips
+            // per listing.
+            .mapNotNull { info ->
+                val packageInfo = analyzer.installedPackageInfo(info.packageName)
+                // Uninstalled between the query and this read. Counted with the rest:
+                // it is one more row the picker is not offering.
+                if (packageInfo == null) hidden++
+                packageInfo?.let { info to it }
+            }
+            .filter { (_, packageInfo) ->
+                val allowed = analyzer.canClone(packageInfo)
                 if (!allowed) hidden++
                 allowed
             }
+            // The label likewise, and for a sharper reason: `compareBy` runs its selectors
+            // on every comparison, so a label read inside the comparator was thousands of
+            // `getApplicationLabel` calls — each one opening the app's resources — where
+            // one per app is enough.
+            .map { (info, packageInfo) -> Listing(info, packageInfo, label(info)) }
             .sortedWith(
                 compareBy(
-                    { it.isSystemApp() },
-                    { label(it).lowercase() },
+                    { it.info.isSystemApp() },
+                    { it.sortKey },
                 ),
             )
-            .map { info -> describe(info, includeIcons) }
+            .map { describe(it, includeIcons) }
             .toList()
             .also {
                 if (hidden > 0) {
@@ -78,8 +95,16 @@ class InstalledAppsProvider(private val context: Context) {
             }
     }
 
-    /** Whether a clone of this package could be created at all. */
-    private fun canClone(packageName: String): Boolean = analyzer.canClone(packageName)
+    /** One launchable app, with the lookups a listing would otherwise repeat. */
+    private class Listing(
+        val info: ApplicationInfo,
+        /** Null only on the single-package path, where the record is read defensively. */
+        val packageInfo: PackageInfo?,
+        val label: String,
+    ) {
+        /** Folded once rather than per comparison, for the same reason as [label]. */
+        val sortKey: String = label.lowercase()
+    }
 
     /**
      * Icons for a specific set of packages.
@@ -107,13 +132,15 @@ class InstalledAppsProvider(private val context: Context) {
         } catch (_: PackageManager.NameNotFoundException) {
             return null
         }
-        return describe(info, includeIcons)
+        val packageInfo = runCatching {
+            packageManager.getPackageInfo(packageName, 0)
+        }.getOrNull()
+        return describe(Listing(info, packageInfo, label(info)), includeIcons)
     }
 
-    private fun describe(info: ApplicationInfo, includeIcons: Boolean): Map<String, Any?> {
-        val packageInfo = runCatching {
-            packageManager.getPackageInfo(info.packageName, 0)
-        }.getOrNull()
+    private fun describe(listing: Listing, includeIcons: Boolean): Map<String, Any?> {
+        val info = listing.info
+        val packageInfo = listing.packageInfo
 
         // Base plus every split the installer wrote. `splitSourceDirs` is the only
         // public way to count them, and it is null for a plain single-APK install.
@@ -121,7 +148,7 @@ class InstalledAppsProvider(private val context: Context) {
 
         return mapOf(
             "packageName" to info.packageName,
-            "appName" to label(info),
+            "appName" to listing.label,
             "versionName" to packageInfo?.versionName,
             "system" to info.isSystemApp(),
             "abis" to abisOf(info),
