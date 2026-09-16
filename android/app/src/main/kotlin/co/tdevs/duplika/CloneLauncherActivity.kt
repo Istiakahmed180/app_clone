@@ -6,6 +6,7 @@ import android.widget.Toast
 import co.tdevs.duplika.diagnostics.DiagCategory
 import co.tdevs.duplika.diagnostics.DiagSource
 import co.tdevs.duplika.diagnostics.DiagnosticLogger
+import co.tdevs.duplika.native.EngineErrorCodes
 import co.tdevs.duplika.native.EngineResult
 import co.tdevs.duplika.native.RealVirtualizationEngine
 import co.tdevs.duplika.native.Slog
@@ -45,7 +46,22 @@ class CloneLauncherActivity : Activity() {
             )
 
             val engine = RealVirtualizationEngine(applicationContext, DuplikaApplication.engine)
-            when (val result = engine.launchProfile(profileId, packageName)) {
+            // The profile mapping refuses to answer rather than guess when its storage is
+            // unreadable, and refusing is right — a guessed id opens the wrong container.
+            // But this entry point has no Flutter layer above it to turn a thrown failure
+            // into a message, and an uncaught one here crashes the home screen, so the
+            // refusal is caught and said out loud like any other launch failure.
+            val result = try {
+                engine.launchProfile(profileId, packageName)
+            } catch (error: Throwable) {
+                Slog.e(Slog.LAUNCH, "Shortcut launch could not be resolved", error)
+                EngineResult.Failure(
+                    EngineErrorCodes.VIRTUAL_APP_NOT_INSTALLED,
+                    "This clone could not be opened. Open Duplika and try again.",
+                )
+            }
+
+            when (result) {
                 is EngineResult.Success ->
                     Slog.i(Slog.LAUNCH, "Shortcut launched $packageName")
 

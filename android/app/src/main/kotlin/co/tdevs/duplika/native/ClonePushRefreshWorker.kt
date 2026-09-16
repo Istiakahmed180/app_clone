@@ -38,7 +38,15 @@ class ClonePushRefreshWorker(
 ) : Worker(context, params) {
 
     override fun doWork(): Result {
-        val userIds = VirtualProfileManager(applicationContext).allMappings().values
+        // The mapping now refuses to answer rather than guessing when its storage is
+        // unreadable, which is right for the clone lifecycle but must not take a periodic
+        // background refresh down with it: no mapping simply means nothing to reconnect.
+        val userIds = runCatching {
+            VirtualProfileManager(applicationContext).allMappings().values
+        }.getOrElse { error ->
+            Slog.e(Slog.LAUNCH, "Background push refresh skipped: ${error.message}")
+            return Result.success()
+        }
         if (userIds.isEmpty()) {
             // Nothing cloned yet: no work, no wake-up cost beyond this check.
             return Result.success()

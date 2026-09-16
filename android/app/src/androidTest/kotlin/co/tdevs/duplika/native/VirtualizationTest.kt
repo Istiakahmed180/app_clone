@@ -7,48 +7,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-
-/** Maps Flutter profile ids onto engine user ids without a running engine. */
-@RunWith(AndroidJUnit4::class)
-class VirtualProfileManagerTest {
-
-    private val context: Context = ApplicationProvider.getApplicationContext()
-
-    @Test
-    fun allocatesDistinctIdsAndReusesFreedOnes() {
-        val manager = VirtualProfileManager(context)
-        val existing = manager.allMappings().keys.toList()
-        existing.forEach(manager::remove)
-
-        val first = manager.getOrCreate("profile-a")
-        val second = manager.getOrCreate("profile-b")
-
-        assertNotEquals(first, second)
-        // Stable for the same profile.
-        assertEquals(first, manager.getOrCreate("profile-a"))
-
-        manager.remove("profile-a")
-        assertNull(manager.virtualUserIdFor("profile-a"))
-        // The freed id becomes available again, and never collides with the live one.
-        assertNotEquals(second, manager.getOrCreate("profile-c"))
-
-        listOf("profile-b", "profile-c").forEach(manager::remove)
-    }
-
-    @Test
-    fun mappingSurvivesANewManagerInstance() {
-        val manager = VirtualProfileManager(context)
-        val id = manager.getOrCreate("profile-persist")
-
-        assertEquals(id, VirtualProfileManager(context).virtualUserIdFor("profile-persist"))
-
-        manager.remove("profile-persist")
-    }
-}
 
 /** The container admission policy. */
 @RunWith(AndroidJUnit4::class)

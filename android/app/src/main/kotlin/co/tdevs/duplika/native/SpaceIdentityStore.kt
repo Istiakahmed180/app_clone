@@ -72,7 +72,7 @@ class SpaceIdentityStore(context: Context) {
      */
     @Synchronized
     fun identity(profileId: String, virtualUserId: Int): Identity {
-        stored(virtualUserId)?.let { return it }
+        stored(profileId, virtualUserId)?.let { return it }
 
         // No file yet: this space has never been looked at. Its first set is derived from
         // the profile id so two spaces never collide and the same space always starts
@@ -136,7 +136,7 @@ class SpaceIdentityStore(context: Context) {
      */
     @Synchronized
     fun regenerate(profileId: String, virtualUserId: Int): Identity {
-        val previous = readRevision(virtualUserId)
+        val previous = stored(profileId, virtualUserId)?.revision ?: 0
         val nonce = ByteArray(16).also(random::nextBytes)
             .joinToString("") { "%02x".format(it) }
         val identity = derive(profileId, virtualUserId, nonce)
@@ -153,36 +153,49 @@ class SpaceIdentityStore(context: Context) {
 
     private fun fileFor(virtualUserId: Int) = File(directory, "$virtualUserId.json")
 
-    /** This space's stored set, or null when there is no readable file. */
-    private fun stored(virtualUserId: Int): Identity? = try {
+    /**
+     * This space's stored set, or null when there is no readable file of its own.
+     *
+     * The file is named by virtual user id, but the id is only on loan: an id whose
+     * container the engine failed to remove is quarantined rather than reused, yet a stale
+     * file can still outlive the space that wrote it. [persist] records the owning profile
+     * id for exactly this check — a file belonging to a different profile is treated as
+     * absent, so a space always gets its own identifiers rather than inheriting a
+     * predecessor's.
+     *
+     * A file with no recorded owner predates that field and is accepted, so upgrading does
+     * not silently reset identifiers somebody typed.
+     */
+    private fun stored(profileId: String, virtualUserId: Int): Identity? = try {
         val file = fileFor(virtualUserId)
         if (!file.isFile) {
             null
         } else {
             val json = JSONObject(file.readText())
-            Identity(
-                virtualUserId = virtualUserId,
-                revision = json.optInt("revision", 0),
-                deviceId = json.getString("deviceId"),
-                androidId = json.getString("androidId"),
-                serialNumber = json.getString("serialNumber"),
-                wifiMac = json.getString("wifiMac"),
-                bluetoothMac = json.getString("bluetoothMac"),
-            )
+            val owner = json.optString("profileId").takeIf { it.isNotEmpty() }
+            if (owner != null && owner != profileId) {
+                Slog.w(
+                    Slog.PROFILE,
+                    "Ignoring the identity stored for virtual user $virtualUserId: it " +
+                        "belongs to another space",
+                )
+                null
+            } else {
+                Identity(
+                    virtualUserId = virtualUserId,
+                    revision = json.optInt("revision", 0),
+                    deviceId = json.getString("deviceId"),
+                    androidId = json.getString("androidId"),
+                    serialNumber = json.getString("serialNumber"),
+                    wifiMac = json.getString("wifiMac"),
+                    bluetoothMac = json.getString("bluetoothMac"),
+                )
+            }
         }
     } catch (_: Throwable) {
         // A truncated or half-written file is not a crash: the caller falls back to a
         // fresh derived set, which is the same outcome as a space nobody has touched.
         null
-    }
-
-    private fun readRevision(virtualUserId: Int): Int = try {
-        val file = fileFor(virtualUserId)
-        if (!file.isFile) 0 else JSONObject(file.readText()).optInt("revision", 0)
-    } catch (_: Throwable) {
-        // An unreadable file means the default identity, not a crash: the values are
-        // derived, so revision 0 rebuilds exactly what the space started with.
-        0
     }
 
     /**

@@ -175,16 +175,7 @@ class RealVirtualizationEngine(
                 virtualUserId = virtualUserId,
                 metadata = mapOf("code" to result.code),
             )
-            releaseProfileArtifacts(profileId)
-            phase(
-                "PROFILE_CREATION_FAILED",
-                DiagCategory.PROFILE,
-                "Virtual user $virtualUserId released after a failed install",
-                level = DiagLevel.WARNING,
-                profileId = profileId,
-                packageName = packageName,
-                virtualUserId = virtualUserId,
-            )
+            discardFailedInstall(profileId, virtualUserId, packageName)
         } else {
             seedChromeOnboardingComplete(packageName, virtualUserId)
             phase(
@@ -380,7 +371,7 @@ class RealVirtualizationEngine(
                 virtualUserId = virtualUserId,
                 metadata = mapOf("code" to result.code, "apkCount" to retained.size.toString()),
             )
-            releaseProfileArtifacts(profileId)
+            discardFailedInstall(profileId, virtualUserId, packageName)
         } else {
             seedChromeOnboardingComplete(packageName, virtualUserId)
             phase(
@@ -397,15 +388,83 @@ class RealVirtualizationEngine(
         return result
     }
 
-    /** Drops the user mapping and any retained APK for a profile that never came up. */
-    private fun releaseProfileArtifacts(profileId: String) {
+    /** Drops the retained APKs of a profile whose container is going away. */
+    private fun releaseRetainedApks(profileId: String) {
         profileManager.apkPathsFor(profileId).forEach { path ->
             if (!File(path).delete() && File(path).exists()) {
                 Slog.w(Slog.INSTALL, "Could not delete retained APK for $profileId: $path")
             }
         }
         profileManager.forgetApkPaths(profileId)
-        profileManager.remove(profileId)
+    }
+
+    /**
+     * Tears down the container of an install that failed, then releases its id.
+     *
+     * Provisioning runs *before* the package install (see [VirtualAppInstaller]), so by
+     * the time an install fails the container can already hold microG and a partly
+     * written package. The Flutter side throws this profile id away the moment the install
+     * fails, so nobody will ever retry it — but the id itself goes back into the pool, and
+     * handing the next clone a container full of a previous attempt's state is how a space
+     * ends up with data that was never its own.
+     *
+     * When the engine will not remove the container the id is quarantined instead of
+     * freed: the profile is gone either way, but the id must never be allocated again.
+     */
+    private fun discardFailedInstall(
+        profileId: String,
+        virtualUserId: Int,
+        packageName: String,
+    ) {
+        launcher.stop(packageName, virtualUserId)
+        uninstallForTeardown(packageName, virtualUserId)
+        val deletion = adapter.deleteVirtualUser(virtualUserId)
+        spaceIdentity.forget(virtualUserId)
+        releaseRetainedApks(profileId)
+
+        if (deletion is EngineResult.Success) {
+            profileManager.remove(profileId)
+            phase(
+                "PROFILE_CREATION_FAILED",
+                DiagCategory.PROFILE,
+                "Virtual user $virtualUserId released after a failed install",
+                level = DiagLevel.WARNING,
+                packageName = packageName,
+                profileId = profileId,
+                virtualUserId = virtualUserId,
+            )
+            return
+        }
+        profileManager.quarantine(profileId)
+        phase(
+            "PROFILE_CREATION_FAILED",
+            DiagCategory.PROFILE,
+            "Virtual user $virtualUserId could not be removed after a failed install " +
+                "(${(deletion as EngineResult.Failure).message}); its id is reserved so no " +
+                "later clone can be allocated into that container",
+            level = DiagLevel.ERROR,
+            packageName = packageName,
+            profileId = profileId,
+            virtualUserId = virtualUserId,
+        )
+    }
+
+    /**
+     * Uninstalls a package on the way to removing its container.
+     *
+     * The verdict cannot change what happens next — the virtual user is being deleted
+     * regardless — but a silent failure here is the first sign of a container that will
+     * outlive its profile, so it is recorded.
+     */
+    private fun uninstallForTeardown(packageName: String, virtualUserId: Int) {
+        val result = installer.uninstall(packageName, virtualUserId)
+        if (result is EngineResult.Failure) {
+            Slog.w(
+                Slog.INSTALL,
+                "Uninstall of $packageName from user $virtualUserId failed " +
+                    "(${result.code}); removing the virtual user anyway",
+            )
+        }
     }
 
     private fun retainApks(profileId: String, apkPaths: List<String>): List<String>? = try {
@@ -765,20 +824,29 @@ class RealVirtualizationEngine(
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
             ?: return EngineResult.ok()
 
-        // A pinned shortcut outlives the clone; an app cannot delete one, so disable it
-        // with a reason rather than leaving a tile that silently does nothing.
-        CloneShortcutManager(context).disable(
-            profileId,
-            "This clone was deleted in Duplika.",
-        )
-
         launcher.stop(packageName, virtualUserId)
-        installer.uninstall(packageName, virtualUserId)
-        // Before the id is released: VirtualProfileManager allocates the lowest free
-        // integer, so a later clone would otherwise inherit this space's identifiers.
-        spaceIdentity.forget(virtualUserId)
+        uninstallForTeardown(packageName, virtualUserId)
         val deletion = adapter.deleteVirtualUser(virtualUserId)
-        releaseProfileArtifacts(profileId)
+
+        // Only once the engine has actually released the container. VirtualProfileManager
+        // allocates the lowest free integer, so freeing the id while this space's data is
+        // still on disk would hand that data — and its identifiers — to the next clone.
+        //
+        // Leaving the mapping in place on failure is also what makes a retry work: the
+        // Flutter side keeps the profile visible precisely so the user can try again (see
+        // RealVirtualizationEngine.deleteProfile in Dart), and a retry can only reach this
+        // container while the mapping still points at it.
+        if (deletion is EngineResult.Success) {
+            // A pinned shortcut outlives the clone; an app cannot delete one, so disable
+            // it with a reason rather than leaving a tile that silently does nothing.
+            CloneShortcutManager(context).disable(
+                profileId,
+                "This clone was deleted in Duplika.",
+            )
+            spaceIdentity.forget(virtualUserId)
+            releaseRetainedApks(profileId)
+            profileManager.remove(profileId)
+        }
         phase(
             if (deletion is EngineResult.Success) "PROFILE_DELETE_SUCCESS" else "PROFILE_DELETE_FAILED",
             DiagCategory.PROFILE,

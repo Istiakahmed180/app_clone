@@ -11,6 +11,11 @@ import org.json.JSONObject
  * and the engine ever disagreed, a profile could silently launch another profile's data.
  * Ids are allocated as the smallest unused non-negative integer and are never reused while
  * the mapping still holds them.
+ *
+ * An id whose container could not be torn down is *quarantined* rather than freed. The
+ * profile that owned it is gone, so nothing will ever ask for that id again — but its data
+ * is still on disk underneath it, and handing it to the next clone would open somebody's
+ * account in a space that was never theirs. A quarantined id is never allocated again.
  */
 class VirtualProfileManager(context: Context) {
 
@@ -26,7 +31,7 @@ class VirtualProfileManager(context: Context) {
         val mapping = readMapping()
         mapping[profileId]?.let { return it }
 
-        val used = mapping.values.toSet()
+        val used = mapping.values.toSet() + readQuarantine()
         var candidate = 0
         while (candidate in used) candidate++
 
@@ -42,6 +47,27 @@ class VirtualProfileManager(context: Context) {
         val removed = mapping.remove(profileId) ?: return null
         writeMapping(mapping)
         Slog.i(Slog.PROFILE, "Unmapped profile $profileId from virtual user $removed")
+        return removed
+    }
+
+    /**
+     * Drops [profileId]'s mapping and reserves its id permanently.
+     *
+     * For a container the engine refused to delete: the profile is unreachable from here
+     * on, but its data survives under that id, so the id must never be handed out again.
+     * Returns the reserved id, or null when the profile had no mapping.
+     */
+    @Synchronized
+    fun quarantine(profileId: String): Int? {
+        val removed = remove(profileId) ?: return null
+        val quarantined = readQuarantine()
+        if (quarantined.add(removed)) {
+            writeQuarantine(quarantined)
+            Slog.w(
+                Slog.PROFILE,
+                "Quarantined virtual user $removed: its container could not be removed",
+            )
+        }
         return removed
     }
 
@@ -129,6 +155,23 @@ class VirtualProfileManager(context: Context) {
         prefs.edit().putString(KEY_APK_PATHS, json.toString()).commit()
     }
 
+    private fun readQuarantine(): MutableSet<Int> {
+        val raw = prefs.getString(KEY_QUARANTINE, null) ?: return mutableSetOf()
+        return try {
+            val json = JSONArray(raw)
+            MutableList(json.length()) { index -> json.getInt(index) }.toMutableSet()
+        } catch (error: Exception) {
+            // Same reasoning as readMapping: silently forgetting which ids are unsafe is
+            // exactly how a reserved container gets handed to the next clone.
+            Slog.e(Slog.PROFILE, "Quarantine list unreadable; refusing to allocate", error)
+            throw IllegalStateException("The quarantined virtual user list is unreadable.", error)
+        }
+    }
+
+    private fun writeQuarantine(ids: Set<Int>) {
+        prefs.edit().putString(KEY_QUARANTINE, JSONArray(ids.toList()).toString()).commit()
+    }
+
     private fun readMapping(): MutableMap<String, Int> {
         val raw = prefs.getString(KEY_MAPPING, null) ?: return mutableMapOf()
         return try {
@@ -137,8 +180,13 @@ class VirtualProfileManager(context: Context) {
             json.keys().forEach { key -> result[key] = json.getInt(key) }
             result
         } catch (error: Exception) {
-            Slog.e(Slog.PROFILE, "Profile mapping unreadable; starting empty", error)
-            mutableMapOf()
+            // Never an empty map. Allocation hands out the lowest free id, so starting
+            // empty re-issues 0, 1, 2... over containers that already hold other profiles'
+            // data — the exact crossover this class exists to prevent. Failing the call
+            // keeps every container shut, and NativeBridge turns it into an error the user
+            // sees rather than a clone quietly opening the wrong account.
+            Slog.e(Slog.PROFILE, "Profile mapping unreadable; refusing to allocate", error)
+            throw IllegalStateException("The profile-to-virtual-user mapping is unreadable.", error)
         }
     }
 
@@ -153,5 +201,6 @@ class VirtualProfileManager(context: Context) {
         const val KEY_MAPPING = "profile_to_virtual_user"
         const val KEY_APK_PATHS = "profile_to_apk_path"
         const val KEY_APK_PATH_SETS = "profile_to_apk_paths"
+        const val KEY_QUARANTINE = "quarantined_virtual_users"
     }
 }
