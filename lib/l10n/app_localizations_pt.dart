@@ -661,6 +661,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Esta app não pode ser clonada neste dispositivo.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => 'Não foi possível ler o APK selecionado.';
 
   @override

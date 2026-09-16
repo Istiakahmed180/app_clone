@@ -1218,6 +1218,12 @@ abstract class AppLocalizations {
   /// **'This app cannot be cloned on this device.'**
   String get pickerCannotClone;
 
+  /// No description provided for @pickerCloneInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'A clone is already being created. Wait for it to finish, then try again.'**
+  String get pickerCloneInProgress;
+
   /// No description provided for @pickerApkUnreadable.
   ///
   /// In en, this message translates to:

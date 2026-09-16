@@ -661,6 +661,10 @@ class AppLocalizationsMs extends AppLocalizations {
       'Apl ini tidak boleh diklon pada peranti ini.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => 'APK yang dipilih tidak dapat dibaca.';
 
   @override

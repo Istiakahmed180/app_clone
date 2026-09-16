@@ -658,6 +658,10 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không thể nhân bản ứng dụng này trên thiết bị này.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => 'Không đọc được tệp APK đã chọn.';
 
   @override

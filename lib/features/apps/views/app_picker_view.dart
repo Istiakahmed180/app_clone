@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/errors/app_error_text.dart';
+import '../../../core/errors/clone_budget_text.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../data/models/clone_budget.dart';
 import '../../../data/models/clone_refusal.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
@@ -357,7 +359,7 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     if (refusal != null) {
-      _showMessage(context, _refusalMessage(context, refusal));
+      _showMessage(context, _refusalMessage(context, refusal, app.appName));
       return;
     }
     _showCaution(context);
@@ -472,7 +474,14 @@ class AppPickerView extends GetView<AppPickerController> {
       return;
     }
     if (error != null) {
-      _showMessage(context, appErrorMessage(context.l10n, error));
+      // Worded here rather than through the error table: nothing failed, and nothing was
+      // attempted. Same reason the installed-app route has [CloneRefusal.busy].
+      _showMessage(
+        context,
+        error.code == AppPickerController.cloneInProgressCode
+            ? context.l10n.pickerCloneInProgress
+            : appErrorMessage(context.l10n, error),
+      );
       return;
     }
     _showCaution(context);
@@ -516,7 +525,19 @@ class AppPickerView extends GetView<AppPickerController> {
 
   /// Why the clone did not happen, in the user's language where there is a translation
   /// for it and in the engine's own words where there is not.
-  String _refusalMessage(BuildContext context, CloneRefusal refusal) {
+  String _refusalMessage(
+    BuildContext context,
+    CloneRefusal refusal,
+    String appName,
+  ) {
+    if (refusal.busy) {
+      return context.l10n.pickerCloneInProgress;
+    }
+    // The same sentence the grid's clone route refuses with, from the same figures.
+    final CloneBudget? budget = refusal.budget;
+    if (budget != null) {
+      return cloneBudgetRefusal(context.l10n, budget, appName);
+    }
     final CompatibilityFinding? finding = refusal.finding;
     if (finding != null) {
       return compatibilityFindingMessage(context.l10n, finding);

@@ -10,10 +10,12 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/diagnostics/diagnostic_event.dart';
 import '../../../core/diagnostics/diagnostic_operation.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/services/clone_budget_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/app_name_sort.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
 import '../../../data/models/app_details.dart';
+import '../../../data/models/clone_budget.dart';
 import '../../../data/models/clone_refusal.dart';
 import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/installed_app_model.dart';
@@ -35,11 +37,17 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     required this._bridge,
     required this._engine,
     required this._repository,
+    required this._cloneBudgets,
   });
 
   final NativeBridge _bridge;
   final VirtualizationEngine _engine;
   final VirtualProfileRepository _repository;
+
+  /// What this device has room for. The grid's clone route has always asked; this one
+  /// did not, so the same device could refuse there and accept here — then fail in the
+  /// engine and say so in the engine's words instead of "there is no room".
+  final CloneBudgetService _cloneBudgets;
   final AppLogger _logger = const AppLogger('AppPickerController');
 
   final RxList<InstalledAppModel> apps = <InstalledAppModel>[].obs;
@@ -627,6 +635,18 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
 
   /// Clones an installed app. Returns `null` on success, or the refusal to be worded
   /// by the caller.
+  /// The stand-in for "not started, because one already is".
+  ///
+  /// The two clone routes answer with an [AppException], so refusing with one keeps their
+  /// signature — and it is compared by identity rather than by code, so an engine failure
+  /// that happened to share a code could never be mistaken for it.
+  static const String cloneInProgressCode = 'CLONE_IN_PROGRESS';
+
+  static const AppException _busy = VirtualizationException(
+    'A clone is already being created.',
+    code: cloneInProgressCode,
+  );
+
   /// Packages a clone is being created for.
   ///
   /// Kept here so the row itself can say so. Creating a container takes a couple of
@@ -644,10 +664,21 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// Returns why it did not happen, or null on success.
   Future<CloneRefusal?> cloneNow(InstalledAppModel app) async {
     if (cloning.contains(app.packageName) || isWorking.value) {
-      return null;
+      // Said, not swallowed. Returning null here meant "no refusal", which the caller
+      // reads as success: it closed the picker and reported a clone that was never
+      // started. See [CloneRefusal.busy].
+      return const CloneRefusal.busy();
     }
     cloning.add(app.packageName);
     try {
+      // Before the compatibility question, because it is the cheaper refusal and the
+      // one that is not about this app at all: an app that could be cloned on a device
+      // with room should not be told it is unsupported.
+      final CloneBudget budget = await _cloneBudgets.cloneBudget();
+      if (budget.allowsNone) {
+        return CloneRefusal.noRoom(budget);
+      }
+
       final CompatibilityReport report = await analyze(app.packageName);
       if (report.verdict == CompatibilityVerdict.unsupported) {
         // Refused rather than walked into: the engine has already said this cannot
@@ -656,7 +687,9 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       }
       final AppException? failure = await cloneInstalledApp(app);
       if (failure != null) {
-        return CloneRefusal.failed(failure);
+        return identical(failure, _busy)
+            ? const CloneRefusal.busy()
+            : CloneRefusal.failed(failure);
       }
       // Only on success: a clone that was refused has already said why, and a second
       // message about a lesser problem with it would bury the first.
@@ -667,12 +700,14 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  /// Returns the engine's refusal, null on success, or [_busy] when another clone was
+  /// already in flight and this one was not started.
   Future<AppException?> cloneInstalledApp(
     InstalledAppModel app, {
     bool installGms = false,
   }) async {
     if (isWorking.value) {
-      return null;
+      return _busy;
     }
     // Before `isWorking`, so no frame exists where the work is in flight and no row is
     // saying which app it is for — that frame showed the global bar instead.
@@ -814,7 +849,7 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
     bool installGms = false,
   }) async {
     if (isWorking.value) {
-      return null;
+      return _busy;
     }
     isWorking.value = true;
     try {

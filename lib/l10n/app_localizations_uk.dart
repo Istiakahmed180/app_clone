@@ -665,6 +665,10 @@ class AppLocalizationsUk extends AppLocalizations {
       'Цей застосунок не можна клонувати на цьому пристрої.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => 'Не вдалося прочитати вибраний APK.';
 
   @override

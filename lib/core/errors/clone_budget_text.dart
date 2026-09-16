@@ -1,14 +1,19 @@
-import '../../../core/errors/app_error_text.dart';
-import '../../../core/errors/app_exception.dart';
-import '../../../data/models/clone_batch_result.dart';
-import '../../../data/models/clone_budget.dart';
-import '../../../l10n/app_localizations.dart';
+import 'app_error_text.dart';
+import 'app_exception.dart';
+import '../../data/models/clone_batch_result.dart';
+import '../../data/models/clone_budget.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Says a [CloneBudget]'s reason in the user's language.
 ///
 /// The controller decides which fact bound the offer and hands over the figures the
-/// platform already formatted; the wording lives here, beside the rest of the screen's
-/// text, the way [settingsStatusMessage] does for Settings.
+/// platform already formatted; the wording lives here, because a controller has no
+/// `BuildContext` and nothing to translate with.
+///
+/// It sits beside [appErrorMessage] rather than beside the grid, which is where it
+/// started. Both clone routes — the grid's count dialog and the picker's single tap —
+/// now refuse from the same budget, and they have to refuse in the same words; a second
+/// copy of this wording under the picker would be two sentences for one fact.
 String cloneBudgetReason(AppLocalizations l10n, CloneBudget budget) {
   switch (budget.limit) {
     case CloneBudgetLimit.appCeiling:

@@ -660,6 +660,10 @@ class AppLocalizationsNo extends AppLocalizations {
       'Denne appen kan ikke klones på denne enheten.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => 'Den valgte APK-filen kunne ikke leses.';
 
   @override

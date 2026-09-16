@@ -641,6 +641,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickerCannotClone => '此应用无法在本设备上克隆。';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => '无法读取所选的 APK。';
 
   @override

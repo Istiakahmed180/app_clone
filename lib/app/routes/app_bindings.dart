@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../core/diagnostics/diagnostics_repository.dart';
+import '../../core/services/clone_budget_service.dart';
 import '../../core/diagnostics/native_diagnostics.dart';
 import '../../core/virtualization/real_virtualization_engine.dart';
 import '../../core/virtualization/virtualization_engine.dart';
@@ -34,6 +35,11 @@ class AppBinding extends Bindings {
     );
 
     Get.put<NativeBridge>(NativeBridge(), permanent: true);
+    // One answer about what this device has room for, shared by both clone routes.
+    Get.put<CloneBudgetService>(
+      CloneBudgetService(nativeBridge: Get.find<NativeBridge>()),
+      permanent: true,
+    );
     Get.put<VirtualProfileRepository>(VirtualProfileRepository(), permanent: true);
 
     // Permanent: the lock state and the hidden set outlive any single screen, and the
@@ -86,6 +92,7 @@ class HomeBinding extends Bindings {
         nativeBridge: Get.find<NativeBridge>(),
         repository: Get.find<VirtualProfileRepository>(),
         privateSpace: Get.find<PrivateSpaceController>(),
+        cloneBudgets: Get.find<CloneBudgetService>(),
       ),
     );
     Get.lazyPut<OnboardingController>(OnboardingController.new);
@@ -116,6 +123,7 @@ class AppPickerBinding extends Bindings {
         bridge: Get.find<NativeBridge>(),
         engine: Get.find<VirtualizationEngine>(),
         repository: Get.find<VirtualProfileRepository>(),
+        cloneBudgets: Get.find<CloneBudgetService>(),
       ),
     );
   }

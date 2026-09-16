@@ -646,6 +646,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pickerCannotClone => '이 기기에서는 이 앱을 복제할 수 없습니다.';
 
   @override
+  String get pickerCloneInProgress =>
+      'A clone is already being created. Wait for it to finish, then try again.';
+
+  @override
   String get pickerApkUnreadable => '선택한 APK를 읽을 수 없습니다.';
 
   @override
