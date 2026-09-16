@@ -104,8 +104,13 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      # A rolling pre-release, so the link handed to a tester never changes. The asset is
-      # named without the commit for that reason; which commit it is, is in the notes.
+      # A rolling release, so the link handed to a tester never changes. The asset is named
+      # without the commit for that reason; which commit it is, is in the notes.
+      #
+      # Marked `--latest` rather than `--prerelease`: the repository sidebar's Releases card
+      # only shows a release that is not a pre-release, and that card is where someone
+      # landing on the repository looks for a download.
+      #
       # Uses `gh` with the job's own token rather than a third-party action.
       - name: Publish to the latest-build release
         if: ${{ inputs.publish }}
@@ -116,7 +121,7 @@ jobs:
           gh release delete latest-build --yes --cleanup-tag || true
           gh release create latest-build duplika-arm64-v8a.apk \
             --title "Latest test build (${GITHUB_SHA::7})" \
-            --prerelease \
+            --latest \
             --notes "Built from \`${GITHUB_SHA}\` on $(date -u +'%Y-%m-%d %H:%M UTC').
 
           **arm64-v8a only.** It will not install on a 32-bit or x86 device.
