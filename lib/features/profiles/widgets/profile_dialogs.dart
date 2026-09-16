@@ -44,12 +44,23 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
     super.dispose();
   }
 
+  String get _trimmed => _controller.text.trim();
+
   /// Whether the field holds a name the repository will accept.
   ///
-  /// The same rule as `_validateName`, checked here so an empty field disables Save
-  /// rather than being taken and answered with an error dialog. The length bound is the
-  /// field's own `maxLength`, so only emptiness can be got wrong.
-  bool get _isValid => _controller.text.trim().isNotEmpty;
+  /// Both of `_validateName`'s rules, checked here so a name it would refuse disables
+  /// Save rather than being taken and answered with an error dialog afterwards.
+  ///
+  /// The length has to be checked even though the field carries a `maxLength`, because
+  /// the two count different things. `maxLength` counts user-perceived characters —
+  /// `LengthLimitingTextInputFormatter` measures `text.characters.length` — while
+  /// `_validateName` counts UTF-16 code units. For plain text they agree and this is
+  /// dead weight; for anything outside the basic plane they do not. One family emoji is
+  /// a single character to the counter and eleven code units to the check, so four of
+  /// them read as "4/40" in the field and were then refused for being too long.
+  bool get _isValid =>
+      _trimmed.isNotEmpty &&
+      _trimmed.length <= AppConstants.maxProfileNameLength;
 
   void _submit() {
     if (!_isValid) {
@@ -67,7 +78,19 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
         autofocus: true,
         maxLength: AppConstants.maxProfileNameLength,
         textInputAction: TextInputAction.done,
-        decoration: InputDecoration(labelText: context.l10n.renameFieldLabel),
+        decoration: InputDecoration(
+          labelText: context.l10n.renameFieldLabel,
+          // Only when the field holds something and that something is too long: an empty
+          // field is a name not typed yet, not a name that is wrong.
+          errorText: _trimmed.isNotEmpty && !_isValid
+              ? context.l10n.errorProfileNameTooLong(
+                  AppConstants.maxProfileNameLength,
+                )
+              : null,
+          // The counter sits beside the error on the same row, so a sentence that says
+          // the whole rule does not fit on one line and was cut to "can be at m…".
+          errorMaxLines: 2,
+        ),
         onChanged: (_) => setState(() {}),
         onSubmitted: (_) => _submit(),
       ),

@@ -89,7 +89,21 @@ class VirtualProfileRepository {
     if (base.length <= AppConstants.maxProfileNameLength) {
       return base;
     }
-    return base.substring(0, AppConstants.maxProfileNameLength).trimRight();
+    return base.substring(0, _cutBefore(base)).trimRight();
+  }
+
+  /// Where to cut [text] so the result fits the limit without splitting a character.
+  ///
+  /// The limit counts UTF-16 code units, and a character outside the basic plane is two
+  /// of them. Cutting at the bound alone can therefore land between the halves of a
+  /// surrogate pair and leave the first half behind — which is not a character at all,
+  /// and renders as a replacement glyph in the clone's name. Backing off by one costs a
+  /// character nobody would miss and keeps the string well-formed.
+  static int _cutBefore(String text) {
+    const int limit = AppConstants.maxProfileNameLength;
+    final int unit = text.codeUnitAt(limit - 1);
+    final bool splitsAPair = unit >= 0xD800 && unit <= 0xDBFF;
+    return splitsAPair ? limit - 1 : limit;
   }
 
   /// How many profiles already clone [packageName].

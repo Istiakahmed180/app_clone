@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/app_name_sort.dart';
 import '../../../core/services/clone_budget_service.dart';
 import '../../../core/services/clone_icon_store.dart';
 import '../../../core/virtualization/virtualization_engine.dart';
@@ -189,10 +190,16 @@ class HomeController extends GetxController {
                 other.packageName == profile.packageName,
           )
           .toList(growable: false)
-        ..sort(
-          (VirtualProfileModel a, VirtualProfileModel b) =>
-              a.createdAt.compareTo(b.createdAt),
-        );
+        ..sort((VirtualProfileModel a, VirtualProfileModel b) {
+          final int byAge = a.createdAt.compareTo(b.createdAt);
+          // The same tiebreak [_grouped] makes, and for the same reason: two clones
+          // stamped in the same millisecond would otherwise order unpredictably between
+          // reloads. It matters more here than there — this order is what numbers the
+          // badge on the tile and the label on a pinned shortcut, so an unstable one
+          // would swap two clones' numbers and send the launcher a repaint for a change
+          // nobody made.
+          return byAge != 0 ? byAge : a.id.compareTo(b.id);
+        });
 
   String get testAppName =>
       testApp.value?.displayName ?? AppConstants.testAppFallbackName;
@@ -466,9 +473,11 @@ class HomeController extends GetxController {
   ) {
     return profiles.toList()
       ..sort((VirtualProfileModel a, VirtualProfileModel b) {
-        final int byApp = a.appName.toLowerCase().compareTo(
-          b.appName.toLowerCase(),
-        );
+        // The same comparison the picker sorts its list with. `toLowerCase().compareTo`
+        // is UTF-16 code unit order, where every accented letter sits above `z`: a clone
+        // of Ångström landed after one of Zoo here, while the picker — sorting the same
+        // two names — put it first. Two screens, one set of app names, one order.
+        final int byApp = compareAppNames(a.appName, b.appName);
         if (byApp != 0) {
           return byApp;
         }
