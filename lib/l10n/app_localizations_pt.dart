@@ -344,6 +344,33 @@ class AppLocalizationsPt extends AppLocalizations {
       'Dê-lhe uma imagem sua, ou mantenha o ícone da aplicação e marque-o com uma cor — de qualquer forma distingue-o num relance dos outros clones da mesma aplicação.';
 
   @override
+  String get cloneIconColorRed => 'Vermelho';
+
+  @override
+  String get cloneIconColorOrange => 'Laranja';
+
+  @override
+  String get cloneIconColorAmber => 'Âmbar';
+
+  @override
+  String get cloneIconColorGreen => 'Verde';
+
+  @override
+  String get cloneIconColorTeal => 'Azul-petróleo';
+
+  @override
+  String get cloneIconColorBlue => 'Azul';
+
+  @override
+  String get cloneIconColorViolet => 'Violeta';
+
+  @override
+  String get cloneIconColorPink => 'Rosa';
+
+  @override
+  String get cloneIconColorNone => 'Sem cor';
+
+  @override
   String get cloneActionForceStop => 'Forçar paragem';
 
   @override
@@ -377,6 +404,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', em execução';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', marcado $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', não pode ser aberta neste dispositivo';
@@ -1540,6 +1572,33 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Dê a ele uma imagem sua, ou mantenha o ícone do app e marque-o com uma cor — de qualquer jeito você o distingue num relance dos seus outros clones do mesmo app.';
 
   @override
+  String get cloneIconColorRed => 'Vermelho';
+
+  @override
+  String get cloneIconColorOrange => 'Laranja';
+
+  @override
+  String get cloneIconColorAmber => 'Âmbar';
+
+  @override
+  String get cloneIconColorGreen => 'Verde';
+
+  @override
+  String get cloneIconColorTeal => 'Azul-petróleo';
+
+  @override
+  String get cloneIconColorBlue => 'Azul';
+
+  @override
+  String get cloneIconColorViolet => 'Violeta';
+
+  @override
+  String get cloneIconColorPink => 'Rosa';
+
+  @override
+  String get cloneIconColorNone => 'Sem cor';
+
+  @override
   String get cloneActionForceStop => 'Forçar paragem';
 
   @override
@@ -1573,6 +1632,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get cloneTileRunning => ', em execução';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', marcado $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', não pode ser aberta neste dispositivo';

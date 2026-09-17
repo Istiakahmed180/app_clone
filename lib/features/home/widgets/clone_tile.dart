@@ -13,6 +13,7 @@ import '../../../data/models/clone_icon_color.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/app_icon.dart';
 import '../controllers/home_controller.dart';
+import 'clone_icon_color_text.dart';
 
 /// One clone, as a launcher tile.
 ///
@@ -240,6 +241,12 @@ class CloneTile extends StatelessWidget {
     final StringBuffer buffer = StringBuffer(profile.profileName);
     if (siblingCount > 1) {
       buffer.write(l10n.cloneTileSibling(instanceIndex, siblingCount));
+    }
+    // The mark is a dot. It is the answer to "which of my accounts is this", and on a
+    // lone clone it is the only thing on the tile that answers it, so a reader that
+    // could not see it would be the one user who set the mark and never hears it.
+    if (profile.iconColor.isSet) {
+      buffer.write(l10n.cloneTileMark(cloneIconColorLabel(l10n, profile.iconColor)));
     }
     if (isLaunching) {
       buffer.write(l10n.cloneTileOpening);

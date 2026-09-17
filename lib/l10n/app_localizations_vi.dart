@@ -342,6 +342,33 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đặt ảnh của riêng bạn, hoặc giữ biểu tượng của ứng dụng và đánh dấu bằng một màu — cách nào bạn cũng nhận ra nó ngay giữa các bản sao khác của cùng ứng dụng.';
 
   @override
+  String get cloneIconColorRed => 'Đỏ';
+
+  @override
+  String get cloneIconColorOrange => 'Cam';
+
+  @override
+  String get cloneIconColorAmber => 'Hổ phách';
+
+  @override
+  String get cloneIconColorGreen => 'Xanh lá';
+
+  @override
+  String get cloneIconColorTeal => 'Xanh mòng két';
+
+  @override
+  String get cloneIconColorBlue => 'Xanh dương';
+
+  @override
+  String get cloneIconColorViolet => 'Tím';
+
+  @override
+  String get cloneIconColorPink => 'Hồng';
+
+  @override
+  String get cloneIconColorNone => 'Không màu';
+
+  @override
   String get cloneActionForceStop => 'Buộc dừng';
 
   @override
@@ -375,6 +402,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', đang chạy';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', đánh dấu $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', không thể khởi chạy trên thiết bị này';

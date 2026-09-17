@@ -334,6 +334,33 @@ class AppLocalizationsZh extends AppLocalizations {
       '给它换上你自己的图片，或者保留应用图标并用颜色做个标记——两种方式都能让你在同一应用的其他分身中一眼认出它。';
 
   @override
+  String get cloneIconColorRed => '红色';
+
+  @override
+  String get cloneIconColorOrange => '橙色';
+
+  @override
+  String get cloneIconColorAmber => '琥珀色';
+
+  @override
+  String get cloneIconColorGreen => '绿色';
+
+  @override
+  String get cloneIconColorTeal => '蓝绿色';
+
+  @override
+  String get cloneIconColorBlue => '蓝色';
+
+  @override
+  String get cloneIconColorViolet => '紫罗兰色';
+
+  @override
+  String get cloneIconColorPink => '粉色';
+
+  @override
+  String get cloneIconColorNone => '无颜色';
+
+  @override
   String get cloneActionForceStop => '强制停止';
 
   @override
@@ -367,6 +394,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cloneTileRunning => '，正在运行';
+
+  @override
+  String cloneTileMark(String color) {
+    return '，标记$color';
+  }
 
   @override
   String get cloneTileCannotLaunch => '，无法在本设备上启动';
@@ -1476,6 +1508,33 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
       '给它换上你自己的图片，或者保留应用图标并用颜色做个标记——两种方式都能让你在同一应用的其他分身中一眼认出它。';
 
   @override
+  String get cloneIconColorRed => '红色';
+
+  @override
+  String get cloneIconColorOrange => '橙色';
+
+  @override
+  String get cloneIconColorAmber => '琥珀色';
+
+  @override
+  String get cloneIconColorGreen => '绿色';
+
+  @override
+  String get cloneIconColorTeal => '蓝绿色';
+
+  @override
+  String get cloneIconColorBlue => '蓝色';
+
+  @override
+  String get cloneIconColorViolet => '紫罗兰色';
+
+  @override
+  String get cloneIconColorPink => '粉色';
+
+  @override
+  String get cloneIconColorNone => '无颜色';
+
+  @override
   String get cloneActionForceStop => '强制停止';
 
   @override
@@ -1509,6 +1568,11 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get cloneTileRunning => '，正在运行';
+
+  @override
+  String cloneTileMark(String color) {
+    return '，标记$color';
+  }
 
   @override
   String get cloneTileCannotLaunch => '，无法在本设备上启动';
@@ -2607,6 +2671,33 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
       '給它換上你自己的圖片，或者保留應用程式圖示並用顏色做個標記——兩種方式都能讓你在同一應用程式的其他分身中一眼認出它。';
 
   @override
+  String get cloneIconColorRed => '紅色';
+
+  @override
+  String get cloneIconColorOrange => '橙色';
+
+  @override
+  String get cloneIconColorAmber => '琥珀色';
+
+  @override
+  String get cloneIconColorGreen => '綠色';
+
+  @override
+  String get cloneIconColorTeal => '藍綠色';
+
+  @override
+  String get cloneIconColorBlue => '藍色';
+
+  @override
+  String get cloneIconColorViolet => '紫羅蘭色';
+
+  @override
+  String get cloneIconColorPink => '粉紅色';
+
+  @override
+  String get cloneIconColorNone => '無顏色';
+
+  @override
   String get cloneActionForceStop => '強制停止';
 
   @override
@@ -2640,6 +2731,11 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get cloneTileRunning => '，正在執行';
+
+  @override
+  String cloneTileMark(String color) {
+    return '，標記$color';
+  }
 
   @override
   String get cloneTileCannotLaunch => '，無法在本裝置上啟動';
@@ -3738,6 +3834,33 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
       '給它換上你自己的圖片，或者保留應用程式圖示並用顏色做個標記——兩種方式都能讓你喺同一應用程式嘅其他分身中一眼認出佢。';
 
   @override
+  String get cloneIconColorRed => '紅色';
+
+  @override
+  String get cloneIconColorOrange => '橙色';
+
+  @override
+  String get cloneIconColorAmber => '琥珀色';
+
+  @override
+  String get cloneIconColorGreen => '綠色';
+
+  @override
+  String get cloneIconColorTeal => '藍綠色';
+
+  @override
+  String get cloneIconColorBlue => '藍色';
+
+  @override
+  String get cloneIconColorViolet => '紫羅蘭色';
+
+  @override
+  String get cloneIconColorPink => '粉紅色';
+
+  @override
+  String get cloneIconColorNone => '無顏色';
+
+  @override
   String get cloneActionForceStop => '強制停止';
 
   @override
@@ -3771,6 +3894,11 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get cloneTileRunning => '，正在執行';
+
+  @override
+  String cloneTileMark(String color) {
+    return '，標記$color';
+  }
 
   @override
   String get cloneTileCannotLaunch => '，無法在本裝置上啟動';

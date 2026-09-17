@@ -336,6 +336,33 @@ class AppLocalizationsJa extends AppLocalizations {
       '好きな画像を設定するか、アプリのアイコンのまま色で印を付けられます。どちらでも、同じアプリの他のクローンとひと目で見分けられます。';
 
   @override
+  String get cloneIconColorRed => '赤';
+
+  @override
+  String get cloneIconColorOrange => 'オレンジ';
+
+  @override
+  String get cloneIconColorAmber => '琥珀色';
+
+  @override
+  String get cloneIconColorGreen => '緑';
+
+  @override
+  String get cloneIconColorTeal => 'ティール';
+
+  @override
+  String get cloneIconColorBlue => '青';
+
+  @override
+  String get cloneIconColorViolet => '紫';
+
+  @override
+  String get cloneIconColorPink => 'ピンク';
+
+  @override
+  String get cloneIconColorNone => '色なし';
+
+  @override
   String get cloneActionForceStop => '強制停止';
 
   @override
@@ -369,6 +396,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cloneTileRunning => '、実行中';
+
+  @override
+  String cloneTileMark(String color) {
+    return '、$color でマーク';
+  }
 
   @override
   String get cloneTileCannotLaunch => '、このデバイスでは起動できません';

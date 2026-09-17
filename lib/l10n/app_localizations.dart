@@ -720,6 +720,60 @@ abstract class AppLocalizations {
   /// **'Give it a picture of your own, or keep the app\'s icon and mark it with a colour — either way you can tell it from your other clones of the same app at a glance.'**
   String get cloneIconPickerMessage;
 
+  /// No description provided for @cloneIconColorRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get cloneIconColorRed;
+
+  /// No description provided for @cloneIconColorOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get cloneIconColorOrange;
+
+  /// No description provided for @cloneIconColorAmber.
+  ///
+  /// In en, this message translates to:
+  /// **'Amber'**
+  String get cloneIconColorAmber;
+
+  /// No description provided for @cloneIconColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get cloneIconColorGreen;
+
+  /// No description provided for @cloneIconColorTeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Teal'**
+  String get cloneIconColorTeal;
+
+  /// No description provided for @cloneIconColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get cloneIconColorBlue;
+
+  /// No description provided for @cloneIconColorViolet.
+  ///
+  /// In en, this message translates to:
+  /// **'Violet'**
+  String get cloneIconColorViolet;
+
+  /// No description provided for @cloneIconColorPink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink'**
+  String get cloneIconColorPink;
+
+  /// No description provided for @cloneIconColorNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No colour'**
+  String get cloneIconColorNone;
+
   /// No description provided for @cloneActionForceStop.
   ///
   /// In en, this message translates to:
@@ -785,6 +839,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **', running'**
   String get cloneTileRunning;
+
+  /// No description provided for @cloneTileMark.
+  ///
+  /// In en, this message translates to:
+  /// **', marked {color}'**
+  String cloneTileMark(String color);
 
   /// No description provided for @cloneTileCannotLaunch.
   ///

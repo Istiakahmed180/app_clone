@@ -344,6 +344,33 @@ class AppLocalizationsMs extends AppLocalizations {
       'Beri gambar anda sendiri, atau kekalkan ikon apl dan tandakannya dengan warna — kedua-duanya membolehkan anda mengecamnya sekali pandang antara klon lain apl yang sama.';
 
   @override
+  String get cloneIconColorRed => 'Merah';
+
+  @override
+  String get cloneIconColorOrange => 'Jingga';
+
+  @override
+  String get cloneIconColorAmber => 'Ambar';
+
+  @override
+  String get cloneIconColorGreen => 'Hijau';
+
+  @override
+  String get cloneIconColorTeal => 'Biru kehijauan';
+
+  @override
+  String get cloneIconColorBlue => 'Biru';
+
+  @override
+  String get cloneIconColorViolet => 'Ungu';
+
+  @override
+  String get cloneIconColorPink => 'Merah jambu';
+
+  @override
+  String get cloneIconColorNone => 'Tiada warna';
+
+  @override
   String get cloneActionForceStop => 'Paksa henti';
 
   @override
@@ -377,6 +404,11 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', sedang berjalan';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', ditanda $color';
+  }
 
   @override
   String get cloneTileCannotLaunch =>

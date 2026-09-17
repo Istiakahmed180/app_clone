@@ -112,9 +112,19 @@ class CloneIconStore {
         if (longest <= _decodeCap) {
           return const ui.TargetImageSize();
         }
+        // The short side is asked for too, rather than left to follow the aspect ratio,
+        // so that it can be floored at a whole pixel. A picture more than [_decodeCap]
+        // times longer than it is wide scales its short side below one — a 12000x2 strip
+        // comes to 1024x0.17 — and a codec asked for a zero-height image produces
+        // nothing at all. That turned a picture which decodes perfectly well at its own
+        // size into "the picture could not be used as an icon", for no reason other than
+        // the cap this asked for. Rounded up, so the figure can only ever reach one from
+        // below.
+        final int shortest = width > height ? height : width;
+        final int scaled = (shortest * _decodeCap / longest).ceil();
         return width >= height
-            ? const ui.TargetImageSize(width: _decodeCap)
-            : const ui.TargetImageSize(height: _decodeCap);
+            ? ui.TargetImageSize(width: _decodeCap, height: scaled)
+            : ui.TargetImageSize(width: scaled, height: _decodeCap);
       },
     );
     final ui.Image image;

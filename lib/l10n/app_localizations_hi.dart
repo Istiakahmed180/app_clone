@@ -343,6 +343,33 @@ class AppLocalizationsHi extends AppLocalizations {
       'इसे अपनी कोई तस्वीर दें, या ऐप का आइकन रखकर उस पर रंग का निशान लगाएँ — दोनों ही तरह आप इसे उसी ऐप के अपने दूसरे क्लोन से एक नज़र में पहचान लेंगे।';
 
   @override
+  String get cloneIconColorRed => 'लाल';
+
+  @override
+  String get cloneIconColorOrange => 'नारंगी';
+
+  @override
+  String get cloneIconColorAmber => 'अंबर';
+
+  @override
+  String get cloneIconColorGreen => 'हरा';
+
+  @override
+  String get cloneIconColorTeal => 'टील';
+
+  @override
+  String get cloneIconColorBlue => 'नीला';
+
+  @override
+  String get cloneIconColorViolet => 'बैंगनी';
+
+  @override
+  String get cloneIconColorPink => 'गुलाबी';
+
+  @override
+  String get cloneIconColorNone => 'कोई रंग नहीं';
+
+  @override
   String get cloneActionForceStop => 'ज़बरदस्ती रोकें';
 
   @override
@@ -376,6 +403,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', चल रहा है';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', $color से चिह्नित';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', इस डिवाइस पर शुरू नहीं हो सकता';

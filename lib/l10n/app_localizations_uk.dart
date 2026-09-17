@@ -345,6 +345,33 @@ class AppLocalizationsUk extends AppLocalizations {
       'Поставте власне зображення або залиште піктограму застосунку й позначте її кольором — у будь-якому разі ви одразу відрізните його від інших клонів того самого застосунку.';
 
   @override
+  String get cloneIconColorRed => 'Червоний';
+
+  @override
+  String get cloneIconColorOrange => 'Помаранчевий';
+
+  @override
+  String get cloneIconColorAmber => 'Бурштиновий';
+
+  @override
+  String get cloneIconColorGreen => 'Зелений';
+
+  @override
+  String get cloneIconColorTeal => 'Бірюзовий';
+
+  @override
+  String get cloneIconColorBlue => 'Синій';
+
+  @override
+  String get cloneIconColorViolet => 'Фіолетовий';
+
+  @override
+  String get cloneIconColorPink => 'Рожевий';
+
+  @override
+  String get cloneIconColorNone => 'Без кольору';
+
+  @override
   String get cloneActionForceStop => 'Зупинити';
 
   @override
@@ -378,6 +405,11 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', працює';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', позначка $color';
+  }
 
   @override
   String get cloneTileCannotLaunch =>

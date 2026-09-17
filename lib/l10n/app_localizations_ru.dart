@@ -344,6 +344,33 @@ class AppLocalizationsRu extends AppLocalizations {
       'Поставьте своё изображение или оставьте значок приложения и отметьте его цветом — в любом случае вы сразу отличите его от других клонов того же приложения.';
 
   @override
+  String get cloneIconColorRed => 'Красный';
+
+  @override
+  String get cloneIconColorOrange => 'Оранжевый';
+
+  @override
+  String get cloneIconColorAmber => 'Янтарный';
+
+  @override
+  String get cloneIconColorGreen => 'Зелёный';
+
+  @override
+  String get cloneIconColorTeal => 'Бирюзовый';
+
+  @override
+  String get cloneIconColorBlue => 'Синий';
+
+  @override
+  String get cloneIconColorViolet => 'Фиолетовый';
+
+  @override
+  String get cloneIconColorPink => 'Розовый';
+
+  @override
+  String get cloneIconColorNone => 'Без цвета';
+
+  @override
   String get cloneActionForceStop => 'Остановить';
 
   @override
@@ -377,6 +404,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', работает';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', метка $color';
+  }
 
   @override
   String get cloneTileCannotLaunch =>

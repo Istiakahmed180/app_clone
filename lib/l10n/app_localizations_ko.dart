@@ -337,6 +337,33 @@ class AppLocalizationsKo extends AppLocalizations {
       '직접 고른 사진을 넣거나, 앱 아이콘을 그대로 두고 색으로 표시할 수 있습니다. 어느 쪽이든 같은 앱의 다른 클론과 한눈에 구분됩니다.';
 
   @override
+  String get cloneIconColorRed => '빨강';
+
+  @override
+  String get cloneIconColorOrange => '주황';
+
+  @override
+  String get cloneIconColorAmber => '호박색';
+
+  @override
+  String get cloneIconColorGreen => '초록';
+
+  @override
+  String get cloneIconColorTeal => '청록';
+
+  @override
+  String get cloneIconColorBlue => '파랑';
+
+  @override
+  String get cloneIconColorViolet => '보라';
+
+  @override
+  String get cloneIconColorPink => '분홍';
+
+  @override
+  String get cloneIconColorNone => '색 없음';
+
+  @override
   String get cloneActionForceStop => '강제 중지';
 
   @override
@@ -370,6 +397,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', 실행 중';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', 표시 $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', 이 기기에서는 실행할 수 없음';

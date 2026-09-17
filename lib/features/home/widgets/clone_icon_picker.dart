@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../data/models/clone_icon_color.dart';
+import 'clone_icon_color_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
 
@@ -153,6 +154,10 @@ class _Swatch extends StatelessWidget {
     final double size = 40.r;
 
     return Semantics(
+      // Named, because the colour is the whole of what the control says and a screen
+      // reader cannot see it. Without this the sheet reads as nine unlabelled buttons,
+      // and the one thing the user came here to choose is the one thing not announced.
+      label: cloneIconColorLabel(context.l10n, color),
       selected: selected,
       button: true,
       child: InkResponse(

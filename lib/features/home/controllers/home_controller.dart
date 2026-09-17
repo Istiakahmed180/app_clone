@@ -682,7 +682,16 @@ class HomeController extends GetxController {
   Future<AppException?> clearCustomIcon(VirtualProfileModel profile) async {
     try {
       await _repository.updateProfile(profile.id, clearIconPath: true);
-      await _iconStore.delete(profile.id);
+      // Removed after the clone has already stopped pointing at it, and never in a way
+      // that can fail the change -- the same reasoning as [deleteProfile]. The clone is
+      // back on its app's icon the moment the path is cleared, so a file that will not
+      // delete is wasted bytes; reporting it would put "the icon could not be removed" in
+      // front of someone who is looking at the icon being removed.
+      try {
+        await _iconStore.delete(profile.id);
+      } on Object catch (error, stackTrace) {
+        _logger.error('Could not remove the icon for ${profile.id}', error, stackTrace);
+      }
       await _loadProfiles();
       await _refreshShortcut(profile.id);
       return null;

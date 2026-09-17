@@ -344,6 +344,33 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ponle una imagen propia, o conserva el icono de la app y márcalo con un color: así lo distinguirás de tus otros clones de la misma app de un vistazo.';
 
   @override
+  String get cloneIconColorRed => 'Rojo';
+
+  @override
+  String get cloneIconColorOrange => 'Naranja';
+
+  @override
+  String get cloneIconColorAmber => 'Ámbar';
+
+  @override
+  String get cloneIconColorGreen => 'Verde';
+
+  @override
+  String get cloneIconColorTeal => 'Verde azulado';
+
+  @override
+  String get cloneIconColorBlue => 'Azul';
+
+  @override
+  String get cloneIconColorViolet => 'Violeta';
+
+  @override
+  String get cloneIconColorPink => 'Rosa';
+
+  @override
+  String get cloneIconColorNone => 'Sin color';
+
+  @override
   String get cloneActionForceStop => 'Forzar detención';
 
   @override
@@ -377,6 +404,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', en ejecución';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', marcado en $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', no se puede abrir en este dispositivo';

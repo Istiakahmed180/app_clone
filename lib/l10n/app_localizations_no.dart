@@ -343,6 +343,33 @@ class AppLocalizationsNo extends AppLocalizations {
       'Gi den et bilde du velger selv, eller behold appens ikon og merk det med en farge — uansett kjenner du den igjen med én gang blant de andre klonene av samme app.';
 
   @override
+  String get cloneIconColorRed => 'Rød';
+
+  @override
+  String get cloneIconColorOrange => 'Oransje';
+
+  @override
+  String get cloneIconColorAmber => 'Rav';
+
+  @override
+  String get cloneIconColorGreen => 'Grønn';
+
+  @override
+  String get cloneIconColorTeal => 'Blågrønn';
+
+  @override
+  String get cloneIconColorBlue => 'Blå';
+
+  @override
+  String get cloneIconColorViolet => 'Fiolett';
+
+  @override
+  String get cloneIconColorPink => 'Rosa';
+
+  @override
+  String get cloneIconColorNone => 'Ingen farge';
+
+  @override
   String get cloneActionForceStop => 'Tving stopp';
 
   @override
@@ -376,6 +403,11 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get cloneTileRunning => ', kjører';
+
+  @override
+  String cloneTileMark(String color) {
+    return ', merket $color';
+  }
 
   @override
   String get cloneTileCannotLaunch => ', kan ikke startes på denne enheten';
