@@ -337,6 +337,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieses Bild konnte nicht als Symbol verwendet werden. Probiere ein anderes.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Dieser Klon konnte nicht entfernt werden. Versuche es erneut.';
+
+  @override
   String get cloneIconPickerTitle => 'Symbol dieses Klons';
 
   @override

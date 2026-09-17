@@ -335,6 +335,10 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không thể dùng ảnh đó làm biểu tượng. Hãy thử ảnh khác.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Không thể xóa bản sao này. Hãy thử lại.';
+
+  @override
   String get cloneIconPickerTitle => 'Biểu tượng của bản sao này';
 
   @override

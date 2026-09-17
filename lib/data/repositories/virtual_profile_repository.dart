@@ -33,6 +33,37 @@ class VirtualProfileRepository {
   final Uuid _uuid;
   final AppLogger _logger = const AppLogger('VirtualProfileRepository');
 
+  /// The tail of the chain every change queues itself behind.
+  Future<void> _writes = Future<void>.value();
+
+  /// Runs [change] with no other change in flight.
+  ///
+  /// Every write here is a read of the whole list, an edit to one entry, and a write of
+  /// the whole list back, with an `await` between each step. Two changes that overlap
+  /// therefore both read the same list and both write their own version of it, and
+  /// whichever finishes last silently undoes the other.
+  ///
+  /// That is not a theoretical interleaving. Deleting a clone tears down its container,
+  /// which takes seconds, and the grid stays interactive the whole time — so a second
+  /// uninstall, a rename, or a new clone from the picker can all start while the first
+  /// is still running. Without this, two overlapping deletes leave the first clone in
+  /// storage: it comes back to the grid after the user watched it go, with its container
+  /// already destroyed. That is shown by the tests rather than by a device — two taps
+  /// cannot be timed finely enough to land inside the window on purpose — and the tests
+  /// force the interleaving instead of waiting for it.
+  ///
+  /// Serialising is the right tool rather than a finer lock per profile: the unit that is
+  /// read and written is the whole list, so two changes to different clones collide just
+  /// as squarely as two changes to one.
+  Future<T> _exclusively<T>(Future<T> Function() change) {
+    final Future<T> result = _writes.then((_) => change());
+    // The chain must survive a refusal. Without swallowing the error here, one rejected
+    // change — deleting a clone that is already gone — would leave every later change
+    // chained behind a failed future.
+    _writes = result.then<void>((_) {}, onError: (Object _) {});
+    return result;
+  }
+
   Future<List<VirtualProfileModel>> getProfiles() async {
     final String? raw = await _storage.read(AppConstants.profilesStorageKey);
     if (raw == null || raw.isEmpty) {
@@ -126,20 +157,22 @@ class VirtualProfileRepository {
     required String packageName,
     required String appName,
     required String profileName,
-  }) async {
-    final String name = _validateName(profileName);
-    final List<VirtualProfileModel> profiles = await getProfiles();
+  }) {
+    return _exclusively(() async {
+      final String name = _validateName(profileName);
+      final List<VirtualProfileModel> profiles = await getProfiles();
 
-    final VirtualProfileModel profile = VirtualProfileModel(
-      id: _uuid.v4(),
-      packageName: packageName,
-      appName: appName,
-      profileName: name,
-      createdAt: DateTime.now(),
-    );
+      final VirtualProfileModel profile = VirtualProfileModel(
+        id: _uuid.v4(),
+        packageName: packageName,
+        appName: appName,
+        profileName: name,
+        createdAt: DateTime.now(),
+      );
 
-    await _persist(<VirtualProfileModel>[...profiles, profile]);
-    return profile;
+      await _persist(<VirtualProfileModel>[...profiles, profile]);
+      return profile;
+    });
   }
 
   Future<VirtualProfileModel> updateProfile(
@@ -150,33 +183,35 @@ class VirtualProfileRepository {
     CloneIconColor? iconColor,
     String? iconPath,
     bool clearIconPath = false,
-  }) async {
-    final List<VirtualProfileModel> profiles = await getProfiles();
-    final int index = profiles.indexWhere(
-      (VirtualProfileModel p) => p.id == profileId,
-    );
-    if (index == -1) {
-      throw ProfileNotFoundException(profileId);
-    }
+  }) {
+    return _exclusively(() async {
+      final List<VirtualProfileModel> profiles = await getProfiles();
+      final int index = profiles.indexWhere(
+        (VirtualProfileModel p) => p.id == profileId,
+      );
+      if (index == -1) {
+        throw ProfileNotFoundException(profileId);
+      }
 
-    final String? name = profileName == null
-        ? null
-        : _validateName(profileName);
+      final String? name = profileName == null
+          ? null
+          : _validateName(profileName);
 
-    final VirtualProfileModel updated = profiles[index].copyWith(
-      profileName: name,
-      enabled: enabled,
-      hidden: hidden,
-      iconColor: iconColor,
-      iconPath: iconPath,
-      clearIconPath: clearIconPath,
-    );
+      final VirtualProfileModel updated = profiles[index].copyWith(
+        profileName: name,
+        enabled: enabled,
+        hidden: hidden,
+        iconColor: iconColor,
+        iconPath: iconPath,
+        clearIconPath: clearIconPath,
+      );
 
-    final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(
-      profiles,
-    )..[index] = updated;
-    await _persist(next);
-    return updated;
+      final List<VirtualProfileModel> next = List<VirtualProfileModel>.of(
+        profiles,
+      )..[index] = updated;
+      await _persist(next);
+      return updated;
+    });
   }
 
   /// Moves a profile in or out of the Private space. The container is untouched.
@@ -187,29 +222,33 @@ class VirtualProfileRepository {
   ///
   /// Used when the Private space is turned off: the lock is gone, so leaving clones
   /// hidden would strand them behind a door that no longer exists.
-  Future<void> unhideAll() async {
-    final List<VirtualProfileModel> profiles = await getProfiles();
-    if (!profiles.any((VirtualProfileModel p) => p.hidden)) {
-      return;
-    }
-    await _persist(
-      profiles
-          .map((VirtualProfileModel p) => p.copyWith(hidden: false))
-          .toList(growable: false),
-    );
+  Future<void> unhideAll() {
+    return _exclusively(() async {
+      final List<VirtualProfileModel> profiles = await getProfiles();
+      if (!profiles.any((VirtualProfileModel p) => p.hidden)) {
+        return;
+      }
+      await _persist(
+        profiles
+            .map((VirtualProfileModel p) => p.copyWith(hidden: false))
+            .toList(growable: false),
+      );
+    });
   }
 
-  Future<void> deleteProfile(String profileId) async {
-    final List<VirtualProfileModel> profiles = await getProfiles();
-    final List<VirtualProfileModel> next = profiles
-        .where((VirtualProfileModel p) => p.id != profileId)
-        .toList(growable: false);
+  Future<void> deleteProfile(String profileId) {
+    return _exclusively(() async {
+      final List<VirtualProfileModel> profiles = await getProfiles();
+      final List<VirtualProfileModel> next = profiles
+          .where((VirtualProfileModel p) => p.id != profileId)
+          .toList(growable: false);
 
-    if (next.length == profiles.length) {
-      throw ProfileNotFoundException(profileId);
-    }
+      if (next.length == profiles.length) {
+        throw ProfileNotFoundException(profileId);
+      }
 
-    await _persist(next);
+      await _persist(next);
+    });
   }
 
   Future<void> _persist(List<VirtualProfileModel> profiles) async {

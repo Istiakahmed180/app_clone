@@ -338,5 +338,6 @@
   "cloneIconColorNone": "Без цвета",
   "cloneIconPickerChoose": "Выбрать изображение",
   "cloneIconPickerUseAppIcon": "Использовать значок приложения",
-  "errorCloneIconFailed": "Это изображение не удалось использовать как значок. Попробуйте другое."
+  "errorCloneIconFailed": "Это изображение не удалось использовать как значок. Попробуйте другое.",
+  "errorCloneDeleteFailed": "Не удалось удалить этот клон. Попробуйте ещё раз."
 }

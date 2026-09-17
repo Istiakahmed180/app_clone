@@ -337,6 +337,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível usar essa imagem como ícone. Experimente outra.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Não foi possível remover este clone. Tente novamente.';
+
+  @override
   String get cloneIconPickerTitle => 'Ícone deste clone';
 
   @override
@@ -1563,6 +1567,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get errorCloneIconFailed =>
       'Não foi possível usar essa imagem como ícone. Tente outra.';
+
+  @override
+  String get errorCloneDeleteFailed =>
+      'Não foi possível remover este clone. Tente novamente.';
 
   @override
   String get cloneIconPickerTitle => 'Ícone deste clone';

@@ -338,5 +338,6 @@
   "cloneIconColorNone": "कोई रंग नहीं",
   "cloneIconPickerChoose": "तस्वीर चुनें",
   "cloneIconPickerUseAppIcon": "ऐप का आइकन इस्तेमाल करें",
-  "errorCloneIconFailed": "उस तस्वीर को आइकन के रूप में इस्तेमाल नहीं किया जा सका। कोई दूसरी आज़माएँ।"
+  "errorCloneIconFailed": "उस तस्वीर को आइकन के रूप में इस्तेमाल नहीं किया जा सका। कोई दूसरी आज़माएँ।",
+  "errorCloneDeleteFailed": "यह क्लोन हटाया नहीं जा सका। फिर से कोशिश करें।"
 }

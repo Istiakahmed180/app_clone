@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Process
 import android.os.SystemClock
 import java.io.File
 import co.tdevs.duplika.native.ApkAbis
@@ -16,6 +17,7 @@ import co.tdevs.duplika.native.VirtualizationEngineAdapter
 import top.niunaijun.blackbox.BlackBoxCore
 import top.niunaijun.blackbox.app.configuration.ClientConfiguration
 import top.niunaijun.blackbox.core.env.BEnvironment
+import top.niunaijun.blackbox.fake.frameworks.BActivityManager
 
 /**
  * The ONLY file in Duplika permitted to reference NewBlackbox (`top.niunaijun.*`).
@@ -482,9 +484,81 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
 
     override fun stop(packageName: String, virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.VIRTUAL_APP_LAUNCH_FAILED) {
+            // Asked before the stop, not after: stopping a package can take Bcore's own
+            // server process down with it, and one of the two answers below comes from
+            // that process.
+            val guests = guestProcesses(packageName, virtualUserId)
             BlackBoxCore.get().stopPackage(packageName, virtualUserId)
+            killSurvivors(packageName, virtualUserId, guests)
             EngineResult.ok()
         }
+
+    /**
+     * The engine's own list of processes running this package in this container.
+     *
+     * Per-container, which is why it is worth asking at all: every clone of an app runs a
+     * process with the same name, so `/proc` and the platform's own process list can say
+     * that a clone of WhatsApp is running but not *which* one, and stopping one clone must
+     * never reach into another's.
+     *
+     * Kept alongside [GuestProcessRegistry] rather than replaced by it because the two fail
+     * in different places. This one knows about a process that started before the registry
+     * existed, or one whose own record could not be written; the registry knows about a
+     * process this one has forgotten, which on a restarted server is most of them.
+     */
+    private fun guestProcesses(packageName: String, virtualUserId: Int): List<Int> {
+        val listed = runCatching {
+            BActivityManager.get()
+                .getRunningAppProcesses(packageName, virtualUserId)
+                ?.mAppProcessInfoList
+        }.onFailure {
+            Slog.w(Slog.LAUNCH, "Could not list guest processes: ${it.message}")
+        }.getOrNull().orEmpty()
+
+        // Confirmed against the kernel rather than believed. Every field above comes from
+        // the engine's server process describing what it remembers starting, and a record
+        // it never cleared names a pid that may since have died — and been handed to
+        // something else. This is about to be sent SIGKILL, so it is checked where the
+        // truth is.
+        val mine = listed.filter { process ->
+            GuestProcessRegistry.isLiveGuest(process.pid, packageName)
+        }
+        Slog.i(
+            Slog.LAUNCH,
+            "Guest processes for $packageName in user $virtualUserId: " +
+                "${listed.size} listed, ${mine.size} to end",
+        )
+        return mine.map { it.pid }
+    }
+
+    /**
+     * Ends the guest processes the engine's own stop left running.
+     *
+     * Bcore's stop asks its server to tear the app down and returns without saying whether
+     * anything happened; measured on API 35, a cloned app that had been opened kept its
+     * process through both a Force stop and a delete of the whole container. The clone's
+     * data directory was gone and its process was still there, holding what it had open —
+     * which is not what "stopped" means, and after a delete it is a live process belonging
+     * to a clone the user has been told no longer exists.
+     *
+     * Two sources, because neither is complete on its own: [listed] is what the engine
+     * still remembers, and [GuestProcessRegistry] is what the clones recorded for
+     * themselves. A pid in either is a pid to end, and a pid in both is ended once.
+     *
+     * Killing by pid is allowed here and nowhere else: a guest runs inside this app's own
+     * uid, which is exactly why the host has the right to end it. Every pid reaching this
+     * point has been checked against that uid, against this process, and against the guest
+     * package's own process name, because this sends SIGKILL.
+     */
+    private fun killSurvivors(packageName: String, virtualUserId: Int, listed: List<Int>) {
+        val pids = (listed + GuestProcessRegistry.livePids(packageName, virtualUserId)).toSet()
+        for (pid in pids) {
+            runCatching { Process.killProcess(pid) }
+                .onSuccess { Slog.i(Slog.LAUNCH, "Ended $packageName process $pid") }
+                .onFailure { Slog.w(Slog.LAUNCH, "Could not end process $pid: ${it.message}") }
+        }
+        GuestProcessRegistry.forget(packageName, virtualUserId, pids)
+    }
 
     override fun isRunning(packageName: String, virtualUserId: Int): Boolean =
         runCatching { BlackBoxCore.isRunningApplication(packageName, virtualUserId) }

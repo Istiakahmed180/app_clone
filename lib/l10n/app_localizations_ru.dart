@@ -337,6 +337,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Это изображение не удалось использовать как значок. Попробуйте другое.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Не удалось удалить этот клон. Попробуйте ещё раз.';
+
+  @override
   String get cloneIconPickerTitle => 'Значок этого клона';
 
   @override

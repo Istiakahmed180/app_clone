@@ -11,6 +11,7 @@ abstract final class AppErrorCodes {
 
   /// A picture the user picked could not be read, decoded or stored as a clone's icon.
   static const String cloneIconFailed = 'CLONE_ICON_FAILED';
+  static const String cloneDeleteFailed = 'CLONE_DELETE_FAILED';
 
   /// The channel answered, but with nothing usable in it.
   static const String bridgeNoData = 'BRIDGE_NO_DATA';

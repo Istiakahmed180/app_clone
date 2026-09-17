@@ -335,6 +335,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Gambar itu tidak bisa dipakai sebagai ikon. Coba yang lain.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Klon ini tidak dapat dihapus. Coba lagi.';
+
+  @override
   String get cloneIconPickerTitle => 'Ikon klon ini';
 
   @override

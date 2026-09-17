@@ -327,6 +327,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errorCloneIconFailed => '那张图片无法用作图标。请换一张试试。';
 
   @override
+  String get errorCloneDeleteFailed => '无法删除此分身。请重试。';
+
+  @override
   String get cloneIconPickerTitle => '此分身的图标';
 
   @override
@@ -1501,6 +1504,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get errorCloneIconFailed => '那张图片无法用作图标。请换一张试试。';
 
   @override
+  String get errorCloneDeleteFailed => '无法删除此分身。请重试。';
+
+  @override
   String get cloneIconPickerTitle => '此分身的图标';
 
   @override
@@ -2664,6 +2670,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get errorCloneIconFailed => '那張圖片無法用作圖示。請換一張試試。';
 
   @override
+  String get errorCloneDeleteFailed => '無法刪除此分身。請重試。';
+
+  @override
   String get cloneIconPickerTitle => '這個分身的圖示';
 
   @override
@@ -3825,6 +3834,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get errorCloneIconFailed => '嗰張圖片無法用作圖示。請換一張試試。';
+
+  @override
+  String get errorCloneDeleteFailed => '無法刪除此分身。請重試。';
 
   @override
   String get cloneIconPickerTitle => '這個分身的圖示';

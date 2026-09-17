@@ -338,5 +338,6 @@
   "cloneIconColorNone": "Sem cor",
   "cloneIconPickerChoose": "Escolher uma imagem",
   "cloneIconPickerUseAppIcon": "Usar o ícone da aplicação",
-  "errorCloneIconFailed": "Não foi possível usar essa imagem como ícone. Experimente outra."
+  "errorCloneIconFailed": "Não foi possível usar essa imagem como ícone. Experimente outra.",
+  "errorCloneDeleteFailed": "Não foi possível remover este clone. Tente novamente."
 }

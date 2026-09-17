@@ -336,6 +336,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'उस तस्वीर को आइकन के रूप में इस्तेमाल नहीं किया जा सका। कोई दूसरी आज़माएँ।';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'यह क्लोन हटाया नहीं जा सका। फिर से कोशिश करें।';
+
+  @override
   String get cloneIconPickerTitle => 'इस क्लोन का आइकन';
 
   @override

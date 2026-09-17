@@ -935,24 +935,46 @@ class HomeController extends GetxController {
   }
 
   Future<AppException?> deleteProfile(VirtualProfileModel profile) async {
+    // Only the removal itself decides the verdict. Everything after it runs outside this
+    // block on purpose: tidying up and redrawing cannot turn a clone that is gone into a
+    // clone that would not go, and a user told "this could not be removed" about a clone
+    // that is no longer on their device has been told the opposite of what happened.
     try {
       await _engine.deleteProfile(profile.id);
-      // After the clone is gone, and never in a way that can fail the delete: a picture
-      // left behind is wasted bytes, but a delete refused because of one would leave the
-      // user with a clone they asked to be rid of.
-      try {
-        await _iconStore.delete(profile.id);
-      } on Object catch (error, stackTrace) {
-        _logger.error('Could not remove the icon for ${profile.id}', error, stackTrace);
-      }
-      // Renumbers the clone's siblings, whose pinned shortcuts are brought back into
-      // step by [_reconcileShortcutLabels] on the reload below.
-      await _loadProfiles();
-      await _loadProfileStates();
-      return null;
     } on AppException catch (error) {
       return error;
+    } on Object catch (error, stackTrace) {
+      // Not every step reports itself as an [AppException]. The engine call does, but the
+      // write that drops the profile row afterwards is shared preferences, which throws
+      // whatever the platform threw. Without this the clone would be gone from the device,
+      // still on the grid, and the user would have been told nothing at all -- the one
+      // outcome a destructive action must not have.
+      _logger.error('Could not delete ${profile.id}', error, stackTrace);
+      return const StorageException(
+        AppErrorCodes.cloneDeleteFailed,
+        'This clone could not be removed.',
+      );
     }
+
+    // A picture left behind is wasted bytes; a delete refused because of one would leave
+    // the user with a clone they asked to be rid of.
+    try {
+      await _iconStore.delete(profile.id);
+    } on Object catch (error, stackTrace) {
+      _logger.error('Could not remove the icon for ${profile.id}', error, stackTrace);
+    }
+
+    // Renumbers the clone's siblings, whose pinned shortcuts are brought back into step
+    // by [_reconcileShortcutLabels] on the reload. A reload that fails leaves the grid
+    // showing a clone that is already gone, which the next refresh corrects -- worth a
+    // log, not worth contradicting what the user just watched happen.
+    try {
+      await _loadProfiles();
+      await _loadProfileStates();
+    } on Object catch (error, stackTrace) {
+      _logger.error('Could not reload after deleting ${profile.id}', error, stackTrace);
+    }
+    return null;
   }
 
   /// How long a tile takes to fade out of the grid.
@@ -974,9 +996,15 @@ class HomeController extends GetxController {
   /// rather than staying half-faded on a grid it is still part of.
   Future<AppException?> uninstall(VirtualProfileModel profile) async {
     removing.add(profile.id);
-    await Future<void>.delayed(removalAnimation);
-    final AppException? error = await deleteProfile(profile);
-    removing.remove(profile.id);
-    return error;
+    try {
+      await Future<void>.delayed(removalAnimation);
+      return await deleteProfile(profile);
+    } finally {
+      // In `finally`, for the same reason as [launchProfile]: a failure that got past
+      // [deleteProfile] would otherwise leave this id in the set for the life of the
+      // screen, and a tile that is in the grid at zero opacity is a hole the user cannot
+      // tap, cannot see and cannot get rid of without restarting the app.
+      removing.remove(profile.id);
+    }
   }
 }

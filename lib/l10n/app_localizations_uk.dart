@@ -338,6 +338,10 @@ class AppLocalizationsUk extends AppLocalizations {
       'Це зображення не вдалося використати як піктограму. Спробуйте інше.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Не вдалося видалити цей клон. Спробуйте ще раз.';
+
+  @override
   String get cloneIconPickerTitle => 'Піктограма цього клону';
 
   @override

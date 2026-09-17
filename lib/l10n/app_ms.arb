@@ -338,5 +338,6 @@
   "cloneIconColorNone": "Tiada warna",
   "cloneIconPickerChoose": "Pilih gambar",
   "cloneIconPickerUseAppIcon": "Guna ikon apl",
-  "errorCloneIconFailed": "Gambar itu tidak boleh digunakan sebagai ikon. Cuba yang lain."
+  "errorCloneIconFailed": "Gambar itu tidak boleh digunakan sebagai ikon. Cuba yang lain.",
+  "errorCloneDeleteFailed": "Klon ini tidak dapat dibuang. Cuba lagi."
 }

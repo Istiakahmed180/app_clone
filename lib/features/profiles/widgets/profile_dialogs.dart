@@ -113,9 +113,14 @@ class _RenameProfileDialogState extends State<_RenameProfileDialog> {
 /// Names and shows the instance it is about to remove. The generic wording alone was
 /// not enough: with several clones of the same app on the grid, "this clone" gave the
 /// user no way to check they had held the right tile before agreeing to lose its data.
+///
+/// [name] is what the tile says, which is the clone's own name and not its app's. The two
+/// are the same until the clone is renamed, and after that they are not: a clone called
+/// "Work" was confirmed as "WhatsApp, space 2 of 3", so the one check this dialog exists
+/// to offer — that this is the tile you held — was the one thing it could not answer.
 Future<bool> showUninstallCloneDialog(
   BuildContext context, {
-  required String appName,
+  required String name,
   required int spaceIndex,
   required int spaceCount,
   Uint8List? icon,
@@ -139,7 +144,7 @@ Future<bool> showUninstallCloneDialog(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(appName, style: theme.textTheme.titleSmall),
+                      Text(name, style: theme.textTheme.titleSmall),
                       SizedBox(height: 2.h),
                       Text(
                         spaceCount > 1

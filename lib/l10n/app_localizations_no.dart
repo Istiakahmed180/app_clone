@@ -336,6 +336,10 @@ class AppLocalizationsNo extends AppLocalizations {
       'Det bildet kunne ikke brukes som ikon. Prøv et annet.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Denne klonen kunne ikke fjernes. Prøv igjen.';
+
+  @override
   String get cloneIconPickerTitle => 'Ikonet til denne klonen';
 
   @override

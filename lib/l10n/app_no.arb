@@ -338,5 +338,6 @@
   "cloneIconColorNone": "Ingen farge",
   "cloneIconPickerChoose": "Velg et bilde",
   "cloneIconPickerUseAppIcon": "Bruk appens ikon",
-  "errorCloneIconFailed": "Det bildet kunne ikke brukes som ikon. Prøv et annet."
+  "errorCloneIconFailed": "Det bildet kunne ikke brukes som ikon. Prøv et annet.",
+  "errorCloneDeleteFailed": "Denne klonen kunne ikke fjernes. Prøv igjen."
 }

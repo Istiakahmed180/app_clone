@@ -338,5 +338,6 @@
   "cloneIconColorNone": "Без кольору",
   "cloneIconPickerChoose": "Вибрати зображення",
   "cloneIconPickerUseAppIcon": "Використати піктограму застосунку",
-  "errorCloneIconFailed": "Це зображення не вдалося використати як піктограму. Спробуйте інше."
+  "errorCloneIconFailed": "Це зображення не вдалося використати як піктограму. Спробуйте інше.",
+  "errorCloneDeleteFailed": "Не вдалося видалити цей клон. Спробуйте ще раз."
 }

@@ -789,7 +789,7 @@ class HomeView extends GetView<HomeController> {
       case CloneAction.delete:
         final bool confirmed = await showUninstallCloneDialog(
           context,
-          appName: profile.appName,
+          name: profile.profileName,
           spaceIndex: controller.instanceIndex(profile),
           spaceCount: controller.siblingCount(profile),
           icon: controller.iconFor(profile),

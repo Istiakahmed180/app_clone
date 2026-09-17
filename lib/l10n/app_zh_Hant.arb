@@ -338,5 +338,6 @@
   "cloneIconColorNone": "無顏色",
   "cloneIconPickerChoose": "選擇圖片",
   "cloneIconPickerUseAppIcon": "使用應用程式圖示",
-  "errorCloneIconFailed": "那張圖片無法用作圖示。請換一張試試。"
+  "errorCloneIconFailed": "那張圖片無法用作圖示。請換一張試試。",
+  "errorCloneDeleteFailed": "無法刪除此分身。請重試。"
 }

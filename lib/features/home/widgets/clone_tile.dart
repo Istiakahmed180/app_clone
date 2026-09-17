@@ -87,7 +87,19 @@ class CloneTile extends StatelessWidget {
         opacity: isRemoving ? 0 : 1,
         duration: HomeController.removalAnimation,
         curve: Curves.easeIn,
-        child: _tile(context, theme, radius),
+        // A transparent widget still takes taps, and this one is transparent for as long
+        // as the engine takes to tear the container down — seconds, not the fifth of a
+        // second the fade lasts. Tapping where the tile used to be would start the clone
+        // that is being deleted.
+        //
+        // With `ignoringSemantics` left unset this also blocks the tile's semantic
+        // actions, so a screen reader cannot activate it either. It does still announce
+        // it: the tile stays in the semantics tree until the grid reloads without it,
+        // which is a moment of staleness rather than something that can be acted on.
+        child: IgnorePointer(
+          ignoring: isRemoving,
+          child: _tile(context, theme, radius),
+        ),
       ),
     );
   }

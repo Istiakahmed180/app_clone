@@ -329,6 +329,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorCloneIconFailed => 'その画像はアイコンとして使えませんでした。別の画像をお試しください。';
 
   @override
+  String get errorCloneDeleteFailed => 'このクローンを削除できませんでした。もう一度お試しください。';
+
+  @override
   String get cloneIconPickerTitle => 'このクローンのアイコン';
 
   @override

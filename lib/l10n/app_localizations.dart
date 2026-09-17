@@ -708,6 +708,12 @@ abstract class AppLocalizations {
   /// **'That picture could not be used as an icon. Try a different one.'**
   String get errorCloneIconFailed;
 
+  /// No description provided for @errorCloneDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This clone could not be removed. Try again.'**
+  String get errorCloneDeleteFailed;
+
   /// No description provided for @cloneIconPickerTitle.
   ///
   /// In en, this message translates to:

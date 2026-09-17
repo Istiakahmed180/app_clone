@@ -337,6 +337,10 @@ class AppLocalizationsMs extends AppLocalizations {
       'Gambar itu tidak boleh digunakan sebagai ikon. Cuba yang lain.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Klon ini tidak dapat dibuang. Cuba lagi.';
+
+  @override
   String get cloneIconPickerTitle => 'Ikon klon ini';
 
   @override

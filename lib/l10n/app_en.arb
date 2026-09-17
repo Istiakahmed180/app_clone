@@ -185,6 +185,7 @@
   "cloneIconPickerChoose": "Choose a picture",
   "cloneIconPickerUseAppIcon": "Use the app's icon",
   "errorCloneIconFailed": "That picture could not be used as an icon. Try a different one.",
+  "errorCloneDeleteFailed": "This clone could not be removed. Try again.",
   "cloneIconPickerTitle": "This clone's icon",
   "cloneIconPickerMessage": "Give it a picture of your own, or keep the app's icon and mark it with a colour \u2014 either way you can tell it from your other clones of the same app at a glance.",
   "cloneIconColorRed": "Red",

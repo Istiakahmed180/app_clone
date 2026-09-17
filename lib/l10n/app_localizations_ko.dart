@@ -330,6 +330,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get errorCloneIconFailed => '그 사진은 아이콘으로 사용할 수 없습니다. 다른 사진을 선택해 주세요.';
 
   @override
+  String get errorCloneDeleteFailed => '이 클론을 삭제하지 못했습니다. 다시 시도해 주세요.';
+
+  @override
   String get cloneIconPickerTitle => '이 클론의 아이콘';
 
   @override

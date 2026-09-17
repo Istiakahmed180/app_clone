@@ -25,6 +25,12 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         context: Context?,
         virtualUserId: Int,
     ) {
+        // Said here because this is the earliest point at which a guest exists and knows
+        // which container it is: the host cannot reliably ask the engine later, and a
+        // process that starts without saying so is one a Force stop or a delete will miss.
+        if (packageName != null) {
+            GuestProcessRegistry.record(packageName, virtualUserId)
+        }
         GuestReceiverQueryRepair.install(context)
         GuestLaunchIntentRepair.install(context)
     }

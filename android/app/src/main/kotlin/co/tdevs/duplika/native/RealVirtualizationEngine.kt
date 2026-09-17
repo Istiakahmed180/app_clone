@@ -385,7 +385,16 @@ class RealVirtualizationEngine(
         return result
     }
 
-    /** Drops the retained APKs of a profile whose container is going away. */
+    /**
+     * Drops the retained APKs of a profile whose container is going away.
+     *
+     * The profile's own directory goes too, and not only the files inside it. Each import
+     * gets a directory named after a fresh profile id, so leaving them behind grows a
+     * directory of empty directories for the life of the install — one per imported clone
+     * ever deleted, named after profiles that no longer exist. Removing the directory also
+     * sweeps up anything the loop above could not name, which is the case where the
+     * recorded paths were lost but the files were not.
+     */
     private fun releaseRetainedApks(profileId: String) {
         profileManager.apkPathsFor(profileId).forEach { path ->
             if (!File(path).delete() && File(path).exists()) {
@@ -393,7 +402,11 @@ class RealVirtualizationEngine(
             }
         }
         profileManager.forgetApkPaths(profileId)
+        File(importedApkStore(), profileId).deleteRecursively()
     }
+
+    /** Where an imported APK set is kept so a container can be rebuilt from it. */
+    private fun importedApkStore(): File = File(context.filesDir, "imported_apks")
 
     /**
      * Tears down the container of an install that failed, then releases its id.
@@ -465,7 +478,7 @@ class RealVirtualizationEngine(
     }
 
     private fun retainApks(profileId: String, apkPaths: List<String>): List<String>? = try {
-        val store = File(context.filesDir, "imported_apks").apply { mkdirs() }
+        val store = importedApkStore().apply { mkdirs() }
         val profileStore = File(store, profileId).apply { mkdirs() }
         val retained = apkPaths.mapIndexed { index, apkPath ->
             val target = File(profileStore, "${index}_${File(apkPath).name}")
@@ -819,7 +832,20 @@ class RealVirtualizationEngine(
     /** Removes the virtual environment for a profile. Other profiles are untouched. */
     fun deleteProfile(profileId: String, packageName: String): EngineResult<Unit> {
         val virtualUserId = profileManager.virtualUserIdFor(profileId)
-            ?: return EngineResult.ok()
+            // No container to remove, so the delete has already succeeded as far as the
+            // engine is concerned -- but the clone is about to disappear from the grid
+            // either way, and what it left on this device must go with it. This is the
+            // profile whose install never finished, or whose mapping was quarantined:
+            // rare, and exactly the profile a user is most likely to delete.
+            //
+            // Both of these are what the success path below does too. Doing them only
+            // there was the mistake: the pinned shortcut stayed live, and an imported APK
+            // set -- which runs to hundreds of megabytes -- stayed on disk with nothing
+            // left that could ever reference it again.
+            ?: return EngineResult.ok().also {
+                disableShortcutFor(profileId)
+                releaseRetainedApks(profileId)
+            }
 
         launcher.stop(packageName, virtualUserId)
         uninstallForTeardown(packageName, virtualUserId)
@@ -834,12 +860,7 @@ class RealVirtualizationEngine(
         // RealVirtualizationEngine.deleteProfile in Dart), and a retry can only reach this
         // container while the mapping still points at it.
         if (deletion is EngineResult.Success) {
-            // A pinned shortcut outlives the clone; an app cannot delete one, so disable
-            // it with a reason rather than leaving a tile that silently does nothing.
-            CloneShortcutManager(context).disable(
-                profileId,
-                "This clone was deleted in Duplika.",
-            )
+            disableShortcutFor(profileId)
             spaceIdentity.forget(virtualUserId)
             releaseRetainedApks(profileId)
             profileManager.remove(profileId)
@@ -859,6 +880,27 @@ class RealVirtualizationEngine(
             virtualUserId = virtualUserId,
         )
         return deletion
+    }
+
+    /**
+     * Marks a deleted clone's pinned shortcut as dead.
+     *
+     * A pinned shortcut outlives the clone; an app cannot delete one the user pinned, so
+     * the best it can do is publish it as disabled, with a reason. Called on every path
+     * that ends with the profile gone, and not only on the one where a container had to
+     * be torn down first.
+     *
+     * What the launcher then does with it is the launcher's own business, and worth
+     * recording so nobody chases it as a bug here. Measured on Pixel Launcher, API 35:
+     * once it reloads, the tile is labelled as disabled and cannot be opened — but
+     * tapping it produces the launcher's own "Shortcut isn't available" rather than the
+     * reason below. The reason is published either way; some launchers show it.
+     */
+    private fun disableShortcutFor(profileId: String) {
+        CloneShortcutManager(context).disable(
+            profileId,
+            "This clone was deleted in Duplika.",
+        )
     }
 
     /** Engine-observed state for one profile, used to render honest status in the UI. */

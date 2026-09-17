@@ -340,6 +340,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non è stato possibile usare quell\'immagine come icona. Provane un\'altra.';
 
   @override
+  String get errorCloneDeleteFailed =>
+      'Non è stato possibile rimuovere questo clone. Riprova.';
+
+  @override
   String get cloneIconPickerTitle => 'Icona di questo clone';
 
   @override
