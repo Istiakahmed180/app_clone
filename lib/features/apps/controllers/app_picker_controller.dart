@@ -333,6 +333,11 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// dropped rather than queued: both would return the same device.
   bool _loading = false;
 
+  /// Long enough for a slow device with a few hundred apps — the metadata-only read was
+  /// measured in the low seconds — and short enough that a stalled engine becomes a
+  /// message with a Retry rather than a screen that never resolves.
+  static const Duration _listingTimeout = Duration(seconds: 45);
+
   /// Re-reads the device.
   ///
   /// [background] keeps the list and its scroll position on screen for the duration and
@@ -358,9 +363,21 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
       // Metadata only. Decoding every launchable app's icon here took about fifteen
       // seconds on a real device; the icons arrive afterwards, for the rows that are
       // actually drawn. See [requestIcons].
-      final InstalledAppListing listing = await _bridge.listInstalledApps(
-        includeIcons: false,
-      );
+      // Bounded, because a platform call that never answers has nowhere to land: the
+      // spinner is only taken down in the `finally` below, and `_loading` stays true, so
+      // every later refresh — including the user's own pull — is dropped as a duplicate.
+      // One stalled reply would leave the picker loading for the rest of the session.
+      // Measured causes were all engine-side and are fixed elsewhere; this is the screen
+      // refusing to depend on that.
+      final InstalledAppListing listing = await _bridge
+          .listInstalledApps(includeIcons: false)
+          .timeout(
+            _listingTimeout,
+            onTimeout: () => throw const VirtualizationException(
+              'Reading the app list took too long. Pull down to try again.',
+              code: 'INSTALLED_APPS_TIMEOUT',
+            ),
+          );
       if (_disposed) {
         return;
       }

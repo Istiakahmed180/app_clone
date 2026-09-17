@@ -91,4 +91,39 @@ internal object EngineHookTable {
 
         override fun afterHook(result: Any?): Any? = correct(delegate.afterHook(result))
     }
+
+    /**
+     * A hook that adjusts the *arguments* before the one it replaced sees them.
+     *
+     * [adjust] runs in `beforeHook`, which the stub calls first and whose return value it
+     * only uses to decide whether to short-circuit — so the arguments are corrected before
+     * any of the engine's own handling, and its answer is passed through unchanged.
+     */
+    open class Adjusting(
+        private val delegate: MethodHook,
+        private val name: String,
+        private val adjust: (Array<Any?>?) -> Unit,
+    ) : MethodHook() {
+
+        override fun getMethodName(): String = name
+
+        override fun isEnable(): Boolean = delegate.isEnable()
+
+        override fun beforeHook(
+            who: Any?,
+            method: java.lang.reflect.Method?,
+            args: Array<Any?>?,
+        ): Any? {
+            runCatching { adjust(args) }
+            return delegate.beforeHook(who, method, args)
+        }
+
+        override fun hook(
+            who: Any?,
+            method: java.lang.reflect.Method?,
+            args: Array<Any?>?,
+        ): Any? = delegate.hook(who, method, args)
+
+        override fun afterHook(result: Any?): Any? = delegate.afterHook(result)
+    }
 }

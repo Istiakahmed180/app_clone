@@ -23,6 +23,8 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  *   the first activity that could read a caller off them has not started yet.
  * - [GuestRunningProcessRepair] beside it, for the other half of the same boundary: the
  *   running-process list must not name the host as the app behind a guest process.
+ * - [GuestRestartLaunchRepair] next, which needs a context to read the manifest with and
+ *   must be in place before the app can restart itself into a closed activity.
  * - [GuestWebViewDataDirRepair] next, because Bcore chose the WebView directory a few
  *   lines before this callback and the first WebView is still several steps away.
  * - [GuestFatalCrashRepair] last, so it wraps every handler installed above it.
@@ -57,6 +59,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         GuestLaunchIntentRepair.install(context)
         GuestCallerIdentityRepair.install()
         GuestRunningProcessRepair.install()
+        GuestRestartLaunchRepair.install(context)
         GuestWebViewDataDirRepair.install(context, packageName, processName, virtualUserId)
         GuestFatalCrashRepair.install()
     }
