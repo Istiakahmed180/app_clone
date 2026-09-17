@@ -16,6 +16,8 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  * - [GuestReceiverQueryRepair] first, so it is in place before any context in this process
  *   caches the package-manager binder it wraps.
  * - [GuestLaunchIntentRepair] second, which needs a context to read the manifest with.
+ * - [GuestCallerIdentityRepair] last: it needs no context, only the engine's hooks, and
+ *   the first activity that could read a caller off them has not started yet.
  */
 class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
 
@@ -33,6 +35,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         }
         GuestReceiverQueryRepair.install(context)
         GuestLaunchIntentRepair.install(context)
+        GuestCallerIdentityRepair.install()
     }
 
     /**
