@@ -118,11 +118,25 @@ object GuestLaunchIntentRepair {
         val loader = Thread.currentThread().contextClassLoader ?: return
         if (canLoad(loader, requested.className)) return
 
-        // The alias's own target first, which is the substitution the platform makes and
-        // the only one that lands where the app meant to go. Bcore's ActivityInfo is the
-        // fallback: it names a class that at least exists, so a clone that would have
-        // crash-looped keeps running even when the manifest cannot be read.
-        val replacement = listOfNotNull(aliasTargetOf(requested), info.name)
+        // The platform's own rule, applied to the `ActivityInfo` Bcore resolved:
+        //
+        //     if (r.activityInfo.targetActivity != null)
+        //         component = new ComponentName(.., r.activityInfo.targetActivity);
+        //     activity = newActivity(cl, component.getClassName(), r.intent);
+        //
+        // so an alias resolves to its target and anything else resolves to itself. Reading
+        // it off the `ActivityInfo` rather than off the intent's alias is what matters: the
+        // two agree when Bcore substituted the alias's own entry, and when it substituted a
+        // *different* activity the ActivityInfo is the one that says where the launch is
+        // actually going. Preferring the intent's alias target was measured sending
+        // microG's sign-in to its settings screen — Bcore was relaunching
+        // `auth.signin.AuthSignInActivity` under a stale MAIN/LAUNCHER intent naming
+        // `ui.SettingsActivity`, and the rewrite obediently opened the settings screen,
+        // which cannot inflate inside a container and crash-looped the clone.
+        //
+        // The manifest lookup stays as the last resort, for an `ActivityInfo` that names
+        // nothing loadable at all.
+        val replacement = listOfNotNull(info.targetActivity, info.name, aliasTargetOf(requested))
             .firstOrNull { it.isNotEmpty() && it != requested.className && canLoad(loader, it) }
             ?: return
 

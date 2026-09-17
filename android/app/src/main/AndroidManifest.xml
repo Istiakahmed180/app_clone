@@ -97,6 +97,15 @@
                 android:value="container_host_keepalive" />
         </service>
 
+        <!-- Declared in the engine's own server process so that binding it raises that
+             process out of the cached state; see EngineServerAnchor for what goes wrong
+             when the freezer reaches it. The process name is the engine's own string
+             resource rather than a literal ":black", so the two cannot drift apart. -->
+        <service
+            android:name=".native.EngineServerAnchor"
+            android:exported="false"
+            android:process="@string/black_box_service_name" />
+
         <!-- Hands exported diagnostics reports to the Android share sheet.
 
              Not exported, no permission required, and scoped by res/xml/diagnostics_paths.xml

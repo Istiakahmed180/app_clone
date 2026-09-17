@@ -96,6 +96,10 @@ class CloneKeepAliveService : Service() {
 
         userId = intent.getIntExtra(EXTRA_USER_ID, -1)
         startForegroundCompat()
+        // Only once this service is in the foreground, because the anchor works by lending
+        // this process's standing to the engine's server process: bound from a cached
+        // client it would be worth nothing.
+        EngineServerAnchor.hold(this)
         // The engine creates its own channels lazily, when it first starts the daemon for a
         // container -- i.e. after Application.onCreate has already run. This service starts
         // on the same launch, just after, so it is the first point at which the engine's
@@ -118,6 +122,7 @@ class CloneKeepAliveService : Service() {
     override fun onDestroy() {
         handler.removeCallbacks(relabel)
         handler.removeCallbacks(reconnect)
+        EngineServerAnchor.release(this)
         super.onDestroy()
     }
 
