@@ -835,11 +835,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'このアプリは共有ストレージを使用します。クローンを起動する前に、設定 → 特別なアプリアクセスで $appName に「すべてのファイルへのアクセス」を許可してください。許可しないと起動時に拒否される場合があります。';
-  }
-
-  @override
   String get factsNoNativeCode => 'ネイティブコードなし';
 
   @override

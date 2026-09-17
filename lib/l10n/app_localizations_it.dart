@@ -865,11 +865,6 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Questa app usa l\'archiviazione condivisa. Concedi a $appName l\'“accesso a tutti i file” in Impostazioni → Accesso speciale alle app prima di avviare il clone, altrimenti potrebbe essere rifiutato all\'avvio.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Nessun codice nativo';
 
   @override

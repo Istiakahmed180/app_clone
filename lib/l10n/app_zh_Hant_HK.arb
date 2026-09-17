@@ -219,7 +219,6 @@
   "findingSystemComponent": "系統元件無法被複製。",
   "findingAbiNotSupported": "這個應用程式的原生程式庫並非為引擎支援的架構建置。",
   "findingStorageUnavailable": "這個應用程式使用共用儲存空間，而目前這個 {appName} 版本沒有宣告「所有檔案存取權」。它的分身無法存取你的檔案，也無法正常運作。",
-  "findingStorageNotGranted": "這個應用程式使用共用儲存空間。請在啟動分身前，於「設定 → 特殊應用程式存取權」中授予 {appName}「所有檔案存取權」，否則分身可能在啟動時被拒絕。",
   "factsNoNativeCode": "無原生程式碼",
   "factsAnyNoNativeCode": "任意 — 無原生程式碼",
   "factsBits32And64": "32 + 64",

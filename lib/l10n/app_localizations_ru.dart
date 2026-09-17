@@ -864,11 +864,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Это приложение использует общее хранилище. Предоставьте $appName «доступ ко всем файлам» в Настройках → Специальный доступ приложений, прежде чем запускать клон, иначе он может быть отклонён при запуске.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Без нативного кода';
 
   @override

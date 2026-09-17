@@ -2,7 +2,6 @@ package co.tdevs.duplika.native
 
 import android.os.Build
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -36,35 +35,25 @@ class AppCompatibilityAnalyzerStorageTest {
         ).forEach { requested ->
             assertNull(
                 "unexpected finding for $requested",
-                AppCompatibilityAnalyzer.storageFindingFor(requested, true, true, androidT),
+                AppCompatibilityAnalyzer.storageFindingFor(requested, true, androidT),
             )
         }
     }
 
     @Test
-    fun aStorageAppIsCleanWhenTheHostDeclaresAndHoldsAllFilesAccess() {
-        assertNull(
-            AppCompatibilityAnalyzer.storageFindingFor(
-                requestedPermissions = setOf(readStorage),
-                hostDeclaresAllFilesAccess = true,
-                hostHoldsAllFilesAccess = true,
-                deviceSdk = androidR,
-            ),
-        )
-    }
-
-    @Test
-    fun aDeclaredButUngrantedHostAsksTheUserToGrantIt() {
-        val finding = AppCompatibilityAnalyzer.storageFindingFor(
-            requestedPermissions = setOf(readStorage),
-            hostDeclaresAllFilesAccess = true,
-            hostHoldsAllFilesAccess = false,
-            deviceSdk = androidR,
-        )
-
-        assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_NOT_GRANTED, finding?.code)
-        assertFalse(finding!!.blocking)
-        assertTrue(finding.message.contains("All files access"))
+    fun aStorageAppIsCleanWhenTheHostDeclaresAllFilesAccess() {
+        // Whether the user has granted it is theirs to settle in Settings, and is not a
+        // finding: it can change while Duplika runs, and nothing is said about it here.
+        listOf(Build.VERSION_CODES.Q, androidR, androidT).forEach { sdk ->
+            assertNull(
+                "unexpected finding on API $sdk",
+                AppCompatibilityAnalyzer.storageFindingFor(
+                    requestedPermissions = setOf(readStorage, allFiles),
+                    hostDeclaresAllFilesAccess = true,
+                    deviceSdk = sdk,
+                ),
+            )
+        }
     }
 
     @Test
@@ -73,7 +62,6 @@ class AppCompatibilityAnalyzerStorageTest {
         val finding = AppCompatibilityAnalyzer.storageFindingFor(
             requestedPermissions = setOf(readStorage),
             hostDeclaresAllFilesAccess = false,
-            hostHoldsAllFilesAccess = false,
             deviceSdk = androidR,
         )
 
@@ -87,7 +75,6 @@ class AppCompatibilityAnalyzerStorageTest {
             val finding = AppCompatibilityAnalyzer.storageFindingFor(
                 requestedPermissions = setOf(allFiles),
                 hostDeclaresAllFilesAccess = false,
-                hostHoldsAllFilesAccess = false,
                 deviceSdk = sdk,
             )
 
@@ -97,19 +84,6 @@ class AppCompatibilityAnalyzerStorageTest {
                 finding?.code,
             )
         }
-    }
-
-    @Test
-    fun theMissingDeclarationIsCheckedBeforeTheMissingGrant() {
-        // Neither declared nor held: the fallback message is the honest one, not "grant it".
-        val finding = AppCompatibilityAnalyzer.storageFindingFor(
-            requestedPermissions = setOf(readStorage),
-            hostDeclaresAllFilesAccess = false,
-            hostHoldsAllFilesAccess = false,
-            deviceSdk = androidR,
-        )
-
-        assertEquals(AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE, finding?.code)
     }
 
     // -------------------------------------------------------------------------------
@@ -127,7 +101,6 @@ class AppCompatibilityAnalyzerStorageTest {
                 AppCompatibilityAnalyzer.storageFindingFor(
                     requestedPermissions = setOf(writeStorage),
                     hostDeclaresAllFilesAccess = false,
-                    hostHoldsAllFilesAccess = false,
                     deviceSdk = sdk,
                 ),
             )
@@ -141,7 +114,6 @@ class AppCompatibilityAnalyzerStorageTest {
             AppCompatibilityAnalyzer.storageFindingFor(
                 requestedPermissions = setOf(readStorage, writeStorage),
                 hostDeclaresAllFilesAccess = false,
-                hostHoldsAllFilesAccess = false,
                 deviceSdk = androidT,
             ),
         )
@@ -153,11 +125,10 @@ class AppCompatibilityAnalyzerStorageTest {
         listOf(readStorage, writeStorage).forEach { permission ->
             assertEquals(
                 "wrong finding for $permission",
-                AppCompatibilityAnalyzer.CODE_STORAGE_NOT_GRANTED,
+                AppCompatibilityAnalyzer.CODE_STORAGE_UNAVAILABLE,
                 AppCompatibilityAnalyzer.storageFindingFor(
                     requestedPermissions = setOf(permission),
-                    hostDeclaresAllFilesAccess = true,
-                    hostHoldsAllFilesAccess = false,
+                    hostDeclaresAllFilesAccess = false,
                     deviceSdk = Build.VERSION_CODES.Q,
                 )?.code,
             )

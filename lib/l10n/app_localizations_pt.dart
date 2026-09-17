@@ -858,11 +858,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Esta app usa o armazenamento partilhado. Concede ao $appName o «acesso a todos os ficheiros» em Definições → Acesso especial a apps antes de abrir o clone, ou pode ser recusado no arranque.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Sem código nativo';
 
   @override
@@ -2080,11 +2075,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String findingStorageUnavailable(String appName) {
     return 'Este app usa o armazenamento compartilhado e esta versão do $appName não declara o acesso a todos os arquivos. Um clone dele não consegue alcançar seus arquivos e não vai funcionar.';
-  }
-
-  @override
-  String findingStorageNotGranted(String appName) {
-    return 'Este app usa o armazenamento compartilhado. Conceda ao $appName o “acesso a todos os arquivos” em Configurações → Acesso especial de apps antes de abrir o clone, ou ele pode ser recusado ao iniciar.';
   }
 
   @override

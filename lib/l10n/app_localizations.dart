@@ -1560,12 +1560,6 @@ abstract class AppLocalizations {
   /// **'This app uses shared storage, and this build of {appName} does not declare All files access. A clone of it cannot reach your files and will not work.'**
   String findingStorageUnavailable(String appName);
 
-  /// No description provided for @findingStorageNotGranted.
-  ///
-  /// In en, this message translates to:
-  /// **'This app uses shared storage. Grant {appName} \"All files access\" in Settings → Special app access before launching the clone, or it may be refused at launch.'**
-  String findingStorageNotGranted(String appName);
-
   /// No description provided for @factsNoNativeCode.
   ///
   /// In en, this message translates to:

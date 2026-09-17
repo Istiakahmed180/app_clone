@@ -856,11 +856,6 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Denne appen bruker delt lagring. Gi $appName «tilgang til alle filer» i Innstillinger → Spesiell apptilgang før du starter klonen, ellers kan den bli avvist ved oppstart.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Ingen nativ kode';
 
   @override

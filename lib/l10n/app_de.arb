@@ -219,7 +219,6 @@
   "findingSystemComponent": "Systemkomponenten können nicht geklont werden.",
   "findingAbiNotSupported": "Die nativen Bibliotheken dieser App sind nicht für eine von der Engine unterstützte Architektur gebaut.",
   "findingStorageUnavailable": "Diese App nutzt den gemeinsamen Speicher, und dieser Build von {appName} deklariert keinen Zugriff auf alle Dateien. Ein Klon davon kommt nicht an deine Dateien und wird nicht funktionieren.",
-  "findingStorageNotGranted": "Diese App nutzt den gemeinsamen Speicher. Gib {appName} in Einstellungen → Spezieller App-Zugriff den „Zugriff auf alle Dateien“, bevor du den Klon startest, sonst wird er beim Start möglicherweise abgelehnt.",
   "factsNoNativeCode": "Kein nativer Code",
   "factsAnyNoNativeCode": "Beliebig — kein nativer Code",
   "factsBits32And64": "32 + 64",

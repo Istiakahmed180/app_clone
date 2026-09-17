@@ -219,7 +219,6 @@
   "findingSystemComponent": "システムコンポーネントはクローンできません。",
   "findingAbiNotSupported": "このアプリのネイティブライブラリは、エンジンが対応するアーキテクチャ向けにビルドされていません。",
   "findingStorageUnavailable": "このアプリは共有ストレージを使用しますが、この {appName} のビルドは「すべてのファイルへのアクセス」を宣言していません。そのクローンはあなたのファイルに到達できず、動作しません。",
-  "findingStorageNotGranted": "このアプリは共有ストレージを使用します。クローンを起動する前に、設定 → 特別なアプリアクセスで {appName} に「すべてのファイルへのアクセス」を許可してください。許可しないと起動時に拒否される場合があります。",
   "factsNoNativeCode": "ネイティブコードなし",
   "factsAnyNoNativeCode": "すべて — ネイティブコードなし",
   "factsBits32And64": "32 + 64",

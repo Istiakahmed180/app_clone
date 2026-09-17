@@ -219,7 +219,6 @@
   "findingSystemComponent": "Systemkomponenter kan ikke klones.",
   "findingAbiNotSupported": "De native bibliotekene i denne appen er ikke bygget for en arkitektur motoren støtter.",
   "findingStorageUnavailable": "Denne appen bruker delt lagring, og denne versjonen av {appName} oppgir ikke tilgang til alle filer. En klone av den når ikke filene dine og vil ikke virke.",
-  "findingStorageNotGranted": "Denne appen bruker delt lagring. Gi {appName} «tilgang til alle filer» i Innstillinger → Spesiell apptilgang før du starter klonen, ellers kan den bli avvist ved oppstart.",
   "factsNoNativeCode": "Ingen nativ kode",
   "factsAnyNoNativeCode": "Alle — ingen nativ kode",
   "factsBits32And64": "32 + 64",

@@ -219,7 +219,6 @@
   "findingSystemComponent": "시스템 구성요소는 복제할 수 없습니다.",
   "findingAbiNotSupported": "이 앱의 네이티브 라이브러리는 엔진이 지원하는 아키텍처용으로 빌드되지 않았습니다.",
   "findingStorageUnavailable": "이 앱은 공유 저장소를 사용하는데, 이 {appName} 빌드는 '모든 파일 접근'을 선언하지 않습니다. 이 앱의 클론은 파일에 접근하지 못해 작동하지 않습니다.",
-  "findingStorageNotGranted": "이 앱은 공유 저장소를 사용합니다. 클론을 실행하기 전에 설정 → 특별한 앱 접근에서 {appName}에 '모든 파일 접근'을 허용하세요. 그렇지 않으면 실행 시 거부될 수 있습니다.",
   "factsNoNativeCode": "네이티브 코드 없음",
   "factsAnyNoNativeCode": "모두 — 네이티브 코드 없음",
   "factsBits32And64": "32 + 64",

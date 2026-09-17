@@ -854,11 +854,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'This app uses shared storage. Grant $appName \"All files access\" in Settings → Special app access before launching the clone, or it may be refused at launch.';
-  }
-
-  @override
   String get factsNoNativeCode => 'No native code';
 
   @override

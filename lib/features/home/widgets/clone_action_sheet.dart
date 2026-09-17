@@ -171,51 +171,37 @@ class _CloneActionSheet extends StatelessWidget {
     );
   }
 
-  /// What the analyzer found about this clone's app, worst first.
+  /// What stands between this clone and starting at all.
   ///
-  /// A clone is only ever made from an app the picker judged clonable, so a **blocking**
-  /// finding here means the host's copy changed underneath the clone — most plainly that
-  /// the app was uninstalled, because a container holds no copy of the APK, only a record
-  /// pointing at the host's. The clone's own data survives and comes back if the app is
-  /// reinstalled, but until then it cannot start, and nothing else in the app said why:
-  /// the tile looked ordinary, the sheet offered every action, and the launch failed.
+  /// Only blocking findings. A clone is only ever made from an app the picker judged
+  /// clonable, so a blocking finding here means the host's copy changed underneath the
+  /// clone — most plainly that the app was uninstalled, because a container holds no copy
+  /// of the APK, only a record pointing at the host's. The clone's own data survives and
+  /// comes back if the app is reinstalled, but until then it cannot start, and nothing
+  /// else in the app said why: the tile looked ordinary, the sheet offered every action,
+  /// and the launch failed.
   ///
-  /// The rest are limitations the clone is already running with. They are shown too, and
-  /// more quietly, because the useful one is not a complaint but an instruction — that
-  /// shared storage needs All files access granted to the host before the clone can reach
-  /// any files — and the only place it was ever said is the picker, which the user passed
-  /// through once, before this clone existed.
+  /// Limitations the clone is already running with are deliberately not repeated here.
+  /// This sheet is opened to do something to a clone, and a standing caution about the
+  /// host's permissions is not an answer to that.
   List<Widget> _findings(BuildContext context) {
-    final List<CompatibilityFinding> findings =
-        compatibility?.findings ?? const <CompatibilityFinding>[];
-    final List<CompatibilityFinding> blocking = findings
-        .where((CompatibilityFinding finding) => finding.blocking)
-        .toList(growable: false);
-    final List<CompatibilityFinding> cautions = findings
-        .where((CompatibilityFinding finding) => !finding.blocking)
-        .toList(growable: false);
-    if (blocking.isEmpty && cautions.isEmpty) {
+    final List<CompatibilityFinding> blocking =
+        (compatibility?.findings ?? const <CompatibilityFinding>[])
+            .where((CompatibilityFinding finding) => finding.blocking)
+            .toList(growable: false);
+    if (blocking.isEmpty) {
       return const <Widget>[];
     }
 
     final ThemeData theme = Theme.of(context);
     return <Widget>[
       SizedBox(height: 16.h),
-      if (blocking.isNotEmpty)
-        _FindingBlock(
-          icon: Icons.error_outline,
-          background: theme.colorScheme.errorContainer,
-          foreground: theme.colorScheme.onErrorContainer,
-          findings: blocking,
-        ),
-      if (blocking.isNotEmpty && cautions.isNotEmpty) SizedBox(height: 8.h),
-      if (cautions.isNotEmpty)
-        _FindingBlock(
-          icon: Icons.info_outline,
-          background: theme.colorScheme.surfaceContainerHighest,
-          foreground: theme.colorScheme.onSurfaceVariant,
-          findings: cautions,
-        ),
+      _FindingBlock(
+        icon: Icons.error_outline,
+        background: theme.colorScheme.errorContainer,
+        foreground: theme.colorScheme.onErrorContainer,
+        findings: blocking,
+      ),
     ];
   }
 

@@ -853,11 +853,6 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Ứng dụng này dùng bộ nhớ dùng chung. Hãy cấp cho $appName “quyền truy cập mọi tệp” trong Cài đặt → Quyền truy cập đặc biệt của ứng dụng trước khi mở bản sao, nếu không nó có thể bị từ chối khi khởi chạy.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Không có mã native';
 
   @override

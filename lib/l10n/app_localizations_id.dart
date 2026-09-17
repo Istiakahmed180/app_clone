@@ -853,11 +853,6 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Aplikasi ini memakai penyimpanan bersama. Berikan $appName “akses ke semua berkas” di Setelan → Akses aplikasi khusus sebelum membuka klon, atau ia bisa ditolak saat dijalankan.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Tanpa kode native';
 
   @override

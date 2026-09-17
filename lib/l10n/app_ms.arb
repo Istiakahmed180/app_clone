@@ -219,7 +219,6 @@
   "findingSystemComponent": "Komponen sistem tidak boleh diklon.",
   "findingAbiNotSupported": "Pustaka natif apl ini tidak dibina untuk seni bina yang disokong oleh enjin.",
   "findingStorageUnavailable": "Apl ini menggunakan storan kongsi, dan binaan {appName} ini tidak mengisytiharkan akses kepada semua fail. Klonnya tidak dapat mencapai fail anda dan tidak akan berfungsi.",
-  "findingStorageNotGranted": "Apl ini menggunakan storan kongsi. Berikan {appName} “akses kepada semua fail” dalam Tetapan → Akses apl khas sebelum melancarkan klon, jika tidak ia mungkin ditolak semasa dilancarkan.",
   "factsNoNativeCode": "Tiada kod natif",
   "factsAnyNoNativeCode": "Mana-mana — tiada kod natif",
   "factsBits32And64": "32 + 64",

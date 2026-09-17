@@ -857,11 +857,6 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'यह ऐप साझा स्टोरेज इस्तेमाल करता है। क्लोन शुरू करने से पहले सेटिंग → विशेष ऐप पहुँच में $appName को \'सभी फ़ाइलों तक पहुँच\' दें, वरना शुरू होते समय उसे अस्वीकार किया जा सकता है।';
-  }
-
-  @override
   String get factsNoNativeCode => 'कोई नेटिव कोड नहीं';
 
   @override

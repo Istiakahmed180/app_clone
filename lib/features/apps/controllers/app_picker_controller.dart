@@ -65,15 +65,6 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
   /// A problem this app found for itself, waiting to be worded and shown once.
   final Rx<PickerStatus?> status = Rx<PickerStatus?>(null);
 
-  /// A non-blocking finding from the clone that was just created, waiting to be shown once.
-  ///
-  /// The compatibility layer produces two kinds of finding and only one of them used to
-  /// reach anybody. A blocking one refuses the clone and is said out loud; a non-blocking
-  /// one was computed, translated into every language Duplika ships, and then dropped on
-  /// the floor — the clone was made and the user found out at launch, if at all. This is
-  /// the other half of that contract. See [CompatibilityReport.caution].
-  final Rx<CompatibilityFinding?> caution = Rx<CompatibilityFinding?>(null);
-
   /// How the list is ordered.
   final Rx<AppSort> sort = AppSort.name.obs;
 
@@ -691,9 +682,6 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
             ? const CloneRefusal.busy()
             : CloneRefusal.failed(failure);
       }
-      // Only on success: a clone that was refused has already said why, and a second
-      // message about a lesser problem with it would bury the first.
-      caution.value = report.caution;
       return null;
     } finally {
       cloning.remove(app.packageName);
@@ -873,7 +861,6 @@ class AppPickerController extends GetxController with WidgetsBindingObserver {
         installGms: installGms,
       );
       clonedPackages.add(candidate.packageName);
-      caution.value = report.caution;
       return null;
     } on AppException catch (error) {
       return error;

@@ -219,7 +219,6 @@
   "findingSystemComponent": "系统组件无法被克隆。",
   "findingAbiNotSupported": "此应用的原生库并非为引擎支持的架构构建。",
   "findingStorageUnavailable": "此应用使用共享存储，而当前这个 {appName} 版本没有声明“所有文件访问权限”。它的分身无法访问你的文件，也无法正常工作。",
-  "findingStorageNotGranted": "此应用使用共享存储。请在启动分身前，于「设置 → 特殊应用权限」中授予 {appName}“所有文件访问权限”，否则分身可能在启动时被拒绝。",
   "factsNoNativeCode": "无原生代码",
   "factsAnyNoNativeCode": "任意 — 无原生代码",
   "factsBits32And64": "32 + 64",

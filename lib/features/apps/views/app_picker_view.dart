@@ -362,7 +362,6 @@ class AppPickerView extends GetView<AppPickerController> {
       _showMessage(context, _refusalMessage(context, refusal, app.appName));
       return;
     }
-    _showCaution(context);
 
     // A beat before leaving, so the row is seen finishing rather than the screen
     // changing under the finger. Short enough not to be a wait of its own.
@@ -484,43 +483,18 @@ class AppPickerView extends GetView<AppPickerController> {
       );
       return;
     }
-    _showCaution(context);
     Get.back<bool>(result: true);
   }
 
-  void _showMessage(
-    BuildContext context,
-    String message, {
-    Duration? duration,
-  }) {
+  void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(message),
-          duration: duration ?? const Duration(seconds: 4),
+          duration: const Duration(seconds: 4),
         ),
       );
-  }
-
-  /// Says the one thing a clone that *was* made still needs the user to do.
-  ///
-  /// Shown on the way out of the picker, and it survives that: the snackbar goes to the
-  /// app's root messenger, so popping this route does not take the message with it.
-  ///
-  /// Longer on screen than an ordinary message because it asks for a trip to Settings,
-  /// and a sentence naming where to go is not one that can be read in four seconds.
-  void _showCaution(BuildContext context) {
-    final CompatibilityFinding? caution = controller.caution.value;
-    if (caution == null) {
-      return;
-    }
-    controller.caution.value = null;
-    _showMessage(
-      context,
-      compatibilityFindingMessage(context.l10n, caution),
-      duration: const Duration(seconds: 8),
-    );
   }
 
   /// Why the clone did not happen, in the user's language where there is a translation

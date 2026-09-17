@@ -6,7 +6,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PermissionInfo
 import android.os.Build
-import android.os.Environment
 
 /**
  * Works out, before anything is cloned, whether a target app can be hosted at all.
@@ -52,14 +51,11 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      * each of them — the All files grant, and one property query per candidate property
      * name. None of them can change while a single listing pass runs.
      *
-     * Deliberately not cached across passes: the All files grant is one the user can change
-     * in Settings while Duplika is running, and a stale answer there would be wrong rather
-     * than merely slow. Every pass builds a fresh one — [hostState] for a single app,
-     * [listingHostState] for a pass over all of them.
+     * Every pass builds a fresh one — [hostState] for a single app, [listingHostState] for
+     * a pass over all of them.
      */
     class HostState internal constructor(
         internal val hostDeclaresAllFilesAccess: Boolean,
-        internal val hostHoldsAllFilesAccess: Boolean,
         internal val loadableAbis: Set<String>,
         /**
          * Every package that declares a secure-environment property, or null where the
@@ -97,7 +93,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      */
     private fun hostState(declarers: Set<String>?): HostState = HostState(
         hostDeclaresAllFilesAccess = hostDeclaresAllFilesAccess,
-        hostHoldsAllFilesAccess = hostHoldsAllFilesAccess(),
         loadableAbis = ApkAbis.loadable(Build.SUPPORTED_ABIS?.asList().orEmpty()),
         secureEnvironmentDeclarers = declarers,
     )
@@ -359,16 +354,15 @@ class AppCompatibilityAnalyzer(private val context: Context) {
      * The `MANAGE_EXTERNAL_STORAGE` fallback, and the honest answer when it cannot be used.
      *
      * Guests run under the host's identity, so a guest that touches shared storage can only
-     * reach it if **Duplika** holds All files access. That permission is special-access: the
-     * user grants it in Settings, never through a runtime dialog, so the app cannot ask for
-     * it and must instead say what is wrong. The decision itself is
-     * [storageFindingFor] — a pure function, so it is unit-tested without a device.
+     * reach it if **Duplika** declares All files access. A build that does not cannot host
+     * such an app at all, and says so rather than letting the clone fail at launch. The
+     * decision itself is [storageFindingFor] — a pure function, so it is unit-tested
+     * without a device.
      */
     private fun storageFinding(requestedPermissions: Set<String>, host: HostState): Finding? =
         storageFindingFor(
             requestedPermissions = requestedPermissions,
             hostDeclaresAllFilesAccess = host.hostDeclaresAllFilesAccess,
-            hostHoldsAllFilesAccess = host.hostHoldsAllFilesAccess,
             deviceSdk = Build.VERSION.SDK_INT,
         )
 
@@ -387,15 +381,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         }
     }
 
-    private fun hostHoldsAllFilesAccess(): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            // All files access is an API 30+ concept. Before Android 11 the legacy storage
-            // grant is what matters and the engine's app-op check does not apply.
-            true
-        }
-
     /**
      * The archive read for a package record, or the empty unreadable answer when the
      * record carries no [ApplicationInfo] at all — which is itself a package with nothing
@@ -406,7 +391,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
 
     companion object {
         const val CODE_STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
-        const val CODE_STORAGE_NOT_GRANTED = "STORAGE_NOT_GRANTED"
 
         private const val ALL_FILES_ACCESS = "android.permission.MANAGE_EXTERNAL_STORAGE"
         private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
@@ -415,10 +399,6 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         private const val STORAGE_UNAVAILABLE_MESSAGE =
             "This app uses shared storage, and this build of Duplika does not declare All " +
                 "files access. A clone of it cannot reach your files and will not work."
-
-        private const val STORAGE_NOT_GRANTED_MESSAGE =
-            "This app uses shared storage. Grant Duplika \"All files access\" in Settings → " +
-                "Special app access before launching the clone, or it may be refused at launch."
 
         /**
          * The declarations that still mean "this app wants the whole shared tree" *on this
@@ -454,36 +434,26 @@ class AppCompatibilityAnalyzer(private val context: Context) {
         /**
          * The pure half of the storage fallback, with every Android lookup passed in.
          *
-         * Two cases, and they are different: the host does not declare All files access at
-         * all (the Play-rejection fallback — blocking, because no clone can ever reach shared
-         * storage), versus the host declares it but the user has not granted it yet
-         * (non-blocking, with the Settings path).
+         * One case is left, and it is about this build rather than about the user: a
+         * Duplika that does not declare All files access at all (the Play-rejection
+         * fallback) can never let a clone reach shared storage, so such an app is blocked
+         * up front. Whether the grant is *held* is not asked here — it is the user's to
+         * give in Settings, it can change while Duplika runs, and a clone is no longer
+         * held up over it.
          */
         @JvmStatic
         internal fun storageFindingFor(
             requestedPermissions: Set<String>,
             hostDeclaresAllFilesAccess: Boolean,
-            hostHoldsAllFilesAccess: Boolean,
             deviceSdk: Int,
-        ): Finding? {
-            if (sharedStoragePermissionsFor(deviceSdk).none { it in requestedPermissions }) {
-                return null
-            }
-            return when {
-                !hostDeclaresAllFilesAccess -> Finding(
-                    CODE_STORAGE_UNAVAILABLE,
-                    STORAGE_UNAVAILABLE_MESSAGE,
-                    blocking = true,
-                )
-
-                !hostHoldsAllFilesAccess -> Finding(
-                    CODE_STORAGE_NOT_GRANTED,
-                    STORAGE_NOT_GRANTED_MESSAGE,
-                    blocking = false,
-                )
-
-                else -> null
-            }
+        ): Finding? = when {
+            sharedStoragePermissionsFor(deviceSdk).none { it in requestedPermissions } -> null
+            hostDeclaresAllFilesAccess -> null
+            else -> Finding(
+                CODE_STORAGE_UNAVAILABLE,
+                STORAGE_UNAVAILABLE_MESSAGE,
+                blocking = true,
+            )
         }
 
         /**

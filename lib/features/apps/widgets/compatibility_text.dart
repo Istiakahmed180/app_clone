@@ -28,8 +28,6 @@ String compatibilityFindingMessage(
       return l10n.findingAppArchiveUnavailable;
     case 'STORAGE_UNAVAILABLE':
       return l10n.findingStorageUnavailable(app);
-    case 'STORAGE_NOT_GRANTED':
-      return l10n.findingStorageNotGranted(app);
     default:
       return finding.message;
   }

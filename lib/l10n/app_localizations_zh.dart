@@ -830,11 +830,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return '此应用使用共享存储。请在启动分身前，于「设置 → 特殊应用权限」中授予 $appName“所有文件访问权限”，否则分身可能在启动时被拒绝。';
-  }
-
-  @override
   String get factsNoNativeCode => '无原生代码';
 
   @override
@@ -1997,11 +1992,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String findingStorageUnavailable(String appName) {
     return '此应用使用共享存储，而当前这个 $appName 版本没有声明“所有文件访问权限”。它的分身无法访问你的文件，也无法正常工作。';
-  }
-
-  @override
-  String findingStorageNotGranted(String appName) {
-    return '此应用使用共享存储。请在启动分身前，于「设置 → 特殊应用权限」中授予 $appName“所有文件访问权限”，否则分身可能在启动时被拒绝。';
   }
 
   @override
@@ -3170,11 +3160,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return '這個應用程式使用共用儲存空間。請在啟動分身前，於「設定 → 特殊應用程式存取權」中授予 $appName「所有檔案存取權」，否則分身可能在啟動時被拒絕。';
-  }
-
-  @override
   String get factsNoNativeCode => '無原生程式碼';
 
   @override
@@ -4337,11 +4322,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   @override
   String findingStorageUnavailable(String appName) {
     return '這個應用程式使用共用儲存空間，而目前這個 $appName 版本沒有宣告「所有檔案存取權」。它的分身無法存取你的檔案，也無法正常運作。';
-  }
-
-  @override
-  String findingStorageNotGranted(String appName) {
-    return '這個應用程式使用共用儲存空間。請在啟動分身前，於「設定 → 特殊應用程式存取權」中授予 $appName「所有檔案存取權」，否則分身可能在啟動時被拒絕。';
   }
 
   @override

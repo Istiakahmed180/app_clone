@@ -855,11 +855,6 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Apl ini menggunakan storan kongsi. Berikan $appName “akses kepada semua fail” dalam Tetapan → Akses apl khas sebelum melancarkan klon, jika tidak ia mungkin ditolak semasa dilancarkan.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Tiada kod natif';
 
   @override

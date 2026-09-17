@@ -219,7 +219,6 @@
   "findingSystemComponent": "Os componentes do sistema não podem ser clonados.",
   "findingAbiNotSupported": "As bibliotecas nativas desta app não foram compiladas para uma arquitetura suportada pelo motor.",
   "findingStorageUnavailable": "Esta app usa o armazenamento partilhado e esta versão do {appName} não declara o acesso a todos os ficheiros. Um clone dela não consegue chegar aos teus ficheiros e não vai funcionar.",
-  "findingStorageNotGranted": "Esta app usa o armazenamento partilhado. Concede ao {appName} o «acesso a todos os ficheiros» em Definições → Acesso especial a apps antes de abrir o clone, ou pode ser recusado no arranque.",
   "factsNoNativeCode": "Sem código nativo",
   "factsAnyNoNativeCode": "Qualquer — sem código nativo",
   "factsBits32And64": "32 + 64",

@@ -836,11 +836,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return '이 앱은 공유 저장소를 사용합니다. 클론을 실행하기 전에 설정 → 특별한 앱 접근에서 $appName에 \'모든 파일 접근\'을 허용하세요. 그렇지 않으면 실행 시 거부될 수 있습니다.';
-  }
-
-  @override
   String get factsNoNativeCode => '네이티브 코드 없음';
 
   @override

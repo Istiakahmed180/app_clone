@@ -219,7 +219,6 @@
   "findingSystemComponent": "Komponen sistem tidak dapat diklon.",
   "findingAbiNotSupported": "Pustaka native aplikasi ini tidak dibangun untuk arsitektur yang didukung mesin.",
   "findingStorageUnavailable": "Aplikasi ini memakai penyimpanan bersama, dan build {appName} ini tidak menyatakan akses ke semua berkas. Klonnya tidak dapat menjangkau berkas Anda dan tidak akan berfungsi.",
-  "findingStorageNotGranted": "Aplikasi ini memakai penyimpanan bersama. Berikan {appName} “akses ke semua berkas” di Setelan → Akses aplikasi khusus sebelum membuka klon, atau ia bisa ditolak saat dijalankan.",
   "factsNoNativeCode": "Tanpa kode native",
   "factsAnyNoNativeCode": "Apa pun — tanpa kode native",
   "factsBits32And64": "32 + 64",

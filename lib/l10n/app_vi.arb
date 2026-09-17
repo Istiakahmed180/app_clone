@@ -219,7 +219,6 @@
   "findingSystemComponent": "Không thể nhân bản các thành phần hệ thống.",
   "findingAbiNotSupported": "Thư viện native của ứng dụng này không được biên dịch cho kiến trúc mà công cụ hỗ trợ.",
   "findingStorageUnavailable": "Ứng dụng này dùng bộ nhớ dùng chung, còn bản dựng {appName} này không khai báo quyền truy cập mọi tệp. Bản sao của nó không thể chạm tới tệp của bạn và sẽ không hoạt động.",
-  "findingStorageNotGranted": "Ứng dụng này dùng bộ nhớ dùng chung. Hãy cấp cho {appName} “quyền truy cập mọi tệp” trong Cài đặt → Quyền truy cập đặc biệt của ứng dụng trước khi mở bản sao, nếu không nó có thể bị từ chối khi khởi chạy.",
   "factsNoNativeCode": "Không có mã native",
   "factsAnyNoNativeCode": "Bất kỳ — không có mã native",
   "factsBits32And64": "32 + 64",

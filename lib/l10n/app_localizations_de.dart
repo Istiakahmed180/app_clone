@@ -863,11 +863,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String findingStorageNotGranted(String appName) {
-    return 'Diese App nutzt den gemeinsamen Speicher. Gib $appName in Einstellungen → Spezieller App-Zugriff den „Zugriff auf alle Dateien“, bevor du den Klon startest, sonst wird er beim Start möglicherweise abgelehnt.';
-  }
-
-  @override
   String get factsNoNativeCode => 'Kein nativer Code';
 
   @override

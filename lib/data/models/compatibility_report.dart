@@ -97,14 +97,4 @@ class CompatibilityReport {
   /// The first blocking reason, which is what stops the app being cloned.
   CompatibilityFinding? get blocker =>
       findings.where((CompatibilityFinding f) => f.blocking).firstOrNull;
-
-  /// The first finding that does not stop the clone but still has to be acted on.
-  ///
-  /// A [CompatibilityVerdict.limited] app is one the engine will host and that will not
-  /// work properly until the user does something — today, granting Duplika All files
-  /// access in Settings. That is worth exactly one sentence at the moment the clone is
-  /// made: it is the last point before launch, which is where the problem would otherwise
-  /// appear with no explanation attached.
-  CompatibilityFinding? get caution =>
-      findings.where((CompatibilityFinding f) => !f.blocking).firstOrNull;
 }
