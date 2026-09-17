@@ -596,6 +596,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get spaceInfoIdentifiers => 'डिवाइस पहचानकर्ता';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'ये स्पेस की अपनी पहचान हैं। इसके अंदर चलने वाला ऐप इन्हें नहीं देखता — वह इस डिवाइस की असली पहचान ही पढ़ता है, इसलिए इससे क्लोन किसी दूसरे फ़ोन जैसा नहीं दिखता।';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

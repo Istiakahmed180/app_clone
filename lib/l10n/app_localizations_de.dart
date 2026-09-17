@@ -599,6 +599,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Gerätekennungen';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Diese kennzeichnen den Bereich selbst. Die App darin sieht sie nicht — sie liest weiterhin die echten Kennungen dieses Geräts. Ein Klon wirkt dadurch nicht wie ein anderes Telefon.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

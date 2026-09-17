@@ -355,6 +355,7 @@ class HomeView extends GetView<HomeController> {
       hidden: hidden || profile.hidden,
       requiresGoogleServices: requiresGoogleServices,
       googleServicesInstalled: googleServicesInstalled,
+      compatibility: controller.compatibility[profile.packageName],
     );
     if (action == null || !context.mounted) {
       return;

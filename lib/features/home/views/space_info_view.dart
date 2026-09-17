@@ -91,6 +91,24 @@ class _SpaceInfoViewState extends State<SpaceInfoView> {
           _headerCard(theme, l10n),
           SizedBox(height: 22.h),
           Text(l10n.spaceInfoIdentifiers, style: theme.textTheme.titleMedium),
+          SizedBox(height: 6.h),
+          // Said on the screen, because the screen on its own says the opposite. Five
+          // per-space identifiers under a heading called "Device identifiers", each with
+          // a copy button, read as the device this clone presents itself as — and that is
+          // not what they are. The engine hands a guest the device's real ANDROID_ID: its
+          // own AndroidIdProxy calls through to the platform and only substitutes a value
+          // when the real one comes back "0" or empty, which on a working device it does
+          // not. Nothing in Duplika reaches those hooks; see [SpaceIdentityStore].
+          //
+          // Someone cloning an app to keep two identities apart is exactly the person who
+          // would read this screen as a promise, so it is the one place the limit has to
+          // be stated rather than left in a source comment.
+          Text(
+            l10n.spaceInfoIdentifiersNote,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
           SizedBox(height: 10.h),
           _identifierCard(theme, l10n),
         ],

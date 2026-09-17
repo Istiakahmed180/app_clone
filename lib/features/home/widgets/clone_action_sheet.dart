@@ -6,9 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../../data/models/compatibility_report.dart';
 import '../../../data/models/engine_result.dart';
 import '../../../data/models/virtual_profile_model.dart';
 import '../../../widgets/app_icon.dart';
+import '../../apps/widgets/compatibility_text.dart';
 
 /// What the user can ask of one clone.
 ///
@@ -54,6 +56,7 @@ Future<CloneAction?> showCloneActionSheet(
   bool hidden = false,
   bool requiresGoogleServices = false,
   bool googleServicesInstalled = false,
+  CompatibilityReport? compatibility,
 }) {
   return showModalBottomSheet<CloneAction>(
     context: context,
@@ -72,6 +75,7 @@ Future<CloneAction?> showCloneActionSheet(
       hidden: hidden,
       requiresGoogleServices: requiresGoogleServices,
       googleServicesInstalled: googleServicesInstalled,
+      compatibility: compatibility,
     ),
   );
 }
@@ -86,6 +90,7 @@ class _CloneActionSheet extends StatelessWidget {
     required this.hidden,
     required this.requiresGoogleServices,
     required this.googleServicesInstalled,
+    required this.compatibility,
   });
 
   final VirtualProfileModel profile;
@@ -102,6 +107,10 @@ class _CloneActionSheet extends StatelessWidget {
   /// Whether the container already carries them. When it does the sheet says nothing at
   /// all; the install row is offered only while they are missing.
   final bool googleServicesInstalled;
+
+  /// What the analyzer last said about this clone's app, or null when it could not be
+  /// asked. Only the blocking findings are shown -- see [_blockers].
+  final CompatibilityReport? compatibility;
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +143,7 @@ class _CloneActionSheet extends StatelessWidget {
                 children: <Widget>[
                   const _DragHandle(),
                   _header(context),
+                  ..._findings(context),
                   SizedBox(height: 20.h),
                   _primaryRow(context),
                   SizedBox(height: 24.h),
@@ -159,6 +169,54 @@ class _CloneActionSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// What the analyzer found about this clone's app, worst first.
+  ///
+  /// A clone is only ever made from an app the picker judged clonable, so a **blocking**
+  /// finding here means the host's copy changed underneath the clone — most plainly that
+  /// the app was uninstalled, because a container holds no copy of the APK, only a record
+  /// pointing at the host's. The clone's own data survives and comes back if the app is
+  /// reinstalled, but until then it cannot start, and nothing else in the app said why:
+  /// the tile looked ordinary, the sheet offered every action, and the launch failed.
+  ///
+  /// The rest are limitations the clone is already running with. They are shown too, and
+  /// more quietly, because the useful one is not a complaint but an instruction — that
+  /// shared storage needs All files access granted to the host before the clone can reach
+  /// any files — and the only place it was ever said is the picker, which the user passed
+  /// through once, before this clone existed.
+  List<Widget> _findings(BuildContext context) {
+    final List<CompatibilityFinding> findings =
+        compatibility?.findings ?? const <CompatibilityFinding>[];
+    final List<CompatibilityFinding> blocking = findings
+        .where((CompatibilityFinding finding) => finding.blocking)
+        .toList(growable: false);
+    final List<CompatibilityFinding> cautions = findings
+        .where((CompatibilityFinding finding) => !finding.blocking)
+        .toList(growable: false);
+    if (blocking.isEmpty && cautions.isEmpty) {
+      return const <Widget>[];
+    }
+
+    final ThemeData theme = Theme.of(context);
+    return <Widget>[
+      SizedBox(height: 16.h),
+      if (blocking.isNotEmpty)
+        _FindingBlock(
+          icon: Icons.error_outline,
+          background: theme.colorScheme.errorContainer,
+          foreground: theme.colorScheme.onErrorContainer,
+          findings: blocking,
+        ),
+      if (blocking.isNotEmpty && cautions.isNotEmpty) SizedBox(height: 8.h),
+      if (cautions.isNotEmpty)
+        _FindingBlock(
+          icon: Icons.info_outline,
+          background: theme.colorScheme.surfaceContainerHighest,
+          foreground: theme.colorScheme.onSurfaceVariant,
+          findings: cautions,
+        ),
+    ];
   }
 
   Widget _header(BuildContext context) {
@@ -470,6 +528,56 @@ class _DragHandle extends StatelessWidget {
           color: theme.colorScheme.outlineVariant,
           borderRadius: BorderRadius.circular(2.r),
         ),
+      ),
+    );
+  }
+}
+
+/// One severity's worth of findings, in a tinted block.
+class _FindingBlock extends StatelessWidget {
+  const _FindingBlock({
+    required this.icon,
+    required this.background,
+    required this.foreground,
+    required this.findings,
+  });
+
+  final IconData icon;
+  final Color background;
+  final Color foreground;
+  final List<CompatibilityFinding> findings;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(icon, size: 18.r, color: foreground),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                for (int i = 0; i < findings.length; i++) ...<Widget>[
+                  if (i > 0) SizedBox(height: 6.h),
+                  Text(
+                    compatibilityFindingMessage(context.l10n, findings[i]),
+                    style: theme.textTheme.bodySmall?.copyWith(color: foreground),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

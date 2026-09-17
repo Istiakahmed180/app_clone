@@ -583,6 +583,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get spaceInfoIdentifiers => '기기 식별자';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      '이 값은 공간 자체를 식별합니다. 안에서 실행되는 앱은 이 값을 보지 못하고 이 기기의 실제 식별자를 그대로 읽으므로, 클론이 다른 기기처럼 보이지는 않습니다.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

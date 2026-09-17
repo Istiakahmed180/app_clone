@@ -597,6 +597,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Pengecam peranti';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Ini mengenal pasti ruang itu sendiri. Aplikasi di dalamnya tidak melihatnya — ia tetap membaca pengenal sebenar peranti ini, jadi ini tidak menjadikan klon kelihatan seperti telefon lain.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

@@ -148,6 +148,7 @@
   "clonePermissionsNote": "이 클론에만 적용됩니다. 복제된 앱은 보통 권한을 쓰기 전에 묻는데, 그 답이 여기서 제한됩니다. 묻지 않고 넘어가는 앱은 {appName} 자체의 권한을 통해 하드웨어에 접근할 수도 있습니다.",
   "spaceInfoTitle": "스페이스 정보",
   "spaceInfoIdentifiers": "기기 식별자",
+  "spaceInfoIdentifiersNote": "이 값은 공간 자체를 식별합니다. 안에서 실행되는 앱은 이 값을 보지 못하고 이 기기의 실제 식별자를 그대로 읽으므로, 클론이 다른 기기처럼 보이지는 않습니다.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "엔진 사용 불가",
   "spaceInfoStateRunning": "실행 중",

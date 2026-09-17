@@ -579,6 +579,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spaceInfoIdentifiers => '设备标识符';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      '这些标识的是空间本身。里面的应用看不到它们——它读取的仍是本机真实的标识符，因此这并不能让分身看起来像另一台手机。';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }
@@ -1756,6 +1760,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get spaceInfoIdentifiers => '设备标识符';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      '这些标识的是空间本身。里面的应用看不到它们——它读取的仍是本机真实的标识符，因此这并不能让分身看起来像另一台手机。';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }
@@ -2922,6 +2930,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get spaceInfoIdentifiers => '裝置識別碼';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      '這些標識的是空間本身。裡面的應用程式看不到它們——它讀取的仍是本機真實的識別碼，因此這並不能讓分身看起來像另一部手機。';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }
@@ -4086,6 +4098,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get spaceInfoIdentifiers => '裝置識別碼';
+
+  @override
+  String get spaceInfoIdentifiersNote =>
+      '這些標識的是空間本身。裡面的應用程式看不到它們——它讀取的仍是本機真實的識別碼，因此這並不能讓分身看起來像另一部手機。';
 
   @override
   String spaceInfoIdLabel(int index) {

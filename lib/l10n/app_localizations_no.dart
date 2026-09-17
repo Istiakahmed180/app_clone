@@ -595,6 +595,10 @@ class AppLocalizationsNo extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Enhetsidentifikatorer';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Disse identifiserer selve rommet. Appen inni ser dem ikke — den leser fortsatt denne enhetens virkelige identifikatorer, så dette får ikke en klon til å se ut som en annen telefon.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

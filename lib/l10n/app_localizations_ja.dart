@@ -582,6 +582,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get spaceInfoIdentifiers => 'デバイス識別子';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'これはスペース自体を識別するものです。中のアプリはこれを見ません — この端末の実際の識別子をそのまま読み取るため、クローンが別の端末に見えるわけではありません。';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

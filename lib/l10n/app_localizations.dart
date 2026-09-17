@@ -1116,6 +1116,12 @@ abstract class AppLocalizations {
   /// **'Device identifiers'**
   String get spaceInfoIdentifiers;
 
+  /// No description provided for @spaceInfoIdentifiersNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These identify the space itself. The app inside it does not see them — it still reads this device\'s real identifiers — so this is not a way to make a clone look like a different phone.'**
+  String get spaceInfoIdentifiersNote;
+
   /// No description provided for @spaceInfoIdLabel.
   ///
   /// In en, this message translates to:

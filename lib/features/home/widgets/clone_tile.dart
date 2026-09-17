@@ -25,11 +25,13 @@ import 'clone_icon_color_text.dart';
 ///   it two identical icons are indistinguishable.
 /// * a **running dot**, because "is it already open" changes what a tap does.
 ///
-/// Everything else — the engine status, the virtual user id, compatibility warnings,
+/// Everything else — the engine status, the virtual user id, compatibility findings,
 /// missing permissions and every action — lives in [showCloneActionSheet], reached by
 /// holding the tile. Compatibility problems deliberately do **not** appear here: the
 /// grid is meant to read as a home screen, and a warning badge on every tile made it
-/// read as a list of faults.
+/// read as a list of faults. That includes the one finding that stops a clone working
+/// outright — an app uninstalled since the clone was made — which the sheet states
+/// plainly on the way to the actions.
 class CloneTile extends StatelessWidget {
   const CloneTile({
     required this.profile,

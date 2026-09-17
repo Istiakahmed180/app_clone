@@ -598,6 +598,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Идентификаторы устройства';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Они обозначают сам контейнер. Приложение внутри их не видит — оно по-прежнему читает настоящие идентификаторы этого устройства, поэтому клон не выглядит как другой телефон.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

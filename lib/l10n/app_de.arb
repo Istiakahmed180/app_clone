@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Das gilt nur für diesen Klon. Eine geklonte App fragt normalerweise, bevor sie eine Berechtigung nutzt, und hier wird diese Antwort eingeschränkt — eine App, die die Frage überspringt, kann über die Berechtigung von {appName} selbst trotzdem an die Hardware kommen.",
   "spaceInfoTitle": "Bereichsinfo",
   "spaceInfoIdentifiers": "Gerätekennungen",
+  "spaceInfoIdentifiersNote": "Diese kennzeichnen den Bereich selbst. Die App darin sieht sie nicht — sie liest weiterhin die echten Kennungen dieses Geräts. Ein Klon wirkt dadurch nicht wie ein anderes Telefon.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Engine nicht verfügbar",
   "spaceInfoStateRunning": "Läuft",

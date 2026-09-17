@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Ini terpakai hanya pada klon ini. Apl yang diklon biasanya bertanya sebelum menggunakan kebenaran, dan di sinilah jawapan itu dihadkan — apl yang melangkau soalan itu masih boleh mencapai perkakasan melalui kebenaran {appName} sendiri.",
   "spaceInfoTitle": "Maklumat ruang",
   "spaceInfoIdentifiers": "Pengecam peranti",
+  "spaceInfoIdentifiersNote": "Ini mengenal pasti ruang itu sendiri. Aplikasi di dalamnya tidak melihatnya — ia tetap membaca pengenal sebenar peranti ini, jadi ini tidak menjadikan klon kelihatan seperti telefon lain.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Enjin tidak tersedia",
   "spaceInfoStateRunning": "Berjalan",

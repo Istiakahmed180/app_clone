@@ -148,6 +148,7 @@
   "clonePermissionsNote": "これはこのクローンにのみ適用されます。クローンされたアプリは通常、権限を使う前に確認しますが、その答えがここで制限されます。確認を省くアプリは、{appName} 自身の権限を通じてハードウェアに到達する可能性があります。",
   "spaceInfoTitle": "スペース情報",
   "spaceInfoIdentifiers": "デバイス識別子",
+  "spaceInfoIdentifiersNote": "これはスペース自体を識別するものです。中のアプリはこれを見ません — この端末の実際の識別子をそのまま読み取るため、クローンが別の端末に見えるわけではありません。",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "エンジン利用不可",
   "spaceInfoStateRunning": "実行中",

@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Dette gjelder bare denne klonen. En klonet app spør vanligvis før den bruker en tillatelse, og det er her det svaret begrenses — en app som hopper over spørsmålet kan fortsatt nå maskinvaren via {appName} sin egen tillatelse.",
   "spaceInfoTitle": "Rominfo",
   "spaceInfoIdentifiers": "Enhetsidentifikatorer",
+  "spaceInfoIdentifiersNote": "Disse identifiserer selve rommet. Appen inni ser dem ikke — den leser fortsatt denne enhetens virkelige identifikatorer, så dette får ikke en klon til å se ut som en annen telefon.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Motor utilgjengelig",
   "spaceInfoStateRunning": "Kjører",

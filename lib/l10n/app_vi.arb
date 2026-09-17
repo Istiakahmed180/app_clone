@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Chỉ áp dụng cho bản sao này. Ứng dụng được nhân bản thường hỏi trước khi dùng một quyền, và đây là nơi câu trả lời đó bị giới hạn — ứng dụng bỏ qua bước hỏi vẫn có thể chạm tới phần cứng qua quyền của chính {appName}.",
   "spaceInfoTitle": "Thông tin không gian",
   "spaceInfoIdentifiers": "Định danh thiết bị",
+  "spaceInfoIdentifiersNote": "Đây là định danh của chính không gian này. Ứng dụng bên trong không nhìn thấy chúng — nó vẫn đọc định danh thật của thiết bị, nên điều này không khiến bản sao trông như một máy khác.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Công cụ không khả dụng",
   "spaceInfoStateRunning": "Đang chạy",

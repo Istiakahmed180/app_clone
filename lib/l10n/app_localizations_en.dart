@@ -595,6 +595,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Device identifiers';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'These identify the space itself. The app inside it does not see them — it still reads this device\'s real identifiers — so this is not a way to make a clone look like a different phone.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

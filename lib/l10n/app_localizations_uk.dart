@@ -599,6 +599,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Ідентифікатори пристрою';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Вони позначають сам простір. Програма всередині їх не бачить — вона й далі читає справжні ідентифікатори цього пристрою, тож клон не виглядає як інший телефон.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

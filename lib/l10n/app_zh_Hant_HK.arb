@@ -148,6 +148,7 @@
   "clonePermissionsNote": "這些設定只對這個分身生效。被複製的應用程式通常會在使用權限前詢問，而這裡限制的正是那個答案——略過詢問的應用程式，仍可能透過 {appName} 本身的授權存取硬體。",
   "spaceInfoTitle": "空間資訊",
   "spaceInfoIdentifiers": "裝置識別碼",
+  "spaceInfoIdentifiersNote": "這些標識的是空間本身。裡面的應用程式看不到它們——它讀取的仍是本機真實的識別碼，因此這並不能讓分身看起來像另一部手機。",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "引擎無法使用",
   "spaceInfoStateRunning": "正在執行",

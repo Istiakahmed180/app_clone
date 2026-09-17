@@ -305,9 +305,16 @@ class HomeController extends GetxController {
 
   /// Analyses each distinct cloned package once, not once per clone.
   ///
-  /// The result is read by [warningsFor], which the clone action sheet shows. It does not
-  /// power a badge on the tile: the grid is meant to read as a home screen, not a list of
-  /// faults.
+  /// Read by the clone action sheet, which shows the findings when a clone is held. It
+  /// does not power a badge on the tile: the grid is meant to read as a home screen, not
+  /// a list of faults.
+  ///
+  /// Every profile, not only the visible ones, so a clone in the Private space is told
+  /// the same things as one on the main grid.
+  ///
+  /// This doc used to name a `warningsFor` that does not exist, and the sheet was not
+  /// given the reports at all — so an app that had been uninstalled since its clone was
+  /// made produced a clone that failed to launch with nothing anywhere saying why.
   Future<void> _loadCompatibility() async {
     final Set<String> packages = profiles
         .map((VirtualProfileModel p) => p.packageName)

@@ -594,6 +594,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Định danh thiết bị';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Đây là định danh của chính không gian này. Ứng dụng bên trong không nhìn thấy chúng — nó vẫn đọc định danh thật của thiết bị, nên điều này không khiến bản sao trông như một máy khác.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

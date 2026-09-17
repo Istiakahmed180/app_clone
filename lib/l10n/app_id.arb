@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Ini hanya berlaku untuk klon ini. Aplikasi yang diklon biasanya bertanya sebelum memakai izin, dan di sinilah jawaban itu dibatasi — aplikasi yang melewati pertanyaan itu tetap bisa menjangkau perangkat keras lewat izin {appName} sendiri.",
   "spaceInfoTitle": "Info ruang",
   "spaceInfoIdentifiers": "Pengidentifikasi perangkat",
+  "spaceInfoIdentifiersNote": "Ini menandai ruang itu sendiri. Aplikasi di dalamnya tidak melihatnya — aplikasi tetap membaca identitas asli perangkat ini, jadi ini tidak membuat klon tampak seperti ponsel lain.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Mesin tidak tersedia",
   "spaceInfoStateRunning": "Berjalan",

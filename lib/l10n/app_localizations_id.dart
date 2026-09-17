@@ -595,6 +595,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Pengidentifikasi perangkat';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Ini menandai ruang itu sendiri. Aplikasi di dalamnya tidak melihatnya — aplikasi tetap membaca identitas asli perangkat ini, jadi ini tidak membuat klon tampak seperti ponsel lain.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }

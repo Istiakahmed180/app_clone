@@ -148,6 +148,7 @@
   "clonePermissionsNote": "Solo se aplican a este clon. Una app clonada suele preguntar antes de usar un permiso, y aquí es donde se limita esa respuesta; una app que se salte la pregunta todavía puede llegar al hardware a través del permiso del propio {appName}.",
   "spaceInfoTitle": "Info del espacio",
   "spaceInfoIdentifiers": "Identificadores del dispositivo",
+  "spaceInfoIdentifiersNote": "Identifican al espacio en sí. La aplicación que hay dentro no los ve: sigue leyendo los identificadores reales de este dispositivo, así que esto no hace que un clon parezca otro teléfono.",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "Motor no disponible",
   "spaceInfoStateRunning": "En ejecución",

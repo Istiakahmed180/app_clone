@@ -148,6 +148,7 @@
   "clonePermissionsNote": "这些设置只对此分身生效。被克隆的应用通常会在使用权限前询问，而这里限制的正是那个答案——跳过询问的应用，仍可能通过 {appName} 自身的授权访问硬件。",
   "spaceInfoTitle": "空间信息",
   "spaceInfoIdentifiers": "设备标识符",
+  "spaceInfoIdentifiersNote": "这些标识的是空间本身。里面的应用看不到它们——它读取的仍是本机真实的标识符，因此这并不能让分身看起来像另一台手机。",
   "spaceInfoIdLabel": "ID {index}",
   "spaceInfoStateEngineUnavailable": "引擎不可用",
   "spaceInfoStateRunning": "正在运行",

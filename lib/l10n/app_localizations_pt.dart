@@ -596,6 +596,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get spaceInfoIdentifiers => 'Identificadores do dispositivo';
 
   @override
+  String get spaceInfoIdentifiersNote =>
+      'Identificam o próprio espaço. A aplicação que corre dentro dele não os vê — continua a ler os identificadores reais deste dispositivo, por isso isto não faz um clone parecer outro telemóvel.';
+
+  @override
   String spaceInfoIdLabel(int index) {
     return 'ID $index';
   }
@@ -1826,6 +1830,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get spaceInfoIdentifiers => 'Identificadores do dispositivo';
+
+  @override
+  String get spaceInfoIdentifiersNote =>
+      'Identificam o próprio espaço. O app que roda dentro dele não os vê — ele continua lendo os identificadores reais deste dispositivo, então isso não faz um clone parecer outro celular.';
 
   @override
   String spaceInfoIdLabel(int index) {
