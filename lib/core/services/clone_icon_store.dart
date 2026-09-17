@@ -25,10 +25,21 @@ class CloneIconStore {
   /// that looks soft everywhere else.
   static const int iconSize = 256;
 
-  /// The width a chosen picture is decoded at, before it is cropped and scaled down.
+  /// The longest side a chosen picture is decoded at, before it is cropped and scaled.
   ///
   /// Four times [iconSize]: far more detail than the result can hold, so nothing is lost,
   /// while a picture of any size costs a few megabytes to decode rather than tens.
+  ///
+  /// The *longest* side, not the width, which is what this used to cap. Capping the
+  /// width leaves the pixel count riding on the picture's shape: hold the width at the
+  /// cap and scale the height to match, and the decode comes to `cap² × height/width` —
+  /// which has no upper bound, because a picture can be as narrow as it likes. Capping
+  /// the longest side instead puts a real ceiling on it, `cap²`, whatever the shape.
+  ///
+  /// The width cap also *raised* the cost for anything narrower than itself, since
+  /// `targetWidth` is a target and not a maximum: a 64-pixel-wide strip was decoded at
+  /// 1024 wide. Upscaling invents no detail, and the result is thrown away by the scale
+  /// down to [iconSize] regardless.
   static const int _decodeCap = iconSize * 4;
 
   /// Normalises [source] and stores it as this clone's icon, returning the file's path.
@@ -80,11 +91,31 @@ class CloneIconStore {
   static Future<Uint8List> _square(Uint8List source) async {
     // Decoded at a cap rather than at full size. A photo straight from a camera is
     // twelve megapixels, which is about 48 MB of RGBA before anything is drawn -- a real
-    // risk on a cheap phone that is also hosting a container. Only the width is given, so
-    // the aspect ratio is kept and the crop below still has something square to take.
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      source,
-      targetWidth: _decodeCap,
+    // risk on a cheap phone that is also hosting a container.
+    //
+    // `instantiateImageCodecWithSize` rather than `instantiateImageCodec`, because it is
+    // the one that hands over the picture's own dimensions before any pixels are decoded.
+    // That is what makes the cap a cap: the longer side is measured, and only ever
+    // brought down. One target is given and the other follows the aspect ratio, so the
+    // crop below still has something square to take.
+    //
+    // Worth saying what this is not: an extreme picture did not bring the old path down.
+    // A 64x12000 strip, whose width cap asked for a 1024x192000 decode, produced an icon
+    // on an API 35 device without an allocation failure — the engine did not hand back
+    // the pixel count the arithmetic suggests. This is the cheaper and more predictable
+    // way to ask, not a repair for a crash anyone has seen.
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      await ui.ImmutableBuffer.fromUint8List(source),
+      getTargetSize: (int width, int height) {
+        final int longest = width > height ? width : height;
+        // Already small enough: decode it as it is rather than resampling for nothing.
+        if (longest <= _decodeCap) {
+          return const ui.TargetImageSize();
+        }
+        return width >= height
+            ? const ui.TargetImageSize(width: _decodeCap)
+            : const ui.TargetImageSize(height: _decodeCap);
+      },
     );
     final ui.Image image;
     try {
