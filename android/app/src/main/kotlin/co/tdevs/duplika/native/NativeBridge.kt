@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import co.tdevs.duplika.DuplikaApplication
 import co.tdevs.duplika.diagnostics.DiagnosticLogger
-import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
@@ -66,15 +65,38 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     // Engine calls can install packages and wait out the backend's service backoff, so they
     // must never run on the platform thread. Results are posted back to the main looper,
     // which MethodChannel.Result requires.
-    private val engineExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "duplika-engine")
-    }
+    //
+    // One at a time, because the backend's install, launch and teardown paths are not safe
+    // to overlap — but on a thread the lane will give up on. A backend call that never
+    // answers used to take every call queued behind it with it, which is what left the app
+    // picker loading forever after a clone was deleted; see [EngineLane].
+    private val engineLane = EngineLane(STALL_TIMEOUT_MS, "duplika-engine")
+
+    /**
+     * The picker's own lane, for the calls that only ever read the *host's* package
+     * manager: which apps this device has, what they look like, and whether the engine
+     * could host them. None of them enters a container, so none of them has any reason to
+     * wait behind one — and when a container call does stall, the one screen the user is
+     * most likely to open next is the one that needs none of it.
+     */
+    private val hostLane = EngineLane(STALL_TIMEOUT_MS, "duplika-host")
     private val mainHandler = Handler(Looper.getMainLooper())
 
     /** Runs [work] off the platform thread and replies on the main looper. */
-    private fun async(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
+    private fun async(result: MethodChannel.Result, work: () -> Map<String, Any?>) =
+        async(engineLane, result, work)
+
+    /** As [async], for the host-only reads that never touch a container. */
+    private fun asyncHostRead(result: MethodChannel.Result, work: () -> Map<String, Any?>) =
+        async(hostLane, result, work)
+
+    private fun async(
+        lane: EngineLane,
+        result: MethodChannel.Result,
+        work: () -> Map<String, Any?>,
+    ) {
         try {
-            submit(result, work)
+            submit(lane, result, work)
         } catch (_: RejectedExecutionException) {
             // detach() has already shut the executor down. Answer instead of leaving the
             // Dart future pending forever.
@@ -83,13 +105,17 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
         }
     }
 
-    private fun submit(result: MethodChannel.Result, work: () -> Map<String, Any?>) {
+    private fun submit(
+        lane: EngineLane,
+        result: MethodChannel.Result,
+        work: () -> Map<String, Any?>,
+    ) {
         // The correlation id is thread-local, and the work is about to hop threads.
         // Capturing it here — on the platform thread, still inside the scope installed
         // by onMethodCall — and re-applying it on the engine thread is what keeps a
         // container install's events tied to the launch that asked for it.
         val scope = DiagnosticLogger.currentOperation()
-        engineExecutor.execute {
+        lane.execute {
             val response = DiagnosticLogger.withOperation(scope?.id, scope?.name) {
                 try {
                     work()
@@ -148,7 +174,8 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
         events = null
         channel?.setMethodCallHandler(null)
         channel = null
-        engineExecutor.shutdown()
+        engineLane.shutdown()
+        hostLane.shutdown()
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -246,7 +273,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             "listInstalledApps" -> {
                 val includeIcons = call.argument<Boolean>("includeIcons") ?: true
-                async(result) {
+                asyncHostRead(result) {
                     success(
                         "APPS_LISTED",
                         "Installed applications listed.",
@@ -257,7 +284,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             "analyzeApp" -> {
                 val packageName = call.requiredPackage(result) ?: return
-                async(result) {
+                asyncHostRead(result) {
                     success(
                         "APP_ANALYZED",
                         "Compatibility analysed.",
@@ -369,7 +396,7 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
 
             "getAppIcons" -> {
                 val packages = call.argument<List<String>>("packageNames").orEmpty()
-                async(result) {
+                asyncHostRead(result) {
                     success(
                         "ICONS_LOADED",
                         "Icons loaded.",
@@ -630,6 +657,15 @@ class NativeBridge(context: Context) : MethodChannel.MethodCallHandler {
     )
 
     companion object {
+        /**
+         * How long one native call may go without answering before the lane stops waiting
+         * on it and lets the rest through. Generous, because a legitimate install of a
+         * large split APK is measured in seconds, not milliseconds — and well under the
+         * Dart side's own listing timeout, so the picker recovers on its own rather than
+         * reporting a failure the user has to dismiss.
+         */
+        private const val STALL_TIMEOUT_MS = 20_000L
+
         const val CHANNEL_NAME = "duplika/native_bridge"
         const val EVENT_CHANNEL_NAME = "duplika/native_bridge_events"
 
