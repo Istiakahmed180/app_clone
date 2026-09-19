@@ -31,6 +31,10 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  *   and the activity whose `onCreate` asks the question has not started yet.
  * - [GuestProxyLaunchRepair] next, which has to be on the main handler before the first
  *   activity launch arrives on it, and below the engine's own callback rather than above it.
+ * - [GuestMediaRouterRepair] beside it: like the repairs above it needs only the engine's
+ *   hooks, and the first activity to build a `MediaRouter2` has not started yet.
+ * - [GuestProviderCallerRepair] beside those two, and before [GuestProviderOrderRepair] runs
+ *   the app's own providers: it has to be in place before the first provider is acquired.
  * - [GuestWebViewDataDirRepair] next, because Bcore chose the WebView directory a few
  *   lines before this callback and the first WebView is still several steps away.
  * - [GuestFatalCrashRepair] next, so it wraps every handler installed above it.
@@ -71,6 +75,8 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         GuestTaskClearLaunchRepair.install()
         GuestFullScreenIntentRepair.install()
         GuestProxyLaunchRepair.install()
+        GuestMediaRouterRepair.install()
+        GuestProviderCallerRepair.install()
         GuestWebViewDataDirRepair.install(context, packageName, processName, virtualUserId)
         GuestFatalCrashRepair.install()
         GuestProviderOrderRepair.install()
