@@ -43,8 +43,9 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  * - [GuestWebViewDataDirRepair] next, because Bcore chose the WebView directory a few
  *   lines before this callback and the first WebView is still several steps away.
  * - [GuestFatalCrashRepair] next, so it wraps every handler installed above it.
- * - [GuestProviderOrderRepair] last, because it touches the list Bcore reads a few lines
- *   later and nothing above it depends on that order.
+ * - [GuestDisabledProviderRepair] next to last and [GuestProviderOrderRepair] last, because
+ *   both touch the list Bcore reads a few lines later: the disabled entries are dropped
+ *   first so the reorder only has to sort providers that will really be created.
  *
  * The guest also anchors the engine's server process and Duplika's own process here. A clone on screen makes *this*
  * process foreground, so binding the server from here is what keeps the freezer off it — the
@@ -94,6 +95,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         GuestProviderCallerRepair.install()
         GuestWebViewDataDirRepair.install(context, packageName, processName, virtualUserId)
         GuestFatalCrashRepair.install()
+        GuestDisabledProviderRepair.install()
         GuestProviderOrderRepair.install()
     }
 

@@ -2,7 +2,6 @@ package co.tdevs.duplika.native.blackbox
 
 import android.content.pm.ProviderInfo
 import co.tdevs.duplika.native.Slog
-import top.niunaijun.blackbox.app.BActivityThread
 
 /**
  * Installs a guest's content providers in the order the app asked for.
@@ -46,7 +45,7 @@ object GuestProviderOrderRepair {
      */
     fun install() {
         try {
-            val providers = boundProviders() ?: return
+            val providers = GuestBoundProviders.list() ?: return
             if (providers.size < 2) return
 
             val before = providers.map { it.name }
@@ -63,23 +62,4 @@ object GuestProviderOrderRepair {
             Slog.w(Slog.LAUNCH, "Guest provider order repair unavailable: ${error.message}")
         }
     }
-
-    /**
-     * The very list `installProviders` iterates, reached through the bound application data
-     * Bcore has just stored. Sorting a copy would change nothing, so this returns the list
-     * itself or nothing at all.
-     */
-    @Suppress("UNCHECKED_CAST")
-    private fun boundProviders(): MutableList<ProviderInfo>? = runCatching {
-        val thread = BActivityThread.currentActivityThread() ?: return null
-        val bound = BActivityThread::class.java
-            .getDeclaredField("mBoundApplication")
-            .apply { isAccessible = true }
-            .get(thread)
-            ?: return null
-        bound.javaClass
-            .getDeclaredField("providers")
-            .apply { isAccessible = true }
-            .get(bound) as? MutableList<ProviderInfo>
-    }.getOrNull()
 }
