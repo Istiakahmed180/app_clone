@@ -201,6 +201,22 @@
          the sheet and the choice stay with the user. -->
     <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS" />
 
+    <!-- Held for the clones as well: an app that watches for screenshots of its own screen
+         asks the platform under this app's uid, and the check is made against this manifest.
+         Spotify asks in `onResume`, so without it the clone dies before it draws anything —
+         measured on API 35:
+
+             Unable to resume activity {com.spotify.music/com.spotify.music.SpotifyMainActivity}:
+             SecurityException: Permission Denial: registerScreenCaptureObserver from uid=10464
+                 requires android.permission.DETECT_SCREEN_CAPTURE
+
+         and the engine restarted that activity into the same exception ten times in half a
+         minute, which the user sees as a black screen.
+
+         Normal permission: granted at install with no runtime dialog, and it reads nothing.
+         It only lets a window be told that *it* was captured; Duplika itself never asks. -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
+
     <!-- ==========================================================================
          Permissions removed from the virtualization engine's merged manifest.
 
