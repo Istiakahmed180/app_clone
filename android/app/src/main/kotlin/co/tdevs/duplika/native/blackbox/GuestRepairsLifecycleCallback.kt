@@ -29,6 +29,8 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  *   correct different flags on the same launch and neither reads what the other wrote.
  * - [GuestFullScreenIntentRepair] next: like the two above it needs only the engine's hooks,
  *   and the activity whose `onCreate` asks the question has not started yet.
+ * - [GuestProxyLaunchRepair] next, which has to be on the main handler before the first
+ *   activity launch arrives on it, and below the engine's own callback rather than above it.
  * - [GuestWebViewDataDirRepair] next, because Bcore chose the WebView directory a few
  *   lines before this callback and the first WebView is still several steps away.
  * - [GuestFatalCrashRepair] next, so it wraps every handler installed above it.
@@ -68,6 +70,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         GuestRestartLaunchRepair.install(context)
         GuestTaskClearLaunchRepair.install()
         GuestFullScreenIntentRepair.install()
+        GuestProxyLaunchRepair.install()
         GuestWebViewDataDirRepair.install(context, packageName, processName, virtualUserId)
         GuestFatalCrashRepair.install()
         GuestProviderOrderRepair.install()
@@ -77,6 +80,9 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
      * Bcore installs its own package-manager proxy somewhere between the two callbacks, so
      * the receiver repair is put back on top of it here. By this point the engine's hooks
      * are final and the app has not yet run a line of its own `onCreate`.
+     *
+     * [GuestProxyLaunchRepair] is given the application here too, because this is the first
+     * point at which there is one to register an activity lifecycle callback on.
      */
     override fun beforeApplicationOnCreate(
         packageName: String?,
@@ -86,5 +92,6 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
     ) {
         GuestReceiverQueryRepair.install(application)
         GuestPackageIdentityRepair.install(application)
+        GuestProxyLaunchRepair.watch(application)
     }
 }

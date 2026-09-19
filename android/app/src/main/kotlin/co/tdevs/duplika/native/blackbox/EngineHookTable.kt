@@ -65,6 +65,14 @@ internal object EngineHookTable {
         return added
     }
 
+    /**
+     * The engine's injector of the named class, or null when the engine has none. Named
+     * rather than typed because these classes are the engine's own and a caller holding one
+     * as a type would be pinned to the version of the AAR it was compiled against.
+     */
+    fun injectorNamed(className: String): Any? =
+        injectors().firstOrNull { it.javaClass.name == className }
+
     @Suppress("UNCHECKED_CAST")
     private fun hookMap(injector: ClassInvocationStub): MutableMap<String, MethodHook>? =
         runCatching {
