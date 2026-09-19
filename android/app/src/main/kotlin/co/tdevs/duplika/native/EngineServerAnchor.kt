@@ -29,10 +29,12 @@ import android.app.Service
  * rate limiter and the guest is handed a null. A guest that asked for something it cannot do
  * without — microG's sign-in screen reading the device's check-in record — dies on the spot.
  *
- * [CloneKeepAliveService] already holds a foreground service so the *host* process survives a
- * clone taking the screen. This gives the server process the same standing: a process bound
- * with `BIND_IMPORTANT` by a foreground client is ranked with that client rather than cached,
- * so the freezer leaves it alone. The binding lasts exactly as long as the keep-alive does.
+ * A process bound with `BIND_IMPORTANT` is ranked with the client that bound it rather than
+ * cached, so the freezer leaves it alone. Two clients hold it, and the first is the one that
+ * matters: the **guest process**, which binds as its repairs are installed and is genuinely
+ * foreground for as long as the clone is on screen. [CloneKeepAliveService] holds it as well,
+ * covering the moment before the guest process exists. Both bindings end by themselves — the
+ * guest's when its process goes, the host's when the user returns to Duplika.
  *
  * The service itself does nothing and is never called. Being bound is the whole point of it.
  */
@@ -60,9 +62,17 @@ class EngineServerAnchor : Service() {
          * build had before.
          */
         @Synchronized
-        fun hold(context: Context) {
+        fun hold(context: Context, hostPackage: String? = null) {
             if (bound) return
-            val intent = Intent(context, EngineServerAnchor::class.java)
+            // Named rather than built from the context, because a guest's context reports
+            // the cloned app's package: `Intent(context, Anchor::class.java)` would name a
+            // component of the *guest*, which neither the container nor the platform has.
+            val intent = Intent().setComponent(
+                ComponentName(
+                    hostPackage ?: context.packageName,
+                    EngineServerAnchor::class.java.name,
+                ),
+            )
             val flags = Context.BIND_AUTO_CREATE or Context.BIND_IMPORTANT
             bound = runCatching { context.bindService(intent, connection, flags) }
                 .onFailure { Slog.w(Slog.ENGINE, "Could not anchor the engine server: ${it.message}") }

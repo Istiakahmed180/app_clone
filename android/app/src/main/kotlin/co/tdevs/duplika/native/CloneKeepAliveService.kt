@@ -1,20 +1,12 @@
 package co.tdevs.duplika.native
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import androidx.core.app.NotificationCompat
-import androidx.core.app.ServiceCompat
 import co.tdevs.duplika.DuplikaApplication
-import co.tdevs.duplika.R
 import co.tdevs.duplika.native.gms.MicroGCheckinSeeder
 import co.tdevs.duplika.native.gms.MicroGProvider
 
@@ -41,6 +33,25 @@ import co.tdevs.duplika.native.gms.MicroGProvider
  *
  * It keeps *Duplika* alive; it does not run the clone. The guest runs in its own process
  * either way.
+ *
+ * ## Why it is not a foreground service
+ *
+ * It was one, and a foreground service must show a notification — "A cloned app is running",
+ * for as long as the clone was open. That notice bought two things, and neither needs it:
+ *
+ * - **The host process staying out of the cached state.** A process running a started service
+ *   is ranked as a service process, which is already above cached. What the notification adds
+ *   is protection from an OEM killer, and the cost of losing that is a cold start of Duplika
+ *   when the user comes back — not a clone that stops working.
+ * - **Standing to lend the engine's server process**, which must not be frozen (see
+ *   [EngineServerAnchor]). That now comes from the guest process itself, which holds the same
+ *   binding from [co.tdevs.duplika.native.blackbox.GuestRepairsLifecycleCallback] — and a
+ *   guest showing a clone on screen is genuinely foreground, so it is a better lender than
+ *   this service ever was. This one keeps its own binding as a second holder.
+ *
+ * Android's background-service limits do not end it early: while a clone is on screen the app
+ * *has* a foreground activity — the engine's proxy activity, declared in this manifest and
+ * running in `co.tdevs.duplika:pN` — so the app is never in the background while this runs.
  *
  * **Why it does not poll the engine's `isRunning`.** That call is broken on API 35
  * (`isRunningApplication failed: BActivityManagerService cannot be cast to ActivityStack`),
@@ -95,10 +106,9 @@ class CloneKeepAliveService : Service() {
         }
 
         userId = intent.getIntExtra(EXTRA_USER_ID, -1)
-        startForegroundCompat()
-        // Only once this service is in the foreground, because the anchor works by lending
-        // this process's standing to the engine's server process: bound from a cached
-        // client it would be worth nothing.
+        // A second holder of the anchor: the guest process is the one whose standing is
+        // worth lending, and it holds its own. This one costs nothing and covers the moment
+        // before the guest process exists.
         EngineServerAnchor.hold(this)
         // The engine creates its own channels lazily, when it first starts the daemon for a
         // container -- i.e. after Application.onCreate has already run. This service starts
@@ -126,41 +136,7 @@ class CloneKeepAliveService : Service() {
         super.onDestroy()
     }
 
-    private fun startForegroundCompat() {
-        val manager = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_ID,
-                    "Running clones",
-                    NotificationManager.IMPORTANCE_LOW,
-                ).apply {
-                    description = "Shown while a cloned app is open"
-                    setShowBadge(false)
-                },
-            )
-        }
-
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_stat_clone)
-            .setContentTitle(getString(R.string.clone_keepalive_title))
-            .setContentText(getString(R.string.clone_keepalive_text))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .setSilent(true)
-            .build()
-
-        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-        } else {
-            0
-        }
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type)
-    }
-
     companion object {
-        private const val CHANNEL_ID = "clone_keepalive"
-        private const val NOTIFICATION_ID = 4711
         /** When to re-label after a launch, bracketing how long the guest takes to come up. */
         private val RELABEL_DELAYS_MS = longArrayOf(3_000L, 10_000L, 30_000L)
 
@@ -171,7 +147,8 @@ class CloneKeepAliveService : Service() {
 
         /**
          * Starts the keep-alive for a clone the user just launched. Callers are in the
-         * foreground when they do this, so the background-start restriction does not apply.
+         * foreground when they do this, so the background-start restriction does not apply,
+         * and the service shows the user nothing.
          * Failure is logged, never fatal: a device that refuses the service still gets a
          * working clone, only without the protection.
          */
@@ -179,13 +156,7 @@ class CloneKeepAliveService : Service() {
             val intent = Intent(context, CloneKeepAliveService::class.java)
                 .putExtra(EXTRA_PACKAGE, packageName)
                 .putExtra(EXTRA_USER_ID, virtualUserId)
-            runCatching {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(intent)
-                } else {
-                    context.startService(intent)
-                }
-            }.onFailure {
+            runCatching { context.startService(intent) }.onFailure {
                 Slog.w(Slog.LAUNCH, "Could not start clone keep-alive: ${it.message}")
             }
         }

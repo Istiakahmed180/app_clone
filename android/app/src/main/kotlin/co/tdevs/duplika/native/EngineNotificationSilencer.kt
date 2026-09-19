@@ -24,9 +24,9 @@ import android.os.Build
  * | `BlackBoxVPN` | `ProxyVpnService` (unused: VPN mode is pinned off) |
  * | `<pkg>` | `NotificationChannelManager.APP_CHANNEL` |
  *
- * **Not** touched: the clone keep-alive notice (`clone_keepalive`, Duplika's own) and every
- * guest notification channel (`<channel>@black-<userId>`), so clone notifications are
- * unaffected.
+ * **Not** touched: every guest notification channel (`<channel>@black-<userId>`), so clone
+ * notifications are unaffected. Duplika itself posts nothing — its keep-alive service stopped
+ * being a foreground service, and with it went the only notice of its own it ever showed.
  *
  * Two mechanisms, because Android's channel rules and the engine's start order both matter:
  *

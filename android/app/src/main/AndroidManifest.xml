@@ -83,19 +83,15 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
-        <!-- Keeps the host process alive while a clone the user opened is running. On
-             aggressive OEM builds (measured: OnePlus) the host is killed the moment it stops
-             being the foreground activity — i.e. when the clone takes the foreground — which
-             cold-starts Duplika when the user returns. The service starts with a clone and
-             stops itself once none are running, so it adds no persistence of its own. -->
+        <!-- Keeps the host process out of the cached state while a clone the user opened is
+             running, and reconnects that container's microG. It runs for the length of the
+             clone's visit and shows the user nothing: it was a foreground service, whose
+             required notification said "A cloned app is running" the whole time, and the
+             standing that notification bought is now lent by the guest process instead (see
+             EngineServerAnchor). Started only while Duplika is in the foreground. -->
         <service
             android:name=".native.CloneKeepAliveService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="container_host_keepalive" />
-        </service>
+            android:exported="false" />
 
         <!-- Declared in the engine's own server process so that binding it raises that
              process out of the cached state; see EngineServerAnchor for what goes wrong
@@ -176,11 +172,9 @@
          through BiometricPrompt, never the fingerprint or face itself. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
-    <!-- Foreground service used only while a clone the user opened is running; see
-         CloneKeepAliveService and the <service> entry below. The notification is the
-         service's required user-visible part and disappears with the last clone. -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Asked for the clones: a cloned messenger's notifications are posted under this app's
+         uid, so the runtime grant is checked against this manifest. Duplika itself posts
+         nothing of its own. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Held for the clones, not for Duplika: a clone's credential request reaches the
