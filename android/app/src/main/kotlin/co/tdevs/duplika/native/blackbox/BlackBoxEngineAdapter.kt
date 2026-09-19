@@ -351,10 +351,16 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
             }
         }
 
+    /**
+     * Bounded by [EngineStatusRead], because the home screen asks this about every clone it
+     * draws and an engine that has stopped answering must not stop the screen with it.
+     * Reported installed when the engine is silent: the caller only asks about a profile it
+     * already holds, so "installed" is the answer that is almost always right.
+     */
     override fun isPackageInstalled(packageName: String, virtualUserId: Int): Boolean =
-        runCatching {
+        EngineStatusRead.answer("installed:$virtualUserId:$packageName", optimistic = true) {
             BlackBoxCore.get().isInstalled(packageName, virtualUserId)
-        }.getOrDefault(false)
+        }
 
     /**
      * Bcore's own accessor for the container's data directory, so the layout is not guessed.
@@ -560,13 +566,18 @@ class BlackBoxEngineAdapter : VirtualizationEngineAdapter {
         GuestProcessRegistry.forget(packageName, virtualUserId, pids)
     }
 
+    /** Bounded like [isPackageInstalled]; a silent engine reports the clone stopped. */
     override fun isRunning(packageName: String, virtualUserId: Int): Boolean =
-        runCatching { BlackBoxCore.isRunningApplication(packageName, virtualUserId) }
-            .getOrDefault(false)
+        EngineStatusRead.answer("running:$virtualUserId:$packageName", optimistic = false) {
+            BlackBoxCore.isRunningApplication(packageName, virtualUserId)
+        }
 
     override fun deleteVirtualUser(virtualUserId: Int): EngineResult<Unit> =
         guarded(EngineErrorCodes.PROFILE_DELETE_FAILED) {
             BlackBoxCore.get().deleteUser(virtualUserId)
+            // The container is gone, so nothing remembered about it is true any more and the
+            // id is free to be handed to the next clone.
+            EngineStatusRead.forget(virtualUserId)
             EngineResult.ok()
         }
 

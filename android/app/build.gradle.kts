@@ -37,6 +37,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        // The JVM unit tests exercise logic that logs through Slog on its way past. Without
+        // this, android.jar's stubbed Log.w throws and the test fails on the logging rather
+        // than on what it is testing. Nothing under test reads a return value from the
+        // framework, so defaults are enough; anything that needs real framework behaviour
+        // belongs in androidTest.
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         // Stated rather than inherited. The diagnostics logger stamps every event with
         // the build type it was captured in, which it reads from BuildConfig.DEBUG, and
