@@ -27,7 +27,9 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  *   must be in place before the app can restart itself into a closed activity.
  * - [GuestWebViewDataDirRepair] next, because Bcore chose the WebView directory a few
  *   lines before this callback and the first WebView is still several steps away.
- * - [GuestFatalCrashRepair] last, so it wraps every handler installed above it.
+ * - [GuestFatalCrashRepair] next, so it wraps every handler installed above it.
+ * - [GuestProviderOrderRepair] last, because it touches the list Bcore reads a few lines
+ *   later and nothing above it depends on that order.
  *
  * ### The two `String` arguments
  *
@@ -62,6 +64,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         GuestRestartLaunchRepair.install(context)
         GuestWebViewDataDirRepair.install(context, packageName, processName, virtualUserId)
         GuestFatalCrashRepair.install()
+        GuestProviderOrderRepair.install()
     }
 
     /**
