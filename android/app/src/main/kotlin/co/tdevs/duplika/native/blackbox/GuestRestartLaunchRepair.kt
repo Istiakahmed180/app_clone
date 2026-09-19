@@ -1,6 +1,5 @@
 package co.tdevs.duplika.native.blackbox
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import co.tdevs.duplika.native.Slog
@@ -123,36 +122,7 @@ object GuestRestartLaunchRepair {
          * Whether this process is running an instance of [className] that could still take
          * the intent. A finishing or destroyed one could not, which is the whole point.
          */
-        fun isLiveHere(className: String): Boolean = runCatching {
-            val activityThread = Class.forName("android.app.ActivityThread")
-            val current = activityThread.getDeclaredMethod("currentActivityThread")
-                .apply { isAccessible = true }
-                .invoke(null) ?: return false
-            val records = activityThread.getDeclaredField("mActivities")
-                .apply { isAccessible = true }
-                .get(current) as? Map<*, *> ?: return false
-
-            records.values.any { record ->
-                val activity = record?.let { activityOf(it) } ?: return@any false
-                activity.javaClass.name == className &&
-                    !activity.isFinishing &&
-                    !activity.isDestroyed
-            }
-        }.getOrDefault(false)
-
-        private fun activityOf(record: Any): Activity? {
-            var cursor: Class<*>? = record.javaClass
-            while (cursor != null && cursor != Any::class.java) {
-                for (field in cursor.declaredFields) {
-                    if (!Activity::class.java.isAssignableFrom(field.type)) continue
-                    return runCatching {
-                        field.isAccessible = true
-                        field.get(record) as? Activity
-                    }.getOrNull()
-                }
-                cursor = cursor.superclass
-            }
-            return null
-        }
+        fun isLiveHere(className: String): Boolean =
+            GuestActivities.liveHere(className).isNotEmpty()
     }
 }

@@ -41,6 +41,30 @@ internal object EngineHookTable {
         return replaced
     }
 
+    /**
+     * Registers [hook] under [methodName] on the stub that serves [interfaceName], and returns
+     * how many stubs took it. Unlike [wrapAll] this adds a hook where the engine has none: a
+     * name it already handles is left alone, because the engine's own answer is the one the
+     * container is built around.
+     *
+     * The interface is named rather than the stub, because which stub carries a system
+     * service is the engine's business and changes with its obfuscation, while the framework
+     * interface a call arrives on does not.
+     */
+    fun addTo(interfaceName: String, methodName: String, hook: () -> MethodHook): Int {
+        val serviceInterface = runCatching { Class.forName(interfaceName) }.getOrNull() ?: return 0
+        var added = 0
+        for (injector in injectors()) {
+            if (injector !is ClassInvocationStub) continue
+            val base = runCatching { injector.base }.getOrNull() ?: continue
+            if (!serviceInterface.isInstance(base)) continue
+            if (hookMap(injector)?.containsKey(methodName) == true) continue
+            injector.addMethodHook(methodName, hook())
+            added++
+        }
+        return added
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun hookMap(injector: ClassInvocationStub): MutableMap<String, MethodHook>? =
         runCatching {
