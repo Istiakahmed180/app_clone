@@ -102,6 +102,13 @@
             android:exported="false"
             android:process="@string/black_box_service_name" />
 
+        <!-- Declared in Duplika's own process, so that a guest binding it keeps this process
+             ranked with the clone on screen; see HostProcessAnchor for the OEM kill it was
+             measured against. -->
+        <service
+            android:name=".native.HostProcessAnchor"
+            android:exported="false" />
+
         <!-- Hands exported diagnostics reports to the Android share sheet.
 
              Not exported, no permission required, and scoped by res/xml/diagnostics_paths.xml

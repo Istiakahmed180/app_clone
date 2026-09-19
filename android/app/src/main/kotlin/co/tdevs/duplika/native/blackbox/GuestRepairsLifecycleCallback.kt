@@ -3,6 +3,7 @@ package co.tdevs.duplika.native.blackbox
 import android.app.Application
 import android.content.Context
 import co.tdevs.duplika.native.EngineServerAnchor
+import co.tdevs.duplika.native.HostProcessAnchor
 import co.tdevs.duplika.native.GuestLaunchIntentRepair
 import top.niunaijun.blackbox.BlackBoxCore
 import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
@@ -43,7 +44,7 @@ import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
  * - [GuestProviderOrderRepair] last, because it touches the list Bcore reads a few lines
  *   later and nothing above it depends on that order.
  *
- * The guest also anchors the engine's server process here. A clone on screen makes *this*
+ * The guest also anchors the engine's server process and Duplika's own process here. A clone on screen makes *this*
  * process foreground, so binding the server from here is what keeps the freezer off it — the
  * job the host used to do by running a foreground service, and the reason that service no
  * longer has to show "A cloned app is running" for as long as a clone is open.
@@ -75,6 +76,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
         }
         if (context != null) {
             EngineServerAnchor.hold(context, BlackBoxCore.getHostPkg())
+            HostProcessAnchor.hold(context, BlackBoxCore.getHostPkg())
         }
         GuestReceiverQueryRepair.install(context)
         GuestPackageIdentityRepair.install(context)
