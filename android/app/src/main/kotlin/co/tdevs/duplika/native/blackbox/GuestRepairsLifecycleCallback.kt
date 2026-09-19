@@ -75,7 +75,7 @@ class GuestRepairsLifecycleCallback : AppLifecycleCallback() {
             GuestProcessRegistry.record(packageName, virtualUserId)
         }
         if (context != null) {
-            EngineServerAnchor.hold(context, BlackBoxCore.getHostPkg())
+            EngineServerAnchor.hold(context, BlackBoxCore.getHostPkg(), EngineServerAnchor.HOST)
             HostProcessAnchor.hold(context, BlackBoxCore.getHostPkg())
         }
         GuestReceiverQueryRepair.install(context)

@@ -30,7 +30,19 @@ import android.app.Service
  * without — microG's sign-in screen reading the device's check-in record — dies on the spot.
  *
  * A process bound with `BIND_IMPORTANT` is ranked with the client that bound it rather than
- * cached, so the freezer leaves it alone. Two clients hold it, and the first is the one that
+ * cached, so the freezer leaves it alone.
+ *
+ * It is also held while Duplika's own screen is on, because a server left cached between two
+ * clone launches is frozen by the time the next launch calls into it. Measured on API 35, at
+ * the moment the user tapped a clone:
+ *
+ *     16:00:06.254  Launch requested for com.netflix.mediaclient
+ *     16:00:06.258  IPCThreadState: Transaction failed because process frozen.
+ *     16:00:06.261  :black  reason=14 (FREEZER) subreason=20 (FREEZER BINDER TRANSACTION)
+ *     16:00:06.404  :black starts again
+ *
+ * — the platform killed the server for failing that transaction, and the launch went on with
+ * a server that was still starting up. Two clients hold it, and the first is the one that
  * matters: the **guest process**, which binds as its repairs are installed and is genuinely
  * foreground for as long as the clone is on screen. [CloneKeepAliveService] holds it as well,
  * covering the moment before the guest process exists. Both bindings end by themselves — the
@@ -57,12 +69,21 @@ class EngineServerAnchor : Service() {
         private var bound = false
 
         /**
+         * Who is asking for the server to stay unfrozen. The binding is one, and it lasts as
+         * long as any of them wants it: Duplika's own screen, the keep-alive of a clone the
+         * user opened, and the guest process itself. Without this an activity stopping would
+         * take the binding out from under a clone that had just started.
+         */
+        private val holders = mutableSetOf<String>()
+
+        /**
          * Idempotent, and never fatal: a device that refuses the binding keeps the engine's
          * server exactly as exposed to the freezer as it was, which is the behaviour this
          * build had before.
          */
         @Synchronized
-        fun hold(context: Context, hostPackage: String? = null) {
+        fun hold(context: Context, hostPackage: String? = null, holder: String = HOST) {
+            if (!holders.add(holder)) return
             if (bound) return
             // Named rather than built from the context, because a guest's context reports
             // the cloned app's package: `Intent(context, Anchor::class.java)` would name a
@@ -80,16 +101,30 @@ class EngineServerAnchor : Service() {
             if (bound) {
                 Slog.i(Slog.ENGINE, "Engine server process anchored against the freezer")
             } else {
+                holders.remove(holder)
                 Slog.w(Slog.ENGINE, "Engine server process could not be anchored")
             }
         }
 
-        /** Releases the binding, letting the server process be cached again. Idempotent. */
+        /**
+         * Gives up one holder's claim, and lets the server process be cached again once no
+         * holder is left. Idempotent, and a holder that never held is simply ignored.
+         */
         @Synchronized
-        fun release(context: Context) {
-            if (!bound) return
+        fun release(context: Context, holder: String = HOST) {
+            if (!holders.remove(holder)) return
+            if (holders.isNotEmpty() || !bound) return
             bound = false
             runCatching { context.unbindService(connection) }
         }
+
+        /** Duplika's own screen: held while it is on, so a launch never meets a frozen server. */
+        const val UI = "ui"
+
+        /** The keep-alive of a clone the user opened. */
+        const val CLONE = "clone"
+
+        /** Anything else in this process, and the guest, which has statics of its own. */
+        const val HOST = "host"
     }
 }

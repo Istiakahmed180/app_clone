@@ -109,7 +109,7 @@ class CloneKeepAliveService : Service() {
         // A second holder of the anchor: the guest process is the one whose standing is
         // worth lending, and it holds its own. This one costs nothing and covers the moment
         // before the guest process exists.
-        EngineServerAnchor.hold(this)
+        EngineServerAnchor.hold(this, holder = EngineServerAnchor.CLONE)
         // The engine creates its own channels lazily, when it first starts the daemon for a
         // container -- i.e. after Application.onCreate has already run. This service starts
         // on the same launch, just after, so it is the first point at which the engine's
@@ -132,7 +132,7 @@ class CloneKeepAliveService : Service() {
     override fun onDestroy() {
         handler.removeCallbacks(relabel)
         handler.removeCallbacks(reconnect)
-        EngineServerAnchor.release(this)
+        EngineServerAnchor.release(this, EngineServerAnchor.CLONE)
         super.onDestroy()
     }
 

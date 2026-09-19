@@ -36,6 +36,31 @@ open class MainActivity : FlutterFragmentActivity() {
         )
     }
 
+    /**
+     * Holds the engine's server process while this screen is on.
+     *
+     * A server left cached between two clone launches is frozen by the time the next launch
+     * calls into it, and the platform kills it for failing that transaction — measured as
+     * `FREEZER BINDER TRANSACTION` in the same second as the user's tap. Holding it from here
+     * means the server the launch talks to is always a running one.
+     */
+    override fun onStart() {
+        super.onStart()
+        co.tdevs.duplika.native.EngineServerAnchor.hold(
+            this,
+            holder = co.tdevs.duplika.native.EngineServerAnchor.UI,
+        )
+    }
+
+    /** Released here, so the server is only anchored while a clone or this screen needs it. */
+    override fun onStop() {
+        co.tdevs.duplika.native.EngineServerAnchor.release(
+            this,
+            co.tdevs.duplika.native.EngineServerAnchor.UI,
+        )
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         // Reaching this activity means the user is back in Duplika, so the clone that needed
